@@ -1,0 +1,188 @@
+name: app
+
+services:
+  # ---------------------------------------
+  # REVERSE PROXY (El punto de entrada)
+  # ---------------------------------------
+  proxy:
+    image: nginx:alpine
+    container_name: app-proxy
+    ports:
+      - '80:80'
+    volumes:
+      - ./infrastructure/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - app-network
+
+  # ---------------------------------------
+  # FRONTEND (React + Vite) - MODO DESARROLLO
+  # ---------------------------------------
+  frontend:
+    image: node:22-alpine
+    container_name: app-frontend
+    working_dir: /app/projects/frontend
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: sh -c "corepack enable pnpm && pnpm install && pnpm run dev --host 0.0.0.0"
+    ports:
+      - '5173:5173'
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+    networks:
+      - app-network
+
+  # ---------------------------------------
+  # BACKEND (Spring Boot 4.1 / Java 21) - MODO DESARROLLO
+  # ---------------------------------------
+  backend:
+    image: maven:3.9-eclipse-temurin-21-alpine
+    container_name: app-backend
+    working_dir: /app/projects/backend
+    volumes:
+      - .:/app
+      - ~/.m2:/root/.m2
+    command: mvn spring-boot:run -Dspring-boot.run.profiles=dev
+    ports:
+      - '8080:8080'
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://app-postgres:5432/${POSTGRES_DB}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - SPRING_DATA_REDIS_HOST=app-redis
+      - MINIO_URL=http://app-minio:9000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  # ---------------------------------------
+  # DATABASE (PostgreSQL 18)
+  # ---------------------------------------
+  postgres:
+    image: postgres:18-alpine
+    container_name: app-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql
+      - ./infrastructure/postgres/init:/docker-entrypoint-initdb.d
+    ports:
+      - '5432:5432'
+    networks:
+      - app-network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------
+  # CACHE (Redis 8)
+  # ---------------------------------------
+  redis:
+    image: redis:8-alpine
+    container_name: app-redis
+    volumes:
+      - redis_data:/data
+      # Mapeamos tu archivo de configuración personalizado
+      - ./infrastructure/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    ports:
+      - '6379:6379'
+    networks:
+      - app-network
+    # Le decimos a Redis que arranque usando tu archivo
+    command: redis-server /usr/local/etc/redis/redis.conf
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------
+  # STORAGE (MinIO)
+  # ---------------------------------------
+  minio:
+    image: minio/minio
+    container_name: app-minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    networks:
+      - app-network
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # Contenedor temporal para crear el bucket automáticamente
+  minio-init:
+    image: minio/mc
+    container_name: app-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    volumes:
+      - ./infrastructure/minio/create-buckets.sh:/create-buckets.sh:ro
+    entrypoint: >
+      /bin/sh -c "sh /create-buckets.sh"
+    networks:
+      - app-network
+
+  # ---------------------------------------
+  # METRICS & OBSERVABILITY
+  # ---------------------------------------
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: app-prometheus
+    volumes:
+      - ./infrastructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - '9090:9090'
+    networks:
+      - app-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: app-grafana
+    depends_on:
+      - prometheus
+    volumes:
+      - ./infrastructure/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+    ports:
+      - '3000:3000'
+    networks:
+      - app-network
+
+# ---------------------------------------
+# REDES Y VOLÚMENES
+# ---------------------------------------
+networks:
+  app-network:
+    name: app-network
+    driver: bridge
+
+volumes:
+  postgres_data:
+    name: postgres_data
+  redis_data:
+    name: redis_data
+  minio_data:
+    name: minio_data
