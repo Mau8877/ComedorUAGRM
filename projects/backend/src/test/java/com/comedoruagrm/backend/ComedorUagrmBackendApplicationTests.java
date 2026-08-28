@@ -1,10 +1,10 @@
-package com.example.backend;
+package com.comedoruagrm.backend;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class AppBackendApplicationTests {
+class ComedorUagrmBackendApplicationTests {
 
 	@Test
 	void contextLoads() {

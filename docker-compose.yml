@@ -1,4 +1,4 @@
-name: app
+name: comedor-uagrm
 
 services:
   # ---------------------------------------
@@ -6,7 +6,7 @@ services:
   # ---------------------------------------
   proxy:
     image: nginx:alpine
-    container_name: app-proxy
+    container_name: comedor-uagrm-proxy
     ports:
       - '80:80'
     volumes:
@@ -15,14 +15,14 @@ services:
       - frontend
       - backend
     networks:
-      - app-network
+      - comedor-uagrm-network
 
   # ---------------------------------------
   # FRONTEND (React + Vite) - MODO DESARROLLO
   # ---------------------------------------
   frontend:
     image: node:22-alpine
-    container_name: app-frontend
+    container_name: comedor-uagrm-frontend
     working_dir: /app/projects/frontend
     volumes:
       - .:/app
@@ -34,14 +34,14 @@ services:
       - NODE_ENV=development
       - CHOKIDAR_USEPOLLING=true
     networks:
-      - app-network
+      - comedor-uagrm-network
 
   # ---------------------------------------
   # BACKEND (Spring Boot 4.1 / Java 21) - MODO DESARROLLO
   # ---------------------------------------
   backend:
     image: maven:3.9-eclipse-temurin-21-alpine
-    container_name: app-backend
+    container_name: comedor-uagrm-backend
     working_dir: /app/projects/backend
     volumes:
       - .:/app
@@ -51,25 +51,25 @@ services:
       - '8080:8080'
     environment:
       - SPRING_PROFILES_ACTIVE=dev
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://app-postgres:5432/${POSTGRES_DB}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://comedor-uagrm-postgres:5432/${POSTGRES_DB}
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
-      - SPRING_DATA_REDIS_HOST=app-redis
-      - MINIO_URL=http://app-minio:9000
+      - SPRING_DATA_REDIS_HOST=comedor-uagrm-redis
+      - MINIO_URL=http://comedor-uagrm-minio:9000
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
     networks:
-      - app-network
+      - comedor-uagrm-network
 
   # ---------------------------------------
   # DATABASE (PostgreSQL 18)
   # ---------------------------------------
   postgres:
     image: postgres:18-alpine
-    container_name: app-postgres
+    container_name: comedor-uagrm-postgres
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -80,7 +80,7 @@ services:
     ports:
       - '5432:5432'
     networks:
-      - app-network
+      - comedor-uagrm-network
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
       interval: 10s
@@ -92,7 +92,7 @@ services:
   # ---------------------------------------
   redis:
     image: redis:8-alpine
-    container_name: app-redis
+    container_name: comedor-uagrm-redis
     volumes:
       - redis_data:/data
       # Mapeamos tu archivo de configuración personalizado
@@ -100,7 +100,7 @@ services:
     ports:
       - '6379:6379'
     networks:
-      - app-network
+      - comedor-uagrm-network
     # Le decimos a Redis que arranque usando tu archivo
     command: redis-server /usr/local/etc/redis/redis.conf
     healthcheck:
@@ -114,7 +114,7 @@ services:
   # ---------------------------------------
   minio:
     image: minio/minio
-    container_name: app-minio
+    container_name: comedor-uagrm-minio
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
@@ -125,7 +125,7 @@ services:
       - '9000:9000'
       - '9001:9001'
     networks:
-      - app-network
+      - comedor-uagrm-network
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
       interval: 30s
@@ -135,7 +135,7 @@ services:
   # Contenedor temporal para crear el bucket automáticamente
   minio-init:
     image: minio/mc
-    container_name: app-minio-init
+    container_name: comedor-uagrm-minio-init
     depends_on:
       minio:
         condition: service_healthy
@@ -144,24 +144,24 @@ services:
     entrypoint: >
       /bin/sh -c "sh /create-buckets.sh"
     networks:
-      - app-network
+      - comedor-uagrm-network
 
   # ---------------------------------------
   # METRICS & OBSERVABILITY
   # ---------------------------------------
   prometheus:
     image: prom/prometheus:latest
-    container_name: app-prometheus
+    container_name: comedor-uagrm-prometheus
     volumes:
       - ./infrastructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     ports:
       - '9090:9090'
     networks:
-      - app-network
+      - comedor-uagrm-network
 
   grafana:
     image: grafana/grafana:latest
-    container_name: app-grafana
+    container_name: comedor-uagrm-grafana
     depends_on:
       - prometheus
     volumes:
@@ -169,20 +169,20 @@ services:
     ports:
       - '3000:3000'
     networks:
-      - app-network
+      - comedor-uagrm-network
 
 # ---------------------------------------
 # REDES Y VOLÚMENES
 # ---------------------------------------
 networks:
-  app-network:
-    name: app-network
+  comedor-uagrm-network:
+    name: comedor-uagrm-network
     driver: bridge
 
 volumes:
   postgres_data:
-    name: postgres_data
+    name: comedor-uagrm-postgres_data
   redis_data:
-    name: redis_data
+    name: comedor-uagrm-redis_data
   minio_data:
-    name: minio_data
+    name: comedor-uagrm-minio_data

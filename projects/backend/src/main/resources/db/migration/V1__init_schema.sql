@@ -15,5 +15,5 @@ CREATE TABLE IF NOT EXISTS system_metadata (
 );
 
 INSERT INTO system_metadata (key, value)
-VALUES ('project_name', 'App')
+VALUES ('project_name', 'ComedorUAGRM')
 ON CONFLICT (key) DO NOTHING;

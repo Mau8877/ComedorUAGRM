@@ -1,6 +1,6 @@
-# DevelopLayout
+# ComedorUAGRM
 
-Plantilla de arquitectura full-stack: Spring Boot + React (Vite) + Flutter, con infraestructura Docker lista para desarrollo.
+Sistema de gestión del comedor universitario UAGRM: Spring Boot + React (Vite) + Flutter, con infraestructura Docker lista para desarrollo.
 
 ## Estructura
 
