@@ -31,11 +31,12 @@ la autenticación "hecha" — no es un requisito opcional.
     abajo).
 - **Invalidación en logout**: el refresh token se guarda del lado del
   servidor (tabla `refresh_tokens` o, mejor, en **Redis** con TTL igual a su
-  vencimiento — Redis ya está en `docker-compose.yml`, pero **la dependencia
-  `spring-boot-starter-data-redis` todavía no está en `pom.xml`**, hay que
-  agregarla antes de implementar esto). En logout se borra/marca inválido esa
-  entrada; en refresh se valida contra ese storage, no solo contra la firma
-  del JWT.
+  vencimiento — Redis ya está en `docker-compose.yml`, y
+  `spring-boot-starter-data-redis` **ya está agregada** en `pom.xml`, sin
+  más wiring que la conexión automática vía `spring.data.redis.host`; falta
+  el código real del storage de tokens, eso sigue pendiente). En logout se
+  borra/marca inválido esa entrada; en refresh se valida contra ese storage,
+  no solo contra la firma del JWT.
 - El access token **no** se invalida antes de tiempo (es stateless por
   diseño) — por eso su vida útil es corta. No se implementa una blacklist de
   access tokens salvo que aparezca un requisito concreto que lo justifique.
@@ -91,6 +92,60 @@ define una sola vez en `security/` — ver
 [CONVENCIONES_JAVA_BACKEND.md](CONVENCIONES_JAVA_BACKEND.md) para dónde vive
 exactamente el archivo, para no terminar con dos definiciones de la misma
 anotación en dos lugares distintos.
+
+## Rate limit
+
+**Ya implementado** — `RateLimitFilter` (`security/RateLimitFilter.java`),
+registrado en `SecurityConfig` con `addFilterBefore(rateLimitFilter,
+UsernamePasswordAuthenticationFilter.class)` (corre antes que la
+autenticación: un cliente sin token igual consume su cupo, no es gratis
+intentar de más).
+
+- **Alcance**: solo `/api/v1/**` (`shouldNotFilter` excluye todo lo demás).
+  Explícitamente **no** aplica a `/health`, `/prometheus` ni
+  `/swagger-ui/**`/`/v3/api-docs/**` — `/prometheus` en particular recibe
+  scrape de Prometheus cada 5s (ver `infrastructure/prometheus/prometheus.yml`)
+  y lo bloquearía por error si estuviera dentro del alcance.
+- **Algoritmo**: token bucket vía **Bucket4j** (`com.bucket4j:bucket4j_jdk11-core`,
+  no `bucket4j-core` — esa coordinada vieja ya no es la que resuelve Maven
+  Central; se verificó contra el índice de Maven Central antes de fijar la
+  versión). Un bucket por IP (`ConcurrentHashMap<String, Bucket>`), refill
+  "greedy" (los tokens se regeneran continuo, no en ráfagas cada N segundos).
+- **Config** (`application.properties`, sobreescribible por env var):
+  `app.ratelimit.capacity` (default `100`) y
+  `app.ratelimit.refill-per-minute` (default `100`) → `RATE_LIMIT_CAPACITY` /
+  `RATE_LIMIT_REFILL_PER_MINUTE`.
+- **Respuesta al superar el límite**: `429`, con el mismo sobre de
+  [RESPONSES_BACKEND.md](RESPONSES_BACKEND.md), código `ERR_SYS_02` (ver
+  [EXCEPCIONES_BACKEND.md](EXCEPCIONES_BACKEND.md)). Se escribe **a mano**
+  (`response.getWriter().write(...)`), no vía `ApiResponse.error(...)` ni
+  `GlobalExceptionHandler` — el filtro corre a nivel servlet, antes de que
+  exista un `DispatcherServlet`/`@RestControllerAdvice` que pueda intervenir.
+  Igual respeta el contrato exacto del sobre para que el cliente (frontend/
+  mobile) lo trate igual que cualquier otro error de la API.
+- **Identificación del cliente**: `request.getRemoteAddr()`. Alcanza hoy
+  porque nginx es el único proxy delante del backend dentro de la red de
+  Docker. Si en el futuro hay más de un proxy en la cadena, hay que leer
+  `X-Forwarded-For` con cuidado (el primer valor, no el último — un cliente
+  puede falsificar ese header).
+
+> **Limitación conocida, aceptada a propósito:** el bucket vive en memoria
+> del proceso (`ConcurrentHashMap`), no es distribuido. Con una sola
+> instancia del backend (el caso de este proyecto) funciona perfecto. Si en
+> algún momento se corre más de una réplica, cada una tendría su propio
+> límite independiente (un atacante repartiendo requests entre instancias
+> efectivamente multiplica su cupo). Para eso existe
+> `bucket4j_jdk11-redis` (Redis ya está en el stack, pero
+> `spring-boot-starter-data-redis` todavía no está en el `pom.xml` — mismo
+> prerequisito que el storage de refresh tokens de más arriba) — no se
+> implementa hasta que haya más de una instancia real corriendo.
+
+> **Esto no reemplaza protección a nivel de infraestructura.** Un rate
+> limit en la app (como este) es la última línea de defensa, no la única —
+> nginx (que ya está en `docker-compose.yml` como proxy) también podría
+> tener su propio `limit_req_zone`/`limit_req`, más barato en recursos
+> porque corta el tráfico antes de que llegue a la JVM. No está configurado
+> todavía; si se agrega, va en una regla de infraestructura aparte, no acá.
 
 ## Endpoints públicos
 

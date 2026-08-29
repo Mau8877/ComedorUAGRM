@@ -8,9 +8,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import com.comedoruagrm.backend.security.RateLimitFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -19,12 +22,22 @@ public class SecurityConfig {
     @Value("${app.cors.allowed-origins}")
     private List<String> corsAllowedOrigins;
 
+    private final RateLimitFilter rateLimitFilter;
+
+    public SecurityConfig(RateLimitFilter rateLimitFilter) {
+        this.rateLimitFilter = rateLimitFilter;
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             // Deshabilitamos CSRF temporalmente si vas a usar JWT más adelante para tu API
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            // Rate limit por IP sobre /api/v1/** -- ver SEGURIDAD_AUTH_BACKEND.md
+            // y RateLimitFilter. Antes del filtro de autenticación: un cliente sin
+            // token igual cuenta contra su límite, no es gratis intentar de más.
+            .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(auth -> auth
                 // 1. Permitimos el tráfico a los endpoints de Actuator (expuestos en la raíz, ver
                 // management.endpoints.web.base-path en application.properties) para health checks

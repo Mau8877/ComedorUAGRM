@@ -81,6 +81,7 @@ Todo `GET` que devuelva una colección incluye el bloque `meta`:
 | `403` | Autenticado pero sin permiso sobre el recurso/acción | `ForbiddenException` |
 | `404` | Recurso no encontrado | `NotFoundException` |
 | `409` | Conflicto (ej. recurso duplicado, estado inconsistente) | `ConflictException` |
+| `429` | Se superó el rate limit por IP (ver [SEGURIDAD_AUTH_BACKEND.md](SEGURIDAD_AUTH_BACKEND.md#rate-limit)) | Ninguna — lo escribe `RateLimitFilter` directo, no pasa por `GlobalExceptionHandler` |
 | `500` | Error no controlado / falla de infraestructura | Cualquier excepción no mapeada explícitamente |
 
 El detalle de la jerarquía de excepciones y el `@RestControllerAdvice` que

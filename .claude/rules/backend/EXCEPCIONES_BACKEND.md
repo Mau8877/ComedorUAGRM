@@ -86,6 +86,7 @@ existen):
 | --- | --- | --- | --- |
 | `ERR_SYS_00` | Sistema | (catch-all) | Error interno no controlado |
 | `ERR_SYS_01` | Sistema | `ValidationException` | Validación de Bean Validation fallida |
+| `ERR_SYS_02` | Sistema | (ninguna — lo escribe `RateLimitFilter`, ver [SEGURIDAD_AUTH_BACKEND.md](SEGURIDAD_AUTH_BACKEND.md#rate-limit)) | `429`, se superó el límite de requests por IP |
 | `ERR_AUTH_01` | Autenticación | `UnauthorizedException` | Credenciales inválidas |
 | `ERR_AUTH_02` | Autenticación | `UnauthorizedException` | Token expirado |
 | `ERR_US_01` | Usuarios | `NotFoundException` | Usuario no encontrado |

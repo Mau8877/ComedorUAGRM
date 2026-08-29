@@ -6,8 +6,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class ComedorUagrmBackendApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(ComedorUagrmBackendApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(ComedorUagrmBackendApplication.class, args);
+    }
 
 }

@@ -9,13 +9,15 @@ globs: projects/backend/**/*
 Los logs se emiten en JSON, no en texto plano — para que Grafana/cualquier
 sistema de logs los pueda indexar y filtrar por campo.
 
-- Librería: **`logstash-logback-encoder`** sobre Logback (el logger default
-  de Spring Boot). **No está agregada todavía en `pom.xml`** — es un
-  prerequisito antes de implementar esto: agregar la dependencia
-  `net.logstash.logback:logstash-logback-encoder` y un `logback-spring.xml`
-  en `src/main/resources/` con un `appender` que use
-  `net.logstash.logback.encoder.LogstashEncoder` (o `LoggingEventCompositeJsonEncoder`
-  si se necesita más control sobre qué campos van).
+- Librería: **`logstash-logback-encoder`** (8.1) sobre Logback (el logger
+  default de Spring Boot) — **ya agregada** en `pom.xml`, con
+  `src/main/resources/logback-spring.xml` configurado con un `appender` que
+  usa `net.logstash.logback.encoder.LogstashEncoder`. Confirmado en runtime:
+  cada línea de log sale como `{"@timestamp":...,"message":...,"level":"INFO",...}`.
+  Ojo con comentarios XML en este archivo (y en cualquier `.xml`/`pom.xml`
+  del proyecto): **nunca uses `--` en el medio de un comentario** (solo al
+  final, cerrando con `-->`) — es inválido en XML y el parser de Logback (o
+  de Maven) tira un error bastante críptico si aparece.
 
 ### Campos por entrada de log
 

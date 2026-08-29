@@ -114,24 +114,56 @@ export const usuariosKeys = {
 }
 ```
 
-## Cliente HTTP centralizado
+## Cliente HTTP centralizado (ya implementado)
 
-Hoy `axios` está instalado pero **no existe ningún cliente configurado
-todavía** — es un prerequisito antes de escribir la primera query real.
+Todo lo relacionado a API/datos vive en `src/store/` — **no** en
+`src/lib/` (eso es exclusivo de lo que genera el CLI de shadcn, ver
+[TAILWIND_STYLES_FRONTEND.md](TAILWIND_STYLES_FRONTEND.md)). Dos capas:
 
-- Se crea `src/lib/api-client.ts` con una instancia única de axios
-  (`axios.create({ baseURL: import.meta.env.VITE_API_BASE_URL })`).
-- Un interceptor de response desempaqueta el sobre estándar del backend
+- **`src/store/createBaseApi.ts`** — factory que crea una instancia de axios
+  con logging HTTP en consola (acordeón colapsable vía
+  `console.groupCollapsed`: código + success/failed + URL siempre visibles,
+  el body de la respuesta solo al expandir), activable con la env var
+  `VITE_ENABLE_API_LOGS` (`true`/`false`, apagada por default). No sabe nada
+  del sobre del backend — reusable con cualquier API.
+- **`src/store/apiClient.ts`** — la instancia real de la app, construida
+  sobre `createBaseApi({ baseURL: import.meta.env.VITE_API_BASE_URL })`, con
+  un segundo interceptor que desempaqueta el sobre estándar del backend
   (`{ status, data, message, error, timestamp, meta? }`, ver
   [RESPONSES_BACKEND.md](../backend/RESPONSES_BACKEND.md)):
-  - Si `status === "success"`, el interceptor devuelve `data` (y `meta`
-    cuando existe) directamente — las queries no desestructuran el sobre a
-    mano en cada hook.
-  - Si `status === "failed"`, el interceptor lanza un `ApiError` tipado
-    (`{ code: error, message }`) en vez de dejar pasar la respuesta 2xx con
-    `status: "failed"` como si fuera éxito, o un error HTTP crudo de axios
-    sin el código de negocio.
-- Todo hook de `api/` usa esta instancia — no se crea una instancia de axios
-  nueva por feature.
-- Falta agregar `QueryClientProvider` en `main.tsx` (todavía no está
-  wireado) — también prerequisito antes de la primera query.
+  - Si `status === "success"`, deja `response.data` como el `data` real (y
+    `meta` si vino) — las queries no desestructuran el sobre a mano.
+  - Si `status === "failed"`, rechaza con `ApiError` (`{ code, message }`,
+    clase exportada desde el mismo archivo) en vez de dejar pasar un error
+    HTTP crudo de axios sin el código de negocio.
+- **`src/store/queryClient.ts`** — instancia de `QueryClient`
+  (`retry: 1`, `refetchOnWindowFocus: false` por default).
+- **`src/store/QueryProvider.tsx`** — envuelve `QueryClientProvider` +
+  `ReactQueryDevtools` (montado solo si `import.meta.env.DEV`, así el panel
+  no termina en el bundle de producción). `main.tsx` monta
+  `<QueryProvider><RouterProvider .../></QueryProvider>`.
+
+Todo hook de `api/` de cada feature usa `apiClient` — no se crea una
+instancia de axios nueva por feature, y no se llama a `createBaseApi()` de
+nuevo fuera de `apiClient.ts` (una sola instancia real en toda la app).
+
+> Sin probar todavía contra un endpoint de negocio real (el backend no tiene
+> ningún `@RestController` aún) — sí se probó manualmente contra `/health` y
+> un endpoint inexistente (`403`/`404`), confirmando que el logging y el
+> manejo de error funcionan. Cuando exista el primer endpoint real, conviene
+> re-verificar el desempaquetado de `data`/`meta` contra una respuesta con
+> el sobre completo.
+
+## Utilidades genéricas: `src/utils/`
+
+Funciones utilitarias que no son específicas de shadcn (eso sigue siendo
+`src/lib/utils.ts`, el `cn()` que el CLI espera en `@/lib/utils` — no se
+toca ni se mueve) van en `src/utils/`, una carpeta nueva y separada. Hoy
+solo tiene `debounce.ts` (debounce genérico, pensado para UX puntual —
+doble-submit por doble-click, un buscador que no dispare en cada tecla — no
+para seguridad; el rate limit real está en el backend, ver
+[SEGURIDAD_AUTH_BACKEND.md](../backend/SEGURIDAD_AUTH_BACKEND.md#rate-limit)).
+No se envuelve `apiClient` completo con debounce — rompería llamadas
+legítimas en paralelo (varias queries de TanStack Query pidiendo cosas
+distintas al mismo tiempo); se aplica puntual en el call site que lo
+necesite.

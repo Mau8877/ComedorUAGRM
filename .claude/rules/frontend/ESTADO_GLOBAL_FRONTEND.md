@@ -4,6 +4,18 @@ globs: projects/frontend/**/*
 
 # Estado Global — Frontend
 
+## `src/store/` no es "solo Zustand"
+
+La carpeta `src/store/` es donde vive **todo lo relacionado a estado y
+datos** del lado del cliente: los stores de Zustand descritos acá, y
+también el cliente HTTP + `QueryClient` de TanStack Query (`createBaseApi.ts`,
+`apiClient.ts`, `queryClient.ts`, `QueryProvider.tsx` — ver
+[TANSTACK_QUERY_FRONTEND.md](TANSTACK_QUERY_FRONTEND.md#cliente-http-centralizado-ya-implementado)).
+Es una decisión de **organización de carpetas**, no una relajación de la
+separación conceptual de abajo — TanStack Query sigue siendo el único que
+cachea datos de servidor, Zustand sigue siendo solo UI; ambos simplemente
+viven bajo el mismo directorio de nivel superior.
+
 ## Separación estricta: Zustand vs TanStack Query
 
 **Zustand maneja únicamente estado de UI.** Nunca cache de datos que vienen

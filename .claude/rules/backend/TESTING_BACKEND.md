@@ -44,13 +44,45 @@ repositorio) se usa **Testcontainers** con PostgreSQL — el mismo motor que
 comportamiento en test sea fiel al de verdad (constraints, tipos de dato,
 etc.).
 
-- **No está agregado todavía** en `pom.xml` — prerequisito antes de escribir
-  el primer test de este tipo: agregar `org.testcontainers:postgresql` y
-  `org.springframework.boot:spring-boot-testcontainers` (scope `test`).
+**Ya agregado** en `pom.xml`: `org.springframework.boot:spring-boot-testcontainers`,
+`org.testcontainers:junit-jupiter` y `org.testcontainers:postgresql` (los
+dos últimos con versión fijada en la property `testcontainers.version`,
+porque `spring-boot-starter-parent` en esta versión no trae el BOM de
+Testcontainers y Maven tira `'dependencies.dependency.version' ... is
+missing` sin eso).
+
 - Se reservan para flujos donde el mock de repositorio no es suficiente
   (queries complejas, constraints de BD, comportamiento de Flyway). Para
   lógica de negocio pura en el `service`, se sigue mockeando el repositorio
   (`@Mock`/`@MockBean`) — no todo test pasa a ser de integración por default.
+- **Prerequisito de infra**: Testcontainers necesita hablar con el daemon de
+  Docker desde DENTRO del contenedor del backend — `docker-compose.yml`
+  monta `/var/run/docker.sock:/var/run/docker.sock` en el servicio
+  `backend` para esto.
+- **Patrón obligatorio para tests que usan Testcontainers**: no manejar el
+  container con `@Testcontainers`/`@Container` (arranca automático y sin
+  forma limpia de saltear el test si Docker no está disponible). En cambio,
+  chequear disponibilidad en un `@BeforeAll` con
+  `DockerClientFactory.instance().isDockerAvailable()` +
+  `Assumptions.assumeTrue(...)`, y manejar el container a mano
+  (try-with-resources) dentro del test. Así, si Docker no está accesible, el
+  test queda **SKIPPED** (no rompe el build) en vez de fallar — ver
+  `TestcontainersSmokeTest.java` como referencia.
+
+> **Docker Desktop en Windows, nota conocida:** montar
+> `/var/run/docker.sock` no alcanza siempre — Docker Desktop puede exponer
+> un socket restringido/"stub" que responde a `/info` con casi todos los
+> campos vacíos (`"ID":""`, `"ServerVersion":""`, etc.) en vez del daemon
+> real, y Testcontainers falla con "Could not find a valid Docker
+> environment" aunque el mount esté bien hecho. Hay que revisar, en la
+> máquina host, **Docker Desktop → Settings → Advanced → "Allow the default
+> Docker socket to be used"** (tiene que estar tildado). Confirmado en esta
+> sesión: con el mount + `DOCKER_HOST=unix:///var/run/docker.sock` +
+> `TESTCONTAINERS_RYUK_DISABLED=true` en el `environment` del servicio
+> `backend`, seguía sin conectar — es un tema de configuración de Docker
+> Desktop en el host, no del código ni de `docker-compose.yml`. Por eso el
+> patrón de `assumeTrue` de arriba es obligatorio: un dev sin ese setting
+> tildado sigue pudiendo correr `mvn test` sin que le rompa el build.
 
 ## Convenciones
 

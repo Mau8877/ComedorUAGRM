@@ -7,6 +7,11 @@ services:
   proxy:
     image: nginx:alpine
     container_name: comedor-uagrm-proxy
+    # Defensa extra además de la resolución dinámica de nginx.conf: si de
+    # todos modos llegara a morir (ej. el propio Docker Desktop matándolo a
+    # mitad de un restart), que reintente solo en vez de quedar caído hasta
+    # que alguien lo note a mano.
+    restart: unless-stopped
     ports:
       - '80:80'
     volumes:
@@ -26,7 +31,17 @@ services:
     working_dir: /app/projects/frontend
     volumes:
       - .:/app
-      - /app/node_modules
+      # Ambos node_modules (raíz del workspace pnpm y el del paquete
+      # frontend) tienen que estar aislados del bind mount de arriba -- si
+      # no, pnpm dentro del contenedor escribe symlinks de Linux
+      # directamente en tu filesystem de Windows apuntando a rutas que solo
+      # existen DENTRO del contenedor (ej. /app/node_modules/.pnpm/...).
+      # Esos symlinks quedan rotos para cualquier pnpm/tsc/ESLint que corras
+      # en el host, y un pnpm install en el host los vuelve a pisar en
+      # sentido contrario -- rompiendo lo del contenedor. Con volúmenes
+      # nombrados, cada lado tiene su propio node_modules real y no chocan.
+      - frontend_node_modules_root:/app/node_modules
+      - frontend_node_modules_pkg:/app/projects/frontend/node_modules
     command: sh -c "corepack enable pnpm && pnpm install && pnpm run dev --host 0.0.0.0"
     ports:
       - '5173:5173'
@@ -46,11 +61,23 @@ services:
     volumes:
       - .:/app
       - ~/.m2:/root/.m2
+      # Necesario para que Testcontainers (tests de integración, ver
+      # TESTING_BACKEND.md) pueda levantar contenedores (ej. Postgres real)
+      # desde DENTRO de este contenedor -- sin esto, `mvn test` falla con
+      # "Could not find a valid Docker environment" en cualquier test que
+      # use Testcontainers.
+      - /var/run/docker.sock:/var/run/docker.sock
     command: mvn spring-boot:run -Dspring-boot.run.profiles=dev
     ports:
       - '8080:8080'
     environment:
       - SPRING_PROFILES_ACTIVE=dev
+      # Testcontainers necesita esto para hablar con el Docker Desktop de
+      # Windows de forma confiable a través del socket montado -- sin esto,
+      # su detección automática de estrategia de conexión falla en Windows
+      # (ver TESTING_BACKEND.md).
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - TESTCONTAINERS_RYUK_DISABLED=true
       - SPRING_DATASOURCE_URL=jdbc:postgresql://comedor-uagrm-postgres:5432/${POSTGRES_DB}
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
@@ -136,6 +163,9 @@ services:
   minio-init:
     image: minio/mc
     container_name: comedor-uagrm-minio-init
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
     depends_on:
       minio:
         condition: service_healthy
@@ -186,3 +216,7 @@ volumes:
     name: comedor-uagrm-redis_data
   minio_data:
     name: comedor-uagrm-minio_data
+  frontend_node_modules_root:
+    name: comedor-uagrm-frontend-node_modules-root
+  frontend_node_modules_pkg:
+    name: comedor-uagrm-frontend-node_modules-pkg

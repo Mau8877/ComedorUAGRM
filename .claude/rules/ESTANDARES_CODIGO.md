@@ -18,6 +18,39 @@ distinta cuando el lenguaje ya tiene una establecida:
 | Constantes | `UPPER_SNAKE_CASE` | `UPPER_SNAKE_CASE` | `UPPER_SNAKE_CASE` (Dart suele usar `lowerCamelCase` para constantes locales, pero las constantes de configuración/catálogo del proyecto — ej. códigos de error, claves de storage — usan `UPPER_SNAKE_CASE` para que se distingan a simple vista de una variable normal) |
 | Archivos | `PascalCase.java` (nombre = nombre de la clase pública) | `camelCase.ts`/`PascalCase.tsx` (componentes React en `PascalCase`) | `snake_case.dart` (convención oficial de Dart/Flutter) |
 
+## Enforcement automático (pre-commit)
+
+Estas convenciones no dependen solo de que alguien se acuerde de seguirlas —
+`husky` (`.husky/pre-commit`) corre `lint-staged` en cada `git commit`, que
+a su vez corre el linter que corresponde según qué archivos quedaron
+staged. Si el linter encuentra un error real (no un warning ignorable), el
+commit **se cancela**.
+
+| Lenguaje | Herramienta | Config | Alcance |
+| --- | --- | --- | --- |
+| TypeScript (frontend) | ESLint (`--fix`) | `projects/frontend/eslint.config.js` | `projects/frontend/**/*.{ts,tsx}` |
+| Java (backend) | Checkstyle | `projects/backend/checkstyle.xml` | `projects/backend/**/*.java` |
+| Dart (mobile) | `flutter analyze` | `projects/mobile/analysis_options.yaml` (`flutter_lints`) | `projects/mobile/**/*.dart` |
+
+- La config de Checkstyle es **propia del proyecto** (no la de Google/Sun) —
+  cubre indentación (4 espacios, ver `.editorconfig`) y las convenciones de
+  nombrado de esta tabla. El `MethodName` usa un patrón relajado
+  (`^[a-z][a-zA-Z0-9]*(_[a-zA-Z0-9]+)*$`) para permitir la convención de
+  nombres de test de [TESTING_BACKEND.md](backend/TESTING_BACKEND.md)
+  (`crearUsuario_conEmailDuplicado_lanzaConflictException`), que de otra
+  forma chocaría con el `MethodName` default de Checkstyle.
+- Checkstyle **no** está atado a ninguna fase del build de Maven (`mvn test`/
+  `package` no lo corren) — se invoca aparte con `mvn checkstyle:check` (o
+  `./mvnw checkstyle:check` desde el host, que comparte el mismo `~/.m2`
+  que el contenedor vía `docker-compose.yml`), igual que ESLint se invoca
+  aparte de `pnpm build`.
+- `flutter analyze` no analiza archivo por archivo — corre sobre todo el
+  paquete `projects/mobile/` aunque el hook solo dispare por un `.dart`
+  puntual modificado. Es el comportamiento normal de la herramienta.
+- No hay `commitlint` (validación del formato `tipo[SCOPE]: descripción` de
+  [CONVENCIONES_GIT.md](CONVENCIONES_GIT.md)) todavía — si se agrega, es un
+  hook `commit-msg` aparte, no se asume implementado.
+
 ## Comentarios
 
 - Un comentario explica el **por qué** de una decisión no obvia (una
