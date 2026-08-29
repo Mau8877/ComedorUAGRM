@@ -107,7 +107,7 @@ implementación.
   methods estáticos: `ApiResponse.success(data, message)`,
   `ApiResponse.successList(items, message, meta)`, `ApiResponse.error(errorCode, message)`.
 - Clase `PageMeta` (record) en `common/response/` para el bloque `meta`.
-- Los controllers **nunca** arman el JSON a mano ni devuelven entidades/DTOs
+- Los controllers **nunca** arman el JSON a mano ni devuelven Models/DTOs
   pelados — siempre devuelven `ResponseEntity<ApiResponse<T>>` (o el
   `ResponseEntity<ApiResponse<List<T>>>` para listados), construido con estos
   factory methods.

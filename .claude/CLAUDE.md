@@ -69,3 +69,39 @@ El propio frontmatter `globs:` de cada archivo de regla determina en qué
 carpetas aplica automáticamente — no hace falta ir a buscarlas a mano, pero
 si algo no queda claro para el archivo que se está por tocar, se revisa la
 carpeta `.claude/rules/` correspondiente antes de asumir un criterio propio.
+
+## Commits de Git — Claude no commitea el trabajo final, salvo pruebas que deshace
+
+**Claude nunca deja un commit permanente sin que la persona lo haya
+pedido.** Decidir cuándo y qué commitear como entrega final del trabajo es
+responsabilidad exclusiva de la persona que está usando Claude.
+
+Cuando el trabajo esté listo para commitear, Claude debe:
+
+1. Seguir [CONVENCIONES_GIT.md](rules/CONVENCIONES_GIT.md) al armar el
+   mensaje: formato `tipo[SCOPE]: descripción concreta`, y **un commit por
+   scope** (si el cambio toca backend y frontend, son dos mensajes
+   separados, no uno).
+2. Proponerle a la persona el/los mensajes de commit listos para usar
+   (idealmente en un bloque de código para copiar/pegar), explicando
+   brevemente qué agrupa cada uno si hay más de uno.
+3. Dejar que la persona misma corra `git add`/`git commit` — Claude no lo
+   ejecuta como entrega final salvo que se lo pidan explícitamente.
+
+**Excepción: probar que un hook de git dispara de verdad.** Claude sí puede
+hacer un `git commit` puntual con el único fin de confirmar que
+`pre-commit`/`commit-msg` disparan en un commit real (no simulado) —
+**siempre y cuando lo deshaga inmediatamente después** con
+`git reset --soft HEAD~1` (deja los cambios de vuelta como estaban,
+staged, sin perder nada) y avise a la persona que hizo esto. Nunca se deja
+como commit definitivo sin que se lo pidan.
+
+Para todo lo demás que no necesite un commit real de por medio (probar que
+un mensaje cumple el formato, o que `lint-staged` corre el linter
+correcto), usar los mecanismos que ni siquiera tocan el historial de git:
+
+```bash
+pnpm exec lint-staged                     # simula el pre-commit sobre lo que esté staged
+sh .husky/commit-msg archivo_con_mensaje.txt  # simula el commit-msg sin commitear
+echo "feat[BACK]: mensaje de prueba" | pnpm exec commitlint  # valida un mensaje suelto
+```

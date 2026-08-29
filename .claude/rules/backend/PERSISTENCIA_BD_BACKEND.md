@@ -34,9 +34,9 @@ evitar conflictos de merge, no un descuido.
 > migración ya aplicada (invalidaría su checksum en `flyway_schema_history`).
 > A partir de la **próxima** migración nueva, se usa el formato timestamp.
 
-## Convención de nombres: entidades, tablas, columnas
+## Convención de nombres: Models, tablas, columnas
 
-- **Java (entidades/campos)**: `camelCase`. Clases en `PascalCase` singular
+- **Java (Models/campos)**: `camelCase`. Clases en `PascalCase` singular
   (`Usuario`, `PedidoItem`).
 - **Base de datos (tablas/columnas)**: `snake_case`. Tablas en plural
   (`usuarios`, `pedido_items`).
@@ -48,13 +48,13 @@ evitar conflictos de merge, no un descuido.
   cuando el nombre de columna necesita diferir del derivado automáticamente
   por alguna razón puntual (ej. una palabra reservada de SQL).
 - Nombre de tabla explícito (`@Table(name = "...")`) cuando el plural
-  automático no da el resultado correcto en español (ej. una entidad
+  automático no da el resultado correcto en español (ej. un Model
   `MenuSemanal` no debería terminar en una tabla mal pluralizada) — se revisa
   caso por caso, no se asume que el default siempre acierta en español.
 
 ## Claves foráneas e índices
 
-- Nombre de columna FK: `{entidad_referenciada_singular}_id` (ej.
+- Nombre de columna FK: `{model_referenciado_singular}_id` (ej.
   `usuario_id` en la tabla `pedidos`).
 - Toda FK lleva su índice correspondiente si se va a filtrar/joinear por ella
   con frecuencia (no depender del default de Postgres, que no indexa FKs

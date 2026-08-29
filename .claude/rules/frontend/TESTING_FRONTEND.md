@@ -35,7 +35,12 @@ export default defineConfig({
 
 ## Dónde viven los tests
 
-**Co-ubicados** junto al archivo que prueban, no en una carpeta `__tests__/`
+Dos criterios distintos según dónde vive el código bajo test — ver
+[ARQUITECTURA_FRONTEND.md](../ARQUITECTURA_FRONTEND.md#tests-co-ubicados-a-nivel-de-app-centralizados-a-nivel-de-feature)
+para el porqué:
+
+**Código transversal** (`src/utils/`, `src/lib/`, `src/components/ui/`):
+**co-ubicado**, junto al archivo que prueba, no en una carpeta `__tests__/`
 separada:
 
 ```
@@ -48,9 +53,16 @@ src/components/ui/
 └── button.test.tsx
 ```
 
-Mismo criterio en `src/features/{feature}/` cuando exista código de
-negocio: el test de `usuarioSchema.ts` es `usuarioSchema.test.ts` al lado,
-no en otro directorio.
+**Código de una feature** (`src/features/{feature}/`): en la carpeta
+`tests/` de esa feature, no al lado del archivo:
+
+```
+src/features/usuarios/
+├── schemas/
+│   └── usuarioSchema.ts
+└── tests/
+    └── usuarioSchema.test.ts
+```
 
 ## Qué testear
 

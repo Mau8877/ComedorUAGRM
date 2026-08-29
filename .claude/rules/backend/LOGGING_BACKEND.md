@@ -66,6 +66,6 @@ Un `WARN` recurrente que nadie revisa es indistinguible de no tener logging.
   el token entero.
 - Datos de pago (número de tarjeta, CVV, etc.).
 
-Si un DTO/entidad que se loguea completo (ej. para debug) puede contener
+Si un DTO/Model que se loguea completo (ej. para debug) puede contener
 alguno de estos campos, se excluye explícitamente antes de loguear (no se
 serializa el objeto entero "porque es más fácil").

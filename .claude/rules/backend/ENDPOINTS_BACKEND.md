@@ -76,7 +76,7 @@ GET /api/v1/usuarios?page=1&pageSize=20&search=texto&filter[rol]=admin
   `@RestControllerAdvice` global, ver
   [EXCEPCIONES_BACKEND.md](EXCEPCIONES_BACKEND.md)), y logging (se loguea en
   el `service`, ver [LOGGING_BACKEND.md](LOGGING_BACKEND.md)).
-- El controller no conoce entidades JPA — recibe y devuelve DTOs
-  (`XxxRequest`/`XxxResponse`), el mapeo Entity↔DTO vive en el `service` o en
+- El controller no conoce Models JPA — recibe y devuelve DTOs
+  (`XxxRequest`/`XxxResponse`), el mapeo Model↔DTO vive en el `service` o en
   un mapper dedicado (ver
   [CONVENCIONES_JAVA_BACKEND.md](CONVENCIONES_JAVA_BACKEND.md)).

@@ -24,8 +24,8 @@ com.comedoruagrm.backend
         ├── service/
         ├── repository/
         ├── dto/          # XxxRequest, XxxResponse
-        ├── entity/
-        └── mapper/       # (si el mapeo Entity↔DTO no es trivial)
+        ├── model/        # La clase mapeada a una tabla (sigue llevando @Entity de JPA, ver nota abajo)
+        └── mapper/       # (si el mapeo Model↔DTO no es trivial)
 ```
 
 Una clase que solo la usa un módulo vive **dentro de ese módulo**, no en
@@ -39,12 +39,21 @@ más features. No se mueve algo a `common/` "por las dudas".
 | Controller | `{Recurso}Controller` | `UsuarioController` |
 | Service | `{Recurso}Service` (clase concreta, **sin** interfaz `IXxx`/`XxxImpl` salvo que exista más de una implementación real) | `UsuarioService` |
 | Repository | `{Recurso}Repository extends JpaRepository<...>` | `UsuarioRepository` |
-| Entity | Nombre de dominio en singular, sin sufijo | `Usuario` |
+| Model | Nombre de dominio en singular, sin sufijo | `Usuario` |
 | DTO de entrada | `{Recurso}Request` (o `Crear{Recurso}Request` / `Actualizar{Recurso}Request` si hace falta distinguir create de update) | `CrearUsuarioRequest` |
 | DTO de salida | `{Recurso}Response` | `UsuarioResponse` |
 | Mapper | `{Recurso}Mapper` | `UsuarioMapper` |
 | Excepción de negocio | Ver [EXCEPCIONES_BACKEND.md](EXCEPCIONES_BACKEND.md) | `NotFoundException` |
 | Códigos de error de un módulo | `{Recurso}ErrorCodes` (interfaz de constantes o `enum`) | `UsuarioErrorCodes` |
+
+> **"Model", no "Entity"** — así se le llama en este proyecto a la clase
+> mapeada a una tabla, y así se llama su carpeta (`model/`, no `entity/`).
+> Esto es solo el nombre que usamos nosotros para referirnos a ella; la
+> clase en sí **sigue llevando la anotación `@Entity` de JPA/Jakarta
+> Persistence** (`import jakarta.persistence.Entity;`) porque es un
+> requisito del framework, no hay forma de evitarlo ni de reemplazarlo por
+> una anotación `@Model` que no existe. No te confundas si ves `@Entity`
+> en el código de un Model — es lo esperado.
 
 No se usa la clase `Service` como interfaz con un único `ServiceImpl` — eso
 es sobre-ingeniería para este proyecto salvo que un módulo concreto

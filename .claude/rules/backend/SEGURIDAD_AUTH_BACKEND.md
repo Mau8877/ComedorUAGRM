@@ -43,7 +43,7 @@ la autenticación "hecha" — no es un requisito opcional.
 
 ## Reemplazo del `InMemoryUserDetailsManager`
 
-- Entidad `User` (tabla `users`) con al menos: `id`, `email` (único),
+- Model `User` (tabla `users`) con al menos: `id`, `email` (único),
   `passwordHash` (BCrypt, nunca texto plano), `role`, `createdAt`. Todavía no
   existe — es un requisito de esta regla, no algo que ya esté implementado.
 - `UserDetailsServiceImpl implements UserDetailsService` en `security/`, que
