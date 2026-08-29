@@ -32,6 +32,14 @@ commit **se cancela**.
 | Java (backend) | Checkstyle | `projects/backend/checkstyle.xml` | `projects/backend/**/*.java` |
 | Dart (mobile) | `flutter analyze` | `projects/mobile/analysis_options.yaml` (`flutter_lints`) | `projects/mobile/**/*.dart` |
 
+**El pre-commit solo lintea, no corre tests.** Se evaluó agregar
+`vitest run`/`flutter test`/`mvn test` al mismo hook, pero se decidió que
+correr la suite de tests completa es responsabilidad de cada dev **antes**
+de commitear (`pnpm test`, `flutter test`, `./mvnw test`), no algo que
+bloquee cada commit automáticamente — mantiene el pre-commit rápido. Nada
+impide agregarlo después a un hook `pre-push` si en el futuro se decide que
+sí hace falta forzarlo.
+
 - La config de Checkstyle es **propia del proyecto** (no la de Google/Sun) —
   cubre indentación (4 espacios, ver `.editorconfig`) y las convenciones de
   nombrado de esta tabla. El `MethodName` usa un patrón relajado
@@ -47,9 +55,33 @@ commit **se cancela**.
 - `flutter analyze` no analiza archivo por archivo — corre sobre todo el
   paquete `projects/mobile/` aunque el hook solo dispare por un `.dart`
   puntual modificado. Es el comportamiento normal de la herramienta.
-- No hay `commitlint` (validación del formato `tipo[SCOPE]: descripción` de
-  [CONVENCIONES_GIT.md](CONVENCIONES_GIT.md)) todavía — si se agrega, es un
-  hook `commit-msg` aparte, no se asume implementado.
+
+**Testing (Vitest en frontend) está instalado y configurado, pero no
+enganchado al pre-commit** — ver [TESTING_FRONTEND.md](frontend/TESTING_FRONTEND.md),
+[TESTING_BACKEND.md](backend/TESTING_BACKEND.md) y
+[TESTING_MOBILE.md](mobile/TESTING_MOBILE.md) para cuándo/cómo escribir
+tests en cada proyecto; correrlos antes de commitear (`pnpm test`,
+`./mvnw test`, `flutter test`) es criterio de cada dev, no algo que el hook
+fuerce.
+
+## Formato del mensaje de commit (`commitlint`)
+
+**Ya implementado.** `commitlint.config.js` (raíz) + hook `.husky/commit-msg`
+validan que todo commit cumpla el formato de
+[CONVENCIONES_GIT.md](CONVENCIONES_GIT.md) (`tipo[SCOPE]: descripción`) antes
+de aceptarlo.
+
+- **No** extiende `@commitlint/config-conventional` — ese preset espera el
+  formato estándar `tipo(scope): descripción` (paréntesis), y este proyecto
+  usa `tipo[SCOPE]: descripción` (corchetes, scope en mayúsculas). Por eso
+  hay un `parserPreset.parserOpts.headerPattern` custom en vez de extender
+  el preset de Conventional Commits.
+- Reglas activas: `type-enum` (los 10 tipos de la tabla de
+  `CONVENCIONES_GIT.md`), `scope-enum` (`BACK`/`FRONT`/`MOBILE`/`INFRA`/`DOCS`/`REPO`),
+  `type-empty`/`scope-empty`/`subject-empty` (a diferencia de Conventional
+  Commits estándar, acá el scope es **obligatorio**, nunca opcional), y
+  `header-max-length` (100).
+- Se puede probar sin hacer un commit real: `echo "feat[BACK]: algo" | pnpm exec commitlint`.
 
 ## Comentarios
 

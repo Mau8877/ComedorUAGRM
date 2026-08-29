@@ -8,6 +8,11 @@ Aplica a todo el repositorio (backend, frontend, mobile, infra, docs).
 tipo[SCOPE]: descripción concreta
 ```
 
+**Este formato se valida automáticamente** — `commitlint` (hook
+`.husky/commit-msg`) rechaza el commit si no cumple el patrón, el tipo no
+está en la lista de abajo, o falta el `[SCOPE]`. Ver detalle de la config en
+[ESTANDARES_CODIGO.md](ESTANDARES_CODIGO.md#formato-del-mensaje-de-commit-commitlint).
+
 Ejemplos:
 
 ```
