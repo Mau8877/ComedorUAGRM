@@ -106,6 +106,13 @@ intentar de más).
   `/swagger-ui/**`/`/v3/api-docs/**` — `/prometheus` en particular recibe
   scrape de Prometheus cada 5s (ver `infrastructure/prometheus/prometheus.yml`)
   y lo bloquearía por error si estuviera dentro del alcance.
+- **Corre por prefijo de URL, no por endpoint real.** El filtro se ejecuta
+  a nivel servlet, **antes** de que Spring resuelva si existe un
+  `@RestController` que atienda esa ruta. Esto significa que una IP
+  consume cupo igual pegándole a un endpoint real que a una URL bajo
+  `/api/v1/**` que ni siquiera existe todavía (un 404) — no hace falta que
+  el feature esté implementado para que el rate limit ya esté activo sobre
+  su futura ruta.
 - **Algoritmo**: token bucket vía **Bucket4j** (`com.bucket4j:bucket4j_jdk11-core`,
   no `bucket4j-core` — esa coordinada vieja ya no es la que resuelve Maven
   Central; se verificó contra el índice de Maven Central antes de fijar la
