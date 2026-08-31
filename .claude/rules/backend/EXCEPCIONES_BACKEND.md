@@ -26,6 +26,17 @@ public abstract class BusinessException extends RuntimeException {
 }
 ```
 
+`common/exception/` se mantiene **plano** (sin subcarpetas) mientras
+contenga solo `BusinessException`, sus subtipos directos y
+`GlobalExceptionHandler` — con ese puñado de archivos, todos con nombre
+autodescriptivo (`XxxException`), navegarlos por nombre es más rápido que
+navegar por sub-carpeta. Mismo criterio de "no anticipar estructura" que el
+slice pattern de [ESTADO_GLOBAL_FRONTEND.md](../frontend/ESTADO_GLOBAL_FRONTEND.md):
+se separa en sub-carpetas recién si esta carpeta empieza a mezclar
+responsabilidades no relacionadas entre sí (ej. handlers específicos por
+tipo de excepción, utilidades de mapeo de errores), no por el simple hecho
+de sumar una excepción más a la lista de 5.
+
 | Excepción | HTTP | Cuándo |
 | --- | --- | --- |
 | `ValidationException` | `400` | El payload no cumple una regla de negocio (más allá de `@Valid`, ej. "la fecha de fin es anterior a la de inicio") |
@@ -40,6 +51,18 @@ public abstract class BusinessException extends RuntimeException {
 > = "te identificaste pero no podés". No renombrar estas clases para que
 > "suenen mejor" en español — el nombre sigue el estándar HTTP, no la
 > traducción literal.
+
+> **Este listado de 5 es deliberadamente el completo, no un ejemplo
+> parcial.** Coincide exactamente con los códigos HTTP que
+> [RESPONSES_BACKEND.md](RESPONSES_BACKEND.md#códigos-http) documenta como
+> disparables por una excepción de negocio (`400`/`401`/`403`/`404`/`409`).
+> `429` y `500` quedan fuera a propósito (ver abajo, y
+> [SEGURIDAD_AUTH_BACKEND.md](SEGURIDAD_AUTH_BACKEND.md#rate-limit) para el
+> primero) — no son un hueco pendiente de llenar. Si en algún momento el
+> dominio necesita de verdad un código HTTP nuevo que ninguna de estas 5
+> cubre (ej. `422`), se agrega una excepción nueva a este mismo listado
+> **antes** de usarla, no se fuerza el caso dentro de una existente que no
+> le corresponde semánticamente.
 
 `500` no tiene una excepción de negocio propia: es el resultado de **no**
 mapear la excepción — un `Exception`/`RuntimeException` no controlada, o una
@@ -78,19 +101,23 @@ Formato fijo: **`ERR_{MODULO}_{NUMERO}`**.
   negocio (`ERR_SYS_00` = error interno genérico, `ERR_SYS_01` = validación
   genérica no específica de un módulo).
 
-Ejemplo de catálogo (formato — el listado real de módulos se completa a
-medida que se implementan features, no se inventan módulos que todavía no
-existen):
+Formato de ejemplo (ilustrativo — usa un módulo `XX` que no existe, para no
+confundirlo con un código real ya implementado):
 
 | Código | Módulo | Excepción | Significado |
 | --- | --- | --- | --- |
-| `ERR_SYS_00` | Sistema | (catch-all) | Error interno no controlado |
-| `ERR_SYS_01` | Sistema | `ValidationException` | Validación de Bean Validation fallida |
-| `ERR_SYS_02` | Sistema | (ninguna — lo escribe `RateLimitFilter`, ver [SEGURIDAD_AUTH_BACKEND.md](SEGURIDAD_AUTH_BACKEND.md#rate-limit)) | `429`, se superó el límite de requests por IP |
-| `ERR_AUTH_01` | Autenticación | `UnauthorizedException` | Credenciales inválidas |
-| `ERR_AUTH_02` | Autenticación | `UnauthorizedException` | Token expirado |
-| `ERR_US_01` | Usuarios | `NotFoundException` | Usuario no encontrado |
-| `ERR_US_03` | Usuarios | `ConflictException` | Ya existe un usuario con ese correo |
+| `ERR_XX_01` | (nombre del módulo) | `NotFoundException` | El recurso solicitado no existe |
+| `ERR_XX_02` | (nombre del módulo) | `ConflictException` | Ya existe un recurso con ese dato único |
+
+**El catálogo real y vivo —con los códigos que de verdad existen hoy en el
+código, uno por uno, con su HTTP, su excepción y dónde se lanza— no vive
+en esta tabla.** Vive en
+[`docs/errors/`](../../../docs/errors/README.md), y el proceso para
+mantenerlo actualizado está en
+[GUIA_ERRORES_BACKEND.md](GUIA_ERRORES_BACKEND.md). Esta sección de acá
+solo explica el **formato** del código (`ERR_{MODULO}_{NUMERO}`), no
+reemplaza ni duplica esa fuente real — si alguna vez quedan
+desincronizados, gana `docs/errors/`.
 
 Cada módulo mantiene su catálogo como constantes (interfaz o `enum` Java,
 ej. `UsuarioErrorCodes`) en su propio paquete de feature, no en un único
@@ -109,3 +136,8 @@ fácil ubicar en qué módulo y punto ocurrió un error solo leyendo el prefijo.
 Si aparece un caso de error nuevo durante el desarrollo, se agrega al
 catálogo del módulo correspondiente antes de mergear, no se deja para
 "después".
+
+Además de la constante Java del módulo, **todo código de error nuevo se
+documenta también en `docs/errors/`** — el paso a paso y el formato
+obligatorio de esa documentación viven en
+[GUIA_ERRORES_BACKEND.md](GUIA_ERRORES_BACKEND.md), no se repiten acá.
