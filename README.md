@@ -183,6 +183,21 @@ tipo[SCOPE]: descripción concreta
 Detalle completo en
 [`.claude/rules/CONVENCIONES_GIT.md`](.claude/rules/CONVENCIONES_GIT.md).
 
+## CI/CD
+
+Cada Pull Request contra `main` (y cada push directo a `main`) dispara
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml): un job
+independiente por proyecto (`backend`, `frontend`, `mobile`) que solo
+corre si cambió algo dentro de esa carpeta, y que hace lint + tests +
+build — los mismos comandos documentados arriba en "Puesta en marcha",
+no algo distinto inventado para CI.
+
+Todavía no hay CD (despliegue automático) — depende de una decisión de
+infraestructura pendiente (dónde se aloja el backend/frontend en
+producción). El detalle completo, incluyendo cómo se vería CD una vez que
+exista ese destino, está en
+[`.claude/rules/CI_CD.md`](.claude/rules/CI_CD.md).
+
 ## Calidad automática (pre-commit)
 
 `husky` corre `lint-staged` en cada `git commit`, que aplica el linter que
