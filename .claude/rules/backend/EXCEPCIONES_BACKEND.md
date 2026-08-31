@@ -101,19 +101,23 @@ Formato fijo: **`ERR_{MODULO}_{NUMERO}`**.
   negocio (`ERR_SYS_00` = error interno genérico, `ERR_SYS_01` = validación
   genérica no específica de un módulo).
 
-Ejemplo de catálogo (formato — el listado real de módulos se completa a
-medida que se implementan features, no se inventan módulos que todavía no
-existen):
+Formato de ejemplo (ilustrativo — usa un módulo `XX` que no existe, para no
+confundirlo con un código real ya implementado):
 
 | Código | Módulo | Excepción | Significado |
 | --- | --- | --- | --- |
-| `ERR_SYS_00` | Sistema | (catch-all) | Error interno no controlado |
-| `ERR_SYS_01` | Sistema | `ValidationException` | Validación de Bean Validation fallida |
-| `ERR_SYS_02` | Sistema | (ninguna — lo escribe `RateLimitFilter`, ver [SEGURIDAD_AUTH_BACKEND.md](SEGURIDAD_AUTH_BACKEND.md#rate-limit)) | `429`, se superó el límite de requests por IP |
-| `ERR_AUTH_01` | Autenticación | `UnauthorizedException` | Credenciales inválidas |
-| `ERR_AUTH_02` | Autenticación | `UnauthorizedException` | Token expirado |
-| `ERR_US_01` | Usuarios | `NotFoundException` | Usuario no encontrado |
-| `ERR_US_03` | Usuarios | `ConflictException` | Ya existe un usuario con ese correo |
+| `ERR_XX_01` | (nombre del módulo) | `NotFoundException` | El recurso solicitado no existe |
+| `ERR_XX_02` | (nombre del módulo) | `ConflictException` | Ya existe un recurso con ese dato único |
+
+**El catálogo real y vivo —con los códigos que de verdad existen hoy en el
+código, uno por uno, con su HTTP, su excepción y dónde se lanza— no vive
+en esta tabla.** Vive en
+[`docs/errors/`](../../../docs/errors/README.md), y el proceso para
+mantenerlo actualizado está en
+[GUIA_ERRORES_BACKEND.md](GUIA_ERRORES_BACKEND.md). Esta sección de acá
+solo explica el **formato** del código (`ERR_{MODULO}_{NUMERO}`), no
+reemplaza ni duplica esa fuente real — si alguna vez quedan
+desincronizados, gana `docs/errors/`.
 
 Cada módulo mantiene su catálogo como constantes (interfaz o `enum` Java,
 ej. `UsuarioErrorCodes`) en su propio paquete de feature, no en un único
