@@ -1,6 +1,6 @@
 import type { LayoutUser } from '@/components/layout'
 
-import type { MenuDia, PedidoHistorial, UsuarioReciente, UsuarioTabla } from '../types'
+import type { Ingrediente, MenuDia, PedidoHistorial, UsuarioReciente, UsuarioTabla } from '../types'
 
 export const mockAdminUser: LayoutUser = {
   nombre: 'Ana Pérez',
@@ -55,6 +55,112 @@ export const mockHistorialPedidos: PedidoHistorial[] = [
   { fecha: 'Ayer, 13:05', plato: 'Silpancho', estado: 'entregado' },
   { fecha: 'Lun 01/09, 12:55', plato: 'Ensalada de quinoa', estado: 'pendiente' },
   { fecha: 'Vie 29/08, 12:30', plato: 'Pique a lo macho', estado: 'cancelado' },
+]
+
+// Fotos reales de Wikimedia Commons (licencia libre, URLs verificadas) --
+// demo de components/ui/tanstack-table con imágenes en la celda de
+// nombre, visibles tanto en DataTable como en DataCards (mismo cell).
+export const mockIngredientes: Ingrediente[] = [
+  {
+    id: 'ing-1',
+    nombre: 'Tomate',
+    foto: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/89/Tomato_je.jpg/330px-Tomato_je.jpg',
+    categoria: 'Verdura',
+    unidad: 'kg',
+    stock: 42,
+    stockMinimo: 10,
+    precioUnitario: 6.5,
+  },
+  {
+    id: 'ing-2',
+    nombre: 'Cebolla',
+    foto: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/20/Harvested_vegetables%28Onions%29.jpg/330px-Harvested_vegetables%28Onions%29.jpg',
+    categoria: 'Verdura',
+    unidad: 'kg',
+    stock: 8,
+    stockMinimo: 10,
+    precioUnitario: 4.2,
+  },
+  {
+    id: 'ing-3',
+    nombre: 'Papa',
+    foto: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/Potatoes%2C_Wirral_flower_and_vegetable_show_-_DSC08219.JPG/330px-Potatoes%2C_Wirral_flower_and_vegetable_show_-_DSC08219.JPG',
+    categoria: 'Verdura',
+    unidad: 'kg',
+    stock: 65,
+    stockMinimo: 15,
+    precioUnitario: 3.8,
+  },
+  {
+    id: 'ing-4',
+    nombre: 'Zanahoria',
+    foto: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/32/Carrots_of_many_colors.jpg/330px-Carrots_of_many_colors.jpg',
+    categoria: 'Verdura',
+    unidad: 'kg',
+    stock: 0,
+    stockMinimo: 8,
+    precioUnitario: 5.0,
+  },
+  {
+    id: 'ing-5',
+    nombre: 'Ajo',
+    foto: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9a/Garlic_bulbs_and_cloves.jpg/330px-Garlic_bulbs_and_cloves.jpg',
+    categoria: 'Condimento',
+    unidad: 'kg',
+    stock: 12,
+    stockMinimo: 3,
+    precioUnitario: 18.0,
+  },
+  {
+    id: 'ing-6',
+    nombre: 'Huevo',
+    foto: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/dd/Eggs_in_basket_2020_G1.jpg/330px-Eggs_in_basket_2020_G1.jpg',
+    categoria: 'Lácteo',
+    unidad: 'docena',
+    stock: 30,
+    stockMinimo: 10,
+    precioUnitario: 12.5,
+  },
+  {
+    id: 'ing-7',
+    nombre: 'Leche',
+    foto: 'https://upload.wikimedia.org/wikipedia/commons/a/a8/Farm-Fresh_glass_of_milk.png',
+    categoria: 'Lácteo',
+    unidad: 'L',
+    stock: 5,
+    stockMinimo: 12,
+    precioUnitario: 7.0,
+  },
+  {
+    id: 'ing-8',
+    nombre: 'Arroz',
+    foto: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bd/White_rice_on_a_brown_table.jpg/330px-White_rice_on_a_brown_table.jpg',
+    categoria: 'Grano',
+    unidad: 'kg',
+    stock: 90,
+    stockMinimo: 20,
+    precioUnitario: 5.5,
+  },
+  {
+    id: 'ing-9',
+    nombre: 'Harina',
+    foto: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/66/Whole_wheat_grain_flour_being_scooped.jpg/330px-Whole_wheat_grain_flour_being_scooped.jpg',
+    categoria: 'Grano',
+    unidad: 'kg',
+    stock: 25,
+    stockMinimo: 10,
+    precioUnitario: 4.9,
+  },
+  {
+    id: 'ing-10',
+    nombre: 'Pimiento',
+    foto: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/de/Capsicum_annuum_fruits_IMGP0049.jpg/330px-Capsicum_annuum_fruits_IMGP0049.jpg',
+    categoria: 'Verdura',
+    unidad: 'kg',
+    stock: 3,
+    stockMinimo: 5,
+    precioUnitario: 9.0,
+  },
 ]
 
 export const mockConsumoSemanal = [

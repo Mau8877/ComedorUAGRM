@@ -30,3 +30,20 @@ export interface PedidoHistorial {
   plato: string
   estado: EstadoPedido
 }
+
+// Dataset del demo de components/ui/tanstack-table -- gestión de
+// ingredientes del comedor (ejemplo más realista que UsuarioTabla).
+export type CategoriaIngrediente = 'Verdura' | 'Fruta' | 'Lácteo' | 'Carne' | 'Grano' | 'Condimento'
+export type UnidadIngrediente = 'kg' | 'L' | 'unidad' | 'docena'
+export type EstadoStock = 'disponible' | 'bajo-stock' | 'agotado'
+
+export interface Ingrediente {
+  id: string
+  nombre: string
+  foto: string
+  categoria: CategoriaIngrediente
+  unidad: UnidadIngrediente
+  stock: number
+  stockMinimo: number
+  precioUnitario: number
+}
