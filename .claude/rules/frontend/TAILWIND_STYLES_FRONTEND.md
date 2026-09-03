@@ -35,7 +35,8 @@ reemplazando el sistema).
 
 | Token (`bg-*`/`text-*`/`border-*`) | Uso | Claro | Oscuro |
 | --- | --- | --- | --- |
-| `primary` | Header, botones, íconos activos | `#1E3A56` (azul marino) | `#5F84A6` (azul claro) |
+| `primary` | Botones, íconos activos | `#1E3A56` (azul marino) | `#5F84A6` (azul claro) |
+| `header` | Fondo del header de la app | `#1E3A56` (azul marino) | `#1E3A56` (azul marino) |
 | `accent` | Acento | `#E8B657` (miel) | `#E8B657` (miel) |
 | `background` | Fondo de la app | `#EAEEF3` | `#141C26` |
 | `card` / `popover` / `sidebar` | Superficie / tarjetas | `#FFFFFF` | `#1C2530` |
@@ -44,9 +45,19 @@ reemplazando el sistema).
 | `success` | Éxito / vegetariano | `#5E7A5C` | `#7FA97D` |
 | `destructive` | Error / alerta | `#B24A3C` | `#D97A66` |
 
-`success`/`success-foreground` son tokens propios del proyecto (shadcn no
-trae uno por default) — se agregaron al lado de `destructive` en
-`index.css` y `@theme inline`, mismo patrón que cualquier otro color del
+**`primary`/`secondary`/`accent` son para botones y elementos de acción** —
+su color puede y debe cambiar entre claro/oscuro para mantener buen
+contraste. Pero una superficie estructural fija de marca, como el fondo del
+header, necesita un token dedicado (`header`/`header-foreground`) que **no
+varíe entre modos** — si el header usara `bg-primary`, pasaría de azul
+marino en claro a azul claro (`#5F84A6`) en oscuro, perdiendo la identidad
+visual de marca justo donde más se nota (la barra superior). `header`
+existe exclusivamente para eso; no se usa para botones ni otros elementos.
+
+`success`/`success-foreground` y `header`/`header-foreground` son tokens
+propios del proyecto (shadcn no trae ninguno por default) — se agregaron al
+lado de `destructive` en `index.css` y `@theme inline`, mismo patrón que
+cualquier otro color del
 sistema (`bg-success`, `text-success-foreground` ya funcionan como clase de
 Tailwind). Si hace falta un tono nuevo con frecuencia (ej. "advertencia"),
 se agrega como token acá, no como valor arbitrario.
