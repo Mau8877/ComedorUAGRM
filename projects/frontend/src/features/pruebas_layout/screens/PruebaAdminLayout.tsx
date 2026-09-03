@@ -4,6 +4,7 @@ import {
   FilterIcon,
   PencilIcon,
   PlusIcon,
+  RefreshCwIcon,
   SearchIcon,
   Trash2Icon,
   TrendingDownIcon,
@@ -25,9 +26,11 @@ import {
   DataCards,
   DataTable,
   DataTablePagination,
+  DataTableToolbar,
   toSortQueryParam,
   useDataTable,
 } from '@/components/ui/tanstack-table'
+import type { DataTableToolbarFilter } from '@/components/ui/tanstack-table'
 
 import { MiniBarChart, ProgressBar, StatusBadge } from '../components'
 import {
@@ -79,17 +82,11 @@ const usuariosTablaColumns: ColumnDef<UsuarioTabla, unknown>[] = [
     ),
     meta: { cardOrder: 0 },
   },
-  {
-    id: 'acciones',
-    header: '',
-    enableSorting: false,
-    cell: () => (
-      <Button variant="ghost" size="sm">
-        Ver
-      </Button>
-    ),
-    meta: { hideInCard: true },
-  },
+]
+
+const usuariosRolFilterOptions = [
+  { label: 'Administrador', value: 'Administrador' },
+  { label: 'Estudiante', value: 'Estudiante' },
 ]
 
 const DEMO_PAGE_SIZE = 8
@@ -102,12 +99,25 @@ export function PruebaAdminLayout() {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(DEMO_PAGE_SIZE)
   const [sorting, setSorting] = useState<SortingState>([])
+  const [search, setSearch] = useState('')
+  const [rolFilter, setRolFilter] = useState<string | undefined>(undefined)
   const sortParam = toSortQueryParam(sorting)
 
+  // search/filter[rol] también los resolvería el backend (ver
+  // .claude/rules/backend/ENDPOINTS_BACKEND.md) -- acá se simulan
+  // client-side sobre el mock solo para esta pantalla de prueba.
+  const datosFiltrados = mockUsuariosTabla.filter((usuario) => {
+    const coincideBusqueda =
+      search.trim() === '' ||
+      usuario.nombre.toLowerCase().includes(search.toLowerCase()) ||
+      usuario.correo.toLowerCase().includes(search.toLowerCase())
+    const coincideRol = !rolFilter || usuario.rol === rolFilter
+    return coincideBusqueda && coincideRol
+  })
+
   // El orden también lo resolvería el backend (`sort=campo`/`sort=-campo`,
-  // ver .claude/rules/backend/ENDPOINTS_BACKEND.md#formato-de-sort) -- acá
-  // se simula client-side sobre el mock solo para esta pantalla de prueba.
-  const datosOrdenados = [...mockUsuariosTabla].sort((a, b) => {
+  // ver .claude/rules/backend/ENDPOINTS_BACKEND.md#formato-de-sort).
+  const datosOrdenados = [...datosFiltrados].sort((a, b) => {
     const [first] = sorting
     if (!first) return 0
     const campo = first.id as keyof UsuarioTabla
@@ -119,6 +129,19 @@ export function PruebaAdminLayout() {
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize))
   const paginaData = datosOrdenados.slice((page - 1) * pageSize, page * pageSize)
   const usuariosTablaMeta = { page, pageSize, totalItems, totalPages }
+
+  const usuariosTablaFilters: DataTableToolbarFilter[] = [
+    {
+      id: 'rol',
+      label: 'Rol',
+      value: rolFilter,
+      onValueChange: (value) => {
+        setPage(1)
+        setRolFilter(value)
+      },
+      options: usuariosRolFilterOptions,
+    },
+  ]
 
   const { table: usuariosTable } = useDataTable({
     data: paginaData,
@@ -398,14 +421,65 @@ export function PruebaAdminLayout() {
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
           Query param que se mandaría al backend:{' '}
-          <code>{sortParam ? `sort=${sortParam}` : '(sin orden aplicado)'}</code>
+          <code>
+            {[
+              search.trim() && `search=${search.trim()}`,
+              rolFilter && `filter[rol]=${rolFilter}`,
+              sortParam && `sort=${sortParam}`,
+            ]
+              .filter(Boolean)
+              .join('&') || '(sin filtros/orden aplicados)'}
+          </code>
         </p>
 
+        <DataTableToolbar
+          className="mt-4"
+          searchValue={search}
+          onSearchChange={(value) => {
+            setPage(1)
+            setSearch(value)
+          }}
+          searchPlaceholder="Buscar por nombre o correo..."
+          filters={usuariosTablaFilters}
+          actions={
+            <>
+              <Button variant="outline" size="sm" onClick={() => { setPage(1); setSearch(''); setRolFilter(undefined) }}>
+                <RefreshCwIcon data-icon="inline-start" />
+                Refrescar
+              </Button>
+              <Button size="sm">
+                <PlusIcon data-icon="inline-start" />
+                Nuevo usuario
+              </Button>
+            </>
+          }
+        />
+
         <div className="mt-4 hidden md:block">
-          <DataTable table={usuariosTable} isLoading={false} isError={false} />
+          <DataTable
+            table={usuariosTable}
+            isLoading={false}
+            isError={false}
+            showRowNumber
+            renderActions={(row) => (
+              <Button variant="ghost" size="sm">
+                Ver {row.original.nombre.split(' ')[0]}
+              </Button>
+            )}
+          />
         </div>
         <div className="mt-4 md:hidden">
-          <DataCards table={usuariosTable} isLoading={false} isError={false} />
+          <DataCards
+            table={usuariosTable}
+            isLoading={false}
+            isError={false}
+            showRowNumber
+            renderActions={() => (
+              <Button variant="ghost" size="sm">
+                Ver
+              </Button>
+            )}
+          />
         </div>
 
         <DataTablePagination

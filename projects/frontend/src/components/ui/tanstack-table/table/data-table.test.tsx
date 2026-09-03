@@ -26,6 +26,19 @@ function useTestTable(data: Row[]) {
   }).result.current
 }
 
+function useTestTableWithPagination(data: Row[], pageIndex: number, pageSize: number) {
+  return renderHook(function useWrapper() {
+    return useReactTable({
+      data,
+      columns,
+      state: { pagination: { pageIndex, pageSize } },
+      manualPagination: true,
+      onPaginationChange: () => {},
+      getCoreRowModel: getCoreRowModel(),
+    })
+  }).result.current
+}
+
 describe('DataTable', () => {
   it('en loading, renderiza filas skeleton en vez de datos', () => {
     const table = useTestTable([{ id: '1', nombre: 'Ana', email: 'ana@test.com' }])
@@ -63,5 +76,49 @@ describe('DataTable', () => {
 
     expect(screen.getByText('Ana')).toBeInTheDocument()
     expect(screen.getByText('beto@test.com')).toBeInTheDocument()
+  })
+
+  it('con showRowNumber, antepone la columna "#" con el número 1-based de la página actual', () => {
+    const table = useTestTableWithPagination(
+      [
+        { id: '1', nombre: 'Ana', email: 'ana@test.com' },
+        { id: '2', nombre: 'Beto', email: 'beto@test.com' },
+      ],
+      0,
+      2,
+    )
+
+    render(<DataTable table={table} isLoading={false} isError={false} showRowNumber />)
+
+    expect(screen.getByText('#')).toBeInTheDocument()
+    expect(screen.getByText('1')).toBeInTheDocument()
+    expect(screen.getByText('2')).toBeInTheDocument()
+  })
+
+  it('con showRowNumber y página 2, el número respeta el offset de la página', () => {
+    const table = useTestTableWithPagination(
+      [{ id: '3', nombre: 'Carla', email: 'carla@test.com' }],
+      1,
+      2,
+    )
+
+    render(<DataTable table={table} isLoading={false} isError={false} showRowNumber />)
+
+    expect(screen.getByText('3')).toBeInTheDocument()
+  })
+
+  it('con renderActions, agrega una celda por fila con el contenido devuelto', () => {
+    const table = useTestTable([{ id: '1', nombre: 'Ana', email: 'ana@test.com' }])
+
+    render(
+      <DataTable
+        table={table}
+        isLoading={false}
+        isError={false}
+        renderActions={(row) => <button type="button">Editar {row.original.nombre}</button>}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: 'Editar Ana' })).toBeInTheDocument()
   })
 })

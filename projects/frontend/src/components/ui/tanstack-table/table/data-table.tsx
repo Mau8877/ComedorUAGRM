@@ -1,6 +1,7 @@
 import { flexRender } from '@tanstack/react-table'
-import type { Table as TanstackTable } from '@tanstack/react-table'
+import type { Row, Table as TanstackTable } from '@tanstack/react-table'
 import { ArrowDownIcon, ArrowUpIcon, ChevronsUpDownIcon } from 'lucide-react'
+import type { ReactNode } from 'react'
 import {
   Table,
   TableBody,
@@ -18,6 +19,14 @@ export interface DataTableProps<TData> extends DataStateProps {
   /** Filas placeholder mientras `isLoading` (default 5). */
   skeletonRowCount?: number
   emptyMessage?: string
+  /** Antepone una columna "#" con el número de fila (1-based, respeta la página actual vía `table.getState().pagination`). */
+  showRowNumber?: boolean
+  /**
+   * Agrega una columna final con lo que devuelva esta función por fila
+   * (típicamente botones de editar/eliminar/ver). El paquete no sabe qué
+   * acciones existen -- solo reserva y alinea la columna.
+   */
+  renderActions?: (row: Row<TData>) => ReactNode
   /** className del contenedor con borde -- el scroll horizontal lo maneja el `<Table>` de shadcn internamente, nunca el body. */
   className?: string
 }
@@ -29,10 +38,13 @@ export function DataTable<TData>({
   errorMessage = 'Ocurrió un error al cargar los datos',
   skeletonRowCount = 5,
   emptyMessage = 'Sin resultados',
+  showRowNumber = false,
+  renderActions,
   className,
 }: DataTableProps<TData>) {
-  const columnCount = table.getAllLeafColumns().length
+  const columnCount = table.getAllLeafColumns().length + (showRowNumber ? 1 : 0) + (renderActions ? 1 : 0)
   const rows = table.getRowModel().rows
+  const { pageIndex, pageSize } = table.getState().pagination
 
   return (
     <div className={cn('w-full overflow-hidden rounded-md border', className)}>
@@ -40,6 +52,9 @@ export function DataTable<TData>({
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
+              {showRowNumber && (
+                <TableHead className="w-px whitespace-nowrap text-muted-foreground">#</TableHead>
+              )}
               {headerGroup.headers.map((header) => {
                 const canSort = header.column.getCanSort()
                 const sortDirection = header.column.getIsSorted()
@@ -67,6 +82,7 @@ export function DataTable<TData>({
                   </TableHead>
                 )
               })}
+              {renderActions && <TableHead className="w-px whitespace-nowrap" />}
             </TableRow>
           ))}
         </TableHeader>
@@ -94,13 +110,21 @@ export function DataTable<TData>({
               </TableCell>
             </TableRow>
           ) : (
-            rows.map((row) => (
+            rows.map((row, rowIndexInPage) => (
               <TableRow key={row.id}>
+                {showRowNumber && (
+                  <TableCell className="w-px whitespace-nowrap text-muted-foreground">
+                    {pageIndex * pageSize + rowIndexInPage + 1}
+                  </TableCell>
+                )}
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id} style={{ textAlign: cell.column.columnDef.meta?.align }}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
+                {renderActions && (
+                  <TableCell className="w-px whitespace-nowrap text-right">{renderActions(row)}</TableCell>
+                )}
               </TableRow>
             ))
           )}

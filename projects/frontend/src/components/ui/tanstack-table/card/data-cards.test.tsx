@@ -129,4 +129,54 @@ describe('DataCards', () => {
 
     expect(screen.getByText('Sin resultados')).toBeInTheDocument()
   })
+
+  it('con showRowNumber, muestra el número 1-based como badge en la card', () => {
+    const columns: ColumnDef<Row, unknown>[] = [
+      { accessorKey: 'nombre', header: 'Nombre', meta: { cardTitle: true } },
+    ]
+    const table = useTestTable(columns)
+
+    render(<DataCards table={table} isLoading={false} isError={false} showRowNumber />)
+
+    expect(screen.getByText('#1')).toBeInTheDocument()
+  })
+
+  it('con renderActions, agrega el contenido devuelto en el pie de la card', () => {
+    const columns: ColumnDef<Row, unknown>[] = [
+      { accessorKey: 'nombre', header: 'Nombre', meta: { cardTitle: true } },
+    ]
+    const table = useTestTable(columns)
+
+    render(
+      <DataCards
+        table={table}
+        isLoading={false}
+        isError={false}
+        renderActions={(row) => <button type="button">Editar {row.original.nombre}</button>}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: 'Editar Ana' })).toBeInTheDocument()
+  })
+
+  it('con renderCard, ignora showRowNumber y renderActions', () => {
+    const columns: ColumnDef<Row, unknown>[] = [
+      { accessorKey: 'nombre', header: 'Nombre', meta: { cardTitle: true } },
+    ]
+    const table = useTestTable(columns)
+
+    render(
+      <DataCards
+        table={table}
+        isLoading={false}
+        isError={false}
+        showRowNumber
+        renderActions={() => <button type="button">Editar</button>}
+        renderCard={(row) => <div>Custom: {row.original.nombre}</div>}
+      />,
+    )
+
+    expect(screen.queryByText('#1')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Editar' })).not.toBeInTheDocument()
+  })
 })
