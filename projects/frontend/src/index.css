@@ -42,9 +42,13 @@
   --sidebar-accent-foreground: #141C26;
   --sidebar-border: #D7DEE6;
   --sidebar-ring: #1E3A56;
+  --header: #1E3A56;
+  --header-foreground: #FFFFFF;
 }
 
 @theme inline {
+  --color-header-foreground: var(--header-foreground);
+  --color-header: var(--header);
   --font-heading: 'Familjen Grotesk Variable', sans-serif;
   --font-sans: 'Jost Variable', sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
@@ -93,9 +97,9 @@
 .dark {
   --background: #141C26;
   --foreground: #E7ECF1;
-  --card: #1C2530;
+  --card: #232D3A;
   --card-foreground: #E7ECF1;
-  --popover: #1C2530;
+  --popover: #232D3A;
   --popover-foreground: #E7ECF1;
   --primary: #5F84A6;
   --primary-foreground: #141C26;
@@ -109,7 +113,7 @@
   --destructive-foreground: #141C26;
   --success: #7FA97D;
   --success-foreground: #141C26;
-  --border: rgb(231 236 241 / 10%);
+  --border: rgb(231 236 241 / 14%);
   --input: rgb(231 236 241 / 15%);
   --ring: #5F84A6;
   --chart-1: #5F84A6;
@@ -125,6 +129,8 @@
   --sidebar-accent-foreground: #141C26;
   --sidebar-border: rgb(231 236 241 / 10%);
   --sidebar-ring: #5F84A6;
+  --header: #1E3A56;
+  --header-foreground: #FFFFFF;
 }
 
 @layer base {

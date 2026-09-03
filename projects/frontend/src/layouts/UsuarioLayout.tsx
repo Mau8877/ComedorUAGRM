@@ -13,15 +13,23 @@ const usuarioNavItems: NavItem[] = [
 interface UsuarioLayoutProps {
   title: string
   user: LayoutUser
+  /** Solo para pantallas de prueba: fuerza qué ítem se ve activo. */
+  activeHref?: string
   children: ReactNode
 }
 
-export function UsuarioLayout({ title, user, children }: UsuarioLayoutProps) {
+export function UsuarioLayout({
+  title,
+  user,
+  activeHref,
+  children,
+}: UsuarioLayoutProps) {
   return (
     <AppShell
       appName="ComedorU"
       title={title}
       navItems={usuarioNavItems}
+      activeHref={activeHref}
       user={user}
     >
       {children}

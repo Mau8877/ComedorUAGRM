@@ -1,14 +1,16 @@
-import type { ReactNode } from 'react'
+import { useEffect, type ReactNode } from 'react'
+
+import { useUiStore } from '@/store'
 
 import { AppHeader } from './AppHeader'
 import { AppSidebar } from './AppSidebar'
-import { AppFooter } from './AppFooter'
 import type { LayoutUser, NavItem } from './types'
 
 interface AppShellProps {
   appName: string
   title: string
   navItems: NavItem[]
+  activeHref?: string
   user: LayoutUser
   children: ReactNode
 }
@@ -21,16 +23,31 @@ export function AppShell({
   appName,
   title,
   navItems,
+  activeHref,
   user,
   children,
 }: AppShellProps) {
+  const theme = useUiStore((s) => s.theme)
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+  }, [theme])
+
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
-      <AppSidebar items={navItems} appName={appName} />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <AppHeader title={title} user={user} />
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
-        <AppFooter />
+    <div className="flex h-screen flex-col overflow-hidden bg-background">
+      <AppHeader appName={appName} user={user} />
+
+      {/* * p-4 acá es lo que crea el espacio real entre el sidebar y el
+          header -- el sidebar es una tarjeta flotante (bordes redondeados
+          propios), no una columna pegada de borde a borde. */}
+      <div className="flex min-h-0 flex-1 gap-4 overflow-hidden p-4">
+        <AppSidebar items={navItems} activeHref={activeHref} />
+        <main className="min-w-0 flex-1 overflow-y-auto rounded-2xl border border-border bg-card p-6 shadow-sm">
+          <h1 className="font-heading text-2xl font-semibold text-foreground">
+            {title}
+          </h1>
+          <div className="mt-4">{children}</div>
+        </main>
       </div>
     </div>
   )

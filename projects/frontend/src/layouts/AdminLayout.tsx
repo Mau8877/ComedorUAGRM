@@ -19,15 +19,23 @@ const adminNavItems: NavItem[] = [
 interface AdminLayoutProps {
   title: string
   user: LayoutUser
+  /** Solo para pantallas de prueba: fuerza qué ítem se ve activo. */
+  activeHref?: string
   children: ReactNode
 }
 
-export function AdminLayout({ title, user, children }: AdminLayoutProps) {
+export function AdminLayout({
+  title,
+  user,
+  activeHref,
+  children,
+}: AdminLayoutProps) {
   return (
     <AppShell
       appName="ComedorU Admin"
       title={title}
       navItems={adminNavItems}
+      activeHref={activeHref}
       user={user}
     >
       {children}

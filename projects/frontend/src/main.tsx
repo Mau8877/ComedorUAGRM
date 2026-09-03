@@ -4,6 +4,7 @@ import { RouterProvider, createRouter } from '@tanstack/react-router'
 import './index.css'
 import { routeTree } from './routeTree.gen'
 import { QueryProvider } from './store'
+import { Toaster } from '@/components/ui/sonner'
 
 const router = createRouter({ routeTree })
 
@@ -17,6 +18,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryProvider>
       <RouterProvider router={router} />
+      <Toaster position="top-right" />
     </QueryProvider>
   </StrictMode>,
 )
