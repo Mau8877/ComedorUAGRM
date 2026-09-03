@@ -91,7 +91,10 @@ const usuariosRolFilterOptions = [
   { label: 'Estudiante', value: 'Estudiante' },
 ]
 
-const DEMO_PAGE_SIZE = 8
+// Mismo default que .claude/rules/backend/ENDPOINTS_BACKEND.md (pageSize=20)
+// -- DataTablePagination ya trae el set fijo 10/20/50 predefinido, no se
+// pisa acá con valores custom.
+const DEMO_PAGE_SIZE = 20
 
 export function PruebaAdminLayout() {
   // Simula lo que en una feature real haría un hook de api/ con TanStack
@@ -502,7 +505,6 @@ export function PruebaAdminLayout() {
             setPage(1)
             setPageSize(nextPageSize)
           }}
-          pageSizeOptions={[2, 4, 8, 12]}
         />
       </div>
 
