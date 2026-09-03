@@ -41,18 +41,19 @@ const Toaster = ({ ...props }: ToasterProps) => {
           "--success-bg": "var(--success)",
           "--success-text": "var(--success-foreground)",
           "--success-border": "var(--success)",
-          "--error-bg": "var(--destructive)",
-          "--error-text": "var(--destructive-foreground)",
-          "--error-border": "var(--destructive)",
-          // * `header`, no `primary` -- info debe verse igual en claro y
-          // * oscuro, y `primary` cambia de tono entre modos (ver la regla
-          // * de diseño del header en TAILWIND_STYLES_FRONTEND.md).
-          "--info-bg": "var(--header)",
-          "--info-text": "var(--header-foreground)",
-          "--info-border": "var(--header)",
-          "--warning-bg": "var(--accent)",
-          "--warning-text": "var(--accent-foreground)",
-          "--warning-border": "var(--accent)",
+          // * El error usa el rojo distintivo de marca (`--accent`), no
+          // * `--destructive` -- ese rojo más fuerte es el que se reserva
+          // * para el toast de error; `--destructive` sigue usándose en
+          // * otros elementos (botones de eliminar, etc.).
+          "--error-bg": "var(--accent)",
+          "--error-text": "var(--accent-foreground)",
+          "--error-border": "var(--accent)",
+          "--warning-bg": "var(--warning)",
+          "--warning-text": "var(--warning-foreground)",
+          "--warning-border": "var(--warning)",
+          "--info-bg": "var(--info)",
+          "--info-text": "var(--info-foreground)",
+          "--info-border": "var(--info)",
         } as CSSProperties
       }
       {...props}

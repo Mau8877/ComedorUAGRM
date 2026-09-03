@@ -35,15 +35,23 @@ reemplazando el sistema).
 
 | Token (`bg-*`/`text-*`/`border-*`) | Uso | Claro | Oscuro |
 | --- | --- | --- | --- |
-| `primary` | Botones, íconos activos | `#1E3A56` (azul marino) | `#5F84A6` (azul claro) |
-| `header` | Fondo del header de la app | `#1E3A56` (azul marino) | `#1E3A56` (azul marino) |
-| `accent` | Acento | `#E8B657` (miel) | `#E8B657` (miel) |
+| `primary` | Botones, íconos activos | `#2A3964` (azul marino UAGRM) | `#5F84A6` (azul claro) |
+| `header` | Fondo del header de la app | `#2A3964` (azul marino UAGRM) | `#2A3964` (azul marino UAGRM) |
+| `accent` | Acento | `#CC100C` (rojo UAGRM) | `#E2453F` (rojo UAGRM, claro) |
 | `background` | Fondo de la app | `#EAEEF3` | `#141C26` |
 | `card` / `popover` / `sidebar` | Superficie / tarjetas | `#FFFFFF` | `#1C2530` |
 | `foreground` / `card-foreground` | Texto principal | `#141C26` | `#E7ECF1` |
 | `muted-foreground` | Texto secundario | `#5B6A78` | `#8794A2` |
 | `success` | Éxito / vegetariano | `#5E7A5C` | `#7FA97D` |
-| `destructive` | Error / alerta | `#B24A3C` | `#D97A66` |
+| `destructive` | Error / alerta (uso general, ej. botones "eliminar") | `#B24A3C` | `#D97A66` |
+| `warning` | Advertencia | `#B45309` (naranja) | `#E8A056` (naranja claro) |
+| `info` | Información | `#1F6FA0` (celeste) | `#4BA3D6` (celeste) |
+
+> `primary`/`header`/`accent` toman los colores distintivos del sitio
+> oficial de la UAGRM (`--color-primary: #2a3964` y `--color-secondary:
+> #cc100c`, verificados en las DevTools del sitio real) — no son un tono
+> "parecido a rojo/azul institucional" inventado, son los valores exactos
+> de marca.
 
 **`primary`/`secondary`/`accent` son para botones y elementos de acción** —
 su color puede y debe cambiar entre claro/oscuro para mantener buen
@@ -54,13 +62,17 @@ marino en claro a azul claro (`#5F84A6`) en oscuro, perdiendo la identidad
 visual de marca justo donde más se nota (la barra superior). `header`
 existe exclusivamente para eso; no se usa para botones ni otros elementos.
 
-`success`/`success-foreground` y `header`/`header-foreground` son tokens
-propios del proyecto (shadcn no trae ninguno por default) — se agregaron al
-lado de `destructive` en `index.css` y `@theme inline`, mismo patrón que
-cualquier otro color del
-sistema (`bg-success`, `text-success-foreground` ya funcionan como clase de
-Tailwind). Si hace falta un tono nuevo con frecuencia (ej. "advertencia"),
-se agrega como token acá, no como valor arbitrario.
+`success`/`success-foreground`, `warning`/`warning-foreground`,
+`info`/`info-foreground` y `header`/`header-foreground` son tokens propios
+del proyecto (shadcn no trae ninguno por default) — se agregaron al lado de
+`destructive` en `index.css` y `@theme inline`, mismo patrón que cualquier
+otro color del sistema (`bg-success`, `text-warning-foreground`, etc. ya
+funcionan como clase de Tailwind). `warning`/`info` existen específicamente
+para los cuatro estados del sistema de toasts (ver
+`src/components/ui/sonner.tsx`) — no se reusa `accent` para "advertencia"
+ni `header` para "información" como se hacía antes, cada estado tiene su
+propio token semántico. Si hace falta un tono nuevo con frecuencia, se
+agrega como token acá, no como valor arbitrario.
 
 ## Tipografía
 
