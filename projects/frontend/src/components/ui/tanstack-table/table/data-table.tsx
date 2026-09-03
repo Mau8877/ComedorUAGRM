@@ -1,5 +1,6 @@
 import { flexRender } from '@tanstack/react-table'
 import type { Table as TanstackTable } from '@tanstack/react-table'
+import { ArrowDownIcon, ArrowUpIcon, ChevronsUpDownIcon } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -39,13 +40,33 @@ export function DataTable<TData>({
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableHead key={header.id} style={{ textAlign: header.column.columnDef.meta?.align }}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(header.column.columnDef.header, header.getContext())}
-                </TableHead>
-              ))}
+              {headerGroup.headers.map((header) => {
+                const canSort = header.column.getCanSort()
+                const sortDirection = header.column.getIsSorted()
+
+                return (
+                  <TableHead key={header.id} style={{ textAlign: header.column.columnDef.meta?.align }}>
+                    {header.isPlaceholder ? null : canSort ? (
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-1 hover:text-foreground"
+                        onClick={header.column.getToggleSortingHandler()}
+                      >
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                        {sortDirection === 'asc' ? (
+                          <ArrowUpIcon className="size-3.5" />
+                        ) : sortDirection === 'desc' ? (
+                          <ArrowDownIcon className="size-3.5" />
+                        ) : (
+                          <ChevronsUpDownIcon className="size-3.5 text-muted-foreground/60" />
+                        )}
+                      </button>
+                    ) : (
+                      flexRender(header.column.columnDef.header, header.getContext())
+                    )}
+                  </TableHead>
+                )
+              })}
             </TableRow>
           ))}
         </TableHeader>

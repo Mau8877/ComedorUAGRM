@@ -46,10 +46,18 @@ export interface UseDataTableOptions<TData> {
   onPageChange: (page: number) => void
   onPageSizeChange: (pageSize: number) => void
   /**
-   * El backend todavía no soporta `sort` (ver
-   * .claude/rules/backend/ENDPOINTS_BACKEND.md). Deshabilitado por default
-   * -- no se asume ningún formato de query param hasta que el backend lo
-   * defina.
+   * El backend soporta orden por un único campo vía el query param `sort`
+   * (`sort=campo` ascendente, `sort=-campo` descendente -- ver
+   * .claude/rules/backend/ENDPOINTS_BACKEND.md#formato-de-sort). Sigue
+   * deshabilitado por default: es opt-in por feature, porque no toda
+   * columna es ordenable en cada endpoint (cada uno documenta qué campos
+   * acepta) y habilitarlo a ciegas dejaría headers clicables sin efecto si
+   * la feature no traduce el estado a ese query param. Cuando se habilita,
+   * `useDataTable` fuerza `enableMultiSort: false` -- el backend no soporta
+   * multi-columna, así que un click en otra columna reemplaza el orden
+   * anterior en vez de acumularlo. Usar `toSortQueryParam` (exportado por
+   * este paquete) para convertir el `SortingState` resultante al formato
+   * exacto que espera el backend.
    */
   enableSorting?: boolean
   sorting?: SortingState

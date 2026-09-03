@@ -9,7 +9,7 @@ import {
   TrendingDownIcon,
   TrendingUpIcon,
 } from 'lucide-react'
-import type { ColumnDef } from '@tanstack/react-table'
+import type { ColumnDef, SortingState } from '@tanstack/react-table'
 
 import { AdminLayout } from '@/layouts'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -25,6 +25,7 @@ import {
   DataCards,
   DataTable,
   DataTablePagination,
+  toSortQueryParam,
   useDataTable,
 } from '@/components/ui/tanstack-table'
 
@@ -70,6 +71,7 @@ const usuariosTablaColumns: ColumnDef<UsuarioTabla, unknown>[] = [
   {
     accessorKey: 'rol',
     header: 'Rol',
+    enableSorting: false,
     cell: (ctx) => (
       <Badge variant={ctx.getValue<UsuarioTabla['rol']>() === 'Administrador' ? 'default' : 'secondary'}>
         {ctx.getValue<string>()}
@@ -80,6 +82,7 @@ const usuariosTablaColumns: ColumnDef<UsuarioTabla, unknown>[] = [
   {
     id: 'acciones',
     header: '',
+    enableSorting: false,
     cell: () => (
       <Button variant="ghost" size="sm">
         Ver
@@ -98,9 +101,23 @@ export function PruebaAdminLayout() {
   // prueba visual.
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(DEMO_PAGE_SIZE)
-  const totalItems = mockUsuariosTabla.length
+  const [sorting, setSorting] = useState<SortingState>([])
+  const sortParam = toSortQueryParam(sorting)
+
+  // El orden también lo resolvería el backend (`sort=campo`/`sort=-campo`,
+  // ver .claude/rules/backend/ENDPOINTS_BACKEND.md#formato-de-sort) -- acá
+  // se simula client-side sobre el mock solo para esta pantalla de prueba.
+  const datosOrdenados = [...mockUsuariosTabla].sort((a, b) => {
+    const [first] = sorting
+    if (!first) return 0
+    const campo = first.id as keyof UsuarioTabla
+    const comparacion = String(a[campo]).localeCompare(String(b[campo]))
+    return first.desc ? -comparacion : comparacion
+  })
+
+  const totalItems = datosOrdenados.length
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize))
-  const paginaData = mockUsuariosTabla.slice((page - 1) * pageSize, page * pageSize)
+  const paginaData = datosOrdenados.slice((page - 1) * pageSize, page * pageSize)
   const usuariosTablaMeta = { page, pageSize, totalItems, totalPages }
 
   const { table: usuariosTable } = useDataTable({
@@ -113,6 +130,12 @@ export function PruebaAdminLayout() {
     onPageSizeChange: (nextPageSize) => {
       setPage(1)
       setPageSize(nextPageSize)
+    },
+    enableSorting: true,
+    sorting,
+    onSortingChange: (nextSorting) => {
+      setPage(1)
+      setSorting(nextSorting)
     },
   })
 
@@ -371,7 +394,11 @@ export function PruebaAdminLayout() {
         <p className="mt-1 text-xs text-muted-foreground">
           Mismas columnas para ambas vistas. DataTable visible desde
           `md`, DataCards debajo -- reducí el ancho de la ventana para ver
-          el cambio.
+          el cambio. Click en "Nombre" o "Correo" para ordenar.
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Query param que se mandaría al backend:{' '}
+          <code>{sortParam ? `sort=${sortParam}` : '(sin orden aplicado)'}</code>
         </p>
 
         <div className="mt-4 hidden md:block">

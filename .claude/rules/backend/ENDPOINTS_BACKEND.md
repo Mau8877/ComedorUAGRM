@@ -27,7 +27,7 @@ globs: projects/backend/**/*
 ## Query params de listados (obligatorio en TODO `GET` de colección)
 
 ```
-GET /api/v1/usuarios?page=1&pageSize=20&search=texto&filter[rol]=admin
+GET /api/v1/usuarios?page=1&pageSize=20&search=texto&filter[rol]=admin&sort=-nombre
 ```
 
 | Param | Obligatorio | Default | Descripción |
@@ -36,14 +36,37 @@ GET /api/v1/usuarios?page=1&pageSize=20&search=texto&filter[rol]=admin
 | `pageSize` | No | `20` | Tamaño de página, modificable por query param |
 | `search` | No | — | Búsqueda de texto libre (campos definidos por cada endpoint) |
 | `filter[campo]` | No | — | Filtro exacto por campo (`filter[rol]=admin`, se pueden repetir varios `filter[...]`) |
+| `sort` | No | orden default del endpoint (a criterio de cada uno, ej. por fecha de creación) | Un solo campo de orden — ver formato abajo |
 
 - **Ningún endpoint de listado puede omitir la paginación**, ni siquiera si
   hoy tiene pocos registros — se pagina desde el primer día.
 - El response correspondiente sigue el contrato de
   [RESPONSES_BACKEND.md](RESPONSES_BACKEND.md) (`data` array + bloque `meta`).
-- Si un listado necesita un `sort`/orden, no está definido todavía en este
-  documento — no se inventa un formato ad-hoc por endpoint; se define acá
-  antes de implementarlo en el primer caso que lo necesite.
+
+### Formato de `sort`
+
+Un único campo por request (no multi-columna) — estilo JSON:API:
+
+- `sort=nombre` → ascendente por `nombre`.
+- `sort=-nombre` → descendente por `nombre` (prefijo `-`, sin espacio ni
+  separador entre el guion y el nombre del campo).
+
+El campo va en camelCase (mismo nombre que expone el `Response` DTO, no el
+nombre de columna en snake_case de la base de datos — ver
+[PERSISTENCIA_BD_BACKEND.md](PERSISTENCIA_BD_BACKEND.md) para esa
+conversión). Cada endpoint documenta en su propio controller/service qué
+campos acepta como valor de `sort` — no todos los campos del DTO son
+necesariamente ordenables (ej. no tiene sentido ordenar por una relación
+calculada). Un valor de `sort` con un campo no soportado por ese endpoint es
+un `400` (`ValidationException`, ver
+[EXCEPCIONES_BACKEND.md](EXCEPCIONES_BACKEND.md)), catalogado con su propio
+`errorCode` de módulo — no se ignora silenciosamente ni se cae a un orden
+default sin avisar.
+
+No se soporta multi-columna (`sort=campo1,-campo2`) todavía — no hay caso de
+uso concreto que lo justifique hoy. Si aparece, se define acá antes de
+implementarlo en el primer endpoint que lo necesite, mismo criterio que ya
+se aplicó para llegar a esta versión de la regla.
 
 ## Verbos HTTP
 

@@ -13,7 +13,9 @@ function resolveUpdater<T>(updater: Updater<T>, current: T): T {
  * `getCoreRowModel()`. Nunca se registra `getPaginationRowModel`,
  * `getSortedRowModel` ni `getFilteredRowModel`: agregarlos rompería la
  * premisa de que el backend es la única fuente de verdad de paginación/
- * orden/filtro (ver .claude/rules/backend/ENDPOINTS_BACKEND.md).
+ * orden/filtro (ver .claude/rules/backend/ENDPOINTS_BACKEND.md). Con
+ * `enableSorting`, además fuerza `enableMultiSort: false` -- el backend
+ * solo acepta un campo de orden por request (`sort=campo`/`sort=-campo`).
  *
  * Convierte `page` (1-based, misma convención que el query param del
  * backend) a `pageIndex` (0-based, interno de TanStack Table) puertas
@@ -51,6 +53,7 @@ export function useDataTable<TData>(
     manualSorting: true,
     manualFiltering: true,
     enableSorting,
+    enableMultiSort: false,
     onPaginationChange: (updater) => {
       const current: PaginationState = { pageIndex: page - 1, pageSize }
       const next = resolveUpdater(updater, current)
