@@ -20,6 +20,19 @@ declare module '@tanstack/react-table' {
     cardOrder?: number
     /** Alineación de la celda, solo usada por DataTable. */
     align?: 'left' | 'center' | 'right'
+    /**
+     * Solo usada por `DataTable`. Marca esta columna como la que absorbe el
+     * espacio sobrante de la tabla (`width: 100%` de lo que quede) -- el
+     * resto de las columnas se ajustan a su contenido (`white-space:
+     * nowrap`, sin crecer). Sin esto, `table-layout: auto` reparte el
+     * espacio libre de forma arbitraria entre columnas angostas (se ve
+     * como columnas "pegadas" entre sí sin razón aparente). Se marca en la
+     * columna con contenido más largo/variable (típicamente la que tiene
+     * el nombre/título). Como mucho una columna por tabla debería tener
+     * `grow: true` -- si hay más de una, gana la última en el orden de
+     * columnas.
+     */
+    grow?: boolean
   }
 }
 

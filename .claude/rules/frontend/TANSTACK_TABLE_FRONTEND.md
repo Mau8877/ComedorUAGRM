@@ -32,6 +32,18 @@ haga falta) — el paquete no las combina por sí solo.
 
 ## Reglas de uso obligatorias
 
+- **`DataTable` siempre necesita una columna con `meta.grow: true`** —
+  la de contenido más largo/variable (típicamente la que tiene el
+  nombre/título, igual que `cardTitle`). `DataTable` usa
+  `table-layout: fixed` con anchos explícitos por columna (`w-12` en
+  `#`, `w-56` en la columna `grow`, `w-28` en Acciones, el resto se
+  reparte en partes iguales el espacio que sobra) — así el espacio libre
+  se reparte proporcionalmente entre todas las columnas en vez de que una
+  sola se lo quede entero (lo que pasaba con `table-layout: auto`, el
+  default de HTML: ni siquiera `max-width` en una celda ayuda ahí, la
+  mayoría de los navegadores lo ignora para el cálculo de ancho de
+  columna). El resto de las columnas no necesita nada — se reparten el
+  espacio libre en partes iguales.
 - **100% server-side**: `useDataTable` nunca pagina/ordena/filtra en el
   cliente. `page`/`pageSize`/`sorting` viven en el `useState` de la
   feature y se mandan al backend a través del hook de `api/` de esa

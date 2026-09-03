@@ -86,4 +86,40 @@ describe('DataTableToolbar', () => {
 
     expect(onValueChange).toHaveBeenCalledWith('ADMIN')
   })
+
+  it('sin búsqueda ni filtros activos, no muestra "Limpiar filtros"', () => {
+    render(<DataTableToolbar searchValue="" onSearchChange={vi.fn()} />)
+    expect(screen.queryByRole('button', { name: 'Limpiar filtros' })).not.toBeInTheDocument()
+  })
+
+  it('con búsqueda activa, muestra "Limpiar filtros" y al hacer click la vacía', async () => {
+    const onSearchChange = vi.fn()
+    const user = userEvent.setup()
+
+    render(<DataTableToolbar searchValue="tomate" onSearchChange={onSearchChange} />)
+
+    await user.click(screen.getByRole('button', { name: 'Limpiar filtros' }))
+
+    expect(onSearchChange).toHaveBeenCalledWith('')
+  })
+
+  it('con un filtro activo, muestra "Limpiar filtros" y al hacer click llama onValueChange(undefined) de cada filtro', async () => {
+    const onValueChange = vi.fn()
+    const user = userEvent.setup()
+    const filters: DataTableToolbarFilter[] = [
+      {
+        id: 'rol',
+        label: 'Rol',
+        value: 'ADMIN',
+        onValueChange,
+        options: [{ label: 'Administrador', value: 'ADMIN' }],
+      },
+    ]
+
+    render(<DataTableToolbar filters={filters} />)
+
+    await user.click(screen.getByRole('button', { name: 'Limpiar filtros' }))
+
+    expect(onValueChange).toHaveBeenCalledWith(undefined)
+  })
 })

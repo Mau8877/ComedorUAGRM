@@ -42,7 +42,7 @@ const ingredientesColumns: ColumnDef<Ingrediente, unknown>[] = [
   {
     accessorKey: 'nombre',
     header: 'Ingrediente',
-    meta: { cardTitle: true },
+    meta: { cardTitle: true, grow: true },
     cell: (ctx) => (
       <div className="flex items-center gap-3">
         <img
@@ -223,15 +223,7 @@ export function PruebaIngredientes() {
           filters={ingredientesFilters}
           actions={
             <>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setPage(1)
-                  setSearch('')
-                  setCategoriaFilter(undefined)
-                }}
-              >
+              <Button variant="outline" size="sm" onClick={() => setPage(1)}>
                 <RefreshCwIcon data-icon="inline-start" />
                 Refrescar
               </Button>

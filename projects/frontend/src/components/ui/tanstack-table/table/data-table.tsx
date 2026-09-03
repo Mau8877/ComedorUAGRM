@@ -33,6 +33,21 @@ export interface DataTableProps<TData> extends DataStateProps {
   className?: string
 }
 
+/**
+ * `table-layout: fixed` (en vez del `auto` default) -- con `auto`, cuando
+ * la tabla se fuerza a `width: 100%` (como hace `<Table>` de shadcn) y las
+ * columnas no llenan ese ancho, el sobrante se lo queda una sola columna
+ * casi entero (la única sin ninguna pista de ancho), dejando un hueco
+ * vacío enorme después de su contenido en vez de verse proporcional. Con
+ * `fixed` + un ancho explícito en la fila de headers (la única fila que
+ * cuenta para fixed layout), el sobrante se reparte proporcionalmente
+ * entre TODAS las columnas según el ancho que cada una declaró -- ninguna
+ * absorbe el 100% del espacio libre ella sola.
+ */
+function columnWidthClassName(grow: boolean | undefined): string {
+  return grow ? 'w-56' : ''
+}
+
 export function DataTable<TData>({
   table,
   isLoading,
@@ -51,22 +66,23 @@ export function DataTable<TData>({
 
   return (
     <div className={cn('w-full overflow-hidden rounded-md border', className)}>
-      <Table>
+      <Table className="table-fixed">
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className="bg-accent hover:bg-accent">
               {showRowNumber && (
-                <TableHead className="w-px whitespace-nowrap text-accent-foreground">#</TableHead>
+                <TableHead className="w-12 px-3 text-accent-foreground">#</TableHead>
               )}
               {headerGroup.headers.map((header) => {
                 const canSort = header.column.getCanSort()
                 const sortDirection = header.column.getIsSorted()
+                const meta = header.column.columnDef.meta
 
                 return (
                   <TableHead
                     key={header.id}
-                    className="text-accent-foreground"
-                    style={{ textAlign: header.column.columnDef.meta?.align }}
+                    className={cn('px-3 text-accent-foreground', columnWidthClassName(meta?.grow))}
+                    style={{ textAlign: meta?.align }}
                   >
                     {header.isPlaceholder ? null : canSort ? (
                       <button
@@ -90,7 +106,7 @@ export function DataTable<TData>({
                 )
               })}
               {renderActions && (
-                <TableHead className="w-px whitespace-nowrap text-right text-accent-foreground">
+                <TableHead className="w-28 px-3 text-right text-accent-foreground">
                   {actionsLabel}
                 </TableHead>
               )}
@@ -102,7 +118,7 @@ export function DataTable<TData>({
             Array.from({ length: skeletonRowCount }).map((_, rowIndex) => (
               <TableRow key={`skeleton-${rowIndex}`}>
                 {Array.from({ length: columnCount }).map((_, cellIndex) => (
-                  <TableCell key={cellIndex}>
+                  <TableCell key={cellIndex} className="px-3">
                     <Skeleton className="h-4 w-full" />
                   </TableCell>
                 ))}
@@ -110,13 +126,13 @@ export function DataTable<TData>({
             ))
           ) : isError ? (
             <TableRow>
-              <TableCell colSpan={columnCount} className="h-24 text-center text-destructive">
+              <TableCell colSpan={columnCount} className="h-24 px-3 text-center text-destructive">
                 {errorMessage}
               </TableCell>
             </TableRow>
           ) : rows.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={columnCount} className="h-24 text-center text-muted-foreground">
+              <TableCell colSpan={columnCount} className="h-24 px-3 text-center text-muted-foreground">
                 {emptyMessage}
               </TableCell>
             </TableRow>
@@ -124,17 +140,24 @@ export function DataTable<TData>({
             rows.map((row, rowIndexInPage) => (
               <TableRow key={row.id} className={rowIndexInPage % 2 === 1 ? 'bg-muted/40' : undefined}>
                 {showRowNumber && (
-                  <TableCell className="w-px whitespace-nowrap text-muted-foreground">
+                  <TableCell className="w-12 px-3 text-muted-foreground">
                     {pageIndex * pageSize + rowIndexInPage + 1}
                   </TableCell>
                 )}
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} style={{ textAlign: cell.column.columnDef.meta?.align }}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
+                {row.getVisibleCells().map((cell) => {
+                  const meta = cell.column.columnDef.meta
+                  return (
+                    <TableCell
+                      key={cell.id}
+                      className={cn('truncate px-3', columnWidthClassName(meta?.grow))}
+                      style={{ textAlign: meta?.align }}
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  )
+                })}
                 {renderActions && (
-                  <TableCell className="w-px whitespace-nowrap text-right">
+                  <TableCell className="w-28 px-3 text-right">
                     <div className="flex items-center justify-end gap-1">{renderActions(row)}</div>
                   </TableCell>
                 )}

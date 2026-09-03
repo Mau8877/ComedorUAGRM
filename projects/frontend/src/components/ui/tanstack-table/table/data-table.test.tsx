@@ -136,4 +136,24 @@ describe('DataTable', () => {
     expect(rows[1]).toHaveClass('bg-muted/40')
     expect(rows[2]).not.toHaveClass('bg-muted/40')
   })
+
+  it('con meta.grow en una columna, esa columna recibe un ancho explícito (w-56) y el resto no', () => {
+    const growColumns: ColumnDef<Row, unknown>[] = [
+      { accessorKey: 'nombre', header: 'Nombre', meta: { grow: true } },
+      { accessorKey: 'email', header: 'Correo' },
+    ]
+    const table = renderHook(function useWrapper() {
+      return useReactTable({
+        data: [{ id: '1', nombre: 'Ana', email: 'ana@test.com' }],
+        columns: growColumns,
+        getCoreRowModel: getCoreRowModel(),
+      })
+    }).result.current
+
+    render(<DataTable table={table} isLoading={false} isError={false} />)
+
+    const growCell = screen.getByText('Ana').closest('[data-slot="table-cell"]')
+    expect(growCell).toHaveClass('w-56')
+    expect(screen.getByText('ana@test.com').closest('[data-slot="table-cell"]')).not.toHaveClass('w-56')
+  })
 })

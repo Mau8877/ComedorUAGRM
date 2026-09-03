@@ -66,7 +66,7 @@ const usuariosTablaColumns: ColumnDef<UsuarioTabla, unknown>[] = [
   {
     accessorKey: 'nombre',
     header: 'Nombre',
-    meta: { cardTitle: true },
+    meta: { cardTitle: true, grow: true },
   },
   {
     accessorKey: 'correo',
@@ -448,7 +448,7 @@ export function PruebaAdminLayout() {
           filters={usuariosTablaFilters}
           actions={
             <>
-              <Button variant="outline" size="sm" onClick={() => { setPage(1); setSearch(''); setRolFilter(undefined) }}>
+              <Button variant="outline" size="sm" onClick={() => setPage(1)}>
                 <RefreshCwIcon data-icon="inline-start" />
                 Refrescar
               </Button>

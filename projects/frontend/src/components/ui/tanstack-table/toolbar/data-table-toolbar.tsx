@@ -1,5 +1,6 @@
-import { SearchIcon } from 'lucide-react'
+import { SearchIcon, XIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
@@ -41,6 +42,11 @@ export interface DataTableToolbarProps {
  * quiere debounce, envuelve su propio `onSearchChange` con
  * `src/utils/debounce.ts` antes de pasarlo acá. El toolbar solo refleja
  * `searchValue` tal cual se lo dan.
+ *
+ * Incluye un botón "Limpiar filtros" que aparece solo cuando hay búsqueda
+ * y/o algún filtro con valor -- limpia todo de una vez (llama
+ * `onSearchChange('')` y `onValueChange(undefined)` de cada filtro), sin
+ * que cada feature tenga que armar ese botón a mano.
  */
 export function DataTableToolbar({
   searchValue,
@@ -50,6 +56,14 @@ export function DataTableToolbar({
   actions,
   className,
 }: DataTableToolbarProps) {
+  const hasActiveFilters =
+    Boolean(searchValue?.trim()) || filters.some((filter) => filter.value !== undefined)
+
+  const clearFilters = () => {
+    onSearchChange?.('')
+    filters.forEach((filter) => filter.onValueChange(undefined))
+  }
+
   return (
     <div className={cn('flex flex-wrap items-end justify-between gap-3', className)}>
       <div className="flex flex-wrap items-end gap-3">
@@ -94,6 +108,12 @@ export function DataTableToolbar({
             </Select>
           </div>
         ))}
+        {hasActiveFilters && (
+          <Button variant="ghost" size="sm" onClick={clearFilters}>
+            <XIcon data-icon="inline-start" />
+            Limpiar filtros
+          </Button>
+        )}
       </div>
 
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
