@@ -42,6 +42,13 @@ GET /api/v1/usuarios?page=1&pageSize=20&search=texto&filter[rol]=admin&sort=-nom
   hoy tiene pocos registros — se pagina desde el primer día.
 - El response correspondiente sigue el contrato de
   [RESPONSES_BACKEND.md](RESPONSES_BACKEND.md) (`data` array + bloque `meta`).
+- **`pageSize` acepta cualquier entero positivo** (no hay una lista fija de
+  valores válidos del lado del backend — no se rechaza un `pageSize=37`).
+  El selector de filas por página del frontend sí ofrece un set fijo de
+  opciones para no dejarlo libre en la UI: **10, 20, 50**, con `20` como
+  selección inicial (mismo valor que el default del backend cuando se omite
+  el query param). Definido acá para que cualquier feature nueva con
+  listado use el mismo set, en vez de que cada una invente el suyo.
 
 ### Formato de `sort`
 

@@ -18,7 +18,11 @@ export interface DataTablePaginationProps {
   className?: string
 }
 
-const DEFAULT_PAGE_SIZE_OPTIONS = [10, 20, 50, 100]
+// Mismo set fijo definido en .claude/rules/backend/ENDPOINTS_BACKEND.md --
+// 20 es el default (mismo valor que asume el backend cuando se omite el
+// query param `pageSize`), no simplemente "el primer valor del array".
+const DEFAULT_PAGE_SIZE_OPTIONS = [10, 20, 50]
+const DEFAULT_PAGE_SIZE = 20
 
 /**
  * Controles de paginación basados 100% en la `PageMeta` que devuelve el
@@ -35,7 +39,7 @@ export function DataTablePagination({
   siblingCount = 1,
   className,
 }: DataTablePaginationProps) {
-  const pageSize = meta?.pageSize ?? pageSizeOptions[0]
+  const pageSize = meta?.pageSize ?? DEFAULT_PAGE_SIZE
   const canPreviousPage = page > 1 && !isLoading
   const canNextPage = !!meta && page < meta.totalPages && !isLoading
   // Con totalItems en 0, totalPages viene en 0 (Math.ceil(0 / pageSize)) --
@@ -82,12 +86,15 @@ export function DataTablePagination({
           ) : (
             <Button
               key={item}
-              variant={item === page ? 'default' : 'ghost'}
+              variant="ghost"
               size="icon-sm"
-              className="rounded-full"
+              className={cn(
+                'rounded-full',
+                item === page && 'bg-accent text-accent-foreground hover:bg-accent/90',
+              )}
               aria-label={`Página ${item}`}
               aria-current={item === page ? 'page' : undefined}
-              disabled={isLoading || item === page}
+              disabled={isLoading}
               onClick={() => onPageChange(item)}
             >
               {item}
