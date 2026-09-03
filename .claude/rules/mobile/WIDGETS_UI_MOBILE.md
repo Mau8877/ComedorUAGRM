@@ -27,13 +27,31 @@ igual que el criterio de `shared/api/` del lado del consumo de API (ver
 
 ## Tema (`ThemeData`)
 
-`lib/core/theme/` ya está scaffoldeado pero vacío (solo `.gitkeep`) — **no
-hay un `ThemeData` del proyecto definido todavía**. Mismo placeholder que
+Definido en `lib/core/theme/app_theme.dart` — mismos valores de marca que
 [TAILWIND_STYLES_FRONTEND.md](../frontend/TAILWIND_STYLES_FRONTEND.md) del
-lado web: hasta que exista la paleta final de ComedorUAGRM, no se inventan
-colores de marca acá. Cuando se defina, el `ThemeData` se arma en
-`lib/core/theme/app_theme.dart` y se referencia desde `MaterialApp` (hoy
-`lib/main.dart` usa `ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple))`
-directo desde el boilerplate de `flutter create`, sin pasar por
-`core/theme/` — se reemplaza ese bloque cuando el tema real esté definido,
-no antes).
+lado web, traducidos a `ColorScheme`/`TextTheme` de Material 3 (no hay
+forma de compartir el archivo de tokens entre Tailwind/CSS y Dart, así que
+los valores se mantienen sincronizados a mano entre los dos documentos si
+la paleta cambia):
+
+- `AppTheme.light` / `AppTheme.dark` — dos `ThemeData` completos (colores +
+  tipografía), expuestos como getters estáticos. `lib/main.dart` los pasa a
+  `MaterialApp(theme: AppTheme.light, darkTheme: AppTheme.dark)` — no se
+  arma el `ThemeData` inline en `main.dart` (eso era el boilerplate de
+  `flutter create` con `ColorScheme.fromSeed(seedColor: Colors.deepPurple)`,
+  ya reemplazado).
+- `AppColors` (mismo archivo) — las constantes `Color(0xFF...)` de la
+  paleta, separadas en `light*`/`dark*`, para no repetir valores hex sueltos
+  en otros widgets. Un widget que necesita un color de marca fuera del
+  `Theme.of(context)` (raro — la mayoría debería salir de `colorScheme`)
+  importa `AppColors`, no hardcodea el hex de nuevo.
+- Tipografía vía el paquete **`google_fonts`** (no hay equivalente a
+  Fontsource en Flutter): **Familjen Grotesk** para títulos
+  (`display*`/`headline*`/`title*` del `TextTheme`) y **Jost** para cuerpo/
+  botones/formularios/etiquetas (el resto del `TextTheme`, y el default que
+  hereda cualquier widget de Material). Por default `google_fonts` descarga
+  el archivo de fuente la primera vez que se usa (no lo bundlea en el
+  `.apk`/`.ipa`) — si en algún momento la app necesita funcionar 100% offline
+  desde el primer arranque, se evalúa fijar las fuentes como asset local
+  (`GoogleFonts.config.allowRuntimeFetching = false` + fuentes en
+  `pubspec.yaml`), no antes de que sea un problema real.

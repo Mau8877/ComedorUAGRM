@@ -25,16 +25,47 @@ esquivando el sistema de diseño en vez de extenderlo — si hace falta un
 tamaño/color nuevo con frecuencia, se agrega como token al tema, no se
 repite el valor arbitrario en cada lugar que lo necesita.
 
-## No hay paleta custom todavía
+## Paleta de marca (ComedorU)
 
-Hoy el proyecto usa el tema **default** de shadcn (`components.json`:
-`baseColor: "neutral"`, sin `tailwind.config` custom). **No hay una paleta
-de colores propia del proyecto definida todavía** — este archivo es un
-placeholder hasta que se defina: cuando exista la paleta final
-(colores de marca de ComedorUAGRM), este documento se actualiza con los
-tokens reales y ejemplos concretos de uso. Hasta entonces, no se inventan
-colores de marca ni se asume que ya existe una paleta terminada — se sigue
-usando el set neutral default de shadcn.
+Definida en `src/index.css`, sobre las mismas variables de tema que ya
+espera shadcn/Tailwind 4 (`:root` para modo claro, `.dark` para modo
+oscuro) — no se tocó `components.json` (`baseColor: "neutral"` sigue
+siendo el base de shadcn, la marca se aplica pisando sus variables, no
+reemplazando el sistema).
+
+| Token (`bg-*`/`text-*`/`border-*`) | Uso | Claro | Oscuro |
+| --- | --- | --- | --- |
+| `primary` | Header, botones, íconos activos | `#1E3A56` (azul marino) | `#5F84A6` (azul claro) |
+| `accent` | Acento | `#E8B657` (miel) | `#E8B657` (miel) |
+| `background` | Fondo de la app | `#EAEEF3` | `#141C26` |
+| `card` / `popover` / `sidebar` | Superficie / tarjetas | `#FFFFFF` | `#1C2530` |
+| `foreground` / `card-foreground` | Texto principal | `#141C26` | `#E7ECF1` |
+| `muted-foreground` | Texto secundario | `#5B6A78` | `#8794A2` |
+| `success` | Éxito / vegetariano | `#5E7A5C` | `#7FA97D` |
+| `destructive` | Error / alerta | `#B24A3C` | `#D97A66` |
+
+`success`/`success-foreground` son tokens propios del proyecto (shadcn no
+trae uno por default) — se agregaron al lado de `destructive` en
+`index.css` y `@theme inline`, mismo patrón que cualquier otro color del
+sistema (`bg-success`, `text-success-foreground` ya funcionan como clase de
+Tailwind). Si hace falta un tono nuevo con frecuencia (ej. "advertencia"),
+se agrega como token acá, no como valor arbitrario.
+
+## Tipografía
+
+Dos familias, vía `@fontsource-variable` (mismo mecanismo que ya traía
+`Inter Variable`, ahora reemplazado por estas dos):
+
+- **Títulos** (`font-heading`, aplicado automático a `h1`-`h6` en
+  `@layer base`): **Familjen Grotesk** (`@fontsource-variable/familjen-grotesk`),
+  weight 400-500.
+- **Cuerpo, botones, formularios, etiquetas** (`font-sans`, default de
+  `html`): **Jost** (`@fontsource-variable/jost`), weight 300-400.
+
+Un componente que necesita la tipografía de títulos fuera de un `h1`-`h6`
+(ej. un `<span>` que visualmente es un título) usa la clase `font-heading`
+explícita — no se fuerza a que sea literalmente un heading semántico si no
+corresponde.
 
 ## Agregar componentes vía CLI de shadcn
 
