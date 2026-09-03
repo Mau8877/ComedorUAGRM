@@ -51,8 +51,8 @@ export function DataTableToolbar({
   className,
 }: DataTableToolbarProps) {
   return (
-    <div className={cn('flex flex-wrap items-center justify-between gap-3', className)}>
-      <div className="flex flex-wrap items-center gap-2">
+    <div className={cn('flex flex-wrap items-end justify-between gap-3', className)}>
+      <div className="flex flex-wrap items-end gap-3">
         {onSearchChange && (
           <div className="relative">
             <SearchIcon className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -66,31 +66,33 @@ export function DataTableToolbar({
           </div>
         )}
         {filters.map((filter) => (
-          <Select
-            key={filter.id}
-            value={filter.value ?? FILTER_ALL_VALUE}
-            onValueChange={(value) =>
-              filter.onValueChange(value == null || value === FILTER_ALL_VALUE ? undefined : value)
-            }
-          >
-            <SelectTrigger size="sm" aria-label={filter.label}>
-              <SelectValue placeholder={filter.placeholder ?? filter.label}>
-                {(value: string | null) =>
-                  !value || value === FILTER_ALL_VALUE
-                    ? 'Todos'
-                    : (filter.options.find((option) => option.value === value)?.label ?? value)
-                }
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={FILTER_ALL_VALUE}>Todos</SelectItem>
-              {filter.options.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div key={filter.id} className="flex flex-col gap-1">
+            <span className="text-xs font-medium text-muted-foreground">{filter.label}</span>
+            <Select
+              value={filter.value ?? FILTER_ALL_VALUE}
+              onValueChange={(value) =>
+                filter.onValueChange(value == null || value === FILTER_ALL_VALUE ? undefined : value)
+              }
+            >
+              <SelectTrigger size="sm" aria-label={filter.label}>
+                <SelectValue placeholder={filter.placeholder ?? filter.label}>
+                  {(value: string | null) =>
+                    !value || value === FILTER_ALL_VALUE
+                      ? 'Todos'
+                      : (filter.options.find((option) => option.value === value)?.label ?? value)
+                  }
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={FILTER_ALL_VALUE}>Todos</SelectItem>
+                {filter.options.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         ))}
       </div>
 

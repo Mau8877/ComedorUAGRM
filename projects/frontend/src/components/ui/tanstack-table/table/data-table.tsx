@@ -27,6 +27,8 @@ export interface DataTableProps<TData> extends DataStateProps {
    * acciones existen -- solo reserva y alinea la columna.
    */
   renderActions?: (row: Row<TData>) => ReactNode
+  /** Header de la columna de acciones (default "Acciones"). Sin efecto si no se pasa `renderActions`. */
+  actionsLabel?: string
   /** className del contenedor con borde -- el scroll horizontal lo maneja el `<Table>` de shadcn internamente, nunca el body. */
   className?: string
 }
@@ -40,6 +42,7 @@ export function DataTable<TData>({
   emptyMessage = 'Sin resultados',
   showRowNumber = false,
   renderActions,
+  actionsLabel = 'Acciones',
   className,
 }: DataTableProps<TData>) {
   const columnCount = table.getAllLeafColumns().length + (showRowNumber ? 1 : 0) + (renderActions ? 1 : 0)
@@ -86,7 +89,11 @@ export function DataTable<TData>({
                   </TableHead>
                 )
               })}
-              {renderActions && <TableHead className="w-px whitespace-nowrap text-accent-foreground" />}
+              {renderActions && (
+                <TableHead className="w-px whitespace-nowrap text-right text-accent-foreground">
+                  {actionsLabel}
+                </TableHead>
+              )}
             </TableRow>
           ))}
         </TableHeader>
@@ -127,7 +134,9 @@ export function DataTable<TData>({
                   </TableCell>
                 ))}
                 {renderActions && (
-                  <TableCell className="w-px whitespace-nowrap text-right">{renderActions(row)}</TableCell>
+                  <TableCell className="w-px whitespace-nowrap text-right">
+                    <div className="flex items-center justify-end gap-1">{renderActions(row)}</div>
+                  </TableCell>
                 )}
               </TableRow>
             ))

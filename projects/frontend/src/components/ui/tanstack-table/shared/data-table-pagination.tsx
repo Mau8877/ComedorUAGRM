@@ -2,6 +2,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
+import { ELLIPSIS, getPaginationRange } from './paginationRange'
 import type { DataTablePageMeta } from './types'
 
 export interface DataTablePaginationProps {
@@ -12,6 +13,8 @@ export interface DataTablePaginationProps {
   pageSizeOptions?: number[]
   /** Deshabilita los controles mientras la feature refetchea. */
   isLoading?: boolean
+  /** Números de página mostrados a cada lado de la actual antes del "…" (default 1). */
+  siblingCount?: number
   className?: string
 }
 
@@ -29,14 +32,16 @@ export function DataTablePagination({
   onPageSizeChange,
   pageSizeOptions = DEFAULT_PAGE_SIZE_OPTIONS,
   isLoading = false,
+  siblingCount = 1,
   className,
 }: DataTablePaginationProps) {
   const pageSize = meta?.pageSize ?? pageSizeOptions[0]
   const canPreviousPage = page > 1 && !isLoading
   const canNextPage = !!meta && page < meta.totalPages && !isLoading
   // Con totalItems en 0, totalPages viene en 0 (Math.ceil(0 / pageSize)) --
-  // se muestra como 1 para no mostrar "Página 1 de 0".
-  const totalPagesDisplay = meta ? Math.max(1, meta.totalPages) : undefined
+  // se muestra como 1 para no mostrar un rango vacío de páginas.
+  const totalPagesDisplay = meta ? Math.max(1, meta.totalPages) : 1
+  const pageRange = getPaginationRange(page, totalPagesDisplay, siblingCount)
 
   return (
     <div className={cn('flex flex-wrap items-center justify-between gap-4', className)}>
@@ -54,32 +59,53 @@ export function DataTablePagination({
             ))}
           </SelectContent>
         </Select>
+        {meta && <span>· {meta.totalItems} resultados</span>}
       </div>
 
-      <div className="flex items-center gap-3 text-sm text-muted-foreground">
-        {meta && <span>{meta.totalItems} resultados</span>}
-        <span>Página {page} de {totalPagesDisplay ?? '—'}</span>
-        <div className="flex items-center gap-1">
-          <Button
-            variant="outline"
-            size="icon-sm"
-            aria-label="Página anterior"
-            disabled={!canPreviousPage}
-            onClick={() => onPageChange(page - 1)}
-          >
-            <ChevronLeftIcon />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon-sm"
-            aria-label="Página siguiente"
-            disabled={!canNextPage}
-            onClick={() => onPageChange(page + 1)}
-          >
-            <ChevronRightIcon />
-          </Button>
-        </div>
-      </div>
+      <nav className="flex items-center gap-1" aria-label="Paginación">
+        <Button
+          variant="ghost"
+          size="sm"
+          aria-label="Página anterior"
+          disabled={!canPreviousPage}
+          onClick={() => onPageChange(page - 1)}
+        >
+          <ChevronLeftIcon data-icon="inline-start" />
+          Anterior
+        </Button>
+
+        {pageRange.map((item, index) =>
+          item === ELLIPSIS ? (
+            <span key={`ellipsis-${index}`} className="px-1.5 text-sm text-muted-foreground">
+              …
+            </span>
+          ) : (
+            <Button
+              key={item}
+              variant={item === page ? 'default' : 'ghost'}
+              size="icon-sm"
+              className="rounded-full"
+              aria-label={`Página ${item}`}
+              aria-current={item === page ? 'page' : undefined}
+              disabled={isLoading || item === page}
+              onClick={() => onPageChange(item)}
+            >
+              {item}
+            </Button>
+          ),
+        )}
+
+        <Button
+          variant="ghost"
+          size="sm"
+          aria-label="Página siguiente"
+          disabled={!canNextPage}
+          onClick={() => onPageChange(page + 1)}
+        >
+          Siguiente
+          <ChevronRightIcon data-icon="inline-end" />
+        </Button>
+      </nav>
     </div>
   )
 }

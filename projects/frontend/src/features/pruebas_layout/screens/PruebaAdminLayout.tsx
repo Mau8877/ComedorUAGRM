@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import {
   DownloadIcon,
+  EyeIcon,
   FilterIcon,
   PencilIcon,
   PlusIcon,
@@ -27,6 +28,7 @@ import {
   DataTable,
   DataTablePagination,
   DataTableToolbar,
+  RowActionButton,
   toSortQueryParam,
   useDataTable,
 } from '@/components/ui/tanstack-table'
@@ -462,9 +464,16 @@ export function PruebaAdminLayout() {
             isError={false}
             showRowNumber
             renderActions={(row) => (
-              <Button variant="ghost" size="sm">
-                Ver {row.original.nombre.split(' ')[0]}
-              </Button>
+              <>
+                <RowActionButton icon={<EyeIcon />} label="Ver detalles" onClick={() => {}} />
+                <RowActionButton icon={<PencilIcon />} label="Editar" onClick={() => {}} />
+                <RowActionButton
+                  icon={<Trash2Icon />}
+                  label={`Eliminar a ${row.original.nombre}`}
+                  variant="destructive"
+                  onClick={() => {}}
+                />
+              </>
             )}
           />
         </div>
@@ -475,9 +484,11 @@ export function PruebaAdminLayout() {
             isError={false}
             showRowNumber
             renderActions={() => (
-              <Button variant="ghost" size="sm">
-                Ver
-              </Button>
+              <>
+                <RowActionButton icon={<EyeIcon />} label="Ver detalles" onClick={() => {}} />
+                <RowActionButton icon={<PencilIcon />} label="Editar" onClick={() => {}} />
+                <RowActionButton icon={<Trash2Icon />} label="Eliminar" variant="destructive" onClick={() => {}} />
+              </>
             )}
           />
         </div>
@@ -491,7 +502,7 @@ export function PruebaAdminLayout() {
             setPage(1)
             setPageSize(nextPageSize)
           }}
-          pageSizeOptions={[4, 8, 12]}
+          pageSizeOptions={[2, 4, 8, 12]}
         />
       </div>
 
