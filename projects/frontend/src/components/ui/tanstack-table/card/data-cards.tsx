@@ -4,7 +4,7 @@ import type { ReactNode } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
-import type { DataStateProps } from './types'
+import type { DataStateProps } from '../shared'
 
 export interface DataCardsProps<TData> extends DataStateProps {
   table: TanstackTable<TData>

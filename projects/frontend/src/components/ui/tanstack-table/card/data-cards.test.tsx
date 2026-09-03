@@ -4,7 +4,7 @@ import { renderHook } from '@testing-library/react'
 import { useReactTable, getCoreRowModel } from '@tanstack/react-table'
 import type { ColumnDef } from '@tanstack/react-table'
 import { DataCards } from './data-cards'
-import './types'
+import '../shared/types'
 
 interface Row {
   id: string

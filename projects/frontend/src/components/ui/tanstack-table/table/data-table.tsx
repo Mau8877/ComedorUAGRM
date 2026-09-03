@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/table'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
-import type { DataStateProps } from './types'
+import type { DataStateProps } from '../shared'
 
 export interface DataTableProps<TData> extends DataStateProps {
   table: TanstackTable<TData>
