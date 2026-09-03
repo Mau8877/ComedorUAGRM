@@ -121,4 +121,19 @@ describe('DataTable', () => {
 
     expect(screen.getByRole('button', { name: 'Editar Ana' })).toBeInTheDocument()
   })
+
+  it('alterna un fondo sutil en las filas pares (índice 1, 3, ...)', () => {
+    const table = useTestTable([
+      { id: '1', nombre: 'Ana', email: 'ana@test.com' },
+      { id: '2', nombre: 'Beto', email: 'beto@test.com' },
+      { id: '3', nombre: 'Caro', email: 'caro@test.com' },
+    ])
+
+    render(<DataTable table={table} isLoading={false} isError={false} />)
+
+    const rows = document.querySelectorAll('[data-slot="table-body"] [data-slot="table-row"]')
+    expect(rows[0]).not.toHaveClass('bg-muted/40')
+    expect(rows[1]).toHaveClass('bg-muted/40')
+    expect(rows[2]).not.toHaveClass('bg-muted/40')
+  })
 })

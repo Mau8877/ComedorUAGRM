@@ -122,7 +122,7 @@ export function DataTable<TData>({
             </TableRow>
           ) : (
             rows.map((row, rowIndexInPage) => (
-              <TableRow key={row.id}>
+              <TableRow key={row.id} className={rowIndexInPage % 2 === 1 ? 'bg-muted/40' : undefined}>
                 {showRowNumber && (
                   <TableCell className="w-px whitespace-nowrap text-muted-foreground">
                     {pageIndex * pageSize + rowIndexInPage + 1}
