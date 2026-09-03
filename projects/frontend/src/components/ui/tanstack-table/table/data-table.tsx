@@ -51,20 +51,24 @@ export function DataTable<TData>({
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
+            <TableRow key={headerGroup.id} className="bg-accent hover:bg-accent">
               {showRowNumber && (
-                <TableHead className="w-px whitespace-nowrap text-muted-foreground">#</TableHead>
+                <TableHead className="w-px whitespace-nowrap text-accent-foreground">#</TableHead>
               )}
               {headerGroup.headers.map((header) => {
                 const canSort = header.column.getCanSort()
                 const sortDirection = header.column.getIsSorted()
 
                 return (
-                  <TableHead key={header.id} style={{ textAlign: header.column.columnDef.meta?.align }}>
+                  <TableHead
+                    key={header.id}
+                    className="text-accent-foreground"
+                    style={{ textAlign: header.column.columnDef.meta?.align }}
+                  >
                     {header.isPlaceholder ? null : canSort ? (
                       <button
                         type="button"
-                        className="inline-flex items-center gap-1 hover:text-foreground"
+                        className="inline-flex items-center gap-1 hover:text-accent-foreground/70"
                         onClick={header.column.getToggleSortingHandler()}
                       >
                         {flexRender(header.column.columnDef.header, header.getContext())}
@@ -73,7 +77,7 @@ export function DataTable<TData>({
                         ) : sortDirection === 'desc' ? (
                           <ArrowDownIcon className="size-3.5" />
                         ) : (
-                          <ChevronsUpDownIcon className="size-3.5 text-muted-foreground/60" />
+                          <ChevronsUpDownIcon className="size-3.5 text-accent-foreground/50" />
                         )}
                       </button>
                     ) : (
@@ -82,7 +86,7 @@ export function DataTable<TData>({
                   </TableHead>
                 )
               })}
-              {renderActions && <TableHead className="w-px whitespace-nowrap" />}
+              {renderActions && <TableHead className="w-px whitespace-nowrap text-accent-foreground" />}
             </TableRow>
           ))}
         </TableHeader>
