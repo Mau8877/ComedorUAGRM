@@ -1,6 +1,11 @@
 import { AdminLayout } from '@/layouts/AdminLayout'
 import { Button } from '@/components/ui/button'
-import { toastSuccess, toastError } from '@/components/ui/toast'
+import {
+  toastSuccess,
+  toastError,
+  toastWarning,
+  toastInfo,
+} from '@/components/ui/toast'
 
 import { mockAdminUser } from '../mocks'
 
@@ -12,11 +17,12 @@ export function PruebaAdminLayout() {
           Notificaciones (toast)
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Dos tipos disponibles, ya diseñados y listos para llamar desde
-          cualquier feature: <code>toastSuccess()</code> y{' '}
-          <code>toastError()</code>.
+          Cuatro tipos disponibles, ya diseñados y listos para llamar desde
+          cualquier feature: <code>toastSuccess()</code>,{' '}
+          <code>toastError()</code>, <code>toastWarning()</code> y{' '}
+          <code>toastInfo()</code>.
         </p>
-        <div className="mt-3 flex gap-3">
+        <div className="mt-3 flex flex-wrap gap-3">
           <Button
             className="bg-success text-success-foreground hover:bg-success/90"
             onClick={() =>
@@ -38,6 +44,28 @@ export function PruebaAdminLayout() {
             }
           >
             Probar error
+          </Button>
+          <Button
+            className="bg-accent text-accent-foreground hover:bg-accent/90"
+            onClick={() =>
+              toastWarning(
+                'Pocas porciones disponibles',
+                'Quedan menos de 10 porciones de Silpancho para hoy.'
+              )
+            }
+          >
+            Probar advertencia
+          </Button>
+          <Button
+            className="bg-header text-header-foreground hover:bg-header/90"
+            onClick={() =>
+              toastInfo(
+                'Nuevo periodo de becas',
+                'Los alumnos ya pueden postular para el próximo semestre.'
+              )
+            }
+          >
+            Probar info
           </Button>
         </div>
       </div>

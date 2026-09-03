@@ -44,6 +44,15 @@ const Toaster = ({ ...props }: ToasterProps) => {
           "--error-bg": "var(--destructive)",
           "--error-text": "var(--destructive-foreground)",
           "--error-border": "var(--destructive)",
+          // * `header`, no `primary` -- info debe verse igual en claro y
+          // * oscuro, y `primary` cambia de tono entre modos (ver la regla
+          // * de diseño del header en TAILWIND_STYLES_FRONTEND.md).
+          "--info-bg": "var(--header)",
+          "--info-text": "var(--header-foreground)",
+          "--info-border": "var(--header)",
+          "--warning-bg": "var(--accent)",
+          "--warning-text": "var(--accent-foreground)",
+          "--warning-border": "var(--accent)",
         } as CSSProperties
       }
       {...props}
