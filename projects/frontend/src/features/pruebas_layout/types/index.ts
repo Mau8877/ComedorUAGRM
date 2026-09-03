@@ -10,7 +10,7 @@ export interface MenuDia {
 
 export interface UsuarioReciente {
   nombre: string
-  rol: 'Administrador' | 'Alumno'
+  rol: 'Administrador' | 'Estudiante'
   correo: string
 }
 

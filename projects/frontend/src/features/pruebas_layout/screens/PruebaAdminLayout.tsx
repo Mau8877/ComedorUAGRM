@@ -9,7 +9,7 @@ import {
   TrendingUpIcon,
 } from 'lucide-react'
 
-import { AdminLayout } from '@/layouts/AdminLayout'
+import { AdminLayout } from '@/layouts/admin'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -64,7 +64,7 @@ export function PruebaAdminLayout() {
             onClick={() =>
               toastSuccess(
                 'Menú publicado',
-                'El menú de la semana ya está visible para los alumnos.'
+                'El menú de la semana ya está visible para los estudiantes.'
               )
             }
           >
@@ -97,7 +97,7 @@ export function PruebaAdminLayout() {
             onClick={() =>
               toastInfo(
                 'Nuevo periodo de becas',
-                'Los alumnos ya pueden postular para el próximo semestre.'
+                'Los estudiantes ya pueden postular para el próximo semestre.'
               )
             }
           >

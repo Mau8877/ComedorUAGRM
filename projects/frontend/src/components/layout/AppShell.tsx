@@ -15,7 +15,7 @@ interface AppShellProps {
   children: ReactNode
 }
 
-// * Esqueleto compartido por todos los layouts de rol (Admin, Alumno, y los
+// * Esqueleto compartido por todos los layouts de rol (Admin, Estudiante, y los
 // * que se agreguen a futuro) -- no conoce roles, solo recibe navItems/user
 // * por props. Cada layout de rol (src/layouts/) es el único que decide QUÉ
 // * le pasa acá, nunca se bifurca por rol dentro de este componente.

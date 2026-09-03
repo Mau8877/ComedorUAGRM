@@ -1,0 +1,23 @@
+import { AppShell } from '@/components/layout'
+
+import { adminNavItems } from './adminNavItems'
+import type { AdminLayoutProps } from './adminTypes'
+
+export function AdminLayout({
+  title,
+  user,
+  activeHref,
+  children,
+}: AdminLayoutProps) {
+  return (
+    <AppShell
+      appName="ComedorU Admin"
+      title={title}
+      navItems={adminNavItems}
+      activeHref={activeHref}
+      user={user}
+    >
+      {children}
+    </AppShell>
+  )
+}

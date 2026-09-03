@@ -7,9 +7,9 @@ export const mockAdminUser: LayoutUser = {
   rol: 'Administrador',
 }
 
-export const mockAlumnoUser: LayoutUser = {
+export const mockEstudianteUser: LayoutUser = {
   nombre: 'Juan Gómez',
-  rol: 'Alumno',
+  rol: 'Estudiante',
 }
 
 export const mockMenuSemana: MenuDia[] = [
@@ -22,9 +22,9 @@ export const mockMenuSemana: MenuDia[] = [
 
 export const mockUsuariosRecientes: UsuarioReciente[] = [
   { nombre: 'Ana Pérez', rol: 'Administrador', correo: 'ana.perez@uagrm.edu.bo' },
-  { nombre: 'Juan Gómez', rol: 'Alumno', correo: 'juan.gomez@uagrm.edu.bo' },
-  { nombre: 'Rosa Fernández', rol: 'Alumno', correo: 'rosa.fernandez@uagrm.edu.bo' },
-  { nombre: 'Diego Vaca', rol: 'Alumno', correo: 'diego.vaca@uagrm.edu.bo' },
+  { nombre: 'Juan Gómez', rol: 'Estudiante', correo: 'juan.gomez@uagrm.edu.bo' },
+  { nombre: 'Rosa Fernández', rol: 'Estudiante', correo: 'rosa.fernandez@uagrm.edu.bo' },
+  { nombre: 'Diego Vaca', rol: 'Estudiante', correo: 'diego.vaca@uagrm.edu.bo' },
 ]
 
 export const mockPedidosPorCategoria = [

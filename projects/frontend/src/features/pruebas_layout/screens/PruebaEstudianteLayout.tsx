@@ -5,7 +5,7 @@ import {
   UtensilsCrossedIcon,
 } from 'lucide-react'
 
-import { UsuarioLayout } from '@/layouts/UsuarioLayout'
+import { EstudianteLayout } from '@/layouts/estudiante'
 import { Button } from '@/components/ui/button'
 import {
   toastSuccess,
@@ -15,7 +15,11 @@ import {
 } from '@/components/ui/toast'
 
 import { MiniBarChart, ProgressBar, StatusBadge } from '../components'
-import { mockAlumnoUser, mockConsumoSemanal, mockHistorialPedidos } from '../mocks'
+import {
+  mockEstudianteUser,
+  mockConsumoSemanal,
+  mockHistorialPedidos,
+} from '../mocks'
 import type { EstadoPedido } from '../types'
 
 const estadoPedidoBadge: Record<
@@ -38,11 +42,11 @@ const avisos = [
   },
 ]
 
-export function PruebaAlumnoLayout() {
+export function PruebaEstudianteLayout() {
   return (
-    <UsuarioLayout
+    <EstudianteLayout
       title="Mi Menú"
-      user={mockAlumnoUser}
+      user={mockEstudianteUser}
       activeHref="/mi-menu"
     >
       {/* Notificaciones (toast) */}
@@ -234,6 +238,6 @@ export function PruebaAlumnoLayout() {
           de la ventana y cambiar entre tema claro/oscuro.
         </p>
       </div>
-    </UsuarioLayout>
+    </EstudianteLayout>
   )
 }
