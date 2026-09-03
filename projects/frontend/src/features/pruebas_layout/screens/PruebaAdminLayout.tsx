@@ -9,7 +9,7 @@ import {
   TrendingUpIcon,
 } from 'lucide-react'
 
-import { AdminLayout } from '@/layouts/admin'
+import { AdminLayout } from '@/layouts'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {

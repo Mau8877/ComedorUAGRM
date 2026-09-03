@@ -5,7 +5,7 @@ import {
   UtensilsCrossedIcon,
 } from 'lucide-react'
 
-import { EstudianteLayout } from '@/layouts/estudiante'
+import { EstudianteLayout } from '@/layouts'
 import { Button } from '@/components/ui/button'
 import {
   toastSuccess,

@@ -119,8 +119,12 @@ para el esquema de roles del lado del backend — el frontend usa el mismo
   `adminNavItems.ts`/`adminTypes.ts` no se exportan desde `index.ts` — son
   detalle interno de ese layout, igual que el criterio de "qué es público de
   la feature" en [ARQUITECTURA_FRONTEND.md](../ARQUITECTURA_FRONTEND.md#indexts-qué-es-público-de-la-feature).
-  Quien consume el layout importa siempre del barrel (`@/layouts/admin`),
-  nunca de un archivo interno (`@/layouts/admin/AdminLayout`).
+  `src/layouts/index.ts` es a su vez el barrel de nivel superior que
+  re-exporta el barrel de cada rol (`export * from './admin'`,
+  `export * from './estudiante'`) — quien consume un layout importa siempre
+  desde ahí (`import { AdminLayout } from '@/layouts'`), nunca de un
+  archivo interno (`@/layouts/admin/AdminLayout`) ni siquiera del barrel de
+  un rol puntual (`@/layouts/admin`).
 - Asociación ruta ↔ layout: se agrupan las rutas de cada rol bajo su propio
   layout pathless dentro de `_authenticated/`, ej.
   `_authenticated/_admin/...` usa `AdminLayout`, `_authenticated/_estudiante/...`
