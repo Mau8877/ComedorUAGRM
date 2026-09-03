@@ -45,6 +45,19 @@ describe('DataTablePagination', () => {
     expect(screen.getByText(/Página 1 de/)).toBeInTheDocument()
   })
 
+  it('con totalItems en 0 (totalPages: 0), muestra "Página 1 de 1" en vez de "de 0"', () => {
+    render(
+      <DataTablePagination
+        meta={{ page: 1, pageSize: 20, totalItems: 0, totalPages: 0 }}
+        page={1}
+        onPageChange={vi.fn()}
+        onPageSizeChange={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByText('Página 1 de 1')).toBeInTheDocument()
+  })
+
   it('deshabilita ambos botones mientras isLoading', () => {
     render(
       <DataTablePagination

@@ -34,6 +34,9 @@ export function DataTablePagination({
   const pageSize = meta?.pageSize ?? pageSizeOptions[0]
   const canPreviousPage = page > 1 && !isLoading
   const canNextPage = !!meta && page < meta.totalPages && !isLoading
+  // Con totalItems en 0, totalPages viene en 0 (Math.ceil(0 / pageSize)) --
+  // se muestra como 1 para no mostrar "Página 1 de 0".
+  const totalPagesDisplay = meta ? Math.max(1, meta.totalPages) : undefined
 
   return (
     <div className={cn('flex flex-wrap items-center justify-between gap-4', className)}>
@@ -55,7 +58,7 @@ export function DataTablePagination({
 
       <div className="flex items-center gap-3 text-sm text-muted-foreground">
         {meta && <span>{meta.totalItems} resultados</span>}
-        <span>Página {page} de {meta?.totalPages ?? '—'}</span>
+        <span>Página {page} de {totalPagesDisplay ?? '—'}</span>
         <div className="flex items-center gap-1">
           <Button
             variant="outline"
