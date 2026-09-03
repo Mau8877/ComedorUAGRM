@@ -1,6 +1,6 @@
 import type { LayoutUser } from '@/components/layout'
 
-import type { MenuDia, PedidoHistorial, UsuarioReciente } from '../types'
+import type { MenuDia, PedidoHistorial, UsuarioReciente, UsuarioTabla } from '../types'
 
 export const mockAdminUser: LayoutUser = {
   nombre: 'Ana Pérez',
@@ -26,6 +26,21 @@ export const mockUsuariosRecientes: UsuarioReciente[] = [
   { nombre: 'Rosa Fernández', rol: 'Estudiante', correo: 'rosa.fernandez@uagrm.edu.bo' },
   { nombre: 'Diego Vaca', rol: 'Estudiante', correo: 'diego.vaca@uagrm.edu.bo' },
 ]
+
+const nombresDemo = [
+  'Ana Pérez', 'Juan Gómez', 'Rosa Fernández', 'Diego Vaca', 'Lucía Rojas',
+  'Marco Suárez', 'Elena Choque', 'Pablo Mamani', 'Carla Justiniano', 'Iván Rivero',
+  'Valeria Peña', 'Óscar Salvatierra', 'Noelia Rocha', 'Fabricio Antelo', 'Camila Áñez',
+  'Bruno Chávez', 'Gabriela Ortiz', 'Ramiro Melgar', 'Daniela Roca', 'Tomás Barba',
+  'Andrea Vargas', 'Sergio Cuéllar', 'Paola Landívar', 'Hugo Terceros',
+]
+
+export const mockUsuariosTabla: UsuarioTabla[] = nombresDemo.map((nombre, index) => ({
+  id: `usuario-${index + 1}`,
+  nombre,
+  rol: index % 4 === 0 ? 'Administrador' : 'Estudiante',
+  correo: `${nombre.toLowerCase().replace(/\s+/g, '.')}@uagrm.edu.bo`,
+}))
 
 export const mockPedidosPorCategoria = [
   { label: 'Ejecutivo', value: 148 },

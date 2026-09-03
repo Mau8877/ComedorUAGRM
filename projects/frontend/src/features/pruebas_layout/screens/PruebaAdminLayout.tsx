@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {
   DownloadIcon,
   FilterIcon,
@@ -8,9 +9,11 @@ import {
   TrendingDownIcon,
   TrendingUpIcon,
 } from 'lucide-react'
+import type { ColumnDef } from '@tanstack/react-table'
 
 import { AdminLayout } from '@/layouts'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   toastSuccess,
@@ -18,6 +21,12 @@ import {
   toastWarning,
   toastInfo,
 } from '@/components/ui/toast'
+import {
+  DataCards,
+  DataTable,
+  DataTablePagination,
+  useDataTable,
+} from '@/components/ui/tanstack-table'
 
 import { MiniBarChart, ProgressBar, StatusBadge } from '../components'
 import {
@@ -25,8 +34,9 @@ import {
   mockMenuSemana,
   mockPedidosPorCategoria,
   mockUsuariosRecientes,
+  mockUsuariosTabla,
 } from '../mocks'
-import type { EstadoDisponibilidad } from '../types'
+import type { EstadoDisponibilidad, UsuarioTabla } from '../types'
 
 const estadoBadge: Record<
   EstadoDisponibilidad,
@@ -43,7 +53,69 @@ const stats = [
   { titulo: 'Menús publicados', valor: 12, tendencia: '-2%', positiva: false },
 ]
 
+// Columnas del demo de components/ui/tanstack-table -- una sola definición
+// alimenta tanto DataTable como DataCards (ver meta.cardTitle/cardLabel/
+// hideInCard/cardOrder).
+const usuariosTablaColumns: ColumnDef<UsuarioTabla, unknown>[] = [
+  {
+    accessorKey: 'nombre',
+    header: 'Nombre',
+    meta: { cardTitle: true },
+  },
+  {
+    accessorKey: 'correo',
+    header: 'Correo',
+    meta: { cardLabel: 'Correo', cardOrder: 1 },
+  },
+  {
+    accessorKey: 'rol',
+    header: 'Rol',
+    cell: (ctx) => (
+      <Badge variant={ctx.getValue<UsuarioTabla['rol']>() === 'Administrador' ? 'default' : 'secondary'}>
+        {ctx.getValue<string>()}
+      </Badge>
+    ),
+    meta: { cardOrder: 0 },
+  },
+  {
+    id: 'acciones',
+    header: '',
+    cell: () => (
+      <Button variant="ghost" size="sm">
+        Ver
+      </Button>
+    ),
+    meta: { hideInCard: true },
+  },
+]
+
+const DEMO_PAGE_SIZE = 8
+
 export function PruebaAdminLayout() {
+  // Simula lo que en una feature real haría un hook de api/ con TanStack
+  // Query contra el backend (page/pageSize -> meta) -- acá se resuelve
+  // client-side sobre el mock solo para el propósito de esta pantalla de
+  // prueba visual.
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(DEMO_PAGE_SIZE)
+  const totalItems = mockUsuariosTabla.length
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize))
+  const paginaData = mockUsuariosTabla.slice((page - 1) * pageSize, page * pageSize)
+  const usuariosTablaMeta = { page, pageSize, totalItems, totalPages }
+
+  const { table: usuariosTable } = useDataTable({
+    data: paginaData,
+    columns: usuariosTablaColumns,
+    meta: usuariosTablaMeta,
+    page,
+    pageSize,
+    onPageChange: setPage,
+    onPageSizeChange: (nextPageSize) => {
+      setPage(1)
+      setPageSize(nextPageSize)
+    },
+  })
+
   return (
     <AdminLayout title="Dashboard" user={mockAdminUser} activeHref="/panel">
       {/* Notificaciones (toast) */}
@@ -289,6 +361,37 @@ export function PruebaAdminLayout() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* components/ui/tanstack-table -- misma columnas para DataTable y DataCards */}
+      <div className="mt-6 rounded-2xl border border-border bg-card p-4">
+        <h2 className="font-heading text-sm font-medium text-foreground">
+          Tabla de usuarios (DataTable + DataCards)
+        </h2>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Mismas columnas para ambas vistas. DataTable visible desde
+          `md`, DataCards debajo -- reducí el ancho de la ventana para ver
+          el cambio.
+        </p>
+
+        <div className="mt-4 hidden md:block">
+          <DataTable table={usuariosTable} isLoading={false} isError={false} />
+        </div>
+        <div className="mt-4 md:hidden">
+          <DataCards table={usuariosTable} isLoading={false} isError={false} />
+        </div>
+
+        <DataTablePagination
+          className="mt-4"
+          meta={usuariosTablaMeta}
+          page={page}
+          onPageChange={setPage}
+          onPageSizeChange={(nextPageSize) => {
+            setPage(1)
+            setPageSize(nextPageSize)
+          }}
+          pageSizeOptions={[4, 8, 12]}
+        />
       </div>
 
       <div className="mt-6 rounded-2xl border border-border bg-card p-4">
