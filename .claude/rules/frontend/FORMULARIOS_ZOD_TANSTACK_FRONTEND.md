@@ -70,4 +70,47 @@ const form = useForm({
 
 Se prefiere `validators.onChange` (valida mientras el usuario escribe) sobre
 solo validar en `onSubmit`, para que el error aparezca inline apenas el
-campo es inválido, no recién al intentar enviar.
+campo es inválido, no recién al intentar enviar -- pero ver la regla
+siguiente antes de renderizar ese error.
+
+## Un campo solo muestra su error si el usuario ya lo tocó
+
+`validators.onChange` valida el **objeto completo** del form en cada
+tecleo, no campo por campo -- por eso, al escribir en un solo campo,
+TanStack Form recalcula el `errorMap` de **todos** los campos del schema a
+la vez y se lo reparte a cada `field.state.meta.errors`, incluidos los que
+el usuario todavía no tocó. Si un `form.Field` renderiza ese error apenas
+existe, cualquier campo vacío obligatorio (`foto`, `stock`, etc.) aparece
+"inválido" desde la primera letra que se escribe en **otro** campo,
+aunque el usuario ni llegó a esa parte del formulario todavía.
+
+**Regla obligatoria**: todo `form.Field` que muestra un error inline lo
+condiciona también a `field.state.meta.isTouched` -- que TanStack Form
+solo pone en `true` para el campo puntual que el usuario escribió o le
+hizo blur (nunca para los demás, aunque su `errorMap` ya se haya
+recalculado):
+
+```tsx
+<form.Field name="nombre">
+  {(field) => (
+    <>
+      <Input
+        value={field.state.value}
+        onBlur={field.handleBlur}
+        onChange={(e) => field.handleChange(e.target.value)}
+      />
+      {field.state.meta.isTouched && field.state.meta.errors[0] && (
+        <span className="text-xs text-destructive">{field.state.meta.errors[0].message}</span>
+      )}
+    </>
+  )}
+</form.Field>
+```
+
+Por esto mismo, `onBlur={field.handleBlur}` en cada `Input`/`Select` no es
+decorativo -- sin él, un campo que el usuario salta sin escribirle nunca
+queda "tocado" antes del submit. Al intentar enviar el formulario
+(`form.handleSubmit()`), TanStack Form sí marca todos los campos como
+tocados de una sola vez, así que en ese momento aparecen correctamente
+todos los errores pendientes, aunque el usuario nunca haya pasado por esos
+campos.
