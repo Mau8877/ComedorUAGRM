@@ -1,4 +1,5 @@
 import { useForm } from '@tanstack/react-form'
+import { PencilIcon, PlusIcon } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { ModalLayout } from '@/components/ui/modal-layout'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -64,6 +65,7 @@ export function IngredienteFormModal({
       open={open}
       onOpenChange={onOpenChange}
       title={isEdit ? 'Editar ingrediente' : 'Nuevo ingrediente'}
+      icon={isEdit ? PencilIcon : PlusIcon}
       subtitle={
         isEdit
           ? `Actualizá los datos de "${ingrediente?.nombre}"`

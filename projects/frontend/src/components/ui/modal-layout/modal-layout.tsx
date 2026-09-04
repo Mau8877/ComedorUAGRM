@@ -16,6 +16,7 @@ export function ModalLayout({
   onOpenChange,
   title,
   subtitle,
+  icon,
   size = 'md',
   formId,
   isSubmitting = false,
@@ -45,9 +46,18 @@ export function ModalLayout({
         // * relativo al viewport" -- es el tope que evita que el modal ocupe
         // * la pantalla completa en formularios largos, dejando aire arriba/
         // * abajo. El ancho sí usa tokens (`sizeClassName`).
-        className={cn('flex max-h-[85vh] flex-col gap-0 p-0', sizeClassName[size])}
+        // * overflow-hidden: el header (bg-header) tiene esquinas rectas --
+        // * sin esto, sus esquinas cuadradas sobresaldrían por encima del
+        // * radio ya redondeado que trae DialogContent, dejando el modal con
+        // * pinta de "no redondeado" arriba a pesar de que el contenedor sí
+        // * lo es.
+        className={cn('flex max-h-[85vh] flex-col gap-0 overflow-hidden p-0', sizeClassName[size])}
+        // * El botón X propio se dibuja en ModalLayoutHeader -- el default de
+        // * DialogContent está pensado para un fondo claro (bg-secondary) y
+        // * quedaría ilegible sobre el bg-header del header.
+        showCloseButton={false}
       >
-        <ModalLayoutHeader title={title} subtitle={subtitle} />
+        <ModalLayoutHeader title={title} subtitle={subtitle} icon={icon} />
         <div className="flex-1 overflow-y-auto p-6">{children}</div>
         <ModalLayoutFooter
           formId={formId}

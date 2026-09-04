@@ -1,3 +1,4 @@
+import type { LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 
 export type ModalLayoutSize = 'sm' | 'md' | 'lg'
@@ -8,6 +9,8 @@ export interface ModalLayoutProps {
   onOpenChange: (open: boolean) => void
   title: string
   subtitle?: string
+  /** Ícono de lucide-react al inicio del título. Sin este prop, no se muestra ninguno. */
+  icon?: LucideIcon
   /** Ancho del modal -- set fijo de tokens, nunca un valor libre. Default `"md"`. */
   size?: ModalLayoutSize
   /**
