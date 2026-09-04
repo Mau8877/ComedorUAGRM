@@ -4,7 +4,7 @@ import { useUiStore } from '@/store'
 
 import { AppHeader } from './AppHeader'
 import { AppSidebar } from './AppSidebar'
-import type { LayoutUser, NavItem } from './types'
+import type { LayoutUser, NavItem, NotificationsController } from './types'
 
 interface AppShellProps {
   appName: string
@@ -12,6 +12,8 @@ interface AppShellProps {
   navItems: NavItem[]
   activeHref?: string
   user: LayoutUser
+  /** Ver AppHeaderProps. */
+  notifications?: NotificationsController
   children: ReactNode
 }
 
@@ -25,6 +27,7 @@ export function AppShell({
   navItems,
   activeHref,
   user,
+  notifications,
   children,
 }: AppShellProps) {
   const theme = useUiStore((s) => s.theme)
@@ -35,7 +38,7 @@ export function AppShell({
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
-      <AppHeader appName={appName} user={user} />
+      <AppHeader appName={appName} user={user} notifications={notifications} />
 
       {/* * p-4 acá es lo que crea el espacio real entre el sidebar y el
           header -- el sidebar es una tarjeta flotante (bordes redondeados

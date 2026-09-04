@@ -5,6 +5,8 @@ import {
   MoonIcon,
   LogOutIcon,
   UserIcon,
+  KeyRoundIcon,
+  SettingsIcon,
 } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
@@ -21,7 +23,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
-import type { LayoutUser } from './types'
+import { NotificationsMenu } from './NotificationsMenu'
+import type { LayoutUser, NotificationsController } from './types'
 
 function iniciales(nombre: string) {
   return nombre
@@ -35,6 +38,21 @@ function iniciales(nombre: string) {
 interface AppHeaderProps {
   appName: string
   user: LayoutUser
+  /** Sin esto, la campanita no muestra "circulito" y el panel queda vacío. */
+  notifications?: NotificationsController
+}
+
+const EMPTY_NOTIFICATIONS: NotificationsController = {
+  items: [],
+  meta: undefined,
+  isLoading: false,
+  isLoadingMore: false,
+  unreadCount: 0,
+  onOpenChange: () => {},
+  onLoadMore: () => {},
+  onMarkAsRead: () => {},
+  onMarkAllAsRead: () => {},
+  onDeleteAll: () => {},
 }
 
 // * Un solo botón de menú controla el sidebar en ambos tamaños de pantalla
@@ -44,8 +62,7 @@ interface AppHeaderProps {
 // * referencia de diseño, en vez de dos botones distintos.
 function toggleSidebar() {
   const isDesktop = window.matchMedia('(min-width: 768px)').matches
-  const { toggleSidebarCollapsed, mobileSidebarOpen, setMobileSidebarOpen } =
-    useUiStore.getState()
+  const { toggleSidebarCollapsed, mobileSidebarOpen, setMobileSidebarOpen } = useUiStore.getState()
 
   if (isDesktop) {
     toggleSidebarCollapsed()
@@ -60,18 +77,13 @@ function toggleSidebar() {
 const headerButtonClass =
   'text-header-foreground hover:bg-header-foreground/15 hover:text-header-foreground focus-visible:ring-header-foreground/40'
 
-export function AppHeader({ appName, user }: AppHeaderProps) {
+export function AppHeader({ appName, user, notifications = EMPTY_NOTIFICATIONS }: AppHeaderProps) {
   const theme = useUiStore((s) => s.theme)
   const toggleTheme = useUiStore((s) => s.toggleTheme)
 
   return (
     <header className="flex h-16 shrink-0 items-center gap-3 bg-header px-4 text-header-foreground">
-      <Button
-        variant="ghost"
-        size="icon-sm"
-        className={headerButtonClass}
-        onClick={toggleSidebar}
-      >
+      <Button variant="ghost" size="icon-sm" className={headerButtonClass} onClick={toggleSidebar}>
         <MenuIcon />
         <span className="sr-only">Alternar sidebar</span>
       </Button>
@@ -84,37 +96,27 @@ export function AppHeader({ appName, user }: AppHeaderProps) {
       </div>
 
       <div className="ml-auto flex items-center gap-1">
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          className={headerButtonClass}
-          onClick={toggleTheme}
-        >
-          {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
-          <span className="sr-only">Cambiar tema</span>
-        </Button>
+        <NotificationsMenu notifications={notifications} triggerClassName={headerButtonClass} />
 
         <DropdownMenu>
           <DropdownMenuTrigger
             className={cn(
-              'ml-1 flex items-center gap-2 rounded-full px-1.5 py-1 outline-none transition-colors hover:bg-header-foreground/15 focus-visible:ring-3 focus-visible:ring-header-foreground/40'
+              'ml-1 flex items-center gap-2.5 rounded-full px-2.5 py-1.5 outline-none transition-colors hover:bg-header-foreground/15 focus-visible:ring-3 focus-visible:ring-header-foreground/40'
             )}
           >
-            <Avatar size="sm">
+            <Avatar>
               <AvatarFallback className="bg-accent text-accent-foreground">
                 {iniciales(user.nombre)}
               </AvatarFallback>
             </Avatar>
             <span className="hidden text-left text-sm sm:block">
-              <span className="block leading-tight font-medium">
-                {user.nombre}
-              </span>
+              <span className="block leading-tight font-medium">{user.nombre}</span>
               <span className="block text-xs leading-tight text-header-foreground/70">
                 {user.rol}
               </span>
             </span>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuGroup>
               <DropdownMenuLabel>{user.nombre}</DropdownMenuLabel>
               <DropdownMenuSeparator />
@@ -122,6 +124,19 @@ export function AppHeader({ appName, user }: AppHeaderProps) {
                 <UserIcon />
                 Mi perfil
               </DropdownMenuItem>
+              <DropdownMenuItem>
+                <KeyRoundIcon />
+                Cambiar contraseña
+              </DropdownMenuItem>
+              <DropdownMenuItem closeOnClick={false} onClick={toggleTheme}>
+                {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+                Cambiar tema
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <SettingsIcon />
+                Configuración
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem variant="destructive">
                 <LogOutIcon />
                 Cerrar sesión

@@ -15,8 +15,9 @@ import {
 } from '@/components/ui/tanstack-table'
 import type { DataTableToolbarFilter } from '@/components/ui/tanstack-table'
 
+import { useMockNotifications } from '../api'
 import { StatusBadge } from '../components'
-import { mockAdminUser, mockIngredientes } from '../mocks'
+import { mockAdminUser, mockIngredientes, mockNotificaciones } from '../mocks'
 import type { CategoriaIngrediente, EstadoStock, Ingrediente } from '../types'
 
 const estadoStockBadge: Record<
@@ -113,6 +114,8 @@ const categoriaFilterOptions: { label: string; value: CategoriaIngrediente }[] =
 const DEMO_PAGE_SIZE = 20
 
 export function PruebaIngredientes() {
+  const notifications = useMockNotifications(mockNotificaciones)
+
   // Igual que en la demo de usuarios: esto simula lo que en una feature
   // real haría un hook de api/ con TanStack Query contra el backend
   // (page/pageSize/search/filter[categoria]/sort -> meta). Acá se
@@ -195,7 +198,7 @@ export function PruebaIngredientes() {
   )
 
   return (
-    <AdminLayout title="Ingredientes" user={mockAdminUser}>
+    <AdminLayout title="Ingredientes" user={mockAdminUser} notifications={notifications}>
       <div className="rounded-2xl border border-border bg-card p-4">
         <h2 className="font-heading text-sm font-medium text-foreground">
           Gestión de ingredientes
