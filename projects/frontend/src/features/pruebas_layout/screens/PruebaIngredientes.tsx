@@ -4,6 +4,7 @@ import type { ColumnDef, SortingState } from '@tanstack/react-table'
 
 import { AdminLayout } from '@/layouts'
 import { Button } from '@/components/ui/button'
+import { ModalDestructive } from '@/components/ui/modal-destructive'
 import {
   DataCards,
   DataTable,
@@ -127,6 +128,20 @@ export function PruebaIngredientes() {
   const [ingredientes, setIngredientes] = useState(mockIngredientes)
   const [modalState, setModalState] = useState<ModalState | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [ingredienteAEliminar, setIngredienteAEliminar] = useState<Ingrediente | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const handleConfirmEliminar = () => {
+    if (!ingredienteAEliminar) return
+    setIsDeleting(true)
+    // Misma simulación de latencia que crear/editar -- acá una feature real
+    // llamaría al DELETE del endpoint e invalidaría ['ingredientes', 'list'].
+    setTimeout(() => {
+      setIngredientes((prev) => prev.filter((item) => item.id !== ingredienteAEliminar.id))
+      setIsDeleting(false)
+      setIngredienteAEliminar(null)
+    }, 800)
+  }
 
   const handleSubmitIngrediente = (values: IngredienteFormValues) => {
     setIsSubmitting(true)
@@ -234,7 +249,7 @@ export function PruebaIngredientes() {
         icon={<Trash2Icon />}
         label={`Eliminar ${row.original.nombre}`}
         variant="destructive"
-        onClick={() => {}}
+        onClick={() => setIngredienteAEliminar(row.original)}
       />
     </>
   )
@@ -347,6 +362,21 @@ export function PruebaIngredientes() {
         ingrediente={modalState?.mode === 'edit' ? modalState.ingrediente : undefined}
         isSubmitting={isSubmitting}
         onSubmit={handleSubmitIngrediente}
+      />
+
+      <ModalDestructive
+        open={ingredienteAEliminar !== null}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) setIngredienteAEliminar(null)
+        }}
+        title="¿Eliminar ingrediente?"
+        description={
+          ingredienteAEliminar
+            ? `Se eliminará permanentemente "${ingredienteAEliminar.nombre}" del sistema.`
+            : ''
+        }
+        isSubmitting={isDeleting}
+        onConfirm={handleConfirmEliminar}
       />
     </AdminLayout>
   )
