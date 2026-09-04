@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
+import { runThemeTransition } from '@/utils/runThemeTransition'
 import { useUiStore } from '@/store'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -133,7 +134,10 @@ export function AppHeader({ appName, user, notifications = EMPTY_NOTIFICATIONS }
                 <KeyRoundIcon />
                 Cambiar contraseña
               </DropdownMenuItem>
-              <DropdownMenuItem closeOnClick={false} onClick={toggleTheme}>
+              <DropdownMenuItem
+                closeOnClick={false}
+                onClick={(event) => runThemeTransition(event.clientX, event.clientY, toggleTheme)}
+              >
                 {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
                 Cambiar tema
               </DropdownMenuItem>

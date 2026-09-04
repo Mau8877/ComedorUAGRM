@@ -1,6 +1,4 @@
-import { useEffect, type ReactNode } from 'react'
-
-import { useUiStore } from '@/store'
+import type { ReactNode } from 'react'
 
 import { AppHeader } from './AppHeader'
 import { AppSidebar } from './AppSidebar'
@@ -30,12 +28,6 @@ export function AppShell({
   notifications,
   children,
 }: AppShellProps) {
-  const theme = useUiStore((s) => s.theme)
-
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark')
-  }, [theme])
-
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
       <AppHeader appName={appName} user={user} notifications={notifications} />
