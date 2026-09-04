@@ -179,4 +179,49 @@ describe('DataCards', () => {
     expect(screen.queryByText('#1')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Editar' })).not.toBeInTheDocument()
   })
+
+  it('con meta.cardImage, renderiza la imagen grande como primer hijo de la card y no duplica el avatar en el título', () => {
+    const columns: ColumnDef<Row, unknown>[] = [
+      {
+        accessorKey: 'nombre',
+        header: 'Nombre',
+        meta: { cardTitle: true, cardImage: (row) => `https://img.test/${row.id}.png` },
+        cell: (ctx) => (
+          <div>
+            <img src="avatar.png" alt="" />
+            <span>{ctx.getValue<string>()}</span>
+          </div>
+        ),
+      },
+      { accessorKey: 'email', header: 'Correo' },
+    ]
+    const table = useTestTable(columns)
+
+    render(<DataCards table={table} isLoading={false} isError={false} />)
+
+    const card = screen.getByText('ana@test.com').closest('[data-slot="card"]')
+    const bigImage = card?.querySelector('img')
+    expect(bigImage).toHaveAttribute('src', 'https://img.test/1.png')
+    expect(card?.querySelectorAll('img')).toHaveLength(1)
+    expect(screen.getAllByText('Ana')).toHaveLength(1)
+  })
+
+  it('respeta cardImageAlt como override del alt de la imagen grande', () => {
+    const columns: ColumnDef<Row, unknown>[] = [
+      {
+        accessorKey: 'nombre',
+        header: 'Nombre',
+        meta: {
+          cardTitle: true,
+          cardImage: (row) => `https://img.test/${row.id}.png`,
+          cardImageAlt: (row) => `Foto de ${row.nombre}`,
+        },
+      },
+    ]
+    const table = useTestTable(columns)
+
+    render(<DataCards table={table} isLoading={false} isError={false} />)
+
+    expect(screen.getByAltText('Foto de Ana')).toBeInTheDocument()
+  })
 })

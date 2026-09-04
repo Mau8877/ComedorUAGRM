@@ -156,4 +156,24 @@ describe('DataTable', () => {
     expect(growCell).toHaveClass('w-56')
     expect(screen.getByText('ana@test.com').closest('[data-slot="table-cell"]')).not.toHaveClass('w-56')
   })
+
+  it('con meta.width en una columna, usa esa clase en vez de la de meta.grow', () => {
+    const widthColumns: ColumnDef<Row, unknown>[] = [
+      { accessorKey: 'nombre', header: 'Nombre', meta: { grow: true, width: 'w-24' } },
+      { accessorKey: 'email', header: 'Correo' },
+    ]
+    const table = renderHook(function useWrapper() {
+      return useReactTable({
+        data: [{ id: '1', nombre: 'Ana', email: 'ana@test.com' }],
+        columns: widthColumns,
+        getCoreRowModel: getCoreRowModel(),
+      })
+    }).result.current
+
+    render(<DataTable table={table} isLoading={false} isError={false} />)
+
+    const widthCell = screen.getByText('Ana').closest('[data-slot="table-cell"]')
+    expect(widthCell).toHaveClass('w-24')
+    expect(widthCell).not.toHaveClass('w-56')
+  })
 })

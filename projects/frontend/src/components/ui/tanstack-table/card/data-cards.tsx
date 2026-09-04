@@ -59,17 +59,39 @@ function AutoCard<TData>({ row, rowNumber, renderActions }: AutoCardProps<TData>
     )
   }
 
+  // Como mucho una columna con `meta.cardImage` por tabla (ver types.ts) --
+  // si hay más de una, gana la última en el orden de columnas, mismo
+  // criterio que `grow` en DataTable.
+  const imageCells = visibleCells.filter((cell) => cell.column.columnDef.meta?.cardImage)
+  const imageCell = imageCells[imageCells.length - 1]
+  const imageMeta = imageCell?.column.columnDef.meta
+
   const fieldCells = visibleCells
-    .filter((cell) => cell.id !== titleCell?.id)
+    .filter((cell) => cell.id !== titleCell?.id && cell.id !== imageCell?.id)
     .sort((a, b) => (a.column.columnDef.meta?.cardOrder ?? 0) - (b.column.columnDef.meta?.cardOrder ?? 0))
+
+  // Cuando la columna de título es también la de la imagen grande (el caso
+  // típico: una columna que en DataTable combina avatar+nombre en un solo
+  // `cell`), el título de la card usa el valor plano de la celda en vez de
+  // ese `cell` -- si no, la miniatura del avatar quedaría duplicada al lado
+  // de la imagen grande de arriba.
+  const titleContent =
+    titleCell && imageCell && titleCell.id === imageCell.id
+      ? String(titleCell.getValue() ?? '')
+      : titleCell && flexRender(titleCell.column.columnDef.cell, titleCell.getContext())
 
   return (
     <Card>
+      {imageMeta?.cardImage && (
+        <img
+          src={imageMeta.cardImage(row.original)}
+          alt={imageMeta.cardImageAlt?.(row.original) ?? (titleCell ? String(titleCell.getValue() ?? '') : '')}
+          className="aspect-square w-full object-cover"
+        />
+      )}
       {(titleCell || rowNumber != null) && (
         <CardHeader>
-          {titleCell && (
-            <CardTitle>{flexRender(titleCell.column.columnDef.cell, titleCell.getContext())}</CardTitle>
-          )}
+          {titleCell && <CardTitle>{titleContent}</CardTitle>}
           {rowNumber != null && (
             <CardAction>
               <span className="text-xs text-muted-foreground">#{rowNumber}</span>
@@ -87,7 +109,9 @@ function AutoCard<TData>({ row, rowNumber, renderActions }: AutoCardProps<TData>
           </div>
         ))}
       </CardContent>
-      {renderActions && <CardFooter className="justify-end gap-2">{renderActions(row)}</CardFooter>}
+      {renderActions && (
+        <CardFooter className="justify-around border-t border-border">{renderActions(row)}</CardFooter>
+      )}
     </Card>
   )
 }

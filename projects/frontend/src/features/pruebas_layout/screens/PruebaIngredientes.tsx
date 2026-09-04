@@ -35,14 +35,22 @@ function getEstadoStock(ingrediente: Ingrediente): EstadoStock {
 }
 
 // Columnas del mockup -- una sola definición alimenta DataTable y
-// DataCards (ver meta.cardTitle/cardLabel/cardOrder/hideInCard). La foto
-// va pegada al nombre en la misma celda, así aparece en las dos vistas
-// sin necesitar una columna aparte.
+// DataCards (ver meta.cardTitle/cardLabel/cardOrder/hideInCard/cardImage).
+// La foto va pegada al nombre en la misma celda de DataTable (así aparece
+// ahí sin necesitar una columna aparte), y esa misma columna usa
+// `meta.cardImage` para que DataCards la muestre además como la imagen
+// grande de la variante "con imagen" (ver shared/types.ts) -- DataCards ya
+// se encarga de no duplicar la miniatura dentro del título en ese caso.
 const ingredientesColumns: ColumnDef<Ingrediente, unknown>[] = [
   {
     accessorKey: 'nombre',
     header: 'Ingrediente',
-    meta: { cardTitle: true, grow: true },
+    meta: {
+      cardTitle: true,
+      grow: true,
+      cardImage: (row) => row.foto,
+      cardImageAlt: (row) => row.nombre,
+    },
     cell: (ctx) => (
       <div className="flex items-center gap-3">
         <img
@@ -63,13 +71,13 @@ const ingredientesColumns: ColumnDef<Ingrediente, unknown>[] = [
         {ctx.getValue<string>()}
       </StatusBadge>
     ),
-    meta: { cardOrder: 0 },
+    meta: { cardOrder: 0, width: 'w-32' },
   },
   {
     accessorKey: 'stock',
     header: 'Stock',
     cell: (ctx) => `${ctx.getValue<number>()} ${ctx.row.original.unidad}`,
-    meta: { cardOrder: 1, align: 'right' },
+    meta: { cardOrder: 1, align: 'left', width: 'w-28' },
   },
   {
     id: 'estado',
@@ -83,13 +91,13 @@ const ingredientesColumns: ColumnDef<Ingrediente, unknown>[] = [
         </StatusBadge>
       )
     },
-    meta: { cardOrder: 2 },
+    meta: { cardOrder: 2, width: 'w-32' },
   },
   {
     accessorKey: 'precioUnitario',
     header: 'Precio',
     cell: (ctx) => `Bs ${ctx.getValue<number>().toFixed(2)}`,
-    meta: { cardOrder: 3, align: 'right' },
+    meta: { cardOrder: 3, align: 'right', width: 'w-24' },
   },
 ]
 
@@ -246,6 +254,25 @@ export function PruebaIngredientes() {
         </div>
         <div className="mt-4 md:hidden">
           <DataCards
+            table={ingredientesTable}
+            isLoading={false}
+            isError={false}
+            showRowNumber
+            renderActions={renderIngredienteActions}
+          />
+        </div>
+
+        <div className="mt-8 hidden md:block">
+          <h3 className="font-heading text-sm font-medium text-foreground">
+            Misma data, vista de cards (5 por fila)
+          </h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Mismas columnas de `ingredientesColumns`, renderizadas con{' '}
+            <code>DataCards</code> en vez de <code>DataTable</code> -- demuestra que ambas
+            vistas salen de la misma definición de columnas.
+          </p>
+          <DataCards
+            className="mt-4 grid-cols-2 lg:grid-cols-5"
             table={ingredientesTable}
             isLoading={false}
             isError={false}

@@ -43,9 +43,15 @@ export interface DataTableProps<TData> extends DataStateProps {
  * cuenta para fixed layout), el sobrante se reparte proporcionalmente
  * entre TODAS las columnas según el ancho que cada una declaró -- ninguna
  * absorbe el 100% del espacio libre ella sola.
+ *
+ * `meta.width` (una clase `w-*` puntual por columna) gana sobre `grow` --
+ * así una feature puede fijar el ancho real de cada columna en vez de
+ * depender de que el navegador reparta en partes iguales lo que sobra
+ * entre las columnas sin pista de ancho.
  */
-function columnWidthClassName(grow: boolean | undefined): string {
-  return grow ? 'w-56' : ''
+function columnWidthClassName(meta: { grow?: boolean; width?: string } | undefined): string {
+  if (meta?.width) return meta.width
+  return meta?.grow ? 'w-56' : ''
 }
 
 export function DataTable<TData>({
@@ -81,7 +87,7 @@ export function DataTable<TData>({
                 return (
                   <TableHead
                     key={header.id}
-                    className={cn('px-3 text-accent-foreground', columnWidthClassName(meta?.grow))}
+                    className={cn('px-3 text-accent-foreground', columnWidthClassName(meta))}
                     style={{ textAlign: meta?.align }}
                   >
                     {header.isPlaceholder ? null : canSort ? (
@@ -149,7 +155,7 @@ export function DataTable<TData>({
                   return (
                     <TableCell
                       key={cell.id}
-                      className={cn('truncate px-3', columnWidthClassName(meta?.grow))}
+                      className={cn('truncate px-3', columnWidthClassName(meta))}
                       style={{ textAlign: meta?.align }}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
