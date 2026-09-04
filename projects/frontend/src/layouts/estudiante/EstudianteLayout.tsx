@@ -6,6 +6,7 @@ import type { EstudianteLayoutProps } from './estudianteTypes'
 export function EstudianteLayout({
   title,
   user,
+  notifications,
   activeHref,
   children,
 }: EstudianteLayoutProps) {
@@ -16,6 +17,7 @@ export function EstudianteLayout({
       navItems={estudianteNavItems}
       activeHref={activeHref}
       user={user}
+      notifications={notifications}
     >
       {children}
     </AppShell>

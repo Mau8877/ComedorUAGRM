@@ -1,3 +1,6 @@
 export * from './PruebaAdminLayout'
+export * from './PruebaBreadcrumbsInicio'
+export * from './PruebaBreadcrumbsUsuarioDetalle'
+export * from './PruebaBreadcrumbsUsuarios'
 export * from './PruebaEstudianteLayout'
 export * from './PruebaIngredientes'

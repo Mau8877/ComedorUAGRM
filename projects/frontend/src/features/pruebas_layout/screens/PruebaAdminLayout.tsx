@@ -34,10 +34,12 @@ import {
 } from '@/components/ui/tanstack-table'
 import type { DataTableToolbarFilter } from '@/components/ui/tanstack-table'
 
+import { useMockNotifications } from '../api'
 import { MiniBarChart, ProgressBar, StatusBadge } from '../components'
 import {
   mockAdminUser,
   mockMenuSemana,
+  mockNotificaciones,
   mockPedidosPorCategoria,
   mockUsuariosRecientes,
   mockUsuariosTabla,
@@ -97,6 +99,8 @@ const usuariosRolFilterOptions = [
 const DEMO_PAGE_SIZE = 20
 
 export function PruebaAdminLayout() {
+  const notifications = useMockNotifications(mockNotificaciones)
+
   // Simula lo que en una feature real haría un hook de api/ con TanStack
   // Query contra el backend (page/pageSize -> meta) -- acá se resuelve
   // client-side sobre el mock solo para el propósito de esta pantalla de
@@ -168,7 +172,7 @@ export function PruebaAdminLayout() {
   })
 
   return (
-    <AdminLayout title="Dashboard" user={mockAdminUser} activeHref="/panel">
+    <AdminLayout title="Dashboard" user={mockAdminUser} activeHref="/panel" notifications={notifications}>
       {/* Notificaciones (toast) */}
       <div className="mb-6 rounded-2xl border border-border bg-card p-4">
         <h2 className="font-heading text-sm font-medium text-foreground">

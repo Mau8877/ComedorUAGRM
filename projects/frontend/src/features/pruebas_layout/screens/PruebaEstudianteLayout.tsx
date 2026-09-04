@@ -14,11 +14,13 @@ import {
   toastInfo,
 } from '@/components/ui/toast'
 
+import { useMockNotifications } from '../api'
 import { MiniBarChart, ProgressBar, StatusBadge } from '../components'
 import {
   mockEstudianteUser,
   mockConsumoSemanal,
   mockHistorialPedidos,
+  mockNotificaciones,
 } from '../mocks'
 import type { EstadoPedido } from '../types'
 
@@ -43,11 +45,14 @@ const avisos = [
 ]
 
 export function PruebaEstudianteLayout() {
+  const notifications = useMockNotifications(mockNotificaciones.slice(0, 4))
+
   return (
     <EstudianteLayout
       title="Mi Menú"
       user={mockEstudianteUser}
       activeHref="/mi-menu"
+      notifications={notifications}
     >
       {/* Notificaciones (toast) */}
       <div className="mb-6 rounded-2xl border border-border bg-card p-4">

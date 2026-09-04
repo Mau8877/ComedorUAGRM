@@ -159,3 +159,30 @@
     @apply font-heading;
   }
 }
+
+/* * Reveal circular al cambiar de tema (ver src/utils/runThemeTransition.ts
+   -- ese módulo setea --theme-transition-x/y/radius desde el punto donde
+   se clickeó "Cambiar tema" y dispara la View Transition; acá solo vive el
+   keyframe). Se anula la cross-fade por opacidad que el navegador aplica
+   por default a ::view-transition-old/new(root), y en su lugar el snapshot
+   NUEVO crece como un círculo desde ese punto por encima del snapshot
+   viejo -- por eso solo ::view-transition-new(root) necesita animación
+   propia, el viejo se queda quieto debajo hasta quedar tapado. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-new(root) {
+  clip-path: circle(0 at var(--theme-transition-x, 50%) var(--theme-transition-y, 50%));
+  animation: theme-transition-reveal 480ms ease-in-out forwards;
+}
+
+@keyframes theme-transition-reveal {
+  to {
+    clip-path: circle(
+      var(--theme-transition-radius, 150%) at var(--theme-transition-x, 50%) var(--theme-transition-y, 50%)
+    );
+  }
+}

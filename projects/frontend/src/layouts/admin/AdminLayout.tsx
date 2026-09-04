@@ -6,6 +6,7 @@ import type { AdminLayoutProps } from './adminTypes'
 export function AdminLayout({
   title,
   user,
+  notifications,
   activeHref,
   children,
 }: AdminLayoutProps) {
@@ -16,6 +17,7 @@ export function AdminLayout({
       navItems={adminNavItems}
       activeHref={activeHref}
       user={user}
+      notifications={notifications}
     >
       {children}
     </AppShell>

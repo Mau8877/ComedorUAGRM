@@ -1,4 +1,6 @@
-import type { LayoutUser } from '@/components/layout'
+import dayjs from 'dayjs'
+
+import type { LayoutUser, NotificationItem } from '@/components/layout'
 
 import type { Ingrediente, MenuDia, PedidoHistorial, UsuarioReciente, UsuarioTabla } from '../types'
 
@@ -11,6 +13,53 @@ export const mockEstudianteUser: LayoutUser = {
   nombre: 'Juan Gómez',
   rol: 'Estudiante',
 }
+
+// 23 notificaciones (no las 5-7 de antes) para poder ver la paginación real
+// de a 10 + "Mostrar más" de NotificationsMenu -- ya ordenadas más nueva
+// primero (el orden es responsabilidad de quien arma el array, no del
+// componente). `minutosAtras` se resuelve a un ISO real al construir el
+// array, así `formatRelativeDate` muestra un relativo de verdad ("hace 5
+// minutos", "hace 2 días") en vez de un string ya formateado a mano.
+const notificacionesSeed: {
+  tipo: NotificationItem['tipo']
+  titulo: string
+  detalle?: string
+  minutosAtras: number
+  leida: boolean
+}[] = [
+  { tipo: 'warning', titulo: 'Stock bajo: Cebolla', detalle: 'Quedan 8 kg, por debajo del mínimo (10 kg).', minutosAtras: 5, leida: false },
+  { tipo: 'info', titulo: 'Nuevo pedido recibido', detalle: 'Pedido #1042 -- Milanesa con puré.', minutosAtras: 32, leida: false },
+  { tipo: 'error', titulo: 'Ingrediente agotado: Zanahoria', minutosAtras: 60, leida: false },
+  { tipo: 'success', titulo: 'Menú de mañana publicado', detalle: 'Silpancho, Ensalada de quinoa, Charque con mote.', minutosAtras: 95, leida: false },
+  { tipo: 'info', titulo: 'Nuevo usuario registrado', detalle: 'Rosa Fernández se unió como Estudiante.', minutosAtras: 140, leida: false },
+  { tipo: 'warning', titulo: 'Stock bajo: Leche', detalle: 'Quedan 5 L, por debajo del mínimo (12 L).', minutosAtras: 210, leida: false },
+  { tipo: 'error', titulo: 'Pedido cancelado', detalle: 'Pedido #1039 -- Pique a lo macho.', minutosAtras: 300, leida: false },
+  { tipo: 'success', titulo: 'Pedido entregado', detalle: 'Pedido #1035 -- Silpancho.', minutosAtras: 480, leida: false },
+  { tipo: 'info', titulo: 'Cambio de horario', detalle: 'El comedor cierra 30 minutos antes este viernes.', minutosAtras: 600, leida: false },
+  { tipo: 'warning', titulo: 'Stock bajo: Pimiento', detalle: 'Quedan 3 kg, por debajo del mínimo (5 kg).', minutosAtras: 720, leida: true },
+  { tipo: 'success', titulo: 'Nuevo ingrediente registrado', detalle: 'Arroz agregado al inventario.', minutosAtras: 900, leida: true },
+  { tipo: 'info', titulo: 'Nuevo usuario registrado', detalle: 'Diego Vaca se unió como Estudiante.', minutosAtras: 1080, leida: true },
+  { tipo: 'error', titulo: 'Ingrediente agotado: Harina', minutosAtras: 1300, leida: true },
+  { tipo: 'success', titulo: 'Menú semanal publicado', detalle: 'Ya está disponible el menú de la próxima semana.', minutosAtras: 1500, leida: true },
+  { tipo: 'warning', titulo: 'Stock bajo: Ajo', detalle: 'Quedan 2 kg, por debajo del mínimo (3 kg).', minutosAtras: 1800, leida: true },
+  { tipo: 'info', titulo: 'Nuevo pedido recibido', detalle: 'Pedido #1020 -- Ensalada de quinoa.', minutosAtras: 2100, leida: true },
+  { tipo: 'success', titulo: 'Pedido entregado', detalle: 'Pedido #1018 -- Charque con mote.', minutosAtras: 2600, leida: true },
+  { tipo: 'error', titulo: 'Pedido cancelado', detalle: 'Pedido #1015 -- Milanesa con puré.', minutosAtras: 3000, leida: true },
+  { tipo: 'info', titulo: 'Nuevo usuario registrado', detalle: 'Lucía Rojas se unió como Estudiante.', minutosAtras: 4000, leida: true },
+  { tipo: 'warning', titulo: 'Stock bajo: Tomate', detalle: 'Quedan 9 kg, por debajo del mínimo (10 kg).', minutosAtras: 5200, leida: true },
+  { tipo: 'success', titulo: 'Nuevo ingrediente registrado', detalle: 'Huevo agregado al inventario.', minutosAtras: 7000, leida: true },
+  { tipo: 'info', titulo: 'Cambio de horario', detalle: 'El comedor abre 1 hora antes durante exámenes.', minutosAtras: 8500, leida: true },
+  { tipo: 'success', titulo: 'Menú de mañana publicado', detalle: 'Pique a lo macho, Ensalada de quinoa.', minutosAtras: 10000, leida: true },
+]
+
+export const mockNotificaciones: NotificationItem[] = notificacionesSeed.map((seed, index) => ({
+  id: `notif-${index + 1}`,
+  tipo: seed.tipo,
+  titulo: seed.titulo,
+  detalle: seed.detalle,
+  fecha: dayjs().subtract(seed.minutosAtras, 'minute').toISOString(),
+  leida: seed.leida,
+}))
 
 export const mockMenuSemana: MenuDia[] = [
   { dia: 'Lunes', plato: 'Silpancho', estado: 'disponible', porciones: 34, porcionesTotal: 40 },
