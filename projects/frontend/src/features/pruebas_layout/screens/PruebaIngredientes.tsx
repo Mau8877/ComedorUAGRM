@@ -18,7 +18,9 @@ import type { DataTableToolbarFilter } from '@/components/ui/tanstack-table'
 import { useMockNotifications } from '../api'
 import { StatusBadge } from '../components'
 import { mockAdminUser, mockIngredientes, mockNotificaciones } from '../mocks'
+import type { IngredienteFormValues } from '../schemas'
 import type { CategoriaIngrediente, EstadoStock, Ingrediente } from '../types'
+import { IngredienteFormModal } from './IngredienteFormModal'
 
 const estadoStockBadge: Record<
   EstadoStock,
@@ -113,8 +115,44 @@ const categoriaFilterOptions: { label: string; value: CategoriaIngrediente }[] =
 
 const DEMO_PAGE_SIZE = 20
 
+type ModalState = { mode: 'create' } | { mode: 'edit'; ingrediente: Ingrediente }
+
 export function PruebaIngredientes() {
   const notifications = useMockNotifications(mockNotificaciones)
+
+  // Estado local mutable solo para que el modal de crear/editar tenga un
+  // efecto visible en la tabla del mockup -- una feature real invalidaría
+  // ['ingredientes', 'list'] en vez de mutar un array a mano (ver
+  // TANSTACK_QUERY_FRONTEND.md).
+  const [ingredientes, setIngredientes] = useState(mockIngredientes)
+  const [modalState, setModalState] = useState<ModalState | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleSubmitIngrediente = (values: IngredienteFormValues) => {
+    setIsSubmitting(true)
+    // Simula la latencia de una mutation real (ver isSubmitting del
+    // ModalLayout) -- acá no hay backend, solo el timeout.
+    setTimeout(() => {
+      const payload = {
+        nombre: values.nombre,
+        foto: values.foto,
+        categoria: values.categoria,
+        unidad: values.unidad,
+        stock: Number(values.stock),
+        stockMinimo: Number(values.stockMinimo),
+        precioUnitario: Number(values.precioUnitario),
+      }
+      setIngredientes((prev) => {
+        if (modalState?.mode === 'edit') {
+          const idEditado = modalState.ingrediente.id
+          return prev.map((item) => (item.id === idEditado ? { ...item, ...payload } : item))
+        }
+        return [{ id: `ing-${Date.now()}`, ...payload }, ...prev]
+      })
+      setIsSubmitting(false)
+      setModalState(null)
+    }, 800)
+  }
 
   // Igual que en la demo de usuarios: esto simula lo que en una feature
   // real haría un hook de api/ con TanStack Query contra el backend
@@ -127,7 +165,7 @@ export function PruebaIngredientes() {
   const [categoriaFilter, setCategoriaFilter] = useState<string | undefined>(undefined)
   const sortParam = toSortQueryParam(sorting)
 
-  const datosFiltrados = mockIngredientes.filter((ingrediente) => {
+  const datosFiltrados = ingredientes.filter((ingrediente) => {
     const coincideBusqueda =
       search.trim() === '' || ingrediente.nombre.toLowerCase().includes(search.toLowerCase())
     const coincideCategoria = !categoriaFilter || ingrediente.categoria === categoriaFilter
@@ -187,7 +225,11 @@ export function PruebaIngredientes() {
   const renderIngredienteActions = (row: { original: Ingrediente }) => (
     <>
       <RowActionButton icon={<EyeIcon />} label="Ver detalles" onClick={() => {}} />
-      <RowActionButton icon={<PencilIcon />} label="Editar" onClick={() => {}} />
+      <RowActionButton
+        icon={<PencilIcon />}
+        label="Editar"
+        onClick={() => setModalState({ mode: 'edit', ingrediente: row.original })}
+      />
       <RowActionButton
         icon={<Trash2Icon />}
         label={`Eliminar ${row.original.nombre}`}
@@ -238,7 +280,7 @@ export function PruebaIngredientes() {
                 <RefreshCwIcon data-icon="inline-start" />
                 Refrescar
               </Button>
-              <Button size="sm">
+              <Button size="sm" onClick={() => setModalState({ mode: 'create' })}>
                 <PlusIcon data-icon="inline-start" />
                 Nuevo ingrediente
               </Button>
@@ -295,6 +337,17 @@ export function PruebaIngredientes() {
           }}
         />
       </div>
+
+      <IngredienteFormModal
+        key={modalState?.mode === 'edit' ? modalState.ingrediente.id : 'create'}
+        open={modalState !== null}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) setModalState(null)
+        }}
+        ingrediente={modalState?.mode === 'edit' ? modalState.ingrediente : undefined}
+        isSubmitting={isSubmitting}
+        onSubmit={handleSubmitIngrediente}
+      />
     </AdminLayout>
   )
 }
