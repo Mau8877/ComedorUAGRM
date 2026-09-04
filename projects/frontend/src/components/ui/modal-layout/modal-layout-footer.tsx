@@ -22,10 +22,10 @@ export function ModalLayoutFooter({
 }: ModalLayoutFooterProps) {
   return (
     <DialogFooter className={cn('shrink-0 border-t border-border p-6', className)}>
-      <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
+      <Button type="button" variant="accent" onClick={onCancel} disabled={isSubmitting}>
         {cancelLabel}
       </Button>
-      <Button type="submit" form={formId} disabled={isSubmitting}>
+      <Button type="submit" variant="success" form={formId} disabled={isSubmitting}>
         {isSubmitting && <Loader2Icon data-icon="inline-start" className="animate-spin" />}
         {confirmLabel}
       </Button>
