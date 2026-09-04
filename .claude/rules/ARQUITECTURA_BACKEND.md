@@ -27,6 +27,8 @@ com.comedoruagrm.backend
 └── features/
     └── {modulo}/
         ├── controller/  # Entrada HTTP
+        ├── enums/       # Enumeraciones de negocio (si aplica)
+        ├── exception/   # Excepciones de negocio (si aplica)
         ├── service/     # Lógica de negocio
         ├── repository/  # Acceso a datos (Spring Data JPA)
         ├── dto/         # Contrato con el cliente (Request/Response)
@@ -65,8 +67,8 @@ PostgreSQL
   DTOs a la capa de arriba (el controller), pero internamente trabaja con
   Models.
 - **Repository**: sin lógica, solo acceso a datos. `JpaRepository<Model, Id>`
-  + queries derivadas por nombre de método o `@Query` cuando el nombre se
-  vuelve inmanejable.
+  - queries derivadas por nombre de método o `@Query` cuando el nombre se
+    vuelve inmanejable.
 - **DTO**: es el contrato con el cliente, nunca se expone un `Model` (la
   clase JPA) directo en un response (evita filtrar detalles de persistencia,
   permite que el modelo de datos cambie sin romper el contrato HTTP).
@@ -80,15 +82,15 @@ Estas piezas no viven en ningún `features/{modulo}/` porque las usa **toda**
 la aplicación, no un módulo puntual — cada una tiene su propia rule con el
 detalle completo:
 
-| Pieza | Vive en | Rule |
-| --- | --- | --- |
-| Sobre de respuesta (`ApiResponse`, `PageMeta`) | `common/response/` | [RESPONSES_BACKEND.md](backend/RESPONSES_BACKEND.md) |
-| Jerarquía de excepciones + `GlobalExceptionHandler` | `common/exception/` | [EXCEPCIONES_BACKEND.md](backend/EXCEPCIONES_BACKEND.md) |
-| Autenticación JWT, `RateLimitFilter`, `@CurrentUserId` | `security/` | [SEGURIDAD_AUTH_BACKEND.md](backend/SEGURIDAD_AUTH_BACKEND.md) |
-| `SecurityConfig` y demás config de Spring | `config/` | — |
-| Convención de rutas, verbos HTTP, paginación | (no es código, es contrato) | [ENDPOINTS_BACKEND.md](backend/ENDPOINTS_BACKEND.md) |
-| Logging estructurado | (transversal a `service/` de cada módulo) | [LOGGING_BACKEND.md](backend/LOGGING_BACKEND.md) |
-| Migraciones, nombres de tabla/columna | `src/main/resources/db/migration/` | [PERSISTENCIA_BD_BACKEND.md](backend/PERSISTENCIA_BD_BACKEND.md) |
+| Pieza                                                  | Vive en                                   | Rule                                                             |
+| ------------------------------------------------------ | ----------------------------------------- | ---------------------------------------------------------------- |
+| Sobre de respuesta (`ApiResponse`, `PageMeta`)         | `common/response/`                        | [RESPONSES_BACKEND.md](backend/RESPONSES_BACKEND.md)             |
+| Jerarquía de excepciones + `GlobalExceptionHandler`    | `common/exception/`                       | [EXCEPCIONES_BACKEND.md](backend/EXCEPCIONES_BACKEND.md)         |
+| Autenticación JWT, `RateLimitFilter`, `@CurrentUserId` | `security/`                               | [SEGURIDAD_AUTH_BACKEND.md](backend/SEGURIDAD_AUTH_BACKEND.md)   |
+| `SecurityConfig` y demás config de Spring              | `config/`                                 | —                                                                |
+| Convención de rutas, verbos HTTP, paginación           | (no es código, es contrato)               | [ENDPOINTS_BACKEND.md](backend/ENDPOINTS_BACKEND.md)             |
+| Logging estructurado                                   | (transversal a `service/` de cada módulo) | [LOGGING_BACKEND.md](backend/LOGGING_BACKEND.md)                 |
+| Migraciones, nombres de tabla/columna                  | `src/main/resources/db/migration/`        | [PERSISTENCIA_BD_BACKEND.md](backend/PERSISTENCIA_BD_BACKEND.md) |
 
 ## Regla de dependencia
 
