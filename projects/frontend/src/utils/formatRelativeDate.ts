@@ -1,9 +1,4 @@
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
-import 'dayjs/locale/es'
-
-dayjs.extend(relativeTime)
-dayjs.locale('es')
+import dayjs from './dayjsEs'
 
 /**
  * Formatea una fecha ISO-8601 a relativo en español (ej. "hace 5 minutos",

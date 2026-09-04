@@ -23,6 +23,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
+import { Breadcrumbs } from './Breadcrumbs'
+import { HeaderClock } from './HeaderClock'
 import { NotificationsMenu } from './NotificationsMenu'
 import type { LayoutUser, NotificationsController } from './types'
 
@@ -95,7 +97,10 @@ export function AppHeader({ appName, user, notifications = EMPTY_NOTIFICATIONS }
         <span className="font-heading text-lg font-semibold">{appName}</span>
       </div>
 
-      <div className="ml-auto flex items-center gap-1">
+      <Breadcrumbs className="ml-2 hidden lg:flex" />
+
+      <div className="ml-auto flex items-center gap-3">
+        <HeaderClock className="hidden text-xs text-header-foreground/60 xl:block" />
         <NotificationsMenu notifications={notifications} triggerClassName={headerButtonClass} />
 
         <DropdownMenu>
