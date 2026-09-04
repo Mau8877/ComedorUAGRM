@@ -213,12 +213,11 @@ y [CONVENCIONES_JAVA_BACKEND.md](../../.claude/rules/backend/CONVENCIONES_JAVA_B
 ```
 features/notificaciones/
 ├── controller/NotificacionController.java
+├── enums/TipoNotificacion.java     (enum: SUCCESS, INFO, WARNING, ERROR)
 ├── service/NotificacionService.java
 ├── repository/NotificacionRepository.java
 ├── dto/NotificacionResponse.java   (record)
-└── model/
-    ├── Notificacion.java
-    └── TipoNotificacion.java       (enum: SUCCESS, INFO, WARNING, ERROR)
+└── model/Notificacion.java
 ```
 
 Tabla `notificaciones` (ver

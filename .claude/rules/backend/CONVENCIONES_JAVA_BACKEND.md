@@ -21,6 +21,7 @@ com.comedoruagrm.backend
 └── features/
     └── {modulo}/         # ej. usuarios/, auth/, pedidos/
         ├── controller/
+        ├── enums/        # Enumeraciones de negocio del módulo (si aplica, ver nota abajo)
         ├── service/
         ├── repository/
         ├── dto/          # XxxRequest, XxxResponse
@@ -31,6 +32,17 @@ com.comedoruagrm.backend
 Una clase que solo la usa un módulo vive **dentro de ese módulo**, no en
 `common/` — `common/` es exclusivamente para lo que de verdad comparten dos o
 más features. No se mueve algo a `common/` "por las dudas".
+
+`enums/` es solo para **enumeraciones de negocio propias del módulo** (ej.
+`TipoNotificacion { SUCCESS, INFO, WARNING, ERROR }` en `notificaciones/`) —
+un campo del Model que solo puede tomar un set fijo de valores, persistido
+`@Enumerated(EnumType.STRING)` (nunca `ORDINAL`, mismo criterio que `Role`
+en [SEGURIDAD_AUTH_BACKEND.md](SEGURIDAD_AUTH_BACKEND.md#roles-y-permisos)).
+No confundir con `{Recurso}ErrorCodes` (el catálogo de códigos de error del
+módulo, ver [EXCEPCIONES_BACKEND.md](EXCEPCIONES_BACKEND.md)) — eso sigue
+sin una subcarpeta dedicada, vive suelto en la raíz del paquete del módulo.
+Si el módulo no tiene ninguna enumeración de negocio, la carpeta
+directamente no existe (no se crea vacía "por si acaso").
 
 ## Nombres de clases
 
