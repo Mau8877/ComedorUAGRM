@@ -24,11 +24,48 @@ en la feature.
 | `actions/RowActionButton` | Ícono + tooltip para una fila | Dentro de `renderActions` de `DataTable`/`DataCards` |
 
 Una sola definición de columnas (`ColumnDef<TData>[]`, con `meta.cardTitle`/
-`cardLabel`/`hideInCard`/`cardOrder` donde corresponda) alimenta **tanto**
-`DataTable` como `DataCards` — no se duplica el mapeo campo→UI entre las
-dos vistas. Cuál de las dos se muestra (por breakpoint, por toggle, etc.)
-es una decisión de la feature (`hidden md:block` / `md:hidden`, o lo que
-haga falta) — el paquete no las combina por sí solo.
+`cardLabel`/`hideInCard`/`cardOrder`/`cardImage` donde corresponda) alimenta
+**tanto** `DataTable` como `DataCards` — no se duplica el mapeo campo→UI
+entre las dos vistas. Cuál de las dos se muestra (por breakpoint, por
+toggle, etc.) es una decisión de la feature (`hidden md:block` /
+`md:hidden`, o lo que haga falta) — el paquete no las combina por sí solo.
+
+## `DataCards`: dos variantes de card, elegidas por columna
+
+`DataCards` deriva automáticamente una de dos variantes según si alguna
+columna define `meta.cardImage` — no es una prop de `DataCards`, es
+metadata de la columna, mismo criterio que `cardTitle`/`cardOrder`:
+
+- **Sin imagen** (default, sin `meta.cardImage` en ninguna columna):
+  título + campos (`label: valor`) + acciones al pie.
+- **Con imagen** (una columna define `meta.cardImage`): una imagen grande
+  ocupa todo el ancho arriba de la card (usa el mismo radio de esquina que
+  `Card` ya trae para un `<img>` como primer hijo), seguida del título +
+  campos + acciones, igual que la variante sin imagen.
+
+```ts
+{
+  accessorKey: 'nombre',
+  header: 'Ingrediente',
+  meta: {
+    cardTitle: true,
+    cardImage: (row) => row.foto,        // recibe la FILA completa, no el valor de la celda
+    cardImageAlt: (row) => row.nombre,   // opcional -- default: el valor de la celda `cardTitle`
+  },
+  cell: (ctx) => (/* markup de DataTable, ej. avatar + nombre en la misma celda */),
+}
+```
+
+`cardImage`/`cardImageAlt` reciben la fila completa (`row.original`), no el
+valor de esa columna ni su `cell` — así una columna que en `DataTable`
+combina avatar + nombre en un solo `cell` (patrón ya usado para ahorrar una
+columna aparte en la tabla) puede seguir haciendo eso en la tabla, mientras
+`DataCards` arma la imagen grande por su cuenta sin duplicar la miniatura
+dentro del título. Como mucho una columna por tabla debería definir
+`cardImage` — si hay más de una, gana la última en el orden de columnas
+(mismo criterio que `grow` en `DataTable`). Ver el mockup de ingredientes
+(`features/pruebas_layout/screens/PruebaIngredientes.tsx`) como referencia
+de la variante con imagen.
 
 ## Reglas de uso obligatorias
 
@@ -44,6 +81,12 @@ haga falta) — el paquete no las combina por sí solo.
   mayoría de los navegadores lo ignora para el cálculo de ancho de
   columna). El resto de las columnas no necesita nada — se reparten el
   espacio libre en partes iguales.
+- **`meta.width` para fijar el ancho de una columna puntual** — una clase
+  `w-*` de Tailwind (ej. `w-32`), gana sobre `meta.grow` en esa columna.
+  Se usa en columnas angostas de contenido corto (un badge de estado, un
+  número) que igual necesitan más o menos aire que el reparto automático
+  les daría — no hace falta para la mayoría de las columnas, que ya se
+  reparten bien solas.
 - **100% server-side**: `useDataTable` nunca pagina/ordena/filtra en el
   cliente. `page`/`pageSize`/`sorting` viven en el `useState` de la
   feature y se mandan al backend a través del hook de `api/` de esa
