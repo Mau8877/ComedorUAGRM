@@ -90,17 +90,45 @@ no se copia la validación de sesión adentro de cada ruta nueva.
 ## Layouts por rol
 
 Distintos layouts según el rol del usuario autenticado (ej. layout admin vs.
-layout usuario común, ver [SEGURIDAD_AUTH_BACKEND.md](../backend/SEGURIDAD_AUTH_BACKEND.md)
+layout estudiante, ver [SEGURIDAD_AUTH_BACKEND.md](../backend/SEGURIDAD_AUTH_BACKEND.md)
 para el esquema de roles del lado del backend — el frontend usa el mismo
 `role` que viaja en el JWT/en la respuesta de login).
 
-- `src/layouts/AdminLayout.tsx`, `src/layouts/UsuarioLayout.tsx` — un
-  componente de layout por rol, no un único layout con `if (role === 'ADMIN')`
-  esparcido dentro (eso se vuelve ilegible apenas se agregan dos roles más).
+> **Nombre del layout vs. valor del rol en el backend.** El enum de roles
+> del backend es `Role { ADMIN, USUARIO }` (ver
+> [SEGURIDAD_AUTH_BACKEND.md](../backend/SEGURIDAD_AUTH_BACKEND.md#roles-y-permisos))
+> — ese valor `USUARIO` **no cambia**, es la decisión ya tomada del backend.
+> `estudiante/` es solo el nombre que el frontend le da a su layout/carpeta
+> para ese mismo rol (más descriptivo que "usuario" para este dominio,
+> donde el rol no-admin siempre es un estudiante). Cuando exista el mapeo
+> real JWT → layout, ese punto traduce `role: "USUARIO"` a
+> `EstudianteLayout`, no al revés.
+
+- Un directorio por rol dentro de `src/layouts/` (`admin/`, `estudiante/`, y
+  los que se agreguen a futuro), no un único layout con
+  `if (role === 'ADMIN')` esparcido dentro (eso se vuelve ilegible apenas se
+  agregan dos roles más). Cada directorio sigue la misma forma interna,
+  ej. `src/layouts/admin/`:
+  ```
+  admin/
+  ├── AdminLayout.tsx    # el componente: arma <AppShell> con navItems + appName
+  ├── adminNavItems.ts   # el array de NavItem[] de ese rol
+  ├── adminTypes.ts      # AdminLayoutProps (title/user/activeHref/children)
+  └── index.ts           # barrel: exporta AdminLayout + AdminLayoutProps
+  ```
+  `adminNavItems.ts`/`adminTypes.ts` no se exportan desde `index.ts` — son
+  detalle interno de ese layout, igual que el criterio de "qué es público de
+  la feature" en [ARQUITECTURA_FRONTEND.md](../ARQUITECTURA_FRONTEND.md#indexts-qué-es-público-de-la-feature).
+  `src/layouts/index.ts` es a su vez el barrel de nivel superior que
+  re-exporta el barrel de cada rol (`export * from './admin'`,
+  `export * from './estudiante'`) — quien consume un layout importa siempre
+  desde ahí (`import { AdminLayout } from '@/layouts'`), nunca de un
+  archivo interno (`@/layouts/admin/AdminLayout`) ni siquiera del barrel de
+  un rol puntual (`@/layouts/admin`).
 - Asociación ruta ↔ layout: se agrupan las rutas de cada rol bajo su propio
   layout pathless dentro de `_authenticated/`, ej.
-  `_authenticated/_admin/...` usa `AdminLayout`, `_authenticated/_usuario/...`
-  usa `UsuarioLayout`. La decisión de a qué grupo pertenece cada ruta es
+  `_authenticated/_admin/...` usa `AdminLayout`, `_authenticated/_estudiante/...`
+  usa `EstudianteLayout`. La decisión de a qué grupo pertenece cada ruta es
   estructural (en qué carpeta vive el archivo), no una condición en runtime
   dentro de un layout único.
 - El layout no vuelve a validar el rol contra el backend en cada render —

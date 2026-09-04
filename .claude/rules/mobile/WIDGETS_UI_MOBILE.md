@@ -44,7 +44,14 @@ la paleta cambia):
   paleta, separadas en `light*`/`dark*`, para no repetir valores hex sueltos
   en otros widgets. Un widget que necesita un color de marca fuera del
   `Theme.of(context)` (raro — la mayoría debería salir de `colorScheme`)
-  importa `AppColors`, no hardcodea el hex de nuevo.
+  importa `AppColors`, no hardcodea el hex de nuevo. Incluye `lightWarning`/
+  `darkWarning` y `lightInfo`/`darkInfo` (sin equivalente en
+  `ColorScheme` de Material 3, igual que `lightSuccess`/`darkSuccess` — se
+  usan como constantes sueltas donde haga falta un estado de advertencia/
+  información, ej. un `SnackBar`), y `header`/`headerForeground` — una
+  única superficie fija de marca (no varía entre claro/oscuro, mismo
+  criterio que `--header` del lado web) usada en `appBarTheme` de ambos
+  temas.
 - Tipografía vía el paquete **`google_fonts`** (no hay equivalente a
   Fontsource en Flutter): **Familjen Grotesk** para títulos
   (`display*`/`headline*`/`title*` del `TextTheme`) y **Jost** para cuerpo/
