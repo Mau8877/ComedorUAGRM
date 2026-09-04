@@ -83,12 +83,7 @@ export function ModalDestructive({
           >
             {cancelLabel}
           </Button>
-          <Button
-            type="button"
-            onClick={onConfirm}
-            disabled={isSubmitting}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/80"
-          >
+          <Button type="button" variant="destructive-solid" onClick={onConfirm} disabled={isSubmitting}>
             {isSubmitting && <Loader2Icon data-icon="inline-start" className="animate-spin" />}
             {confirmLabel}
           </Button>

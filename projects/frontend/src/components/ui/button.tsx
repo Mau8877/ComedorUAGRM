@@ -17,11 +17,15 @@ const buttonVariants = cva(
           "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50",
         destructive:
           "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
-        // * accent/success: variantes sólidas (mismo patrón que `default`)
-        // * para acciones de negativa/afirmativa explícitas -- ej. Cancelar
-        // * vs Crear/Guardar de ModalLayout -- no confundir `accent` acá
-        // * con `destructive`, que es para eliminar/errores.
-        accent: "bg-accent text-accent-foreground hover:bg-accent/80",
+        // * destructive-solid/success: variantes sólidas (mismo patrón que
+        // * `default`) para acciones de negativa/afirmativa explícitas -- ej.
+        // * Cancelar vs Crear/Guardar de ModalLayout, o Eliminar de
+        // * ModalDestructive. `destructive-solid` usa el mismo token
+        // * `destructive` que la variante de arriba (mismo rojo semántico de
+        // * "error/eliminar" en todo el sistema), solo que sólido en vez de
+        // * tenue -- no se usa `accent` (el rojo de marca) para esto, para
+        // * no tener dos rojos con significado distinto en la misma app.
+        "destructive-solid": "bg-destructive text-destructive-foreground hover:bg-destructive/80",
         success: "bg-success text-success-foreground hover:bg-success/80",
         link: "text-primary underline-offset-4 hover:underline",
       },
