@@ -1,8 +1,25 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
+
+import { Button } from '@/components/ui/button'
 
 export const Route = createFileRoute('/')({
   component: HomePage,
 })
+
+const RUTAS_DISPONIBLES = [
+  { to: '/login', label: 'Login' },
+  { to: '/panel', label: 'Panel' },
+  { to: '/pruebas-layout/admin', label: 'Prueba: Layout Admin' },
+  { to: '/pruebas-layout/estudiante', label: 'Prueba: Layout Estudiante' },
+  { to: '/pruebas-layout/ingredientes', label: 'Prueba: Ingredientes' },
+  { to: '/pruebas-layout/breadcrumbs', label: 'Prueba: Breadcrumbs' },
+  { to: '/pruebas-layout/breadcrumbs/usuarios', label: 'Prueba: Breadcrumbs Usuarios' },
+  {
+    to: '/pruebas-layout/breadcrumbs/usuarios/$usuarioId',
+    params: { usuarioId: '1' },
+    label: 'Prueba: Breadcrumbs Detalle Usuario',
+  },
+] as const
 
 function HomePage() {
   return (
@@ -15,6 +32,25 @@ function HomePage() {
           Grotesk para títulos y Jost para texto) y el sistema de colores.
         </p>
       </header>
+
+      {/* Navegación rápida a todas las rutas existentes */}
+      <section className="space-y-3">
+        <h2 className="font-heading text-2xl font-bold">Rutas</h2>
+        <div className="flex flex-wrap gap-3">
+          {RUTAS_DISPONIBLES.map((ruta) => (
+            <Button
+              key={ruta.to}
+              nativeButton={false}
+              render={
+                // @ts-expect-error -- `params` solo existe en la ruta dinámica del array
+                <Link to={ruta.to} params={ruta.params} />
+              }
+            >
+              {ruta.label}
+            </Button>
+          ))}
+        </div>
+      </section>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 font-sans">
         {/* Tarjeta 1: Colores Principales */}
