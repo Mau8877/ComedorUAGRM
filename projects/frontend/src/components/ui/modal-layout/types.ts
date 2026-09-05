@@ -30,3 +30,24 @@ export interface ModalLayoutProps {
   onCancel?: () => void
   children: ReactNode
 }
+
+export interface ModalDetailLayoutProps {
+  /** Controla la visibilidad del modal (mismo patrón que `Dialog`). */
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  title: string
+  subtitle?: string
+  /** Ícono de lucide-react al inicio del título. Sin este prop, no se muestra ninguno. */
+  icon?: LucideIcon
+  /** Ancho del modal -- set fijo de tokens, nunca un valor libre. Default `"md"`. */
+  size?: ModalLayoutSize
+  /** Default: `"Cerrar"`. */
+  closeLabel?: string
+  /**
+   * Acción secundaria opcional del footer (ej. "Editar"). Solo se muestra
+   * cuando se pasan `actionLabel` y `onAction` juntos.
+   */
+  actionLabel?: string
+  onAction?: () => void
+  children: ReactNode
+}

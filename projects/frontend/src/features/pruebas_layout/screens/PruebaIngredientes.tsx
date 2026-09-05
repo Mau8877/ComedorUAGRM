@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { EyeIcon, PencilIcon, PlusIcon, RefreshCwIcon, Trash2Icon } from 'lucide-react'
+import { PencilIcon, PlusIcon, RefreshCwIcon, SquareTextIcon, Trash2Icon } from 'lucide-react'
 import type { ColumnDef, SortingState } from '@tanstack/react-table'
 
 import { AdminLayout } from '@/layouts'
@@ -21,6 +21,7 @@ import { StatusBadge } from '../components'
 import { mockAdminUser, mockIngredientes, mockNotificaciones } from '../mocks'
 import type { IngredienteFormValues } from '../schemas'
 import type { CategoriaIngrediente, EstadoStock, Ingrediente } from '../types'
+import { IngredienteDetailModal } from './IngredienteDetailModal'
 import { IngredienteFormModal } from './IngredienteFormModal'
 
 const estadoStockBadge: Record<
@@ -130,6 +131,7 @@ export function PruebaIngredientes() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [ingredienteAEliminar, setIngredienteAEliminar] = useState<Ingrediente | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [ingredienteDetalle, setIngredienteDetalle] = useState<Ingrediente | null>(null)
 
   const handleConfirmEliminar = () => {
     if (!ingredienteAEliminar) return
@@ -239,7 +241,11 @@ export function PruebaIngredientes() {
 
   const renderIngredienteActions = (row: { original: Ingrediente }) => (
     <>
-      <RowActionButton icon={<EyeIcon />} label="Ver detalles" onClick={() => {}} />
+      <RowActionButton
+        icon={<SquareTextIcon />}
+        label="Ver detalles"
+        onClick={() => setIngredienteDetalle(row.original)}
+      />
       <RowActionButton
         icon={<PencilIcon />}
         label="Editar"
@@ -261,10 +267,9 @@ export function PruebaIngredientes() {
           Gestión de ingredientes
         </h2>
         <p className="mt-1 text-xs text-muted-foreground">
-          Ejemplo de components/ui/tanstack-table aplicado a un dominio real
-          del comedor -- foto + nombre en la misma celda (visible en tabla y
-          en cards), categoría, stock con su unidad, estado derivado del
-          stock mínimo, y precio. Reducí el ancho de la ventana para ver la
+          Ejemplo de components/ui/tanstack-table aplicado a un dominio real del comedor -- foto +
+          nombre en la misma celda (visible en tabla y en cards), categoría, stock con su unidad,
+          estado derivado del stock mínimo, y precio. Reducí el ancho de la ventana para ver la
           vista de cards en mobile.
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
@@ -327,9 +332,9 @@ export function PruebaIngredientes() {
             Misma data, vista de cards (5 por fila)
           </h3>
           <p className="mt-1 text-xs text-muted-foreground">
-            Mismas columnas de `ingredientesColumns`, renderizadas con{' '}
-            <code>DataCards</code> en vez de <code>DataTable</code> -- demuestra que ambas
-            vistas salen de la misma definición de columnas.
+            Mismas columnas de `ingredientesColumns`, renderizadas con <code>DataCards</code> en vez
+            de <code>DataTable</code> -- demuestra que ambas vistas salen de la misma definición de
+            columnas.
           </p>
           <DataCards
             className="mt-4 grid-cols-2 lg:grid-cols-5"
@@ -362,6 +367,18 @@ export function PruebaIngredientes() {
         ingrediente={modalState?.mode === 'edit' ? modalState.ingrediente : undefined}
         isSubmitting={isSubmitting}
         onSubmit={handleSubmitIngrediente}
+      />
+
+      <IngredienteDetailModal
+        open={ingredienteDetalle !== null}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) setIngredienteDetalle(null)
+        }}
+        ingrediente={ingredienteDetalle}
+        onEditar={(ingrediente) => {
+          setIngredienteDetalle(null)
+          setModalState({ mode: 'edit', ingrediente })
+        }}
       />
 
       <ModalDestructive

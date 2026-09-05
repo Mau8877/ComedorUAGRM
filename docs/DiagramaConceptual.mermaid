@@ -1,0 +1,119 @@
+erDiagram
+  USUARIO ||--o| PERFIL : tiene
+  USUARIO ||--o{ USUARIO_ROL : tiene
+  ROL ||--o{ USUARIO_ROL : agrupa
+  USUARIO ||--o| CONFIGURACION : configura
+  USUARIO ||--o{ NOTIFICACION : recibe
+  USUARIO ||--o{ NOTIFICACION_BROADCAST : crea
+  NOTIFICACION_BROADCAST ||--o{ NOTIFICACION : genera
+  USUARIO ||--o{ BITACORA_ACCESO : genera
+  PERFIL ||--o{ ASIGNACION_BECA : tiene
+  USUARIO ||--o{ ASIGNACION_BECA : otorga
+
+  USUARIO {
+    bigint id PK
+    uuid codigo_usuario
+    string username
+    string correo
+    string password_hash
+    string estado
+    boolean correo_verificado
+    timestamp created_at
+    timestamp updated_at
+    timestamp deleted_at
+  }
+  PERFIL {
+    bigint id PK
+    uuid codigo_perfil
+    bigint usuario_id FK
+    string nombres
+    string apellidos
+    string estado
+    timestamp created_at
+    timestamp updated_at
+    timestamp deleted_at
+  }
+  ROL {
+    bigint id PK
+    uuid codigo_rol
+    string nombre
+    text descripcion
+    boolean is_active
+    timestamp created_at
+    timestamp updated_at
+    timestamp deleted_at
+  }
+  USUARIO_ROL {
+    bigint id PK
+    uuid codigo_usuario_rol
+    bigint usuario_id FK
+    bigint rol_id FK
+    boolean is_active
+    timestamp created_at
+    timestamp updated_at
+    timestamp deleted_at
+  }
+  CONFIGURACION {
+    bigint id PK
+    uuid codigo_configuracion
+    bigint usuario_id FK
+    boolean notificacion_push_activado
+    boolean notificacion_email_activado
+    string tema_preferido
+    boolean is_active
+    timestamp created_at
+    timestamp updated_at
+    timestamp deleted_at
+  }
+  NOTIFICACION_BROADCAST {
+    bigint id PK
+    uuid codigo_notificacion_broadcast
+    bigint creado_por FK
+    string titulo
+    string mensaje
+    string criterio_destinatarios
+    timestamp fecha_envio
+    boolean is_active
+    timestamp created_at
+    timestamp updated_at
+    timestamp deleted_at
+  }
+  NOTIFICACION {
+    bigint id PK
+    uuid codigo_notificacion
+    bigint usuario_id FK
+    bigint notificacion_broadcast_id FK
+    string titulo
+    string mensaje
+    string tipo
+    string canal
+    boolean leida
+    timestamp fecha_lectura
+    boolean is_active
+    timestamp created_at
+    timestamp updated_at
+    timestamp deleted_at
+  }
+  BITACORA_ACCESO {
+    bigint id PK
+    uuid codigo_bitacora_acceso
+    bigint usuario_id FK
+    string tipo_evento
+    string metodo_autenticacion
+    string ip_origen
+    string user_agent
+    string resultado
+    timestamp created_at
+  }
+  ASIGNACION_BECA {
+    bigint id PK
+    uuid codigo_asignacion_beca
+    bigint perfil_id FK
+    bigint asignado_por FK
+    date fecha_inicio
+    date fecha_fin
+    string estado
+    timestamp created_at
+    timestamp updated_at
+    timestamp deleted_at
+  }

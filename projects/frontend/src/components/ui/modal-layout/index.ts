@@ -1,2 +1,3 @@
 export { ModalLayout } from './modal-layout'
-export type { ModalLayoutProps, ModalLayoutSize } from './types'
+export { ModalDetailLayout } from './modal-detail-layout'
+export type { ModalLayoutProps, ModalDetailLayoutProps, ModalLayoutSize } from './types'

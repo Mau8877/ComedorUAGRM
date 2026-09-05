@@ -46,4 +46,12 @@ export interface Ingrediente {
   stock: number
   stockMinimo: number
   precioUnitario: number
+  // Campos que solo se muestran en el detalle (no en la tabla ni en el
+  // form de crear/editar) -- opcionales porque un ingrediente creado desde
+  // el mockup de la demo no los completa.
+  descripcion?: string
+  proveedor?: string
+  ubicacionAlmacen?: string
+  fechaIngreso?: string
+  fechaVencimiento?: string
 }
