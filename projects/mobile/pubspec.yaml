@@ -63,6 +63,12 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  # .env no se commitea (ver .gitignore) -- cada dev lo crea a partir de
+  # .env.example, igual que los .env de backend/frontend. Sin esta entrada,
+  # flutter_dotenv no puede bundlear el archivo y falla en runtime.
+  assets:
+    - .env
+
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
