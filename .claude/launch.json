@@ -7,6 +7,16 @@
       "runtimeArgs": ["--filter", "./projects/frontend", "dev"],
       "port": 5173,
       "autoPort": true
+    },
+    {
+      "name": "mobile-web",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": [
+        "/c",
+        "cd projects\\mobile && flutter run -d web-server --web-hostname=0.0.0.0 --web-port=5500"
+      ],
+      "port": 5500,
+      "autoPort": true
     }
   ]
 }

@@ -4,27 +4,38 @@ globs: projects/mobile/**/*
 
 # Consumo de API — Mobile
 
-## Cliente `dio` centralizado (prerequisito)
+## Cliente `dio` centralizado (ya implementado)
 
-`dio` está en `pubspec.yaml`, pero **no existe todavía** ningún cliente
-configurado — `lib/core/network/` solo tiene un `.gitkeep`. Antes de
-escribir el primer `service` que llame al backend, hay que crear:
+`lib/core/network/api_client.dart` — clase `ApiClient` con un getter
+estático `instance` que arma un único `Dio` (lazy, se construye una sola
+vez), con `baseUrl` leído de `flutter_dotenv` (`API_BASE_URL`, ver
+`.env.example` de este proyecto — mismo mecanismo que `VITE_API_BASE_URL`
+del lado web).
 
-- `lib/core/network/api_client.dart`: una instancia única de `Dio` con
-  `baseUrl` apuntando a la API (leído de configuración de entorno —
-  `flutter_dotenv` está instalado en `pubspec.yaml` pero tampoco está
-  wireado todavía, es otro prerequisito ligado a este mismo punto).
-- Un `Interceptor` que desempaqueta el sobre estándar del backend
-  (`{status, data, message, error, timestamp, meta?}`, mismo contrato que
-  [RESPONSES_BACKEND.md](../backend/RESPONSES_BACKEND.md)):
-  - Si `status == "success"`, el interceptor deja pasar `data` (y `meta`
-    cuando exista) como el resultado real de la llamada — los `services` no
-    desestructuran el sobre a mano en cada método.
-  - Si `status == "failed"`, el interceptor lanza una excepción tipada
-    propia (ej. `ApiException(code: error, message: message)`) en vez de
-    dejar pasar una respuesta 2xx con `status: "failed"` como si fuera
-    éxito, o dejar que el `DioException` crudo (sin el código de negocio)
-    se propague tal cual hasta la UI.
+Un `Interceptor` desempaqueta el sobre estándar del backend
+(`{status, data, message, error, timestamp, meta?}`, mismo contrato que
+[RESPONSES_BACKEND.md](../backend/RESPONSES_BACKEND.md)):
+
+- Si `status == "success"`, el interceptor deja pasar `data` (y `meta`
+  cuando exista) como el resultado real de la llamada — los `services` no
+  desestructuran el sobre a mano en cada método.
+- Si `status == "failed"`, el interceptor rechaza con un `DioException`
+  cuyo `error` es una `ApiException(code, message)` tipada (clase exportada
+  desde el mismo archivo) en vez de dejar pasar una respuesta 2xx con
+  `status: "failed"` como si fuera éxito. Un `service` que necesita el
+  código de negocio lo lee de `dioException.error as ApiException`.
+
+`ENABLE_API_LOGS` (`.env`, `true`/`false`) prende un `LogInterceptor` de
+`dio` — mismo criterio que `VITE_ENABLE_API_LOGS` del frontend, apagado por
+default.
+
+> Sin probar todavía contra un endpoint de negocio real (el backend no
+> tiene ningún `@RestController` de features aún) — mismo estado que
+> `apiClient.ts` del lado web, ver
+> [TANSTACK_QUERY_FRONTEND.md](../frontend/TANSTACK_QUERY_FRONTEND.md).
+> Cuando exista el primer endpoint real, conviene re-verificar el
+> desempaquetado de `data`/`meta` contra una respuesta con el sobre
+> completo.
 
 ## Servicios por feature
 
