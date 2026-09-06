@@ -94,5 +94,12 @@ jobs:
         with:
           channel: stable
       - run: flutter pub get
+      # pubspec.yaml declara `.env` como asset (ver CONSUMO_API_MOBILE.md) --
+      # el archivo real no se commitea (.gitignore), así que sin este paso
+      # `flutter analyze` falla con "asset_does_not_exist" en un checkout
+      # limpio como el de CI. Mismo criterio que backend/frontend: se arma
+      # a partir de `.env.example`, con valores dummy que alcanzan para que
+      # el análisis/los tests corran (no pegan contra un backend real).
+      - run: cp .env.example .env
       - run: flutter analyze
       - run: flutter test
