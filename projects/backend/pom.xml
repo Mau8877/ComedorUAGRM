@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
@@ -29,8 +29,8 @@
 	<properties>
 		<java.version>21</java.version>
 		<!-- spring-boot-starter-parent no trae el BOM de Testcontainers en
-		     esta versión, así que se fija acá para que junit-jupiter y
-		     postgresql (abajo) usen la misma versión entre sí. -->
+		     esta versiÃ³n, asÃ­ que se fija acÃ¡ para que junit-jupiter y
+		     postgresql (abajo) usen la misma versiÃ³n entre sÃ­. -->
 		<testcontainers.version>1.21.3</testcontainers.version>
 	</properties>
 	<dependencies>
@@ -84,6 +84,11 @@
 			<groupId>net.logstash.logback</groupId>
 			<artifactId>logstash-logback-encoder</artifactId>
 			<version>8.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
 		</dependency>
 
 		<dependency>
@@ -182,6 +187,10 @@
 								<path>
 									<groupId>org.springframework.boot</groupId>
 									<artifactId>spring-boot-configuration-processor</artifactId>
+								</path>
+								<path>
+									<groupId>org.projectlombok</groupId>
+									<artifactId>lombok</artifactId>
 								</path>
 							</annotationProcessorPaths>
 						</configuration>
