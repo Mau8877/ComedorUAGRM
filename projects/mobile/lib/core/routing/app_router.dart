@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 
+import '../../features/health/screens/health_check_screen.dart';
 import '../../features/pruebas_layout/screens/demo_home_screen.dart';
 import '../../features/pruebas_layout/screens/ingredientes_screen.dart';
 import '../../layouts/admin/admin_shell.dart';
@@ -31,6 +32,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/ingredientes',
       builder: (context, state) => const IngredientesScreen(),
+    ),
+    GoRoute(
+      path: '/diagnostico',
+      builder: (context, state) => const HealthCheckScreen(),
     ),
   ],
 );
