@@ -6,26 +6,27 @@ globs: projects/mobile/**/*
 
 ## `go_router` con redirect global
 
-Un único `GoRouter` configurado en `lib/core/routing/` (scaffold ya creado,
-hoy solo tiene `.gitkeep` — es un prerequisito armarlo antes de la primera
-pantalla real). El chequeo de sesión **no se repite pantalla por pantalla**:
-se resuelve una sola vez en el callback `redirect` de la configuración raíz
-del router:
+Un único `GoRouter` (`appRouter`) ya armado en
+[lib/core/routing/app_router.dart](../../../projects/mobile/lib/core/routing/app_router.dart).
+El chequeo de sesión **no se repite pantalla por pantalla**: se resuelve
+una sola vez en el callback `redirect` de la configuración raíz del router
+— hoy es un placeholder que no redirige a nada (`return null` siempre, con
+un comentario `TODO`), mismo estado que `_authenticated.tsx` del lado web
+antes de que exista el provider de auth real:
 
 ```dart
 // lib/core/routing/app_router.dart
-final router = GoRouter(
-  redirect: (context, state) {
-    final isLoggedIn = /* leer estado de sesión, ej. desde un provider de auth */;
-    final isLoggingIn = state.matchedLocation == '/login';
-
-    if (!isLoggedIn && !isLoggingIn) return '/login';
-    if (isLoggedIn && isLoggingIn) return '/';
-    return null; // sin redirect
-  },
+final appRouter = GoRouter(
+  // TODO: reemplazar por la validación real de sesión una vez que exista
+  // TODO: el provider de auth.
+  redirect: (context, state) => null,
   routes: [ /* ... */ ],
 );
 ```
+
+Cuando exista el provider de auth, este `redirect` pasa a resolver contra
+él (ver [Fuente del estado de sesión](#fuente-del-estado-de-sesión) abajo)
+— no se reemplaza el mecanismo, solo se completa la condición.
 
 Mismo concepto que el guard de rutas del frontend web (ver
 [RUTAS_NAVEGACION_FRONTEND.md](../frontend/RUTAS_NAVEGACION_FRONTEND.md)):

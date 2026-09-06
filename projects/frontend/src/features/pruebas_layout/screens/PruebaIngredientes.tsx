@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { EyeIcon, PencilIcon, PlusIcon, RefreshCwIcon, Trash2Icon } from 'lucide-react'
+import { PencilIcon, PlusIcon, RefreshCwIcon, SquareTextIcon, Trash2Icon } from 'lucide-react'
 import type { ColumnDef, SortingState } from '@tanstack/react-table'
 
 import { AdminLayout } from '@/layouts'
 import { Button } from '@/components/ui/button'
+import { ModalDestructive } from '@/components/ui/modal-destructive'
 import {
   DataCards,
   DataTable,
@@ -18,7 +19,10 @@ import type { DataTableToolbarFilter } from '@/components/ui/tanstack-table'
 import { useMockNotifications } from '../api'
 import { StatusBadge } from '../components'
 import { mockAdminUser, mockIngredientes, mockNotificaciones } from '../mocks'
+import type { IngredienteFormValues } from '../schemas'
 import type { CategoriaIngrediente, EstadoStock, Ingrediente } from '../types'
+import { IngredienteDetailModal } from './IngredienteDetailModal'
+import { IngredienteFormModal } from './IngredienteFormModal'
 
 const estadoStockBadge: Record<
   EstadoStock,
@@ -113,8 +117,59 @@ const categoriaFilterOptions: { label: string; value: CategoriaIngrediente }[] =
 
 const DEMO_PAGE_SIZE = 20
 
+type ModalState = { mode: 'create' } | { mode: 'edit'; ingrediente: Ingrediente }
+
 export function PruebaIngredientes() {
   const notifications = useMockNotifications(mockNotificaciones)
+
+  // Estado local mutable solo para que el modal de crear/editar tenga un
+  // efecto visible en la tabla del mockup -- una feature real invalidaría
+  // ['ingredientes', 'list'] en vez de mutar un array a mano (ver
+  // TANSTACK_QUERY_FRONTEND.md).
+  const [ingredientes, setIngredientes] = useState(mockIngredientes)
+  const [modalState, setModalState] = useState<ModalState | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [ingredienteAEliminar, setIngredienteAEliminar] = useState<Ingrediente | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [ingredienteDetalle, setIngredienteDetalle] = useState<Ingrediente | null>(null)
+
+  const handleConfirmEliminar = () => {
+    if (!ingredienteAEliminar) return
+    setIsDeleting(true)
+    // Misma simulación de latencia que crear/editar -- acá una feature real
+    // llamaría al DELETE del endpoint e invalidaría ['ingredientes', 'list'].
+    setTimeout(() => {
+      setIngredientes((prev) => prev.filter((item) => item.id !== ingredienteAEliminar.id))
+      setIsDeleting(false)
+      setIngredienteAEliminar(null)
+    }, 800)
+  }
+
+  const handleSubmitIngrediente = (values: IngredienteFormValues) => {
+    setIsSubmitting(true)
+    // Simula la latencia de una mutation real (ver isSubmitting del
+    // ModalLayout) -- acá no hay backend, solo el timeout.
+    setTimeout(() => {
+      const payload = {
+        nombre: values.nombre,
+        foto: values.foto,
+        categoria: values.categoria,
+        unidad: values.unidad,
+        stock: Number(values.stock),
+        stockMinimo: Number(values.stockMinimo),
+        precioUnitario: Number(values.precioUnitario),
+      }
+      setIngredientes((prev) => {
+        if (modalState?.mode === 'edit') {
+          const idEditado = modalState.ingrediente.id
+          return prev.map((item) => (item.id === idEditado ? { ...item, ...payload } : item))
+        }
+        return [{ id: `ing-${Date.now()}`, ...payload }, ...prev]
+      })
+      setIsSubmitting(false)
+      setModalState(null)
+    }, 800)
+  }
 
   // Igual que en la demo de usuarios: esto simula lo que en una feature
   // real haría un hook de api/ con TanStack Query contra el backend
@@ -127,7 +182,7 @@ export function PruebaIngredientes() {
   const [categoriaFilter, setCategoriaFilter] = useState<string | undefined>(undefined)
   const sortParam = toSortQueryParam(sorting)
 
-  const datosFiltrados = mockIngredientes.filter((ingrediente) => {
+  const datosFiltrados = ingredientes.filter((ingrediente) => {
     const coincideBusqueda =
       search.trim() === '' || ingrediente.nombre.toLowerCase().includes(search.toLowerCase())
     const coincideCategoria = !categoriaFilter || ingrediente.categoria === categoriaFilter
@@ -186,13 +241,21 @@ export function PruebaIngredientes() {
 
   const renderIngredienteActions = (row: { original: Ingrediente }) => (
     <>
-      <RowActionButton icon={<EyeIcon />} label="Ver detalles" onClick={() => {}} />
-      <RowActionButton icon={<PencilIcon />} label="Editar" onClick={() => {}} />
+      <RowActionButton
+        icon={<SquareTextIcon />}
+        label="Ver detalles"
+        onClick={() => setIngredienteDetalle(row.original)}
+      />
+      <RowActionButton
+        icon={<PencilIcon />}
+        label="Editar"
+        onClick={() => setModalState({ mode: 'edit', ingrediente: row.original })}
+      />
       <RowActionButton
         icon={<Trash2Icon />}
         label={`Eliminar ${row.original.nombre}`}
         variant="destructive"
-        onClick={() => {}}
+        onClick={() => setIngredienteAEliminar(row.original)}
       />
     </>
   )
@@ -204,10 +267,9 @@ export function PruebaIngredientes() {
           Gestión de ingredientes
         </h2>
         <p className="mt-1 text-xs text-muted-foreground">
-          Ejemplo de components/ui/tanstack-table aplicado a un dominio real
-          del comedor -- foto + nombre en la misma celda (visible en tabla y
-          en cards), categoría, stock con su unidad, estado derivado del
-          stock mínimo, y precio. Reducí el ancho de la ventana para ver la
+          Ejemplo de components/ui/tanstack-table aplicado a un dominio real del comedor -- foto +
+          nombre en la misma celda (visible en tabla y en cards), categoría, stock con su unidad,
+          estado derivado del stock mínimo, y precio. Reducí el ancho de la ventana para ver la
           vista de cards en mobile.
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
@@ -238,7 +300,7 @@ export function PruebaIngredientes() {
                 <RefreshCwIcon data-icon="inline-start" />
                 Refrescar
               </Button>
-              <Button size="sm">
+              <Button size="sm" onClick={() => setModalState({ mode: 'create' })}>
                 <PlusIcon data-icon="inline-start" />
                 Nuevo ingrediente
               </Button>
@@ -270,9 +332,9 @@ export function PruebaIngredientes() {
             Misma data, vista de cards (5 por fila)
           </h3>
           <p className="mt-1 text-xs text-muted-foreground">
-            Mismas columnas de `ingredientesColumns`, renderizadas con{' '}
-            <code>DataCards</code> en vez de <code>DataTable</code> -- demuestra que ambas
-            vistas salen de la misma definición de columnas.
+            Mismas columnas de `ingredientesColumns`, renderizadas con <code>DataCards</code> en vez
+            de <code>DataTable</code> -- demuestra que ambas vistas salen de la misma definición de
+            columnas.
           </p>
           <DataCards
             className="mt-4 grid-cols-2 lg:grid-cols-5"
@@ -295,6 +357,44 @@ export function PruebaIngredientes() {
           }}
         />
       </div>
+
+      <IngredienteFormModal
+        key={modalState?.mode === 'edit' ? modalState.ingrediente.id : 'create'}
+        open={modalState !== null}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) setModalState(null)
+        }}
+        ingrediente={modalState?.mode === 'edit' ? modalState.ingrediente : undefined}
+        isSubmitting={isSubmitting}
+        onSubmit={handleSubmitIngrediente}
+      />
+
+      <IngredienteDetailModal
+        open={ingredienteDetalle !== null}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) setIngredienteDetalle(null)
+        }}
+        ingrediente={ingredienteDetalle}
+        onEditar={(ingrediente) => {
+          setIngredienteDetalle(null)
+          setModalState({ mode: 'edit', ingrediente })
+        }}
+      />
+
+      <ModalDestructive
+        open={ingredienteAEliminar !== null}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) setIngredienteAEliminar(null)
+        }}
+        title="¿Eliminar ingrediente?"
+        description={
+          ingredienteAEliminar
+            ? `Se eliminará permanentemente "${ingredienteAEliminar.nombre}" del sistema.`
+            : ''
+        }
+        isSubmitting={isDeleting}
+        onConfirm={handleConfirmEliminar}
+      />
     </AdminLayout>
   )
 }
