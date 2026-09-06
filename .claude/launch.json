@@ -17,6 +17,13 @@
       ],
       "port": 5500,
       "autoPort": true
+    },
+    {
+      "name": "mobile-web-static",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-l", "5501", "projects/mobile/build/web"],
+      "port": 5501,
+      "autoPort": true
     }
   ]
 }

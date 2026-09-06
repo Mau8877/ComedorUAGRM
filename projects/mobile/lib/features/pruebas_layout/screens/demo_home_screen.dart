@@ -30,6 +30,11 @@ class DemoHomeScreen extends StatelessWidget {
                 onPressed: () => context.go('/estudiante'),
                 child: const Text('Layout Estudiante'),
               ),
+              const SizedBox(height: 12),
+              FilledButton(
+                onPressed: () => context.go('/ingredientes'),
+                child: const Text('Ingredientes (mock)'),
+              ),
             ],
           ),
         ),

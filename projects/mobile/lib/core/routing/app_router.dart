@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 
 import '../../features/pruebas_layout/screens/demo_home_screen.dart';
+import '../../features/pruebas_layout/screens/ingredientes_screen.dart';
 import '../../layouts/admin/admin_shell.dart';
 import '../../layouts/estudiante/estudiante_shell.dart';
 
@@ -26,6 +27,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/estudiante',
       builder: (context, state) => const EstudianteShell(),
+    ),
+    GoRoute(
+      path: '/ingredientes',
+      builder: (context, state) => const IngredientesScreen(),
     ),
   ],
 );
