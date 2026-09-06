@@ -41,6 +41,37 @@ jobs:
     defaults:
       run:
         working-directory: projects/backend
+    # ComedorUagrmBackendApplicationTests/SecurityConfigTest usan @SpringBootTest
+    # (contexto completo), y Flyway/JPA necesitan una conexión real al arrancar
+    # -- el datasource por defecto de application.properties apunta a
+    # localhost:5432/comedor_uagrm_db (mismas credenciales que docker-compose
+    # en local). Estos services levantan Postgres y Redis efímeros en el
+    # runner, mapeados al mismo host:puerto que ese default, para que el
+    # contexto arranque igual que en local sin tener que tocar el código de
+    # la app ni de los tests.
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: comedor_uagrm_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4

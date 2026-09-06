@@ -4,6 +4,69 @@ globs: projects/backend/**/*
 
 # Persistencia / Base de Datos — Backend
 
+## Antes de crear un Model nuevo: consultar el diagrama conceptual
+
+**[`docs/DiagramaConceptual.mermaid`](../../../docs/DiagramaConceptual.mermaid)
+es la fuente de verdad del modelo de datos del dominio.** Antes de crear
+un Model/tabla nuevo (o de diseñar la Unidad de Trabajo que lo hace, ver
+[UNIDADES_DE_TRABAJO.md](../UNIDADES_DE_TRABAJO.md)), se revisa si esa
+entidad ya está definida ahí — sus campos, sus relaciones, y sus nombres
+exactos (`correo` y no `email`, `estado` y no `activo`, etc.) son los que
+se implementan, no una versión inventada "razonable" a partir del nombre
+de la entidad o de la Historia de Usuario que la menciona.
+
+Si una entidad de negocio nueva **no** está todavía en el diagrama, se
+agrega ahí primero (aunque sea un boceto mínimo) y recién después se crea
+el Model — el diagrama no se deja desactualizado "para después". Si algo
+en el diagrama quedó obsoleto o contradice una decisión ya tomada en otra
+rule (ej. un esquema de roles distinto al que describe
+[SEGURIDAD_AUTH_BACKEND.md](SEGURIDAD_AUTH_BACKEND.md#roles-y-permisos)),
+se resuelve la contradicción explícitamente (actualizando el diagrama o la
+rule, lo que corresponda) antes de escribir código contra cualquiera de
+los dos — nunca se asume en silencio cuál de las dos fuentes "gana".
+
+## Identificador de fila: `id` interno + `codigo` público (patrón `BaseModel`)
+
+Todo Model extiende
+[`common/model/BaseModel.java`](../../../projects/backend/src/main/java/com/comedoruagrm/backend/common/model/BaseModel.java)
+(ver [ARQUITECTURA_BACKEND.md](../ARQUITECTURA_BACKEND.md)), que define
+**dos identificadores distintos**, ambos obligatorios y con roles que no
+se mezclan:
+
+| Campo | Tipo | Rol |
+| --- | --- | --- |
+| `id` | `Long`, `@Id @GeneratedValue(strategy = GenerationType.IDENTITY)` | Clave primaria real de la tabla. **Nunca** se expone en un DTO, una URL, un JWT, ni ningún contrato con el cliente — es un detalle interno de persistencia. |
+| `codigo` | `UUID` | El identificador **público** de la fila — el que sí viaja en DTOs, URLs (`/api/v1/{recurso}/{codigo}`), y claims de JWT. Se genera en la aplicación (`@PrePersist`, `UUID.randomUUID()` si es `null`), no lo genera la base de datos. |
+
+- El nombre de columna de `id` es siempre `id` (genérico, igual en todas
+  las tablas). El de `codigo`, en cambio, **es específico de cada
+  entidad** (`codigo_usuario`, `codigo_perfil`, `codigo_rol`, etc. — el
+  nombre exacto lo fija
+  [`docs/DiagramaConceptual.mermaid`](../../../docs/DiagramaConceptual.mermaid)
+  para esa entidad), porque `BaseModel` es una única clase compartida por
+  todos los Models. Cada entidad concreta fija el nombre de columna real
+  con `@AttributeOverride` sobre el campo heredado:
+
+  ```java
+  @Entity
+  @Table(name = "users")
+  @AttributeOverride(name = "codigo", column = @Column(name = "codigo_usuario"))
+  public class Usuario extends BaseModel {
+      // ...
+  }
+  ```
+
+- `createdAt`/`updatedAt`/`deletedAt` (los otros tres campos de
+  `BaseModel`) **sí** usan el mismo nombre de columna en todas las tablas
+  (`created_at`/`updated_at`/`deleted_at`) — el diagrama conceptual no los
+  varía por entidad, solo `codigo` cambia de nombre.
+- `JpaRepository<Entidad, Long>` — el tipo de ID del repositorio es
+  siempre `Long` (el de `id`), nunca `UUID`. Para buscar por el
+  identificador público se agrega un finder propio,
+  `findByCodigo(UUID codigo)`, en el repositorio de cada Model — no se usa
+  `findById(UUID)` para eso (no compilaría, y conceptualmente sería
+  buscar por la clave equivocada).
+
 ## Nombres de migraciones Flyway
 
 Formato obligatorio: **`V{yyyyMMddHHmmss}__descripcion.sql`**, ej.:

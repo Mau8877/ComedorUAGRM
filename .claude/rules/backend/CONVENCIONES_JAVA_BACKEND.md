@@ -84,8 +84,50 @@ redefine la misma anotación en dos módulos — si dos features necesitan
 ## Estilo general
 
 - 4 espacios de indentación (ya fijado en `.editorconfig` para `*.java`).
-- Constructor injection siempre (`private final` + constructor, o
-  `@RequiredArgsConstructor` de Lombok si se agrega Lombok al proyecto —
-  hoy **no está** en `pom.xml`; mientras no esté, constructores explícitos).
+- Constructor injection siempre, vía `@RequiredArgsConstructor` de Lombok
+  sobre los campos `private final` del `service`/`controller` — no se
+  escribe el constructor a mano cuando Lombok puede generarlo (ver
+  [Lombok](#lombok) abajo).
 - Los `record` de Java se prefieren para DTOs y para `ApiResponse`/`PageMeta`
-  (inmutables, sin boilerplate) por sobre clases con Lombok/getters manuales.
+  (inmutables, sin boilerplate) por sobre clases con Lombok/getters manuales
+  — un DTO **no** se convierte en una clase con `@Getter`/`@Setter` de
+  Lombok solo porque Lombok esté disponible, sigue siendo un `record`.
+
+## Lombok
+
+**Ya agregado** en `pom.xml` (`org.projectlombok:lombok`, `optional`, con
+su path correspondiente en `annotationProcessorPaths` del
+`maven-compiler-plugin`, al lado del de
+`spring-boot-configuration-processor` — un `annotationProcessorPaths`
+custom con más de un elemento necesita listar **todos** los procesadores
+que tienen que correr, agregar Lombok sin tocar esa lista lo dejaría sin
+efecto). **No se escriben getters/setters/constructores a mano** donde
+Lombok los pueda generar — es exactamente el boilerplate que esta
+dependencia existe para eliminar.
+
+| Dónde | Qué anotación | Por qué |
+| --- | --- | --- |
+| `model/` (Models JPA, incluido `BaseModel`) | `@Getter` a nivel de clase; `@Setter` **por campo**, solo en los campos que de verdad necesitan mutarse desde fuera (ej. `deletedAt` para soft delete) | Un Model normalmente no debería exponer setters de todos sus campos sin criterio — igual que `BaseModel` no expone `setCodigo()`/`setCreatedAt()` (son de solo lectura una vez persistidos), cada Model nuevo decide campo por campo qué setter tiene sentido, no `@Setter` a nivel de clase por defecto |
+| `service/`, `controller/` (constructor injection) | `@RequiredArgsConstructor` sobre la clase, con los campos `private final` | Reemplaza el constructor explícito que pedía la versión anterior de esta regla |
+
+### Qué NO se usa
+
+- **`@Data`** en un Model: agrupa `@Getter`+`@Setter`+`@ToString`+`@EqualsAndHashCode`+`@RequiredArgsConstructor`
+  de una sola vez, pero `@ToString`/`@EqualsAndHashCode` automáticos sobre
+  una entidad JPA son un problema conocido — `@ToString` expone **todos**
+  los campos, incluidos los que
+  [LOGGING_BACKEND.md](LOGGING_BACKEND.md#nunca-loguear) prohíbe loguear
+  (ej. `passwordHash`), y `@EqualsAndHashCode` sobre una relación
+  `@ManyToOne`/`@OneToMany` puede disparar carga perezosa (lazy loading) o
+  recursión infinita en relaciones bidireccionales. Por eso cada Model
+  compone explícitamente `@Getter`/`@Setter` (nunca `@Data`), y no agrega
+  `@ToString`/`@EqualsAndHashCode` de Lombok salvo una necesidad puntual
+  evaluada caso por caso (y en ese caso, con `@ToString.Exclude`/
+  `@EqualsAndHashCode.Exclude` explícito sobre cualquier campo sensible o
+  relación lazy).
+- **Lombok en DTOs**: los DTOs siguen siendo `record` (ver arriba) — Lombok
+  no reemplaza esa decisión.
+- **`@Slf4j`**: el logging estructurado del proyecto usa
+  `LoggerFactory.getLogger(...)` explícito — no se evaluó todavía
+  reemplazarlo por la anotación de Lombok; se mantiene como está hasta que
+  se decida explícitamente lo contrario.
