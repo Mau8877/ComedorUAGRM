@@ -17,23 +17,24 @@ services:
     volumes:
       - ./infrastructure/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
-      - frontend
+      - comedoruagrm
+      - nexware-landing
       - backend
     networks:
       - comedor-uagrm-network
 
   # ---------------------------------------
-  # FRONTEND (React + Vite) - MODO DESARROLLO
+  # FRONTEND -- ComedorUAGRM (React + Vite) - MODO DESARROLLO
   # ---------------------------------------
-  frontend:
+  comedoruagrm:
     image: node:22-alpine
     container_name: comedor-uagrm-frontend
-    working_dir: /app/projects/frontend
+    working_dir: /app/projects/frontend/comedoruagrm
     volumes:
       - .:/app
       # Ambos node_modules (raíz del workspace pnpm y el del paquete
-      # frontend) tienen que estar aislados del bind mount de arriba -- si
-      # no, pnpm dentro del contenedor escribe symlinks de Linux
+      # comedoruagrm) tienen que estar aislados del bind mount de arriba --
+      # si no, pnpm dentro del contenedor escribe symlinks de Linux
       # directamente en tu filesystem de Windows apuntando a rutas que solo
       # existen DENTRO del contenedor (ej. /app/node_modules/.pnpm/...).
       # Esos symlinks quedan rotos para cualquier pnpm/tsc/ESLint que corras
@@ -41,10 +42,36 @@ services:
       # sentido contrario -- rompiendo lo del contenedor. Con volúmenes
       # nombrados, cada lado tiene su propio node_modules real y no chocan.
       - frontend_node_modules_root:/app/node_modules
-      - frontend_node_modules_pkg:/app/projects/frontend/node_modules
+      - comedoruagrm_node_modules_pkg:/app/projects/frontend/comedoruagrm/node_modules
     command: sh -c "corepack enable pnpm && pnpm install && pnpm run dev --host 0.0.0.0"
     ports:
       - '5173:5173'
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+    networks:
+      - comedor-uagrm-network
+
+  # ---------------------------------------
+  # LANDING -- Nexware (Astro) - MODO DESARROLLO
+  # ---------------------------------------
+  # Proyecto independiente, fuera del workspace pnpm (ver pnpm-workspace.yaml
+  # y "Nexware guía de marca y guía técnica.md") -- usa npm propio, no pnpm.
+  # Montado detrás del proxy bajo /landing-page (ver nginx.conf), con
+  # `base: '/landing-page'` en astro.config.mjs para que coincida.
+  nexware-landing:
+    image: node:22-alpine
+    container_name: comedor-uagrm-nexware-landing
+    working_dir: /app/projects/frontend/nexware-landing
+    volumes:
+      - .:/app
+      # Mismo motivo que los node_modules de comedoruagrm -- aislado del
+      # bind mount para no romper symlinks entre host (Windows) y
+      # contenedor (Linux).
+      - nexware_landing_node_modules:/app/projects/frontend/nexware-landing/node_modules
+    command: sh -c "npm install && npm run dev"
+    ports:
+      - '4321:4321'
     environment:
       - NODE_ENV=development
       - CHOKIDAR_USEPOLLING=true
@@ -218,5 +245,7 @@ volumes:
     name: comedor-uagrm-minio_data
   frontend_node_modules_root:
     name: comedor-uagrm-frontend-node_modules-root
-  frontend_node_modules_pkg:
-    name: comedor-uagrm-frontend-node_modules-pkg
+  comedoruagrm_node_modules_pkg:
+    name: comedor-uagrm-comedoruagrm-node_modules-pkg
+  nexware_landing_node_modules:
+    name: comedor-uagrm-nexware-landing-node_modules
