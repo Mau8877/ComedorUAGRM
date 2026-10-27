@@ -10,21 +10,27 @@ conecta a todos.
 | Proyecto | Tecnología |
 | --- | --- |
 | **Backend** (`projects/backend`) | Java 21 + Spring Boot 4.1 (Maven), PostgreSQL + Flyway, Redis (caché), MinIO (archivos) |
-| **Frontend** (`projects/frontend`) | React 19 + TypeScript + Vite, TanStack (Query/Router/Form/Table), Tailwind CSS 4 + shadcn |
+| **Frontend — ComedorUAGRM** (`projects/frontend/comedoruagrm`) | React 19 + TypeScript + Vite, TanStack (Query/Router/Form/Table), Tailwind CSS 4 + shadcn |
+| **Frontend — Landing Nexware** (`projects/frontend/nexware-landing`) | Astro + TypeScript, landing bilingüe (es/en) de Nexware, la empresa ficticia dueña de este proyecto |
 | **Mobile** (`projects/mobile`) | Flutter/Dart, Riverpod (estado), `go_router` (navegación), `dio` (HTTP) |
 | **Infraestructura** (`infrastructure/`) | Docker Compose: nginx (proxy), postgres, redis, minio, prometheus, grafana |
 
-`pnpm-workspace.yaml` maneja `projects/*` como un workspace de pnpm
-(frontend y mobile comparten herramientas de raíz; el backend es un
-proyecto Maven independiente que vive dentro del mismo repo).
+`pnpm-workspace.yaml` incluye `projects/*` y
+`projects/frontend/comedoruagrm` como workspace de pnpm (`comedoruagrm` y
+mobile comparten herramientas de raíz; el backend es un proyecto Maven
+independiente que vive dentro del mismo repo). `nexware-landing` queda
+**fuera** del workspace pnpm a propósito: es un proyecto Astro
+independiente que usa npm (ver "Nexware guía de marca y guía técnica.md").
 
 ## Estructura del repo
 
 ```
 ComedorUAGRM/
 ├── projects/
-│   ├── backend/       # API REST (Spring Boot)
-│   ├── frontend/       # Panel web (React)
+│   ├── backend/        # API REST (Spring Boot)
+│   ├── frontend/
+│   │   ├── comedoruagrm/     # Panel web (React) -- se sirve en /
+│   │   └── nexware-landing/  # Landing de Nexware (Astro) -- se sirve en /landing-page
 │   └── mobile/         # App móvil (Flutter)
 ├── infrastructure/      # Config de nginx, postgres, redis, minio, prometheus, grafana
 ├── docs/
@@ -47,17 +53,18 @@ Requiere Docker Desktop. Desde la raíz del repo:
 ```bash
 cp .env.example .env
 cp projects/backend/.env.example projects/backend/.env
-cp projects/frontend/.env.example projects/frontend/.env
+cp projects/frontend/comedoruagrm/.env.example projects/frontend/comedoruagrm/.env
 docker compose up
 ```
 
 Esto levanta todos los servicios en modo desarrollo (hot-reload incluido
-en frontend y backend):
+en los dos frontends y el backend):
 
 | Servicio | Puerto | URL |
 | --- | --- | --- |
-| Proxy (nginx) | `80` | http://localhost |
-| Frontend (Vite) | `5173` | http://localhost:5173 |
+| Proxy (nginx) | `80` | http://localhost (`/` → ComedorUAGRM, `/landing-page` → landing Nexware) |
+| ComedorUAGRM (Vite) | `5173` | http://localhost:5173 |
+| Landing Nexware (Astro) | `4321` | http://localhost:4321 |
 | Backend (API) | `8080` | http://localhost:8080 |
 | PostgreSQL | `5432` | — |
 | Redis | `6379` | — |
@@ -85,13 +92,22 @@ por su cuenta o vía `docker compose up postgres redis minio`):
 ./mvnw clean package                                     # build
 ```
 
-**Frontend** (`projects/frontend`):
+**Frontend — ComedorUAGRM** (`projects/frontend/comedoruagrm`):
 
 ```bash
 pnpm dev       # servidor de desarrollo (Vite, puerto 5173)
 pnpm build     # build de producción
 pnpm lint      # ESLint
 pnpm test      # Vitest
+```
+
+**Frontend — Landing Nexware** (`projects/frontend/nexware-landing`, no es
+parte del workspace pnpm, usa npm propio):
+
+```bash
+npm install
+npm run dev       # servidor de desarrollo (Astro, puerto 4321)
+npm run build     # build estático de producción
 ```
 
 **Mobile** (`projects/mobile`):

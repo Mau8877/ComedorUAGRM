@@ -1,14 +1,22 @@
 # ComedorUAGRM
 
 Sistema de gestión del comedor universitario de la UAGRM. Monorepo con
-pnpm workspaces (`pnpm-workspace.yaml`: `projects/*`) que contiene tres
-proyectos independientes más la infraestructura de desarrollo:
+pnpm workspaces (`pnpm-workspace.yaml`) que contiene tres proyectos
+independientes más la infraestructura de desarrollo:
 
 - **`projects/backend`** — API REST en Java 21 + Spring Boot 4.1 (Maven),
   PostgreSQL + Flyway para persistencia, Redis para caché, MinIO para
   almacenamiento de archivos.
-- **`projects/frontend`** — Panel web en React 19 + TypeScript + Vite,
-  TanStack (Query/Router/Form/Table), Tailwind CSS 4 + shadcn.
+- **`projects/frontend`** — contiene dos proyectos de frontend
+  independientes, cada uno con su propio stack:
+  - **`comedoruagrm/`** — panel web en React 19 + TypeScript + Vite,
+    TanStack (Query/Router/Form/Table), Tailwind CSS 4 + shadcn. Es parte
+    del workspace pnpm. Se sirve en `/` detrás del proxy.
+  - **`nexware-landing/`** — landing institucional de Nexware (la empresa
+    ficticia dueña de este proyecto), en Astro + TypeScript, bilingüe
+    (es/en). Proyecto independiente fuera del workspace pnpm (usa npm
+    propio) — ver "Nexware guía de marca y guía técnica.md" en la raíz.
+    Se sirve en `/landing-page` detrás del proxy.
 - **`projects/mobile`** — App en Flutter/Dart, Riverpod para estado,
   `go_router` para navegación, `dio` como cliente HTTP.
 - **`infrastructure/`** — configuración de Docker Compose: nginx (proxy),
@@ -24,12 +32,20 @@ proyectos independientes más la infraestructura de desarrollo:
 ./mvnw clean package                                     # build
 ```
 
-### Frontend (`projects/frontend`)
+### Frontend — ComedorUAGRM (`projects/frontend/comedoruagrm`)
 
 ```bash
 pnpm dev       # servidor de desarrollo (Vite, puerto 5173)
 pnpm build     # build de producción
 pnpm lint      # ESLint
+```
+
+### Frontend — Landing de Nexware (`projects/frontend/nexware-landing`)
+
+```bash
+npm install
+npm run dev       # servidor de desarrollo (Astro, puerto 4321)
+npm run build     # build estático de producción
 ```
 
 ### Mobile (`projects/mobile`)
@@ -45,16 +61,18 @@ flutter analyze       # análisis estático
 
 Desde la raíz del repo, con los `.env` ya creados a partir de sus
 `.env.example` correspondientes (raíz, `projects/backend/`,
-`projects/frontend/`):
+`projects/frontend/comedoruagrm/`):
 
 ```bash
 docker compose up
 ```
 
-Levanta proxy (puerto 80), frontend (5173), backend (8080), postgres (5432),
-redis (6379), minio (9000/9001), prometheus (9090) y grafana (3000). Ver
-[docs/README.md](../docs/README.md) para el detalle completo de variables de
-entorno y el checklist de puesta en marcha.
+Levanta proxy (puerto 80), comedoruagrm (5173), nexware-landing (4321),
+backend (8080), postgres (5432), redis (6379), minio (9000/9001),
+prometheus (9090) y grafana (3000). El proxy sirve ComedorUAGRM en `/` y la
+landing de Nexware en `/landing-page`. Ver [docs/README.md](../docs/README.md)
+para el detalle completo de variables de entorno y el checklist de puesta
+en marcha.
 
 ## Reglas del proyecto (`.claude/rules/`)
 

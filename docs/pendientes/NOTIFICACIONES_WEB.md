@@ -11,16 +11,16 @@ frontend deje de simular y pase a hablar con la API real.
 
 **No implementar nada de esto especulativamente en mobile todavía** -- ese
 apartado queda pendiente aparte, este documento cubre exclusivamente la
-web (`projects/frontend`).
+web (`projects/frontend/comedoruagrm`).
 
 ### Dónde vive la parte de frontend ya hecha
 
 | Pieza | Archivo |
 | --- | --- |
-| Componente visual (campanita + panel) | [`src/components/layout/NotificationsMenu.tsx`](../../projects/frontend/src/components/layout/NotificationsMenu.tsx) |
-| Tipos del contrato que el frontend espera | [`src/components/layout/types.ts`](../../projects/frontend/src/components/layout/types.ts) (`NotificationItem`, `NotificationsPageMeta`, `NotificationsController`) |
-| Simulación actual (a reemplazar por un hook real de `api/`) | [`src/features/pruebas_layout/api/useMockNotifications.ts`](../../projects/frontend/src/features/pruebas_layout/api/useMockNotifications.ts) |
-| Formateo de fecha relativa (ya resuelto, no depende del backend) | [`src/utils/formatRelativeDate.ts`](../../projects/frontend/src/utils/formatRelativeDate.ts) (`dayjs` + locale español) |
+| Componente visual (campanita + panel) | [`src/components/layout/NotificationsMenu.tsx`](../../projects/frontend/comedoruagrm/src/components/layout/NotificationsMenu.tsx) |
+| Tipos del contrato que el frontend espera | [`src/components/layout/types.ts`](../../projects/frontend/comedoruagrm/src/components/layout/types.ts) (`NotificationItem`, `NotificationsPageMeta`, `NotificationsController`) |
+| Simulación actual (a reemplazar por un hook real de `api/`) | [`src/features/pruebas_layout/api/useMockNotifications.ts`](../../projects/frontend/comedoruagrm/src/features/pruebas_layout/api/useMockNotifications.ts) |
+| Formateo de fecha relativa (ya resuelto, no depende del backend) | [`src/utils/formatRelativeDate.ts`](../../projects/frontend/comedoruagrm/src/utils/formatRelativeDate.ts) (`dayjs` + locale español) |
 
 Cuando exista el endpoint real, el trabajo del lado frontend es acotado:
 un hook nuevo en la feature que corresponda (`api/useNotificaciones.ts`,
@@ -54,7 +54,7 @@ este contrato.
 6. Cada notificación tiene un `tipo` (`success`/`info`/`warning`/`error`)
    que el frontend usa para elegir ícono y color -- mismo vocabulario que
    ya usan los toasts de la app (ver
-   [`components/ui/sonner.tsx`](../../projects/frontend/src/components/ui/sonner.tsx)).
+   [`components/ui/sonner.tsx`](../../projects/frontend/comedoruagrm/src/components/ui/sonner.tsx)).
 
 ## Endpoints necesarios
 
