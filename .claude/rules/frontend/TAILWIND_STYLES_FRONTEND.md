@@ -1,5 +1,5 @@
 ---
-globs: projects/frontend/**/*
+globs: projects/frontend/comedoruagrm/**/*
 ---
 
 # Tailwind / Estilos — Frontend

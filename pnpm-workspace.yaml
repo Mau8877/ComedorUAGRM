@@ -1,2 +1,8 @@
 packages:
   - 'projects/*'
+  # `projects/frontend` ya no tiene su propio package.json (ahora contiene
+  # dos proyectos: comedoruagrm/ y nexware-landing/) -- se agrega
+  # explícito el único de los dos que es parte del workspace pnpm.
+  # nexware-landing/ usa npm por separado (ver su propio package.json), no
+  # pnpm, así que no se agrega acá.
+  - 'projects/frontend/comedoruagrm'

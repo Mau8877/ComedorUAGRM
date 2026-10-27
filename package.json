@@ -5,8 +5,8 @@
 		"prepare": "husky"
 	},
 	"lint-staged": {
-		"projects/frontend/**/*.{ts,tsx}": [
-			"pnpm --dir projects/frontend exec eslint --fix"
+		"projects/frontend/comedoruagrm/**/*.{ts,tsx}": [
+			"pnpm --dir projects/frontend/comedoruagrm exec eslint --fix"
 		],
 		"projects/mobile/**/*.dart": [
 			"sh -c 'cd projects/mobile && flutter analyze'"

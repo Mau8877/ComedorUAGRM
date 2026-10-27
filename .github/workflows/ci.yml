@@ -106,11 +106,14 @@ jobs:
           node-version: 22
           cache: pnpm
       # El lockfile vive en la raíz del workspace pnpm, no dentro de
-      # projects/frontend -- ver docs/README.md.
+      # projects/frontend/comedoruagrm -- ver docs/README.md. nexware-landing
+      # (ver projects/frontend/nexware-landing) usa npm por separado y todavía
+      # no tiene lint/test propios -- se agrega un job para esa parte cuando
+      # ese proyecto exista de verdad (hoy es solo un placeholder).
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --dir projects/frontend run lint
-      - run: pnpm --dir projects/frontend run test
-      - run: pnpm --dir projects/frontend run build
+      - run: pnpm --dir projects/frontend/comedoruagrm run lint
+      - run: pnpm --dir projects/frontend/comedoruagrm run test
+      - run: pnpm --dir projects/frontend/comedoruagrm run build
 
   mobile:
     needs: changes
