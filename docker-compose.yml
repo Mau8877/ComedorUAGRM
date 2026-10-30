@@ -69,7 +69,17 @@ services:
       # bind mount para no romper symlinks entre host (Windows) y
       # contenedor (Linux).
       - nexware_landing_node_modules:/app/projects/frontend/nexware-landing/node_modules
-    command: sh -c "npm install && npm run dev"
+    # Sirve el BUILD (astro build + astro preview), no `astro dev`: el dev
+    # server de Astro emite sus assets como /src/..., /node_modules/... y
+    # /@vite/... desde la raíz, y detrás del proxy esas rutas caen en el
+    # panel de ComedorUAGRM (404) -- sin el CSS ni los scripts de la landing
+    # (por ejemplo, el del cambio de tema). El build sí lleva todo bajo
+    # /landing-page/. Tras editar la landing:
+    #   docker compose restart nexware-landing
+    # Para desarrollar con recarga en caliente: `npm run dev` dentro de
+    # nexware-landing y abrir http://localhost:4321/landing-page/ (parar antes
+    # este contenedor, comparten el puerto).
+    command: sh -c "npm install && npm run build && npm run preview"
     ports:
       - '4321:4321'
     environment:
