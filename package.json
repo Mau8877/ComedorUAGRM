@@ -8,6 +8,9 @@
 		"projects/frontend/comedoruagrm/**/*.{ts,tsx}": [
 			"pnpm --dir projects/frontend/comedoruagrm exec eslint --fix"
 		],
+		"projects/frontend/nexware-landing/**/*.{ts,astro,mjs,js}": [
+			"sh -c 'cd projects/frontend/nexware-landing && npx eslint --fix \"$@\"' _"
+		],
 		"projects/mobile/**/*.dart": [
 			"sh -c 'cd projects/mobile && flutter analyze'"
 		],

@@ -18,6 +18,7 @@ jobs:
     outputs:
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
+      landing: ${{ steps.filter.outputs.landing }}
       mobile: ${{ steps.filter.outputs.mobile }}
     steps:
       - uses: actions/checkout@v4
@@ -28,9 +29,11 @@ jobs:
             backend:
               - 'projects/backend/**'
             frontend:
-              - 'projects/frontend/**'
+              - 'projects/frontend/comedoruagrm/**'
               - 'pnpm-lock.yaml'
               - 'pnpm-workspace.yaml'
+            landing:
+              - 'projects/frontend/nexware-landing/**'
             mobile:
               - 'projects/mobile/**'
 
@@ -107,13 +110,35 @@ jobs:
           cache: pnpm
       # El lockfile vive en la raíz del workspace pnpm, no dentro de
       # projects/frontend/comedoruagrm -- ver docs/README.md. nexware-landing
-      # (ver projects/frontend/nexware-landing) usa npm por separado y todavía
-      # no tiene lint/test propios -- se agrega un job para esa parte cuando
-      # ese proyecto exista de verdad (hoy es solo un placeholder).
+      # usa npm por separado y tiene su propio job (`landing`, abajo).
       - run: pnpm install --frozen-lockfile
       - run: pnpm --dir projects/frontend/comedoruagrm run lint
       - run: pnpm --dir projects/frontend/comedoruagrm run test
       - run: pnpm --dir projects/frontend/comedoruagrm run build
+
+  # Landing de Nexware (Astro): fuera del workspace pnpm, con npm propio.
+  landing:
+    needs: changes
+    if: needs.changes.outputs.landing == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: projects/frontend/nexware-landing
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          # Astro 7 exige Node >= 22.23.4 (la imagen node:22 vieja de Docker
+          # fallaba por eso); 22 resuelve siempre al último parche.
+          node-version: 22
+          cache: npm
+          cache-dependency-path: projects/frontend/nexware-landing/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run check:i18n
+      - run: npm test
+      - run: npm run build
 
   mobile:
     needs: changes

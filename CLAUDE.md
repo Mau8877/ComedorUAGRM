@@ -44,8 +44,12 @@ pnpm lint      # ESLint
 
 ```bash
 npm install
-npm run dev       # servidor de desarrollo (Astro, puerto 4321)
-npm run build     # build estático de producción
+npm run dev          # servidor de desarrollo (Astro, puerto 4321)
+npm run build        # build estático de producción
+npm run lint         # ESLint
+npm run typecheck    # astro check
+npm run check:i18n   # es.json y en.json con las mismas claves, por feature
+npm test             # Vitest
 ```
 
 ### Mobile (`projects/mobile`)
