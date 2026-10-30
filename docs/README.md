@@ -1,31 +1,32 @@
 # Infraestructura
 
 Este documento describe **todo** lo que compone la infraestructura de
-ComedorUAGRM: los 9 servicios de `docker-compose.yml`, la carpeta
+ComedorUAGRM: los 10 servicios de `docker-compose.yml`, la carpeta
 `infrastructure/`, las redes, los volúmenes, las variables de entorno, y
-los dos `Dockerfile` de producción. El objetivo es que después de leer esto
+los `Dockerfile` de producción. El objetivo es que después de leer esto
 no quede ninguna duda sobre qué es cada pieza, para qué sirve, y por qué
 está configurada como está.
 
 ## 1. Panorama general
 
 ```
-                    ┌─────────────────────────────────────────┐
-                    │         docker-compose.yml (dev)          │
-                    │                                           │
-  Internet/host ───▶│  proxy (nginx :80)                        │
-                    │    ├── /api/*  ──▶ backend  (:8080)       │
-                    │    └── /*      ──▶ frontend (:5173)       │
-                    │                                           │
-                    │  backend  ──▶ postgres (:5432)            │
-                    │           ──▶ redis    (:6379)            │
-                    │           ──▶ minio    (:9000)            │
-                    │           ──▶ Docker socket (Testcontainers)│
-                    │                                           │
-                    │  minio-init ──▶ minio (crea el bucket)    │
-                    │  prometheus ──▶ scrapea backend (:8080)   │
-                    │  grafana    ──▶ lee de prometheus         │
-                    └─────────────────────────────────────────┘
+                    ┌──────────────────────────────────────────────┐
+                    │           docker-compose.yml (dev)             │
+                    │                                                │
+  Internet/host ───▶│  proxy (nginx :80)                             │
+                    │    ├── /api/*          ──▶ backend  (:8080)    │
+                    │    ├── /landing-page/* ──▶ nexware-landing (:4321)│
+                    │    └── /*               ──▶ comedoruagrm (:5173)│
+                    │                                                │
+                    │  backend  ──▶ postgres (:5432)                 │
+                    │           ──▶ redis    (:6379)                 │
+                    │           ──▶ minio    (:9000)                 │
+                    │           ──▶ Docker socket (Testcontainers)    │
+                    │                                                │
+                    │  minio-init ──▶ minio (crea el bucket)         │
+                    │  prometheus ──▶ scrapea backend (:8080)        │
+                    │  grafana    ──▶ lee de prometheus              │
+                    └──────────────────────────────────────────────┘
 ```
 
 Todos los servicios viven en **una sola red Docker** (`comedor-uagrm-network`,
@@ -37,7 +38,8 @@ pasar por el proxy.
 | Puerto en tu máquina | Servicio | Para qué |
 | --- | --- | --- |
 | `80` | `proxy` (nginx) | Punto de entrada único, simula cómo se accedería en producción |
-| `5173` | `frontend` (Vite) | Acceso directo al dev server de React, con HMR |
+| `5173` | `comedoruagrm` (Vite) | Acceso directo al dev server de React, con HMR |
+| `4321` | `nexware-landing` (Astro) | Acceso directo al dev server de la landing de Nexware |
 | `8080` | `backend` (Spring Boot) | Acceso directo a la API, Swagger, `/health`, `/prometheus` |
 | `5432` | `postgres` | Conectar un cliente SQL (DBeaver, pgAdmin, etc.) directo |
 | `6379` | `redis` | Conectar un cliente Redis directo |
@@ -45,7 +47,7 @@ pasar por el proxy.
 | `9090` | `prometheus` | UI de Prometheus (ver targets, correr queries PromQL) |
 | `3000` | `grafana` | Dashboards (sin ninguno provisionado todavía, ver sección 7) |
 
-## 2. Los 9 servicios de `docker-compose.yml`
+## 2. Los 10 servicios de `docker-compose.yml`
 
 ### 2.1 `proxy` — reverse proxy (nginx)
 
@@ -55,19 +57,20 @@ pasar por el proxy.
   servicio).
 - **Config**: monta `infrastructure/nginx/nginx.conf` de solo lectura.
 - **Reglas de enrutamiento** (ver [sección 3](#3-nginx-enrutamiento-y-el-fix-de-dns-dinámico)):
-  `/api/*` → `backend:8080`, cualquier otra ruta → `frontend:5173`.
+  `/api/*` → `backend:8080`, `/landing-page/*` → `nexware-landing:4321`
+  (sin recortar el prefijo), cualquier otra ruta → `comedoruagrm:5173`.
 - **`restart: unless-stopped`**: si el contenedor muere (ver el bug de DNS
   explicado abajo), Docker lo reintenta solo en vez de quedar caído hasta
   que alguien lo note.
-- **Depende de**: `frontend` y `backend` (orden de arranque, no espera a que
-  estén realmente listos — ver sección 3 para por qué esto ya no es un
-  problema).
+- **Depende de**: `comedoruagrm`, `nexware-landing` y `backend` (orden de
+  arranque, no espera a que estén realmente listos — ver sección 3 para
+  por qué esto ya no es un problema).
 
-### 2.2 `frontend` — React + Vite (modo desarrollo)
+### 2.2 `comedoruagrm` — React + Vite (modo desarrollo)
 
 - **Imagen**: `node:22-alpine` (imagen genérica de Node, no una imagen
   propia — el código se monta desde el host).
-- **`working_dir`**: `/app/projects/frontend`.
+- **`working_dir`**: `/app/projects/frontend/comedoruagrm`.
 - **Comando**: `corepack enable pnpm && pnpm install && pnpm run dev --host 0.0.0.0`
   — instala dependencias y arranca Vite en modo dev **cada vez que el
   contenedor arranca** (no hay una imagen pre-buildeada, es intencional
@@ -78,8 +81,27 @@ pasar por el proxy.
   desde un volumen montado en Windows).
 - **Volúmenes** (ver [sección 4](#4-volúmenes) para el detalle del porqué):
   - `.:/app` — todo el repo, bind mount desde el host.
-  - `frontend_node_modules_root` y `frontend_node_modules_pkg` — **aislados**
-    del bind mount de arriba, a propósito.
+  - `frontend_node_modules_root` y `comedoruagrm_node_modules_pkg` —
+    **aislados** del bind mount de arriba, a propósito.
+- **Container name**: `comedor-uagrm-frontend` (se mantiene así, sin
+  renombrar, para no romper nada que ya dependiera de ese nombre — el
+  nombre del *servicio* en `docker-compose.yml` sí es `comedoruagrm`).
+
+### 2.2b `nexware-landing` — Astro (modo desarrollo)
+
+- **Imagen**: `node:22-alpine`.
+- **`working_dir`**: `/app/projects/frontend/nexware-landing`.
+- **Comando**: `npm install && npm run dev` — este proyecto **no** es parte
+  del workspace pnpm (ver `pnpm-workspace.yaml` y "Nexware guía de marca y
+  guía técnica.md" en la raíz del repo), usa npm por su cuenta.
+- **Puerto**: `4321` (default de Astro).
+- **`astro.config.mjs`** declara `base: '/landing-page'` — tiene que
+  coincidir exactamente con el prefijo que `nginx.conf` reenvía sin
+  recortar (ver sección 3), si no los links/assets que genera Astro no
+  van a coincidir con lo que el navegador realmente pide a través del
+  proxy.
+- **Volumen**: `nexware_landing_node_modules`, aislado del bind mount por
+  el mismo motivo que `comedoruagrm_node_modules_pkg` (ver sección 4).
 
 ### 2.3 `backend` — Spring Boot 4.1 / Java 21 (modo desarrollo)
 
@@ -262,8 +284,9 @@ la segunda capa de defensa para el mismo problema.
 | `postgres_data` | `comedor-uagrm-postgres_data` | Datos de la base de datos | `docker compose down -v` |
 | `redis_data` | `comedor-uagrm-redis_data` | Persistencia AOF de Redis | `docker compose down -v` |
 | `minio_data` | `comedor-uagrm-minio_data` | Objetos guardados en MinIO | `docker compose down -v` |
-| `frontend_node_modules_root` | `comedor-uagrm-frontend-node_modules-root` | `node_modules` de la raíz del workspace pnpm, **dentro del contenedor** | `docker compose down -v` o `docker compose rm -f -s -v frontend` |
-| `frontend_node_modules_pkg` | `comedor-uagrm-frontend-node_modules-pkg` | `node_modules` de `projects/frontend/`, **dentro del contenedor** | ídem |
+| `frontend_node_modules_root` | `comedor-uagrm-frontend-node_modules-root` | `node_modules` de la raíz del workspace pnpm, **dentro del contenedor** | `docker compose down -v` o `docker compose rm -f -s -v comedoruagrm` |
+| `comedoruagrm_node_modules_pkg` | `comedor-uagrm-comedoruagrm-node_modules-pkg` | `node_modules` de `projects/frontend/comedoruagrm/`, **dentro del contenedor** | ídem |
+| `nexware_landing_node_modules` | `comedor-uagrm-nexware-landing-node_modules` | `node_modules` de `projects/frontend/nexware-landing/` (npm, no pnpm), **dentro del contenedor** | `docker compose down -v` o `docker compose rm -f -s -v nexware-landing` |
 
 Todos los nombres llevan el prefijo `comedor-uagrm-` **a propósito**: esta
 plantilla se reutiliza para otros proyectos en la misma máquina, y sin ese
@@ -271,15 +294,18 @@ prefijo, dos proyectos distintos basados en la misma plantilla terminarían
 compartiendo el mismo volumen físico de Postgres/Redis/MinIO (pasó de
 verdad antes de este fix — ver el historial de `docs/README.md`).
 
-**Por qué los `node_modules` del frontend están en volúmenes separados y no
-en el bind mount `.:/app`**: si no lo estuvieran, `pnpm install` dentro del
-contenedor escribiría symlinks de Linux directo en tu filesystem de
-Windows, apuntando a rutas que **solo existen dentro del contenedor**
-(ej. `/app/node_modules/.pnpm/...`). Esos symlinks quedan rotos para
-cualquier `pnpm`/`tsc`/ESLint que corras en tu host, y un `pnpm install` en
-el host los pisa de vuelta en sentido contrario — rompiendo lo del
-contenedor. Con volúmenes nombrados, cada lado (host y contenedor) tiene su
-propio `node_modules` real, completamente independiente, y no chocan.
+**Por qué los `node_modules` de los frontends están en volúmenes separados
+y no en el bind mount `.:/app`**: si no lo estuvieran, `pnpm install`/`npm
+install` dentro del contenedor escribiría symlinks de Linux directo en tu
+filesystem de Windows, apuntando a rutas que **solo existen dentro del
+contenedor** (ej. `/app/node_modules/.pnpm/...`). Esos symlinks quedan
+rotos para cualquier `pnpm`/`npm`/`tsc`/ESLint que corras en tu host, y un
+`pnpm install`/`npm install` en el host los pisa de vuelta en sentido
+contrario — rompiendo lo del contenedor. Con volúmenes nombrados, cada lado
+(host y contenedor) tiene su propio `node_modules` real, completamente
+independiente, y no chocan. Esto aplica igual a `nexware-landing` aunque
+use npm en vez de pnpm — el problema de fondo (symlinks/binarios Linux
+sobre un bind mount de Windows) no depende del gestor de paquetes.
 
 El backend **no** tiene este problema porque Maven no genera nada parecido
 a `node_modules` dentro del proyecto — todo lo que descarga vive en
@@ -354,7 +380,7 @@ Usadas directamente por Spring Boot (`application.properties` las lee vía
 > razonable en `application.properties`, así que no es obligatorio
 > definirlas en `.env` salvo que se necesite un valor distinto.
 
-### 6.3 Frontend (`projects/frontend/.env`, a partir de `.env.example`)
+### 6.3 Frontend — ComedorUAGRM (`projects/frontend/comedoruagrm/.env`, a partir de `.env.example`)
 
 Usadas por Vite (`import.meta.env.VITE_*`, solo las que empiezan con
 `VITE_` quedan expuestas al código del navegador):
@@ -398,22 +424,29 @@ Probado real: build exitoso, y corriendo contra la red de
 `docker-compose.yml` (Postgres/Redis/MinIO reales) arrancó y `/health`
 respondió `200` a la primera, sin ajustes.
 
-### 7.2 `projects/frontend/Dockerfile`
+### 7.2 `projects/frontend/comedoruagrm/Dockerfile`
 
 Build multi-stage, pero acá **el contexto de build es la raíz del repo**,
-no `projects/frontend` — es un detalle crítico, documentado en un
-comentario al principio del propio archivo:
+no `projects/frontend/comedoruagrm` — es un detalle crítico, documentado en
+un comentario al principio del propio archivo:
 
 ```bash
-docker build -f projects/frontend/Dockerfile -t comedor-uagrm-frontend .
+docker build -f projects/frontend/comedoruagrm/Dockerfile -t comedor-uagrm-frontend .
 ```
+
+> `nexware-landing` todavía no tiene un `Dockerfile` de producción propio —
+> hoy es solo un placeholder servido en modo desarrollo (ver sección 2.2b).
+> Al construir la landing real, se agrega acá un Dockerfile análogo al del
+> backend (build con `npm`, contexto limitado a
+> `projects/frontend/nexware-landing` porque no es parte del workspace
+> pnpm) que sirva `dist/` (el output estático de `astro build`) con nginx.
 
 **Por qué contexto raíz**: el proyecto es un workspace de pnpm
 (`pnpm-workspace.yaml` en la raíz). Para que `pnpm install` use el
 `pnpm-lock.yaml` real (build reproducible) en vez de resolver versiones
 nuevas cada vez, hace falta copiar `package.json` + `pnpm-workspace.yaml` +
 `pnpm-lock.yaml` de la raíz antes de instalar, algo que un contexto
-limitado a `projects/frontend/` no puede ver.
+limitado a `projects/frontend/comedoruagrm/` no puede ver.
 
 1. **Etapa `builder`** (`node:22-alpine`): copia los manifiestos primero
    (cache de capas), instala con `pnpm install --frozen-lockfile --filter
@@ -426,14 +459,14 @@ limitado a `projects/frontend/` no puede ver.
    ninguna config custom (usa el `nginx.conf` default de la imagen).
 
 **Hay un `.dockerignore` en la raíz del repo** (no en
-`projects/frontend/`, porque el contexto de build es la raíz — Docker solo
-lee el `.dockerignore` que está en la raíz del contexto). Sin él,
-`COPY projects/frontend ./projects/frontend` arrastraba el `node_modules`
-real del host hacia adentro de la imagen, con symlinks apuntando a rutas
-que no existen ahí — rompía el build con `Cannot find module`. Excluye
-`node_modules`, `dist`, `.dart_tool`, `build`, `target`, `.git` y los
-`.env` reales (dejando pasar los `.env.example`) en cualquier subcarpeta
-del repo.
+`projects/frontend/comedoruagrm/`, porque el contexto de build es la raíz
+— Docker solo lee el `.dockerignore` que está en la raíz del contexto).
+Sin él, `COPY projects/frontend/comedoruagrm ./projects/frontend/comedoruagrm`
+arrastraba el `node_modules` real del host hacia adentro de la imagen, con
+symlinks apuntando a rutas que no existen ahí — rompía el build con
+`Cannot find module`. Excluye `node_modules`, `dist`, `.dart_tool`,
+`build`, `target`, `.git` y los `.env` reales (dejando pasar los
+`.env.example`) en cualquier subcarpeta del repo.
 
 Probado real: build exitoso, contenedor corriendo, `200` +
 `<title>ComedorUAGRM</title>` al pedir `/`.

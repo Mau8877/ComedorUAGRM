@@ -1,5 +1,5 @@
 ---
-globs: projects/frontend/**/*
+globs: projects/frontend/comedoruagrm/**/*
 ---
 
 # Rutas y Navegación — Frontend

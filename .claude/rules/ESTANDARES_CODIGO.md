@@ -28,7 +28,7 @@ commit **se cancela**.
 
 | Lenguaje | Herramienta | Config | Alcance |
 | --- | --- | --- | --- |
-| TypeScript (frontend) | ESLint (`--fix`) | `projects/frontend/eslint.config.js` | `projects/frontend/**/*.{ts,tsx}` |
+| TypeScript (frontend, ComedorUAGRM) | ESLint (`--fix`) | `projects/frontend/comedoruagrm/eslint.config.js` | `projects/frontend/comedoruagrm/**/*.{ts,tsx}` |
 | Java (backend) | Checkstyle | `projects/backend/checkstyle.xml` | `projects/backend/**/*.java` |
 | Dart (mobile) | `flutter analyze` | `projects/mobile/analysis_options.yaml` (`flutter_lints`) | `projects/mobile/**/*.dart` |
 

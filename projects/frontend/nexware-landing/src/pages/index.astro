@@ -1,0 +1,55 @@
+---
+// Placeholder: la implementación completa de la landing (i18n, secciones,
+// paginas legales, SEO) es trabajo aparte -- ver "Nexware guia de marca y
+// guia tecnica.md" en la raiz del repo. Esta pagina solo confirma que el
+// proyecto Astro esta montado y enrutado correctamente en /landing-page.
+const accent = '#266B66'
+---
+<html lang="es" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>nexware</title>
+  </head>
+  <body>
+    <main>
+      <svg width="48" height="48" viewBox="0 0 72 72" role="img" aria-label="Nexware">
+        <g fill="#1E2A33">
+          <rect x="0" y="0" width="12" height="12" rx="2.5" />
+          <rect x="0" y="15" width="12" height="12" rx="2.5" />
+          <rect x="0" y="30" width="12" height="12" rx="2.5" />
+          <rect x="0" y="45" width="12" height="12" rx="2.5" />
+          <rect x="0" y="60" width="12" height="12" rx="2.5" />
+          <rect x="60" y="0" width="12" height="12" rx="2.5" />
+          <rect x="60" y="15" width="12" height="12" rx="2.5" />
+          <rect x="60" y="30" width="12" height="12" rx="2.5" />
+          <rect x="60" y="45" width="12" height="12" rx="2.5" />
+          <rect x="60" y="60" width="12" height="12" rx="2.5" />
+          <rect x="15" y="15" width="12" height="12" rx="2.5" />
+          <rect x="45" y="45" width="12" height="12" rx="2.5" />
+        </g>
+        <rect x="30" y="30" width="12" height="12" rx="2.5" fill={accent} />
+      </svg>
+      <h1>nexware</h1>
+      <p>Landing en construcción.</p>
+    </main>
+  </body>
+</html>
+
+<style>
+  body {
+    display: grid;
+    place-items: center;
+    min-height: 100vh;
+    margin: 0;
+    background: #f2f5f6;
+    color: #1e2a33;
+    font-family: system-ui, sans-serif;
+  }
+  main {
+    text-align: center;
+  }
+  h1 {
+    margin: 16px 0 4px;
+  }
+</style>
