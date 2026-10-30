@@ -1,0 +1,102 @@
+---
+import Button from '@/components/ui/Button.astro'
+import Eyebrow from '@/components/ui/Eyebrow.astro'
+import TechLogo from '@/components/ui/TechLogo.astro'
+import type { TechId } from '@/config/tech'
+
+interface Props {
+  imageAlt: string
+  label: string
+  title: string
+  description: string
+  techs: TechId[]
+  ctaLabel: string
+  ctaHref: string
+}
+
+const { imageAlt, label, title, description, techs, ctaLabel, ctaHref } = Astro.props
+---
+
+<article class="project reveal">
+  <div class="media" role="img" aria-label={imageAlt}>
+    <span>{imageAlt}</span>
+  </div>
+  <div class="body">
+    <Eyebrow>{label}</Eyebrow>
+    <h3>{title}</h3>
+    <p>{description}</p>
+    <ul class="tags">
+      {techs.map((tech) => (
+        <li>
+          <TechLogo {tech} label size={16} />
+        </li>
+      ))}
+    </ul>
+    <Button href={ctaHref} class="cta">
+      {ctaLabel}
+    </Button>
+  </div>
+</article>
+
+<style>
+  .project {
+    display: flex;
+    flex-wrap: wrap;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background: var(--surface);
+    overflow: hidden;
+  }
+  .media {
+    flex: 1 1 380px;
+    min-width: 0;
+    min-height: 300px;
+    padding: 24px;
+    background-color: var(--tint);
+    background-image: radial-gradient(var(--border) 1.5px, transparent 1.5px);
+    background-size: 24px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .media span {
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: var(--surface);
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 13px;
+    color: var(--accent);
+    text-align: center;
+  }
+  .body {
+    flex: 1 1 380px;
+    min-width: 0;
+    padding: clamp(24px, 4vw, 48px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 16px;
+  }
+  .body :global(.cta) {
+    align-self: flex-start;
+  }
+  h3 {
+    font-size: 34px;
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+    font-weight: 600;
+  }
+  p {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--soft);
+  }
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+</style>

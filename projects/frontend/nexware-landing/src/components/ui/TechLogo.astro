@@ -1,0 +1,63 @@
+---
+import { TECH, type TechId } from '@/config/tech'
+
+interface Props {
+  tech: TechId
+  // Con `label` se muestra el nombre junto al logo (chip); sin él, solo el logo.
+  label?: boolean
+  size?: number
+}
+
+const { tech, label = false, size = 24 } = Astro.props
+const { label: name, icon } = TECH[tech]
+---
+
+<span class="tech" class:list={{ chip: label }}>
+  <span class="tile" style={`--size: ${size}px`}>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      role={label ? undefined : 'img'}
+      aria-label={label ? undefined : name}
+      aria-hidden={label ? 'true' : undefined}
+    >
+      <path d={icon.path} fill={`#${icon.hex}`}></path>
+    </svg>
+  </span>
+  {label && <span class="name">{name}</span>}
+</span>
+
+<style>
+  .tech {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  /* Fondo claro fijo: los colores oficiales de marca (p. ej. el azul de
+     Flutter) no tienen contraste sobre el fondo oscuro del tema. */
+  .tile {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: #ffffff;
+    line-height: 0;
+  }
+  .chip {
+    padding: 4px 12px 4px 4px;
+    border-radius: 999px;
+    background: var(--tint);
+  }
+  .chip .tile {
+    padding: 4px;
+    border-radius: 999px;
+  }
+  .name {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 12px;
+    color: var(--accent);
+  }
+</style>

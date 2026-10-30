@@ -1,0 +1,47 @@
+---
+import Section from '@/components/ui/Section.astro'
+import SectionHeader from '@/components/ui/SectionHeader.astro'
+import { useTranslations, type Lang } from '@/i18n/utils'
+import ServiceCard from './ServiceCard.astro'
+
+interface Props {
+  lang: Lang
+}
+
+const t = useTranslations(Astro.props.lang)
+const services = ['web', 'mobile', 'backend'] as const
+---
+
+<Section id="servicios" labelledby="servicios-title">
+  <div class="inner">
+    <SectionHeader
+      index="01"
+      eyebrow={t('services.eyebrow')}
+      title={t('services.title')}
+      titleId="servicios-title"
+    />
+    <div class="cards">
+      {services.map((id) => (
+        <ServiceCard
+          icon={id}
+          title={t(`services.${id}.title`)}
+          text={t(`services.${id}.text`)}
+          tags={t(`services.${id}.tags`)}
+        />
+      ))}
+    </div>
+  </div>
+</Section>
+
+<style>
+  .inner {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+  .cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+</style>

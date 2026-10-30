@@ -1,0 +1,77 @@
+---
+import Section from '@/components/ui/Section.astro'
+import SectionHeader from '@/components/ui/SectionHeader.astro'
+import { useTranslations, type Lang } from '@/i18n/utils'
+
+interface Props {
+  lang: Lang
+}
+
+const t = useTranslations(Astro.props.lang)
+const steps = ['discovery', 'design', 'development', 'delivery'] as const
+---
+
+<Section id="proceso" labelledby="proceso-title">
+  <div class="inner">
+    <SectionHeader
+      index="03"
+      eyebrow={t('process.eyebrow')}
+      title={t('process.title')}
+      titleId="proceso-title"
+    />
+    <ol class="steps">
+      {steps.map((id, index) => (
+        <li class="step reveal">
+          <span class="number" aria-hidden="true">
+            {String(index + 1).padStart(2, '0')}
+          </span>
+          <h3>{t(`process.${id}.title`)}</h3>
+          <p>{t(`process.${id}.text`)}</p>
+        </li>
+      ))}
+    </ol>
+  </div>
+</Section>
+
+<style>
+  .inner {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .step {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 24px 0 0;
+    border-top: 2px solid var(--border);
+    transition: border-color 0.2s ease;
+  }
+  .step:hover {
+    border-top-color: var(--accent);
+  }
+  .number {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 14px;
+    color: var(--accent);
+  }
+  h3 {
+    font-size: 22px;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+  }
+  p {
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--soft);
+  }
+</style>

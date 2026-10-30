@@ -1,0 +1,19 @@
+{
+  "eyebrow": "SERVICES",
+  "title": "Built to fit, end to end.",
+  "web": {
+    "title": "Custom web",
+    "text": "Websites and web apps with React and TypeScript: fast, accessible and built to grow with you.",
+    "tags": "React · TypeScript"
+  },
+  "mobile": {
+    "title": "Mobile apps",
+    "text": "A single codebase for Android and iOS with Flutter, with the experience your users expect.",
+    "tags": "Flutter"
+  },
+  "backend": {
+    "title": "Backend and AI",
+    "text": "Solid APIs with Spring Boot and AI services with FastAPI, integrated with what you already have.",
+    "tags": "Spring Boot · FastAPI"
+  }
+}

@@ -1,0 +1,13 @@
+---
+import { getCollection } from 'astro:content'
+import { LegalScreen } from '@/features/legal'
+
+export async function getStaticPaths() {
+  const entries = await getCollection('legal', ({ data }) => data.lang === 'es')
+  return entries.map((entry) => ({ params: { legal: entry.data.slug }, props: { entry } }))
+}
+
+const { entry } = Astro.props
+---
+
+<LegalScreen lang="es" {entry} />

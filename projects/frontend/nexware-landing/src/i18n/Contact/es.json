@@ -1,0 +1,12 @@
+{
+  "eyebrow": "CONTACTO",
+  "title": "Cuéntanos tu idea.",
+  "text": "Escríbenos y te respondemos pronto. Sin compromiso.",
+  "name": "Nombre",
+  "emailLabel": "Correo",
+  "message": "¿Qué quieres construir?",
+  "send": "Enviar mensaje",
+  "errorRequired": "Este campo es obligatorio.",
+  "errorEmail": "Escribe un correo válido, por ejemplo nombre@dominio.com.",
+  "success": "Gracias, recibimos tu mensaje. (Versión de demostración: no se envió a ningún servidor.)"
+}

@@ -1,0 +1,40 @@
+---
+import Eyebrow from './Eyebrow.astro'
+
+interface Props {
+  // Número de la sección en la página ("01", "02"...).
+  index: string
+  eyebrow: string
+  title: string
+  titleId: string
+}
+
+const { index, eyebrow, title, titleId } = Astro.props
+---
+
+<div class="header reveal">
+  <Eyebrow>
+    <span class="index" aria-hidden="true">
+      {index} /
+    </span>{' '}
+    {eyebrow}
+  </Eyebrow>
+  <h2 id={titleId}>{title}</h2>
+</div>
+
+<style>
+  .header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .index {
+    color: var(--soft);
+  }
+  h2 {
+    font-size: clamp(32px, 4.4vw, 52px);
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    font-weight: 600;
+  }
+</style>

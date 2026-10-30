@@ -1,0 +1,18 @@
+{
+  "homeTitle": "Nexware: custom web and mobile development in Santa Cruz, Bolivia",
+  "homeDescription": "If it doesn't exist, we build it. We design and build custom websites and mobile apps with React, Flutter, Spring Boot and FastAPI.",
+  "siteName": "Nexware",
+  "ogAlt": "Nexware logo: a pixel-built N and the tagline \"If it doesn't exist, we build it.\"",
+  "terms": {
+    "description": "Terms and conditions for using Nexware's services and website (sample document)."
+  },
+  "privacy": {
+    "description": "Nexware privacy policy: what data we collect, why, and what rights you have (sample document)."
+  },
+  "cookies": {
+    "description": "Nexware cookie policy: we only use essential local storage (sample document)."
+  },
+  "legalNotice": {
+    "description": "Nexware legal notice: owner, address and the site's conditions (sample document)."
+  }
+}

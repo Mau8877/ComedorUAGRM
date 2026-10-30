@@ -1,0 +1,56 @@
+---
+import { alternatePath, otherLang, type LegalId } from '@/i18n/routes'
+import { LANGS, useTranslations, type Lang } from '@/i18n/utils'
+
+interface Props {
+  lang: Lang
+  legalId?: LegalId
+}
+
+const { lang, legalId } = Astro.props
+const t = useTranslations(lang)
+const other = otherLang(lang)
+const href = alternatePath(lang, legalId)
+---
+
+<div class="lang" role="group" aria-label={t('nav.language')}>
+  {LANGS.map((code, index) => (
+    <>
+      {index > 0 && <span aria-hidden="true">/</span>}
+      {code === lang ? (
+        <span class="item current" aria-current="true">
+          {code.toUpperCase()}
+        </span>
+      ) : (
+        <a class="item" {href} hreflang={other} lang={other} aria-label={t('nav.switchTo')}>
+          {code.toUpperCase()}
+        </a>
+      )}
+    </>
+  ))}
+</div>
+
+<style>
+  .lang {
+    display: inline-flex;
+    align-items: center;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 13px;
+    color: var(--soft);
+  }
+  .item {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 6px;
+    color: var(--soft);
+    text-decoration: none;
+  }
+  a.item:hover {
+    color: var(--ink);
+  }
+  .current {
+    color: var(--ink);
+    font-weight: 500;
+  }
+</style>

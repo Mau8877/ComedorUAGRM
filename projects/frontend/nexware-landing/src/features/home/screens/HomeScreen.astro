@@ -1,0 +1,31 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import { Hero } from '@/features/hero'
+import { Services } from '@/features/services'
+import { Stack } from '@/features/stack'
+import { Process } from '@/features/process'
+import { Portfolio } from '@/features/portfolio'
+import { Team } from '@/features/team'
+import { Contact } from '@/features/contact'
+import { organizationJsonLd } from '@/lib/seo'
+import { useTranslations, type Lang } from '@/i18n/utils'
+
+interface Props {
+  lang: Lang
+}
+
+const { lang } = Astro.props
+const t = useTranslations(lang)
+const site = Astro.site ?? new URL(Astro.url.origin)
+const jsonLd = organizationJsonLd(lang, site, t('footer.slogan'))
+---
+
+<BaseLayout {lang} title={t('seo.homeTitle')} description={t('seo.homeDescription')} {jsonLd}>
+  <Hero {lang} />
+  <Services {lang} />
+  <Stack {lang} />
+  <Process {lang} />
+  <Portfolio {lang} />
+  <Team {lang} />
+  <Contact {lang} />
+</BaseLayout>
