@@ -147,8 +147,11 @@ Todo lo relacionado a API/datos vive en `src/store/` — **no** en
 header `Authorization: Bearer <ID token de Firebase>` (obtenido del SDK de
 Firebase con `getIdToken()`, que lo renueva solo — no se guarda el token
 en un store ni en `localStorage`). Como no hay cookies de sesión, **no** se
-usa `withCredentials`. Un `401` de la API significa "sin sesión válida":
-se cierra la sesión de Firebase y se redirige a `/login`. Ver
+usa `withCredentials`. `apiClient` no importa el SDK de Firebase: el flujo de autenticación
+registra el proveedor del token con `setAuthTokenProvider()` y qué hacer
+ante un `401` con `setUnauthorizedHandler()` (ambos en `apiClient.ts`). Un
+`401` de la API significa "sin sesión válida": se cierra la sesión de
+Firebase y se redirige a `/login`. Ver
 [SEGURIDAD_AUTH_BACKEND.md](../backend/SEGURIDAD_AUTH_BACKEND.md).
 
 Todo hook de `api/` de cada feature usa `apiClient` — no se crea una
