@@ -1,119 +1,451 @@
 erDiagram
-  USUARIO ||--o| PERFIL : tiene
-  USUARIO ||--o{ USUARIO_ROL : tiene
-  ROL ||--o{ USUARIO_ROL : agrupa
-  USUARIO ||--o| CONFIGURACION : configura
+  ROL ||--o{ USUARIO : tiene
+  USUARIO ||--o| POSTULANTE : es
+  CARRERA ||--o{ POSTULANTE : cursa
+  GESTION_ACADEMICA ||--o{ CONVOCATORIA : contiene
+  CONVOCATORIA ||--o{ CONVOCATORIA_DOCUMENTO : exige
+  TIPO_DOCUMENTO ||--o{ CONVOCATORIA_DOCUMENTO : define
+  POSTULANTE ||--o{ POSTULACION : envia
+  CONVOCATORIA ||--o{ POSTULACION : recibe
+  POSTULACION ||--o| RESPUESTA_SOCIOECONOMICA : declara
+  POSTULACION ||--o{ NOTA_ACADEMICA : registra
+  POSTULACION ||--o{ DOCUMENTO_ADJUNTO : adjunta
+  TIPO_DOCUMENTO ||--o{ DOCUMENTO_ADJUNTO : clasifica
+  POSTULACION ||--o{ POSTULACION_HISTORIAL : historial
+  USUARIO ||--o{ POSTULACION_HISTORIAL : registra
+  MODELO_PRESELECCION ||--o{ PARAMETRO_MODELO : tiene
+  MODELO_PRESELECCION ||--o{ PUNTAJE_POSTULACION : genera
+  POSTULACION ||--o{ PUNTAJE_POSTULACION : obtiene
+  CONVOCATORIA ||--o{ LOTE_REPROCESAMIENTO : reprocesa
+  MODELO_PRESELECCION ||--o{ LOTE_REPROCESAMIENTO : usa
+  POSTULACION ||--o| FINALISTA : "puede ser"
+  FINALISTA ||--o{ AUDITORIA_EXPEDIENTE : "se audita"
+  POSTULACION ||--o| ADJUDICACION : "resulta en"
+  CONVOCATORIA ||--o{ ACTA_ADJUDICACION : genera
+  CONVOCATORIA ||--o| PUBLICACION_RESULTADO : publica
+  ADJUDICACION ||--o| BECA : origina
+  CONVOCATORIA ||--o{ BECA : otorga
+  POSTULANTE ||--o{ BECA : recibe
+  BECA ||--o{ MOVIMIENTO_BECA : registra
+  BECA ||--o{ MOVIMIENTO_BECA : reemplaza
+  BECA ||--o{ ASISTENCIA : acumula
+  CONVOCATORIA ||--o{ PLANILLA_ASISTENCIA : genera
+  PLANILLA_ASISTENCIA ||--o{ COTEJO_ASISTENCIA : "se coteja"
+  CONVOCATORIA ||--o{ COMUNICADO : tiene
+  COMUNICADO ||--o{ NOTIFICACION : origina
+  POSTULACION ||--o{ NOTIFICACION : motiva
   USUARIO ||--o{ NOTIFICACION : recibe
-  USUARIO ||--o{ NOTIFICACION_BROADCAST : crea
-  NOTIFICACION_BROADCAST ||--o{ NOTIFICACION : genera
-  USUARIO ||--o{ BITACORA_ACCESO : genera
-  PERFIL ||--o{ ASIGNACION_BECA : tiene
-  USUARIO ||--o{ ASIGNACION_BECA : otorga
+  USUARIO ||--o{ DISPOSITIVO_FCM : registra
+  USUARIO ||--o{ BITACORA : ejecuta
+  USUARIO ||--o{ CONVOCATORIA : crea
+  USUARIO ||--o{ MODELO_PRESELECCION : crea
+  USUARIO ||--o{ LOTE_REPROCESAMIENTO : solicita
+  USUARIO ||--o{ AUDITORIA_EXPEDIENTE : audita
+  USUARIO ||--o{ ADJUDICACION : decide
+  USUARIO ||--o{ ACTA_ADJUDICACION : genera
+  USUARIO ||--o{ PUBLICACION_RESULTADO : publica
+  USUARIO ||--o{ MOVIMIENTO_BECA : registra
+  USUARIO ||--o{ ASISTENCIA : registra
+  USUARIO ||--o{ PLANILLA_ASISTENCIA : genera
+  USUARIO ||--o{ COTEJO_ASISTENCIA : realiza
+  USUARIO ||--o{ COMUNICADO : publica
+
+  ROL {
+    bigint id PK
+    uuid codigo_rol UK
+    varchar nombre UK
+    timestamptz creado_en
+    timestamptz actualizado_en
+    timestamptz eliminado_en
+  }
 
   USUARIO {
     bigint id PK
-    uuid codigo_usuario
-    string username
-    string correo
-    string password_hash
-    string estado
-    boolean correo_verificado
-    timestamp created_at
-    timestamp updated_at
-    timestamp deleted_at
-  }
-  PERFIL {
-    bigint id PK
-    uuid codigo_perfil
-    bigint usuario_id FK
-    string nombres
-    string apellidos
-    string estado
-    timestamp created_at
-    timestamp updated_at
-    timestamp deleted_at
-  }
-  ROL {
-    bigint id PK
-    uuid codigo_rol
-    string nombre
-    text descripcion
-    boolean is_active
-    timestamp created_at
-    timestamp updated_at
-    timestamp deleted_at
-  }
-  USUARIO_ROL {
-    bigint id PK
-    uuid codigo_usuario_rol
-    bigint usuario_id FK
+    uuid codigo_usuario UK
     bigint rol_id FK
-    boolean is_active
-    timestamp created_at
-    timestamp updated_at
-    timestamp deleted_at
+    varchar ci UK "(20)"
+    varchar correo UK "(150)"
+    varchar firebase_uid UK "(128)"
+    varchar nombres "(100)"
+    varchar apellidos "(100)"
+    boolean activo
+    timestamptz creado_en
+    timestamptz actualizado_en
+    timestamptz eliminado_en
   }
-  CONFIGURACION {
+
+  CARRERA {
     bigint id PK
-    uuid codigo_configuracion
-    bigint usuario_id FK
-    boolean notificacion_push_activado
-    boolean notificacion_email_activado
-    string tema_preferido
-    boolean is_active
-    timestamp created_at
-    timestamp updated_at
-    timestamp deleted_at
+    uuid codigo_carrera UK
+    varchar nombre UK
+    varchar facultad
+    timestamptz creado_en
+    timestamptz actualizado_en
+    timestamptz eliminado_en
   }
-  NOTIFICACION_BROADCAST {
-    bigint id PK
-    uuid codigo_notificacion_broadcast
-    bigint creado_por FK
-    string titulo
-    string mensaje
-    string criterio_destinatarios
-    timestamp fecha_envio
-    boolean is_active
-    timestamp created_at
-    timestamp updated_at
-    timestamp deleted_at
+
+  POSTULANTE {
+    bigint usuario_id PK, FK
+    uuid codigo_postulante UK
+    bigint carrera_id FK
+    varchar registro_universitario UK "(20)"
+    varchar telefono "(20)"
+    timestamptz creado_en
+    timestamptz actualizado_en
+    timestamptz eliminado_en
   }
-  NOTIFICACION {
+
+  GESTION_ACADEMICA {
     bigint id PK
-    uuid codigo_notificacion
-    bigint usuario_id FK
-    bigint notificacion_broadcast_id FK
-    string titulo
-    string mensaje
-    string tipo
-    string canal
-    boolean leida
-    timestamp fecha_lectura
-    boolean is_active
-    timestamp created_at
-    timestamp updated_at
-    timestamp deleted_at
-  }
-  BITACORA_ACCESO {
-    bigint id PK
-    uuid codigo_bitacora_acceso
-    bigint usuario_id FK
-    string tipo_evento
-    string metodo_autenticacion
-    string ip_origen
-    string user_agent
-    string resultado
-    timestamp created_at
-  }
-  ASIGNACION_BECA {
-    bigint id PK
-    uuid codigo_asignacion_beca
-    bigint perfil_id FK
-    bigint asignado_por FK
+    uuid codigo_gestion_academica UK
+    varchar etiqueta
     date fecha_inicio
     date fecha_fin
-    string estado
-    timestamp created_at
-    timestamp updated_at
-    timestamp deleted_at
+    timestamptz creado_en
+    timestamptz actualizado_en
+    timestamptz eliminado_en
+  }
+
+  CONVOCATORIA {
+    bigint id PK
+    uuid codigo_convocatoria UK
+    bigint gestion_id FK
+    bigint creado_por FK
+    varchar nombre "(150)"
+    timestamptz fecha_apertura
+    timestamptz fecha_cierre
+    int cupos
+    numeric puntaje_minimo "(5,2)"
+    estado_convocatoria estado
+    timestamptz creado_en
+    timestamptz actualizado_en
+    timestamptz eliminado_en
+  }
+
+  TIPO_DOCUMENTO {
+    bigint id PK
+    uuid codigo_tipo_documento UK
+    varchar nombre
+    varchar descripcion
+    timestamptz creado_en
+    timestamptz actualizado_en
+    timestamptz eliminado_en
+  }
+
+  CONVOCATORIA_DOCUMENTO {
+    bigint convocatoria_id PK, FK
+    bigint tipo_documento_id PK, FK
+    uuid codigo_convocatoria_documento UK
+    boolean obligatorio
+    timestamptz creado_en
+    timestamptz actualizado_en
+    timestamptz eliminado_en
+  }
+
+  POSTULACION {
+    bigint id PK
+    uuid codigo_postulacion UK
+    bigint convocatoria_id FK
+    bigint postulante_id FK
+    estado_postulacion estado
+    timestamptz fecha_envio
+    smallint numero_envios
+    timestamptz creado_en
+    timestamptz actualizado_en
+    timestamptz eliminado_en
+  }
+
+  RESPUESTA_SOCIOECONOMICA {
+    bigint postulacion_id PK, FK
+    uuid codigo_respuesta_socioeconomica UK
+    numeric ingresos_familiares "(12,2)"
+    smallint dependientes
+    varchar patrimonio "(255)"
+    varchar procedencia "(150)"
+    numeric promedio_academico "(5,2)"
+    varchar estado_vulnerabilidad "(50)"
+    jsonb datos_extra
+    timestamptz creado_en
+    timestamptz actualizado_en
+    timestamptz eliminado_en
+  }
+
+  NOTA_ACADEMICA {
+    bigint id PK
+    uuid codigo_nota_academica UK
+    bigint postulacion_id FK
+    varchar periodo
+    numeric promedio
+    timestamptz creado_en
+    timestamptz actualizado_en
+    timestamptz eliminado_en
+  }
+
+  DOCUMENTO_ADJUNTO {
+    bigint id PK
+    uuid codigo_documento_adjunto UK
+    bigint postulacion_id FK
+    bigint tipo_documento_id FK
+    varchar nombre_archivo "(255)"
+    varchar mime_type "(100)"
+    varchar storage_path "(500)"
+    bigint tamano_bytes
+    timestamptz subido_en
+    timestamptz creado_en
+    timestamptz actualizado_en
+    timestamptz eliminado_en
+  }
+
+  POSTULACION_HISTORIAL {
+    bigint id PK
+    uuid codigo_postulacion_historial UK
+    bigint postulacion_id FK
+    bigint usuario_id FK
+    estado_postulacion estado_anterior
+    estado_postulacion estado_nuevo
+    text motivo
+    timestamptz creado_en
+    timestamptz actualizado_en
+    timestamptz eliminado_en
+  }
+
+  MODELO_PRESELECCION {
+    bigint id PK
+    uuid codigo_modelo_preseleccion UK
+    bigint creado_por FK
+    varchar version
+    varchar descripcion
+    boolean activo
+    timestamptz creado_en
+    timestamptz actualizado_en
+    timestamptz eliminado_en
+  }
+
+  PARAMETRO_MODELO {
+    bigint id PK
+    uuid codigo_parametro_modelo UK
+    bigint modelo_id FK
+    varchar clave
+    jsonb valor
+    numeric ponderacion
+    timestamptz creado_en
+    timestamptz actualizado_en
+    timestamptz eliminado_en
+  }
+
+  PUNTAJE_POSTULACION {
+    bigint id PK
+    uuid codigo_puntaje_postulacion UK
+    bigint modelo_id FK
+    bigint postulacion_id FK
+    numeric puntaje_total "(5,2)"
+    jsonb detalle
+    timestamptz fecha_calculo
+    boolean vigente
+    timestamptz creado_en
+    timestamptz actualizado_en
+    timestamptz eliminado_en
+  }
+
+  LOTE_REPROCESAMIENTO {
+    bigint id PK
+    uuid codigo_lote_reprocesamiento UK
+    bigint convocatoria_id FK
+    bigint modelo_id FK
+    bigint solicitado_por FK
+    varchar estado
+    int total_postulaciones
+    timestamptz iniciado_en
+    timestamptz terminado_en
+    timestamptz creado_en
+    timestamptz actualizado_en
+    timestamptz eliminado_en
+  }
+
+  FINALISTA {
+    bigint id PK
+    uuid codigo_finalista UK
+    bigint postulacion_id FK, UK
+    int posicion
+    date plazo_entrega
+    timestamptz notificado_en
+    timestamptz documentacion_recibida_en
+    timestamptz creado_en
+    timestamptz actualizado_en
+    timestamptz eliminado_en
+  }
+
+  AUDITORIA_EXPEDIENTE {
+    bigint id PK
+    uuid codigo_auditoria_expediente UK
+    bigint finalista_id FK
+    bigint auditor_id FK
+    timestamptz fecha_auditoria
+    varchar resultado
+    text observaciones
+    timestamptz creado_en
+    timestamptz actualizado_en
+    timestamptz eliminado_en
+  }
+
+  ADJUDICACION {
+    bigint id PK
+    uuid codigo_adjudicacion UK
+    bigint decidido_por FK
+    bigint postulacion_id FK, UK
+    resultado_adjudicacion resultado
+    numeric puntaje_final "(5,2)"
+    timestamptz fecha_adjudicacion
+    timestamptz creado_en
+    timestamptz actualizado_en
+    timestamptz eliminado_en
+  }
+
+  ACTA_ADJUDICACION {
+    bigint id PK
+    uuid codigo_acta_adjudicacion UK
+    bigint convocatoria_id FK
+    bigint generada_por FK
+    varchar numero UK
+    varchar storage_path
+    timestamptz generada_en
+    timestamptz creado_en
+    timestamptz actualizado_en
+    timestamptz eliminado_en
+  }
+
+  PUBLICACION_RESULTADO {
+    bigint id PK
+    uuid codigo_publicacion_resultado UK
+    bigint publicado_por FK
+    bigint convocatoria_id FK, UK
+    timestamptz publicado_en
+    timestamptz creado_en
+    timestamptz actualizado_en
+    timestamptz eliminado_en
+  }
+
+  BECA {
+    bigint id PK
+    uuid codigo_beca UK
+    bigint convocatoria_id FK
+    bigint postulante_id FK
+    bigint adjudicacion_id FK, UK
+    estado_beca estado
+    date fecha_inicio
+    date fecha_fin
+    timestamptz creado_en
+    timestamptz actualizado_en
+    timestamptz eliminado_en
+  }
+
+  MOVIMIENTO_BECA {
+    bigint id PK
+    uuid codigo_movimiento_beca UK
+    bigint beca_id FK
+    bigint beca_reemplazante_id FK
+    bigint registrado_por FK
+    tipo_movimiento_beca tipo
+    date fecha
+    text motivo
+    timestamptz creado_en
+    timestamptz actualizado_en
+    timestamptz eliminado_en
+  }
+
+  ASISTENCIA {
+    bigint id PK
+    uuid codigo_asistencia UK
+    bigint beca_id FK
+    bigint registrado_por FK
+    date fecha
+    timestamptz hora_registro
+    timestamptz creado_en
+    timestamptz actualizado_en
+    timestamptz eliminado_en
+  }
+
+  PLANILLA_ASISTENCIA {
+    bigint id PK
+    uuid codigo_planilla_asistencia UK
+    bigint convocatoria_id FK
+    bigint generada_por FK
+    date fecha_desde
+    date fecha_hasta
+    timestamptz generada_en
+    varchar storage_path
+    timestamptz creado_en
+    timestamptz actualizado_en
+    timestamptz eliminado_en
+  }
+
+  COTEJO_ASISTENCIA {
+    bigint id PK
+    uuid codigo_cotejo_asistencia UK
+    bigint planilla_id FK
+    bigint realizado_por FK
+    date fecha_cotejo
+    int total_registros
+    int coincidencias
+    int discrepancias
+    varchar resultado
+    text observaciones
+    timestamptz creado_en
+    timestamptz actualizado_en
+    timestamptz eliminado_en
+  }
+
+  COMUNICADO {
+    bigint id PK
+    uuid codigo_comunicado UK
+    bigint convocatoria_id FK
+    bigint publicado_por FK
+    varchar titulo
+    text contenido
+    destinatarios_comunicado destinatarios
+    timestamptz publicado_en
+    timestamptz creado_en
+    timestamptz actualizado_en
+    timestamptz eliminado_en
+  }
+
+  NOTIFICACION {
+    bigint id PK
+    uuid codigo_notificacion UK
+    bigint comunicado_id FK
+    bigint postulacion_id FK
+    bigint usuario_id FK
+    varchar titulo
+    text mensaje
+    tipo_notificacion tipo
+    boolean leida
+    timestamptz enviada_en
+    timestamptz creado_en
+    timestamptz actualizado_en
+    timestamptz eliminado_en
+  }
+
+  DISPOSITIVO_FCM {
+    bigint id PK
+    uuid codigo_dispositivo_fcm UK
+    bigint usuario_id FK
+    varchar token UK
+    varchar plataforma
+    timestamptz creado_en
+    timestamptz actualizado_en
+    timestamptz eliminado_en
+  }
+
+  BITACORA {
+    bigint id PK
+    uuid codigo_bitacora UK
+    bigint usuario_id FK
+    varchar accion "(60)"
+    varchar entidad "(60)"
+    bigint entidad_id
+    jsonb detalle
+    inet ip
+    timestamptz creado_en
+    timestamptz actualizado_en
+    timestamptz eliminado_en
   }
