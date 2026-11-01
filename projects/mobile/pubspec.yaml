@@ -40,6 +40,8 @@ dependencies:
   flutter_dotenv: ^6.0.1
   flutter_secure_storage: ^11.0.0
   google_fonts: ^8.2.1
+  comedoru_palette:
+    path: ../../packages/palette
 
 dev_dependencies:
   flutter_test:
