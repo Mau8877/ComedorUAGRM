@@ -24,11 +24,13 @@ WORKDIR /app
 # 1. Copiamos primero solo los manifiestos (cache de Docker: si no cambian
 # las dependencias, no se reinstala nada aunque cambie el código fuente)
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY packages/palette/package.json ./packages/palette/package.json
 COPY projects/frontend/comedoruagrm/package.json ./projects/frontend/comedoruagrm/package.json
 
 RUN pnpm install --frozen-lockfile --filter comedor-uagrm-frontend...
 
 # 2. Copiamos el código fuente del frontend y compilamos
+COPY packages/palette ./packages/palette
 COPY projects/frontend/comedoruagrm ./projects/frontend/comedoruagrm
 RUN pnpm --filter comedor-uagrm-frontend build
 

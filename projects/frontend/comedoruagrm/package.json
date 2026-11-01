@@ -4,13 +4,16 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "predev": "node ../../../packages/palette/scripts/build.mjs",
     "dev": "vite",
+    "prebuild": "node ../../../packages/palette/scripts/build.mjs",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run"
   },
   "dependencies": {
+    "@comedoru/palette": "workspace:*",
     "@base-ui/react": "^1.6.0",
     "@fontsource-variable/familjen-grotesk": "^5.3.0",
     "@fontsource-variable/jost": "^5.3.0",
