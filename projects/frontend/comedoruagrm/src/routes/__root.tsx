@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { createRootRoute, Link, Outlet } from '@tanstack/react-router'
-import { UtensilsCrossedIcon } from 'lucide-react'
 
+import { ComedoruLogo } from '@/components/layout'
 import { buttonVariants } from '@/components/ui/button'
 import { useUiStore } from '@/store'
 
@@ -33,9 +33,7 @@ function RootLayout() {
 function NotFoundPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background px-4 text-center text-foreground">
-      <span className="flex size-14 items-center justify-center rounded-2xl bg-accent">
-        <UtensilsCrossedIcon className="size-7 text-accent-foreground" />
-      </span>
+      <ComedoruLogo className="size-20 text-primary" />
       <div>
         <h1 className="font-heading text-2xl font-semibold">Página no encontrada</h1>
         <p className="mt-2 text-sm text-muted-foreground">

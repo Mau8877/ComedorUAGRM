@@ -1,7 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { UtensilsCrossedIcon } from 'lucide-react'
-
-import { PublicHeader } from '@/components/layout'
+import { ComedoruLogo, PublicHeader } from '@/components/layout'
 import { Button } from '@/components/ui/button'
 
 export function LandingScreen() {
@@ -11,9 +9,7 @@ export function LandingScreen() {
 
       <main className="flex flex-1 items-center justify-center px-4 py-16">
         <section className="mx-auto flex max-w-2xl flex-col items-center gap-6 text-center">
-          <span className="flex size-16 items-center justify-center rounded-2xl bg-accent">
-            <UtensilsCrossedIcon className="size-8 text-accent-foreground" />
-          </span>
+          <ComedoruLogo className="size-24 text-primary" />
           <h1 className="font-heading text-4xl font-bold text-primary md:text-5xl">
             Comedor universitario UAGRM
           </h1>

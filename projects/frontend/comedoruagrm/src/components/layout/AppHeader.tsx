@@ -1,6 +1,5 @@
 import {
   MenuIcon,
-  UtensilsCrossedIcon,
   SunIcon,
   MoonIcon,
   LogOutIcon,
@@ -25,6 +24,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 import { Breadcrumbs } from './Breadcrumbs'
+import { ComedoruLogo } from './ComedoruLogo'
 import { HeaderClock } from './HeaderClock'
 import { NotificationsMenu } from './NotificationsMenu'
 import type { LayoutUser, NotificationsController } from './types'
@@ -92,9 +92,7 @@ export function AppHeader({ appName, user, notifications = EMPTY_NOTIFICATIONS }
       </Button>
 
       <div className="flex items-center gap-2.5">
-        <span className="flex size-9 items-center justify-center rounded-xl bg-accent">
-          <UtensilsCrossedIcon className="size-5 text-accent-foreground" />
-        </span>
+        <ComedoruLogo className="size-9 text-header-foreground" />
         <span className="font-heading text-lg font-semibold">{appName}</span>
       </div>
 

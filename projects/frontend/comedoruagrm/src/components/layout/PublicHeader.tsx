@@ -1,9 +1,11 @@
 import { Link } from '@tanstack/react-router'
-import { LogInIcon, MoonIcon, SunIcon, UtensilsCrossedIcon } from 'lucide-react'
+import { LogInIcon, MoonIcon, SunIcon } from 'lucide-react'
 
 import { runThemeTransition } from '@/utils/runThemeTransition'
 import { useUiStore } from '@/store'
 import { Button } from '@/components/ui/button'
+
+import { ComedoruLogo } from './ComedoruLogo'
 
 interface PublicHeaderProps {
   appName: string
@@ -21,9 +23,7 @@ export function PublicHeader({ appName }: PublicHeaderProps) {
   return (
     <header className="flex h-16 shrink-0 items-center gap-3 bg-header px-4 text-header-foreground">
       <Link to="/" className="flex items-center gap-2.5">
-        <span className="flex size-9 items-center justify-center rounded-xl bg-accent">
-          <UtensilsCrossedIcon className="size-5 text-accent-foreground" />
-        </span>
+        <ComedoruLogo className="size-9" />
         <span className="font-heading text-lg font-semibold">{appName}</span>
       </Link>
 
