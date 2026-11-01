@@ -14,15 +14,16 @@ globs: projects/backend/**/*
   [LOGGING_BACKEND.md](LOGGING_BACKEND.md) para el resto de excepciones de
   seguridad).
 - Recursos en **plural** y **kebab-case**: `/api/v1/usuarios`,
-  `/api/v1/menus-semanales`, `/api/v1/tipos-comida`. Nunca camelCase ni
+  `/api/v1/postulaciones`, `/api/v1/tipos-documento`. Nunca camelCase ni
   snake_case en la URL.
 - Recursos anidados solo cuando la relación es de pertenencia real (el hijo
-  no existe sin el padre): `/api/v1/pedidos/{pedidoId}/items`. Si el recurso
+  no existe sin el padre): `/api/v1/postulaciones/{codigo}/documentos-adjuntos`. Si el recurso
   tiene entidad propia y se puede consultar solo, va en su propia raíz con un
-  filtro (`/api/v1/items?filter[pedidoId]=123`), no anidado.
-- Acciones que no mapean a un CRUD directo (ej. "aprobar pedido") van como
-  sub-recurso verbo en infinitivo: `POST /api/v1/pedidos/{id}/aprobar`. No se
-  usan verbos como query param (`?action=aprobar`).
+  filtro (`/api/v1/documentos-adjuntos?filter[postulacionId]=...`), no anidado.
+- Acciones que no mapean a un CRUD directo (ej. "devolver postulación") van como
+  sub-recurso verbo en infinitivo: `POST /api/v1/postulaciones/{codigo}/devolver`. No se
+  usan verbos como query param (`?action=devolver`).
+- **El identificador en la ruta es siempre el `codigo` público** (UUID, columna `codigo_<tabla>`), nunca el `id` interno de la base: `GET /api/v1/postulaciones/{codigo}`. Los filtros por relación (`filter[postulacionId]`) también reciben códigos. Ver [PERSISTENCIA_BD_BACKEND.md](PERSISTENCIA_BD_BACKEND.md#identificador-de-fila-id-interno--codigo_tabla-público).
 
 ## Query params de listados (obligatorio en TODO `GET` de colección)
 

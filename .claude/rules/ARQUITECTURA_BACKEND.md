@@ -23,7 +23,7 @@ capa** y cómo fluye una request a través de ellas:
 com.comedoruagrm.backend
 ├── common/          # Compartido entre 2+ módulos (nunca "por las dudas")
 ├── config/          # Beans de configuración de Spring (SecurityConfig, etc.)
-├── security/        # JWT, filtros, @CurrentUserId
+├── security/        # verificación del ID token de Firebase, RateLimitFilter, @CurrentUserId
 └── features/
     └── {modulo}/
         ├── controller/  # Entrada HTTP
@@ -86,7 +86,7 @@ detalle completo:
 | ------------------------------------------------------ | ----------------------------------------- | ---------------------------------------------------------------- |
 | Sobre de respuesta (`ApiResponse`, `PageMeta`)         | `common/response/`                        | [RESPONSES_BACKEND.md](backend/RESPONSES_BACKEND.md)             |
 | Jerarquía de excepciones + `GlobalExceptionHandler`    | `common/exception/`                       | [EXCEPCIONES_BACKEND.md](backend/EXCEPCIONES_BACKEND.md)         |
-| Autenticación JWT, `RateLimitFilter`, `@CurrentUserId` | `security/`                               | [SEGURIDAD_AUTH_BACKEND.md](backend/SEGURIDAD_AUTH_BACKEND.md)   |
+| Autenticación (ID token de Firebase), `RateLimitFilter`, `@CurrentUserId` | `security/`                               | [SEGURIDAD_AUTH_BACKEND.md](backend/SEGURIDAD_AUTH_BACKEND.md)   |
 | `SecurityConfig` y demás config de Spring              | `config/`                                 | —                                                                |
 | Convención de rutas, verbos HTTP, paginación           | (no es código, es contrato)               | [ENDPOINTS_BACKEND.md](backend/ENDPOINTS_BACKEND.md)             |
 | Logging estructurado                                   | (transversal a `service/` de cada módulo) | [LOGGING_BACKEND.md](backend/LOGGING_BACKEND.md)                 |
@@ -101,3 +101,30 @@ módulo de `features/` directo salvo que la relación de negocio lo
 justifique explícitamente (ej. `pedidos` necesita leer `usuarios`) — y en
 ese caso, a través del `service` del módulo dueño del dato, nunca accediendo
 a su `repository` desde afuera.
+
+## Módulos del dominio
+
+El dominio (sistema de postulación y preselección de la Beca Comedor de la
+DUBSS) y su división en paquetes de análisis están definidos en la
+documentación de grado (ver
+[PERSISTENCIA_BD_BACKEND.md](backend/PERSISTENCIA_BD_BACKEND.md#fuente-de-verdad-del-modelo-de-datos)).
+Cada paquete de análisis es el punto de partida para agrupar los `features/`:
+
+| Paquete de análisis | Casos de uso | Tablas principales |
+| --- | --- | --- |
+| P1 Cuentas y acceso | CU-01, CU-14, CU-15 | `usuario`, `rol`, `postulante`, `carrera` |
+| P2 Convocatoria y postulación | CU-13, CU-02, CU-16, CU-17, CU-18, CU-04 | `convocatoria`, `gestion_academica`, `postulacion`, `respuesta_socioeconomica`, `documento_adjunto`, `postulacion_historial` |
+| P3 Preselección con IA | CU-03, CU-26 | `modelo_preseleccion`, `parametro_modelo`, `puntaje_postulacion`, `lote_reprocesamiento` |
+| P4 Auditoría y adjudicación | CU-05 a CU-08, CU-19 a CU-22 | `finalista`, `auditoria_expediente`, `adjudicacion`, `acta_adjudicacion`, `publicacion_resultado`, `comunicado`, `notificacion` |
+| P5 Becados y asistencia | CU-23, CU-09, CU-10, CU-11, CU-24 | `beca`, `movimiento_beca`, `asistencia`, `planilla_asistencia`, `cotejo_asistencia` |
+| P6 Reportes y trazabilidad | CU-12, CU-25 | `bitacora` (y consultas de BI) |
+
+- El nombre de cada carpeta `features/{modulo}/` se fija al crear el primer
+  módulo; los paquetes son una guía de agrupación, no un requisito de que
+  haya exactamente seis carpetas.
+- **Integraciones externas** que el backend consume: Firebase (Auth, FCM
+  para push, Storage para archivos) y el **módulo de IA en Python**
+  (consumido por API para calcular el puntaje de vulnerabilidad). La
+  estructura de código de esas integraciones se define al implementar la
+  primera; mientras tanto, regla de dependencia: el `service` de un módulo
+  las usa, nunca el `controller`.

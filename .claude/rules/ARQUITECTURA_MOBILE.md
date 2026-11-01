@@ -59,6 +59,14 @@ ruta monta qué Shell — un Shell no se instancia nunca directo desde una
 medida que exista la feature real detrás de cada ítem de navegación,
 mismo criterio que `_authenticated/panel.tsx` del lado web.
 
+Los roles reales del backend son `POSTULANTE`, `ADMINISTRADOR_DUBSS`,
+`DIRECTIVO` y `PERSONAL_COMEDOR` (ver
+[SEGURIDAD_AUTH_BACKEND.md](backend/SEGURIDAD_AUTH_BACKEND.md#roles-y-permisos)).
+Los dos shells actuales (`AdminShell`, `EstudianteShell`) son de prueba:
+qué rol usa cada shell en mobile, y si hace falta uno nuevo
+(`PERSONAL_COMEDOR`, por ejemplo, que registra asistencia), lo fija el caso
+de uso que lo necesite, no se asume de antemano.
+
 ## Estructura de un feature (`lib/features/{feature}/`)
 
 Ya scaffoldeada como ejemplo de referencia en `lib/features/auth/` (hoy

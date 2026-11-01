@@ -143,6 +143,14 @@ Todo lo relacionado a API/datos vive en `src/store/` — **no** en
   no termina en el bundle de producción). `main.tsx` monta
   `<QueryProvider><RouterProvider .../></QueryProvider>`.
 
+**Autenticación del cliente HTTP.** `apiClient` agrega a cada request el
+header `Authorization: Bearer <ID token de Firebase>` (obtenido del SDK de
+Firebase con `getIdToken()`, que lo renueva solo — no se guarda el token
+en un store ni en `localStorage`). Como no hay cookies de sesión, **no** se
+usa `withCredentials`. Un `401` de la API significa "sin sesión válida":
+se cierra la sesión de Firebase y se redirige a `/login`. Ver
+[SEGURIDAD_AUTH_BACKEND.md](../backend/SEGURIDAD_AUTH_BACKEND.md).
+
 Todo hook de `api/` de cada feature usa `apiClient` — no se crea una
 instancia de axios nueva por feature, y no se llama a `createBaseApi()` de
 nuevo fuera de `apiClient.ts` (una sola instancia real en toda la app).

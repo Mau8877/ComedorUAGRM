@@ -25,6 +25,12 @@ Un `Interceptor` desempaqueta el sobre estándar del backend
   `status: "failed"` como si fuera éxito. Un `service` que necesita el
   código de negocio lo lee de `dioException.error as ApiException`.
 
+Otro `Interceptor` agrega a cada request el header
+`Authorization: Bearer <ID token de Firebase>` (obtenido del SDK de Firebase
+con `getIdToken()`, que lo renueva solo). Un `401` significa "sin sesión
+válida": se cierra la sesión de Firebase y el router redirige al inicio de
+sesión. Ver [SEGURIDAD_AUTH_BACKEND.md](../backend/SEGURIDAD_AUTH_BACKEND.md).
+
 `ENABLE_API_LOGS` (`.env`, `true`/`false`) prende un `LogInterceptor` de
 `dio` — mismo criterio que `VITE_ENABLE_API_LOGS` del frontend, apagado por
 default.

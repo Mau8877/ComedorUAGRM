@@ -70,7 +70,7 @@ src/routes/
 
 `_authenticated.tsx` usa el hook `beforeLoad` de TanStack Router para
 verificar sesión antes de renderizar cualquier ruta hija, y hace
-`throw redirect({ to: '/login' })` si no hay token válido. **Cualquier ruta
+`throw redirect({ to: '/login' })` si no hay sesión de Firebase. **Cualquier ruta
 nueva que necesite autenticación se agrega dentro de `_authenticated/`** —
 no se copia la validación de sesión adentro de cada ruta nueva.
 
@@ -91,22 +91,27 @@ no se copia la validación de sesión adentro de cada ruta nueva.
 
 Distintos layouts según el rol del usuario autenticado (ej. layout admin vs.
 layout estudiante, ver [SEGURIDAD_AUTH_BACKEND.md](../backend/SEGURIDAD_AUTH_BACKEND.md)
-para el esquema de roles del lado del backend — el frontend usa el mismo
-`role` que viaja en el JWT/en la respuesta de login).
+para el esquema de roles del lado del backend). La sesión la maneja el SDK
+de **Firebase Auth** (no hay login propio del backend): el guard consulta
+el estado de Firebase, y el rol y los datos del usuario salen de la
+respuesta del backend (`usuario.rol`), no del token.
 
-> **Nombre del layout vs. valor del rol en el backend.** El enum de roles
-> del backend es `Role { ADMIN, USUARIO }` (ver
+> **Nombre del layout vs. valor del rol en el backend.** Los roles del
+> backend son `POSTULANTE`, `ADMINISTRADOR_DUBSS`, `DIRECTIVO` y
+> `PERSONAL_COMEDOR` (ver
 > [SEGURIDAD_AUTH_BACKEND.md](../backend/SEGURIDAD_AUTH_BACKEND.md#roles-y-permisos))
-> — ese valor `USUARIO` **no cambia**, es la decisión ya tomada del backend.
-> `estudiante/` es solo el nombre que el frontend le da a su layout/carpeta
-> para ese mismo rol (más descriptivo que "usuario" para este dominio,
-> donde el rol no-admin siempre es un estudiante). Cuando exista el mapeo
-> real JWT → layout, ese punto traduce `role: "USUARIO"` a
-> `EstudianteLayout`, no al revés.
+> — esos valores **no cambian**. `admin/` y `estudiante/` son solo los
+> nombres que el frontend le da a sus carpetas de layout. El mapeo es:
+> `ADMINISTRADOR_DUBSS` → `AdminLayout`, `POSTULANTE` → `EstudianteLayout`.
+> Para `DIRECTIVO` y `PERSONAL_COMEDOR` todavía no hay layout: se crea
+> (un directorio por rol, ver abajo) cuando el primer caso de uso de ese
+> rol lo necesite, y si ese caso de uso es solo mobile, no se crea en web.
+> El punto que resuelve rol → layout traduce el rol del backend al layout,
+> no al revés.
 
 - Un directorio por rol dentro de `src/layouts/` (`admin/`, `estudiante/`, y
   los que se agreguen a futuro), no un único layout con
-  `if (role === 'ADMIN')` esparcido dentro (eso se vuelve ilegible apenas se
+  `if (rol === 'ADMINISTRADOR_DUBSS')` esparcido dentro (eso se vuelve ilegible apenas se
   agregan dos roles más). Cada directorio sigue la misma forma interna,
   ej. `src/layouts/admin/`:
   ```

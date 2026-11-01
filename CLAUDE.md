@@ -22,6 +22,32 @@ independientes más la infraestructura de desarrollo:
 - **`infrastructure/`** — configuración de Docker Compose: nginx (proxy),
   postgres, redis, minio, prometheus, grafana.
 
+## Fuente de verdad del dominio: documentación de grado
+
+El sistema (**postulación y preselección de la Beca Comedor de la DUBSS,
+con IA y reportes BI**) está especificado en la documentación de grado, que
+vive **fuera de este repositorio**:
+
+`D:\UAGRM\Taller De Grado - Junior\doc-comedor-univesitario\`
+
+Lo que ahí figura —**diseño lógico de la base de datos**
+(`images/091_Diseno_Logico_Base_de_Datos.jpg`), **casos de uso**
+(`casos_de_uso_filtrados.md`, 26 CU), diagramas de **análisis**, de
+**secuencia** y **mockups** (`images/`)— es lo que el proyecto debe
+cumplir. Antes de implementar un caso de uso hay que mirar sus diagramas
+(ver [CASOS_DE_USO.md](rules/CASOS_DE_USO.md)); el modelo de datos tiene su
+transcripción versionada en `docs/DiagramaConceptual.mermaid` (ver
+[PERSISTENCIA_BD_BACKEND.md](rules/backend/PERSISTENCIA_BD_BACKEND.md)). La
+autenticación la resuelve **Firebase Auth** (el backend solo verifica el
+token; ver [SEGURIDAD_AUTH_BACKEND.md](rules/backend/SEGURIDAD_AUTH_BACKEND.md)).
+Si algo en el código contradice esa documentación, se avisa en vez de
+elegir en silencio.
+
+El trabajo se organiza por **casos de uso** (`docs/CasosDeUso/`) y se
+descompone en **unidades de trabajo** (`docs/UnidadesTrabajo/`), ver
+[CASOS_DE_USO.md](rules/CASOS_DE_USO.md) y
+[UNIDADES_DE_TRABAJO.md](rules/UNIDADES_DE_TRABAJO.md).
+
 ## Comandos básicos
 
 ### Backend (`projects/backend`)

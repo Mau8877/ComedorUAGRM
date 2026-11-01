@@ -1,189 +1,119 @@
----
-globs: projects/backend/**/*
----
-
 # Seguridad y Autenticación — Backend
 
-## Estado actual (punto de partida)
+## Modelo: Firebase Auth + backend como servidor de recursos
 
-`SecurityConfig.java` hoy usa el `InMemoryUserDetailsManager` autogenerado
-por Spring Boot (usuario/password aleatorio impreso en el log en cada
-arranque). Esto es **solo un placeholder de desarrollo** y debe
-reemplazarse por la implementación real descrita abajo antes de considerar
-la autenticación "hecha" — no es un requisito opcional.
+La autenticación **no la implementa este backend**: la hace **Firebase
+Auth** (stack definido en la documentación de grado: *Spring Boot (REST,
+JWT, HTTPS)* + *Firebase: Auth, FCM, Storage*). Firebase se encarga de las
+credenciales, el registro de la cuenta, la verificación de correo, la
+recuperación de contraseña, el bloqueo por intentos fallidos y la emisión y
+renovación de los tokens. El backend solo **verifica** el token que llega y
+**autoriza** según los datos del dominio.
 
-## Flujo: JWT + refresh token
+Por eso este backend **no** tiene: endpoint de login propio, emisión de
+JWT propios, refresh tokens, cookies de sesión, `BCryptPasswordEncoder` ni
+contraseñas en la base de datos (`usuario` no tiene `password_hash`; solo
+`firebase_uid`, ver [PERSISTENCIA_BD_BACKEND.md](PERSISTENCIA_BD_BACKEND.md)).
 
-> **Decisión de diseño confirmada — por qué este esquema y no "todo en
-> cookies".** Se evaluó explícitamente mover también el access token a una
-> cookie `HttpOnly` (para que ningún token sea legible por JavaScript en
-> ningún momento) contra el esquema híbrido documentado abajo (access
-> token en memoria + refresh token en cookie `HttpOnly`), y se **confirmó
-> el híbrido** — es el patrón estándar de la industria para SPAs (mismo
-> enfoque que recomiendan proveedores como Auth0/Okta), por dos razones
-> concretas:
-> 1. **Inmunidad a CSRF en los endpoints de negocio.** El header
->    `Authorization` nunca se auto-envía (a diferencia de una cookie, que
->    el browser adjunta solo) — un endpoint que exige ese header queda
->    protegido contra CSRF sin necesitar un token anti-CSRF adicional. Si
->    el access token también fuera cookie, **todos** los endpoints de
->    negocio necesitarían esa protección extra (`SameSite=Strict` no
->    alcanza solo, o un patrón de doble-submit) — complejidad real sin un
->    beneficio de seguridad proporcional para el alcance de este proyecto.
-> 2. **El refresh token (el credential de larga vida, el que más importa
->    proteger) sí queda completamente fuera del alcance de JavaScript**
->    vía `HttpOnly` — el access token, al ser de vida corta (~15 min) y
->    nunca tocar disco (ni `localStorage` ni cookie), acota el daño de un
->    XSS exitoso a esa ventana de tiempo.
-> No se reabre esta decisión sin una razón concreta nueva (un requisito de
-> seguridad que el esquema actual no cubra) — no "por prolijidad" de tener
-> todo en cookies.
+> **Estado actual (punto de partida).** `SecurityConfig.java` hoy usa el
+> `InMemoryUserDetailsManager` autogenerado por Spring Boot (usuario/password
+> aleatorio impreso en el log). Es **solo un placeholder** y debe
+> reemplazarse por lo descrito abajo antes de considerar la autenticación
+> "hecha". CSRF sigue deshabilitado a propósito: no hay cookies de sesión,
+> la API es stateless y el token viaja en el header `Authorization`.
 
-- **Access token**: JWT de corta duración (ej. 15 minutos). Va en el header
-  `Authorization: Bearer <token>` en cada request. Contiene el `codigo`
-  (UUID) del usuario y la lista de nombres de sus roles activos (ver
-  [Roles](#roles-y-permisos)) como claims — nada sensible además de eso.
-  Viaja en el **body** de la respuesta de login (el cliente lo guarda en
-  memoria, nunca en `localStorage`/cookie).
-- **Refresh token**: de larga duración (ej. 7 días), opaco (UUID aleatorio,
-  no JWT), persistido en **Redis** (ver abajo). Se usa únicamente contra el
-  endpoint de refresh, nunca contra endpoints de negocio.
-- **Transporte del refresh token: cookie `HttpOnly`, no en el body.** El
-  cliente (browser) nunca ve ni maneja el valor del refresh token —
-  `document.cookie` no puede leerla, lo que mitiga robo por XSS. El backend
-  la setea/borra explícitamente en cada respuesta relevante:
+## Flujo de una request autenticada
 
-  | Cookie | `refreshToken` |
-  | --- | --- |
-  | Atributos | `HttpOnly`; `SameSite=Lax`; `Path=/api/v1/auth`; `Max-Age` = duración del refresh token (ej. 7 días en segundos) |
-  | `Secure` | `true` en producción; `false` en `dev` (el stack local corre sobre HTTP) — controlado por `app.cookies.secure` (`application-dev.properties` lo pisa a `false`) |
-  | La setea | `POST /api/v1/auth/login` (al emitir uno nuevo) y `POST /api/v1/auth/refresh` si rota el token |
-  | La borra | `POST /api/v1/auth/logout` (`Max-Age=0`) |
-  | La lee | `POST /api/v1/auth/refresh` y `POST /api/v1/auth/logout` — **nunca** del body del request, del header `Cookie` vía `@CookieValue` |
+1. El cliente (web React o app Flutter) inicia sesión con el **SDK de
+   Firebase** (correo + contraseña) y obtiene un **ID token** (JWT firmado
+   por Google, de vida corta). El SDK lo renueva solo; el cliente nunca
+   maneja el refresh token a mano ni lo copia a otro almacenamiento.
+2. En cada request a la API: `Authorization: Bearer <ID token>`.
+3. El backend valida el token en un filtro de seguridad: **firma, `iss`
+   (`https://securetoken.google.com/{projectId}`), `aud` (el projectId) y
+   expiración**. Qué librería lo hace (resource server de Spring Security o
+   el Admin SDK de Firebase) se decide en la primera UT de seguridad; el
+   contrato es el mismo.
+4. Con el `uid` del token (`sub`) busca el `usuario` por `firebase_uid`,
+   comprueba que esté **activo y no eliminado** (`usuario.activo`,
+   `eliminado_en IS NULL`) y arma el `Authentication` con las `authorities`
+   `ROLE_{rol.nombre}`.
+5. Token válido pero **sin `usuario`** con ese `firebase_uid` →
+   `UnauthorizedException` (`401`). Usuario existente pero **inactivo** →
+   `ForbiddenException` (`403`). Token ausente, mal firmado o vencido →
+   `401`.
 
-  `SameSite=Lax` alcanza porque frontend y backend son **same-site** (mismo
-  dominio registrable `localhost` en dev vía puertos distintos, mismo
-  origen real detrás de nginx en producción, ver
-  [`docker-compose.yml`](../../../docker-compose.yml)) — un request
-  programático (`fetch`/axios) same-site igual envía la cookie aunque sea
-  `Lax`, esa restricción solo afecta navegación cross-site de nivel
-  superior. El cliente HTTP (`apiClient`/`axios`) necesita
-  `withCredentials: true` para que el browser adjunte/acepte esta cookie
-  entre orígenes distintos (ver
-  [TANSTACK_QUERY_FRONTEND.md](../frontend/TANSTACK_QUERY_FRONTEND.md)), y
-  `SecurityConfig` ya tiene `allowCredentials(true)` en su configuración de
-  CORS — necesario para que el browser acepte la cookie en una respuesta
-  cross-origin.
-- **Endpoints** (`/api/v1/auth/...`):
-  - `POST /api/v1/auth/login` → valida credenciales, responde
-    `{ accessToken, usuario }` en el body y setea la cookie `refreshToken`.
-  - `POST /api/v1/auth/refresh` → lee el refresh token de la cookie, valida
-    que no esté invalidado/expirado contra Redis, responde
-    `{ accessToken }` (y opcionalmente rota la cookie).
-  - `POST /api/v1/auth/logout` → lee el refresh token de la cookie, lo
-    invalida en Redis, y borra la cookie en la respuesta.
-- **Invalidación en logout**: el refresh token se guarda del lado del
-  servidor en **Redis** con TTL igual a su vencimiento (Redis ya está en
-  `docker-compose.yml`, y `spring-boot-starter-data-redis` **ya está
-  agregada** en `pom.xml`, sin más wiring que la conexión automática vía
-  `spring.data.redis.host`; falta el código real del storage de tokens, eso
-  sigue pendiente). En logout se borra esa entrada; en refresh se valida
-  contra ese storage, no solo contra el formato del token.
-- El access token **no** se invalida antes de tiempo (es stateless por
-  diseño) — por eso su vida útil es corta. No se implementa una blacklist de
-  access tokens salvo que aparezca un requisito concreto que lo justifique.
+- El `activo` se consulta en cada request (no solo al iniciar sesión): así
+  desactivar a un usuario (CU-14) surte efecto de inmediato aunque su ID
+  token siga vigente unos minutos. Si el costo se vuelve relevante, se
+  cachea en Redis con TTL corto.
+- **El rol sale de la base de datos**, no del token: el ID token de Firebase
+  no lleva el rol y no se usan *custom claims* salvo que aparezca un
+  requisito concreto que la consulta a la base no cubra.
+- **Cerrar sesión** es del cliente (`signOut` del SDK); el backend es
+  stateless y no guarda sesiones. No hay lista de tokens revocados.
+- El `firebase_uid` **siempre** sale del token verificado, nunca de un
+  campo del body o de la URL.
 
-## Reemplazo del `InMemoryUserDetailsManager`
+### Registro (CU-01)
 
-- Model `Usuario` (tabla `users`, `features/usuarios/model/Usuario.java`,
-  extiende `BaseModel` — ver [ARQUITECTURA_BACKEND.md](../ARQUITECTURA_BACKEND.md)),
-  **con la forma exacta que fija
-  [`docs/DiagramaConceptual.mermaid`](../../../docs/DiagramaConceptual.mermaid)**
-  (fuente de verdad del modelo de datos — ver
-  [PERSISTENCIA_BD_BACKEND.md](PERSISTENCIA_BD_BACKEND.md#antes-de-crear-un-model-nuevo-consultar-el-diagrama-conceptual)):
-  `username` (único), `correo` (único), `passwordHash` (BCrypt, nunca
-  texto plano), `estado` (`EstadoUsuario` enum — ver
-  [Roles](#roles-y-permisos) para la distinción con el bloqueo temporal
-  por intentos fallidos), `correoVerificado` (boolean). Todavía no existe
-  — es un requisito de esta regla, no algo que ya esté implementado.
-  El identificador público es `codigo` (heredado de `BaseModel`, columna
-  `codigo_usuario` en esta tabla — ver
-  [PERSISTENCIA_BD_BACKEND.md](PERSISTENCIA_BD_BACKEND.md) para el porqué
-  del nombre de columna distinto por entidad), nunca se expone el `id`
-  interno.
-- Login **acepta `username` o `correo`** indistintamente en el mismo
-  campo de entrada (ver el CU de iniciar sesión) — el repositorio resuelve contra
-  cualquiera de las dos columnas.
-- El nombre para mostrar (`nombres`/`apellidos`) **no** vive en `Usuario`
-  — vive en la entidad `Perfil` (relación 1 a 1, ver el diagrama
-  conceptual), que es alcance de un CU de gestión de usuarios/perfil
-  aparte, no del CU de iniciar sesión.
-- `UserDetailsServiceImpl implements UserDetailsService` en `security/`, que
-  busca el usuario por `username`/`correo` vía `UsuarioRepository` y arma el
-  `UserDetails`/principal con sus roles activos (ver
-  [Roles](#roles-y-permisos)) y su `estado` (mapeado a `enabled` de
-  `UserDetails` — `enabled = true` solo si `estado == ACTIVO`, para que
-  Spring Security dispare `DisabledException` automáticamente en cualquier
-  otro estado).
-- `SecurityConfig` pasa a usar este `UserDetailsService` + un
-  `PasswordEncoder` (`BCryptPasswordEncoder`) en vez del in-memory, vía un
-  `AuthenticationManager` (vía `AuthenticationConfiguration`) que el
-  `AuthService` del módulo `auth` usa para validar credenciales. El filtro
-  de autenticación por JWT (`OncePerRequestFilter` custom) valida el access
-  token en cada request y setea el `Authentication` en el
-  `SecurityContext` — ese filtro es un follow-up del CU de iniciar sesión,
-  no bloqueante para que el login en sí funcione.
+Firebase crea la cuenta; luego el cliente llama al backend con el ID token
+recién obtenido para crear el `usuario` del dominio (y su `postulante`):
+
+- El endpoint de registro exige un token de Firebase **válido**, pero no
+  que ya exista un `usuario` (es el único que lo permite). El rol inicial es
+  `POSTULANTE`; el cliente no elige su rol.
+- `ci` y `correo` únicos → `ConflictException` (`409`) con su código de
+  error catalogado (ver [EXCEPCIONES_BACKEND.md](EXCEPCIONES_BACKEND.md)).
+- Si falla la creación en la base después de crear la cuenta en Firebase,
+  la cuenta de Firebase queda huérfana: el registro debe poder reintentarse
+  con el mismo token sin duplicar el `usuario` (idempotente por
+  `firebase_uid`).
+- Recuperar contraseña y verificar correo (CU-15 / CU-01) los resuelve
+  Firebase; en la base solo se reflejan datos de contacto (`telefono`,
+  `correo`). El `ci` no es modificable (RF-10).
 
 ## Roles y permisos
 
-**Modelo relacional, no un enum fijo** — alineado a
-[`docs/DiagramaConceptual.mermaid`](../../../docs/DiagramaConceptual.mermaid):
-un `Usuario` puede tener **varios roles activos** a la vez, vía las
-entidades `Rol` (catálogo de roles, con `nombre`, `descripcion`,
-`isActive`) y `UsuarioRol` (tabla de asociación con su propio `codigo`,
-`isActive` y timestamps — **no** es un `@ManyToMany` simple de JPA, porque
-esa fila de asociación tiene datos propios más allá de las dos FK, así que
-es una entidad propia con sus dos `@ManyToOne`). Ambas entidades viven en
-`features/usuarios/model/` (mismo dueño del dato que `Usuario`).
+**Un usuario tiene un único rol**: `usuario.rol_id` → `rol` (diagrama de
+base de datos). Catálogo actual (valores de `rol.nombre`):
 
-- Un rol solo cuenta como activo para un usuario si tanto la fila
-  `UsuarioRol.isActive` como el propio `Rol.isActive` son `true` — un rol
-  desactivado globalmente (`Rol.isActive = false`) deja de otorgar acceso
-  a todos los usuarios que lo tengan asignado, sin tener que tocar cada
-  fila de `UsuarioRol`.
-- Los nombres de rol conocidos por el sistema (ej. `"ADMIN"`, `"USUARIO"`)
-  se validan/usan como constantes de texto (`RolNombres` o similar, en
-  `features/usuarios/`), **no** como un enum Java cerrado — los roles son
-  datos (filas de la tabla `ROL`), administrables sin desplegar código
-  nuevo, a diferencia del esquema anterior de esta rule (enum fijo de 2
-  valores), que quedó reemplazado por este modelo.
-- El JWT lleva la lista de nombres de roles activos como claim (array de
-  strings, ver [Flujo JWT](#flujo-jwt--refresh-token)) — `UserDetailsServiceImpl`
-  arma las `authorities` como `ROLE_{nombre}` por cada rol activo.
-- Se protege por rol con `@PreAuthorize("hasRole('ADMIN')")` (o
-  `hasAnyRole(...)` si aplica a más de uno) a nivel de método de `service`
-  (no en el controller — mantiene la regla de controllers delgados de
-  [ENDPOINTS_BACKEND.md](ENDPOINTS_BACKEND.md)).
-- **No confundir con el bloqueo temporal por intentos fallidos de login**
-  (ver el CU de iniciar sesión): ese bloqueo es un estado transitorio en Redis, no
-  un valor de `Usuario.estado` ni de ningún rol — son dos mecanismos
-  independientes.
+| Rol | Quién |
+| --- | --- |
+| `POSTULANTE` | Estudiante UAGRM; postula y, si resulta becado, consulta su beca (el «Becado» **no** es un rol: es un postulante con `beca` vigente). |
+| `ADMINISTRADOR_DUBSS` | Personal de la DUBSS: audita, adjudica, gestiona convocatorias, usuarios, padrón, bitácora y parámetros del modelo. Si se divide en subroles (Trabajo Social / Encargada de Sistemas), **por definir con la DUBSS**. |
+| `DIRECTIVO` | Consume el dashboard de indicadores BI. |
+| `PERSONAL_COMEDOR` | Registra la asistencia digital. |
+
+«Usuario del Sistema» (el actor abstracto del diagrama de casos de uso) no
+se almacena como rol.
+
+- Los nombres de rol se usan como **constantes de texto** (`RolNombres` o
+  similar, en el módulo dueño del dato de `usuario`), no como un enum Java
+  cerrado: son filas de la tabla `rol`.
+- Las `authorities` son `ROLE_{nombre}`. Se protege por rol con
+  `@PreAuthorize("hasRole('ADMINISTRADOR_DUBSS')")` (o `hasAnyRole(...)`) a
+  nivel de método de `service` (no en el controller — mantiene la regla de
+  controllers delgados de [ENDPOINTS_BACKEND.md](ENDPOINTS_BACKEND.md)).
+- El nombre exacto de cada rol y a qué endpoints accede lo fija el caso de
+  uso que lo necesita.
 
 ## Obtener el usuario autenticado en los controllers
 
-No se extrae el JWT manualmente en cada endpoint (`request.getHeader("Authorization")`,
-parsear, etc.). Se usa una anotación custom que resuelve el dato directo
-desde el `SecurityContext`:
+No se extrae el token manualmente en cada endpoint
+(`request.getHeader("Authorization")`, parsear, etc.). Se usa una
+anotación custom que resuelve el dato directo desde el `SecurityContext`:
 
 ```java
-@GetMapping("/{id}/pedidos")
-public ResponseEntity<ApiResponse<List<PedidoResponse>>> misPedidos(@CurrentUserId UUID userId) {
+@GetMapping("/mis-postulaciones")
+public ResponseEntity<ApiResponse<List<PostulacionResponse>>> misPostulaciones(@CurrentUserId UUID userId) {
     ...
 }
 ```
 
-`UUID`, no `Long` — es el `codigo` público del usuario (el mismo valor
-del claim `sub` del JWT), nunca el `id` interno de la tabla `users`.
+`UUID`, no `Long` ni el `uid` de Firebase — es el `codigo_usuario` público
+del usuario (resuelto a partir del `firebase_uid` del token), nunca el `id`
+interno de la tabla `usuario`.
 
 La anotación `@CurrentUserId` (y su `HandlerMethodArgumentResolver`) se
 define una sola vez en `security/` — ver
@@ -241,9 +171,8 @@ intentar de más).
 > límite independiente (un atacante repartiendo requests entre instancias
 > efectivamente multiplica su cupo). Para eso existe
 > `bucket4j_jdk11-redis` (Redis ya está en el stack y
-> `spring-boot-starter-data-redis` ya está en el `pom.xml`, agregada para el
-> storage de refresh tokens de más arriba) — no se implementa hasta que haya
-> más de una instancia real corriendo.
+> `spring-boot-starter-data-redis` ya está en el `pom.xml`) — no se
+> implementa hasta que haya más de una instancia real corriendo.
 
 > **Esto no reemplaza protección a nivel de infraestructura.** Un rate
 > limit en la app (como este) es la última línea de defensa, no la única —
@@ -254,10 +183,10 @@ intentar de más).
 
 ## Endpoints públicos
 
-Solo quedan sin autenticación los ya definidos en `SecurityConfig`
-(`/health`, `/health/**`, `/prometheus`, `/swagger-ui/**`, `/v3/api-docs/**`)
-más los de `/api/v1/auth/login`, `/api/v1/auth/refresh` (obviamente, todavía
-no hay token) y `/api/v1/auth/register` si el proyecto lo requiere.
-Cualquier otro endpoint nuevo es privado por default — si necesita ser
-público, es una decisión explícita, no un olvido de agregar la regla en
-`SecurityConfig`.
+Solo quedan sin autenticación los de infraestructura ya definidos en
+`SecurityConfig` (`/health`, `/health/**`, `/prometheus`, `/swagger-ui/**`,
+`/v3/api-docs/**`). **Ningún endpoint de negocio es público**: incluso el
+registro exige un token de Firebase válido (ver arriba), porque el login
+y la creación de la cuenta ocurren en Firebase, no acá. Cualquier otro
+endpoint nuevo es privado por default — si necesita ser público, es una
+decisión explícita, no un olvido de agregar la regla en `SecurityConfig`.

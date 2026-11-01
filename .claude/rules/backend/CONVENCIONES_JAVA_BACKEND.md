@@ -17,7 +17,7 @@ com.comedoruagrm.backend
 │   ├── response/        # ApiResponse, PageMeta (ver RESPONSES_BACKEND.md)
 │   └── util/            # Utilidades genéricas sin estado
 ├── config/               # Configuración de Spring (SecurityConfig, etc.)
-├── security/             # JWT, filtros, @CurrentUserId, UserDetailsServiceImpl
+├── security/             # verificación del ID token de Firebase, RateLimitFilter, @CurrentUserId
 └── features/
     └── {modulo}/         # ej. usuarios/, auth/, pedidos/
         ├── controller/
@@ -36,8 +36,8 @@ más features. No se mueve algo a `common/` "por las dudas".
 `enums/` es solo para **enumeraciones de negocio propias del módulo** (ej.
 `TipoNotificacion { SUCCESS, INFO, WARNING, ERROR }` en `notificaciones/`) —
 un campo del Model que solo puede tomar un set fijo de valores, persistido
-`@Enumerated(EnumType.STRING)` (nunca `ORDINAL`, mismo criterio que `Role`
-en [SEGURIDAD_AUTH_BACKEND.md](SEGURIDAD_AUTH_BACKEND.md#roles-y-permisos)).
+`@Enumerated(EnumType.STRING)` (nunca `ORDINAL`; ver
+[PERSISTENCIA_BD_BACKEND.md](PERSISTENCIA_BD_BACKEND.md#convención-de-nombres-models-tablas-columnas)).
 No confundir con `{Recurso}ErrorCodes` (el catálogo de códigos de error del
 módulo, ver [EXCEPCIONES_BACKEND.md](EXCEPCIONES_BACKEND.md)) — eso sigue
 sin una subcarpeta dedicada, vive suelto en la raíz del paquete del módulo.
@@ -107,7 +107,7 @@ dependencia existe para eliminar.
 
 | Dónde | Qué anotación | Por qué |
 | --- | --- | --- |
-| `model/` (Models JPA, incluido `BaseModel`) | `@Getter` a nivel de clase; `@Setter` **por campo**, solo en los campos que de verdad necesitan mutarse desde fuera (ej. `deletedAt` para soft delete) | Un Model normalmente no debería exponer setters de todos sus campos sin criterio — igual que `BaseModel` no expone `setCodigo()`/`setCreatedAt()` (son de solo lectura una vez persistidos), cada Model nuevo decide campo por campo qué setter tiene sentido, no `@Setter` a nivel de clase por defecto |
+| `model/` (Models JPA, incluido `BaseModel`) | `@Getter` a nivel de clase; `@Setter` **por campo**, solo en los campos que de verdad necesitan mutarse desde fuera (ej. `eliminadoEn` para soft delete) | Un Model normalmente no debería exponer setters de todos sus campos sin criterio — igual que `BaseModel` no expone `setCodigo()`/`setCreadoEn()` (son de solo lectura una vez persistidos), cada Model nuevo decide campo por campo qué setter tiene sentido, no `@Setter` a nivel de clase por defecto |
 | `service/`, `controller/` (constructor injection) | `@RequiredArgsConstructor` sobre la clase, con los campos `private final` | Reemplaza el constructor explícito que pedía la versión anterior de esta regla |
 
 ### Qué NO se usa

@@ -10,11 +10,45 @@ documento de diseño técnico (eso lo cubren las
 [Unidades de Trabajo](UNIDADES_DE_TRABAJO.md), que se crean después y a
 partir del CU ya escrito).
 
+## Fuente de verdad: la documentación de grado
+
+Los casos de uso de este proyecto **ya están definidos** en la
+documentación de grado (Taller de Grado I), carpeta fuera de este
+repositorio:
+
+`D:\UAGRM\Taller De Grado - Junior\doc-comedor-univesitario\`
+
+Un CU **no se inventa ni se redefine** al escribirlo: se parte de lo que
+esa documentación dice y el sistema debe cumplirlo.
+
+| Qué | Dónde (dentro de esa carpeta) |
+| --- | --- |
+| Lista vigente de **26 CU**, su numeración, paquetes, actores, relaciones (`include`/`extend`) y RF asociados (**fuente de verdad de la numeración**) | `casos_de_uso_filtrados.md` y `CLAUDE.md` §6 |
+| Actores y contexto del dominio | `actores_por_cu.md`, `CLAUDE.md` §2–§3 |
+| Diagrama general de CU | `images/019_Diagrama_General_CU.jpg` |
+| Diagrama de cada CU | `images/038`–`050` y `images/064`–`076` (`..._CUNN_...`) |
+| Análisis (clases de análisis) de cada CU | `images/051`–`063` y `images/077`–`089` (`Analisis_CUNN_...`) |
+| Diagramas de **secuencia** de los CU (P4/P5/P6) | `images/092`–`104` (`Secuencia_CUNN_...`) |
+| Mockups de pantallas | `images/105`–`117` (`Mockup_CUNN_...`) |
+| Requisitos funcionales (RF-01…21) y no funcionales | `secciones/05_capitulo4_ieee830/03_requisitos_especificos.tex` |
+
+Reglas:
+
+- **Antes de escribir un CU**, se miran sus diagramas (CU, análisis,
+  secuencia, mockup) y su RF. El flujo principal, los flujos alternativos y
+  las pantallas del CU deben ser consistentes con esos diagramas; si el
+  diagrama y la lista se contradicen, se avisa y no se elige en silencio.
+- **No se inventan datos institucionales** (umbral mínimo de puntaje,
+  número de cupos, formatos de documento, estados): lo que la documentación
+  deja como "por definir con la DUBSS" se marca igual en el CU.
+- Los casos de uso **descartados** que lista esa documentación no se
+  reintroducen.
+
 ## Dónde vive y cómo se nombra
 
-`docs/CasosDeUso/CU{NN} - {Nombre corto}.md` — numeración secuencial de dos
-dígitos (`CU01`, `CU02`, ..., `CU10`...), asignada cuando el CU se acuerda
-con el equipo, sin reusar un número aunque un CU se descarte (mismo
+`docs/CasosDeUso/CU{NN} - {Nombre corto}.md` — el número y el nombre son los
+de la documentación de grado (`CU01` es el «CU-01» de esa lista, etc.):
+nunca se renumera ni se reasigna a otro CU aunque uno se descarte (mismo
 criterio que los códigos de error de
 [EXCEPCIONES_BACKEND.md](backend/EXCEPCIONES_BACKEND.md): un número usado
 una vez no se reasigna a otra cosa). El nombre corto del archivo coincide
@@ -47,6 +81,7 @@ sesión" no tiene sentido sin "iniciar sesión"), se documenta en sus
 **Actores secundarios:** {otros roles o sistemas involucrados, o "—"}
 **Objetivo:** {qué busca lograr el actor, en una frase}
 **Plataforma:** {Web, Móvil, o Móvil y Web}
+**RF asociados:** {RF-NN de la documentación de grado}
 
 **Descripción:**
 {Párrafo narrativo: qué hace el actor, qué responde el sistema y qué pasa
@@ -112,6 +147,10 @@ como `%20` porque el nombre del archivo los tiene).}
   {resultado}" — nunca "el sistema debe funcionar bien".
 - **Plataforma** indica dónde se ejecuta el CU; de ahí sale qué capas de
   UT (`UT-BACKEND`, `UT-FRONTEND`, `UT-MOBILE`) le corresponden.
+- **RF asociados** y, cuando el CU cambia el estado de una postulación, los
+  **estados de `postulacion` afectados** (ver el ciclo de vida en
+  `diseno_base_de_datos.md` §4) se citan en el flujo o en las reglas de
+  negocio.
 - **Estado** se actualiza a mano a medida que avanza (`Pendiente` → `En
   progreso` → `Hecho`).
 - Los links a otras rules o a otros CU usan rutas relativas correctas
