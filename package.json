@@ -5,6 +5,9 @@
 		"prepare": "husky"
 	},
 	"lint-staged": {
+		"packages/palette/palette.json": [
+			"sh -c 'node packages/palette/scripts/build.mjs && git add packages/palette/palette.css packages/palette/lib/comedoru_palette.dart'"
+		],
 		"projects/frontend/comedoruagrm/**/*.{ts,tsx}": [
 			"pnpm --dir projects/frontend/comedoruagrm exec eslint --fix"
 		],

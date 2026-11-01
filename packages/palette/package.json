@@ -1,0 +1,14 @@
+{
+  "name": "@comedoru/palette",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Paleta de colores de ComedorU compartida por el frontend web y mobile",
+  "type": "module",
+  "exports": {
+    "./palette.css": "./palette.css",
+    "./palette.json": "./palette.json"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs"
+  }
+}

@@ -1,0 +1,12 @@
+name: comedoru_palette
+description: Paleta de colores de ComedorU compartida con el frontend web.
+publish_to: 'none'
+version: 0.0.0
+
+environment:
+  sdk: ^3.12.2
+  flutter: '>=3.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
