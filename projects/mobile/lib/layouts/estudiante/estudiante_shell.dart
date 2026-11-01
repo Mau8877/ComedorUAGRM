@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../shared/widgets/comedoru_logo.dart';
+
 /// Shell del rol Estudiante -- AppBar + `NavigationBar` (Material 3) inferior,
 /// tres secciones. Equivalente mobile de `EstudianteLayout` en el frontend
 /// web (ver ARQUITECTURA_FRONTEND.md#layouts-por-rol): una barra inferior es
@@ -33,7 +35,15 @@ class _EstudianteShellState extends State<EstudianteShell> {
     final seccionActual = _secciones[_selected];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('ComedorU')),
+      appBar: AppBar(title: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ComedoruLogo(size: 32),
+            SizedBox(width: 10),
+            Text('ComedorU'),
+          ],
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
