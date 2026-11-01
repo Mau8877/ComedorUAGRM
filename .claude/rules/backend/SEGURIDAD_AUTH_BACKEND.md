@@ -112,12 +112,12 @@ la autenticación "hecha" — no es un requisito opcional.
   del nombre de columna distinto por entidad), nunca se expone el `id`
   interno.
 - Login **acepta `username` o `correo`** indistintamente en el mismo
-  campo de entrada (ver la HU de login) — el repositorio resuelve contra
+  campo de entrada (ver el CU de iniciar sesión) — el repositorio resuelve contra
   cualquiera de las dos columnas.
 - El nombre para mostrar (`nombres`/`apellidos`) **no** vive en `Usuario`
   — vive en la entidad `Perfil` (relación 1 a 1, ver el diagrama
-  conceptual), que es alcance de una HU de gestión de usuarios/perfil
-  aparte, no de la HU de login.
+  conceptual), que es alcance de un CU de gestión de usuarios/perfil
+  aparte, no del CU de iniciar sesión.
 - `UserDetailsServiceImpl implements UserDetailsService` en `security/`, que
   busca el usuario por `username`/`correo` vía `UsuarioRepository` y arma el
   `UserDetails`/principal con sus roles activos (ver
@@ -131,8 +131,7 @@ la autenticación "hecha" — no es un requisito opcional.
   `AuthService` del módulo `auth` usa para validar credenciales. El filtro
   de autenticación por JWT (`OncePerRequestFilter` custom) valida el access
   token en cada request y setea el `Authentication` en el
-  `SecurityContext` — ese filtro es un follow-up de esta HU (ver
-  [HU-01](../../../docs/HistoriasDeUsuario/HU01%20-%20Iniciar%20Sesión.md)),
+  `SecurityContext` — ese filtro es un follow-up del CU de iniciar sesión,
   no bloqueante para que el login en sí funcione.
 
 ## Roles y permisos
@@ -166,7 +165,7 @@ es una entidad propia con sus dos `@ManyToOne`). Ambas entidades viven en
   (no en el controller — mantiene la regla de controllers delgados de
   [ENDPOINTS_BACKEND.md](ENDPOINTS_BACKEND.md)).
 - **No confundir con el bloqueo temporal por intentos fallidos de login**
-  (ver la HU de login): ese bloqueo es un estado transitorio en Redis, no
+  (ver el CU de iniciar sesión): ese bloqueo es un estado transitorio en Redis, no
   un valor de `Usuario.estado` ni de ningún rol — son dos mecanismos
   independientes.
 

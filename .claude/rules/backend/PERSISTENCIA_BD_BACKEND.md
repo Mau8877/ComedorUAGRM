@@ -13,7 +13,7 @@ un Model/tabla nuevo (o de diseñar la Unidad de Trabajo que lo hace, ver
 entidad ya está definida ahí — sus campos, sus relaciones, y sus nombres
 exactos (`correo` y no `email`, `estado` y no `activo`, etc.) son los que
 se implementan, no una versión inventada "razonable" a partir del nombre
-de la entidad o de la Historia de Usuario que la menciona.
+de la entidad o del Caso de Uso que la menciona.
 
 Si una entidad de negocio nueva **no** está todavía en el diagrama, se
 agrega ahí primero (aunque sea un boceto mínimo) y recién después se crea

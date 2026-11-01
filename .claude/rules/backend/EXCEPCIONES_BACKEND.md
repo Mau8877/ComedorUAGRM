@@ -66,8 +66,7 @@ de sumar una excepción más a la lista de 5.
 > le corresponde semánticamente.
 >
 > `LockedException` se agregó (2026-09-06) puntualmente para el caso de
-> bloqueo de cuenta por intentos fallidos de login (ver
-> [HU01](../../../docs/HistoriasDeUsuario/HU01.md)) — no se forzó dentro de
+> bloqueo de cuenta por intentos fallidos de login — no se forzó dentro de
 > `ForbiddenException` porque semánticamente son cosas distintas: `403` es
 > "no tenés permiso sobre esto", `423 Locked` es "el recurso existe, tenés
 > permiso en principio, pero está temporalmente bloqueado" (la cuenta se

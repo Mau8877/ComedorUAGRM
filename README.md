@@ -36,8 +36,8 @@ ComedorUAGRM/
 ├── docs/
 │   ├── README.md        # Checklist de puesta en marcha de un proyecto nuevo a partir de esta plantilla
 │   ├── errors/           # Catálogo de códigos de error de la API (ver más abajo)
-│   ├── HistoriasDeUsuario/
-│   └── UnidadesTrabajo/
+│   ├── CasosDeUso/       # Casos de uso (ver .claude/rules/CASOS_DE_USO.md)
+│   └── UnidadesTrabajo/  # Unidades de trabajo por caso de uso
 ├── .claude/
 │   ├── CLAUDE.md         # Instrucciones de proyecto para Claude Code
 │   └── rules/            # Reglas de arquitectura y convenciones (ver más abajo)
