@@ -83,7 +83,7 @@ secciones obligatorias:
 # Unidades de trabajo — CU{NN}-{CAPA}
 
 **Caso de uso:** {resumen de una línea de qué cubre este CU en esta capa}
-**Fuente CU:** [`ruta relativa al CU`](../../CasosDeUso/CU{NN}%20-%20Nombre.md)
+**Fuente CU:** [`ruta relativa al CU`](../../../CasosDeUso/CU{NN}%20-%20Nombre.md)
 **Diagramas de grado:** {números de imagen de la secuencia / análisis / mockup de este CU en la documentación de grado}
 **Recurso HTTP / contrato:** {endpoint(s) o pantalla(s) que este CU expone}
 
