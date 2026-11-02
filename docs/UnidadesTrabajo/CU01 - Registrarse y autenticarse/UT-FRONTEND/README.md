@@ -2,7 +2,7 @@
 
 **Caso de uso:** Pantallas web de crear cuenta e iniciar sesión con Firebase Auth, conexión de la sesión de Firebase con la API, guard de rutas privadas y cierre de sesión.
 **Fuente CU:** [`CU01 - Registrarse y autenticarse`](../../../CasosDeUso/CU01%20-%20Registrarse%20y%20autenticarse.md)
-**Diagramas de grado:** `images/038_CU01_Registrarse_Autenticarse.png` (contexto) y `images/051_Analisis_CU01_Registrarse_Autenticarse.png` (análisis). No hay diagrama de secuencia ni mockup de este CU en la documentación de grado.
+**Diagramas de grado:** `images/038_CU01_Registrarse_Autenticarse.png` (contexto), `images/051_Analisis_CU01_Registrarse_Autenticarse.jpg` (análisis), `images/121_Secuencia_CU01_Registrarse_Autenticarse.jpg` (secuencia) y `images/134_Mockup_CU01_Registrarse_autenticarse.png` (mockup).
 **Recurso HTTP / contrato:** Rutas `/registro` y `/login`; consume `GET /carreras`, `POST /auth/registro`, `POST /auth/sesion` y `GET /auth/usuario-actual` (ver [`UT-BACKEND`](../UT-BACKEND/README.md)).
 
 ## Antes de implementar cualquier UT
@@ -13,6 +13,7 @@ Leer [`.claude/rules/`](../../../../.claude/rules/) — `ARQUITECTURA_FRONTEND.m
 
 Todo el código va en `projects/frontend/comedoruagrm/src/` (la feature nueva es `features/auth/`).
 
+- **Diagramas de grado.** El análisis (051) y la secuencia (121) ya reflejan el diseño con Firebase Auth y coinciden con estas fichas. El mockup (134) sigue mostrando el diseño anterior (contraseña de mínimo 8 con letras y números, sin carrera, registro universitario ni teléfono, con casilla de términos y login/registro en pestañas): no se corrige y **ganan el CU y estas UT**.
 - **La sesión es de Firebase, no de un store.** El estado de sesión sale de `onAuthStateChanged` del SDK de Firebase; Zustand sigue siendo solo estado de UI. Los datos del usuario (nombre, rol) vienen del backend con TanStack Query (`GET /auth/usuario-actual`), no se copian a un store (`ESTADO_GLOBAL_FRONTEND.md`).
 - **Flujo de registro en el cliente:** (1) validar el formulario con Zod; (2) crear la cuenta en Firebase con correo y contraseña; (3) `POST /auth/registro` con el ID token; (4) llevar al usuario a su módulo. Si Firebase responde que el correo ya existe, se intenta iniciar sesión con **el mismo correo y contraseña**: si funciona, se continúa con el paso 3 (recupera una cuenta de Firebase que quedó sin su registro en el sistema; el backend es idempotente) y si no, se informa "correo ya registrado" (A1). Si el backend responde `409`, se marca el campo en conflicto (CI, correo o registro universitario) y **no** se cierra la sesión de Firebase, para poder reintentar sin crear otra cuenta.
 - **Flujo de inicio de sesión:** (1) validar; (2) iniciar sesión en Firebase; (3) `POST /auth/sesion` (una sola vez, registra el acceso); (4) llevar al módulo del rol. Si el backend responde `403` `ERR_AUTH_03` (cuenta desactivada) o `401` `ERR_AUTH_02` (sin cuenta en el sistema), se cierra la sesión de Firebase y se muestra el mensaje.

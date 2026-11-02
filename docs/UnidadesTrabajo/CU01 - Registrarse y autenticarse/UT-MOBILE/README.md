@@ -2,7 +2,7 @@
 
 **Caso de uso:** Pantallas de la app móvil para crear cuenta e iniciar sesión con Firebase Auth, conexión de la sesión con la API, redirección por rol y cierre de sesión.
 **Fuente CU:** [`CU01 - Registrarse y autenticarse`](../../../CasosDeUso/CU01%20-%20Registrarse%20y%20autenticarse.md)
-**Diagramas de grado:** `images/038_CU01_Registrarse_Autenticarse.png` (contexto) y `images/051_Analisis_CU01_Registrarse_Autenticarse.png` (análisis). No hay diagrama de secuencia ni mockup de este CU en la documentación de grado.
+**Diagramas de grado:** `images/038_CU01_Registrarse_Autenticarse.png` (contexto), `images/051_Analisis_CU01_Registrarse_Autenticarse.jpg` (análisis), `images/121_Secuencia_CU01_Registrarse_Autenticarse.jpg` (secuencia) y `images/134_Mockup_CU01_Registrarse_autenticarse.png` (mockup).
 **Recurso HTTP / contrato:** Rutas `/login`, `/registro` y `/sin-modulo` en `go_router`; consume `GET /carreras`, `POST /auth/registro`, `POST /auth/sesion` y `GET /auth/usuario-actual` (ver [`UT-BACKEND`](../UT-BACKEND/README.md)).
 
 ## Antes de implementar cualquier UT
@@ -13,6 +13,7 @@ Leer [`.claude/rules/`](../../../../.claude/rules/) — `ARQUITECTURA_MOBILE.md`
 
 Todo el código va en `projects/mobile/lib/` (la feature es `features/auth/`). Esta capa reproduce, con las herramientas de Flutter, lo mismo que [`UT-FRONTEND`](../UT-FRONTEND/README.md): la misma regla de negocio, los mismos mensajes y el mismo flujo (CA14).
 
+- **Diagramas de grado.** El análisis (051) y la secuencia (121) ya reflejan el diseño con Firebase Auth y coinciden con estas fichas. El mockup (134) sigue mostrando el diseño anterior (contraseña de mínimo 8 con letras y números, sin carrera, registro universitario ni teléfono, con casilla de términos y login/registro en pestañas): no se corrige y **ganan el CU y estas UT**.
 - **La sesión es de Firebase.** El estado de sesión sale de `FirebaseAuth.instance.authStateChanges()`; los datos del usuario (nombre, rol) vienen del backend (`GET /auth/usuario-actual`). No se guarda ningún token a mano (ni en `flutter_secure_storage`): lo persiste el SDK.
 - **Flujo de registro:** validar el formulario → crear la cuenta en Firebase → `POST /auth/registro` con el ID token → ir al módulo. Si Firebase dice que el correo ya existe, se prueba iniciar sesión con el mismo correo y contraseña: si funciona se continúa con el registro (recupera una cuenta de Firebase que quedó sin su registro en el sistema); si no, "correo ya registrado" (A1). Un `409` del backend marca el campo en conflicto y **no** cierra la sesión de Firebase.
 - **Flujo de inicio de sesión:** validar → iniciar sesión en Firebase → `POST /auth/sesion` (una sola vez, anota el acceso) → ir al módulo del rol. Ante `403` `ERR_AUTH_03` (desactivada) o `401` `ERR_AUTH_02` (sin cuenta en el sistema) se cierra la sesión de Firebase y se muestra el mensaje.

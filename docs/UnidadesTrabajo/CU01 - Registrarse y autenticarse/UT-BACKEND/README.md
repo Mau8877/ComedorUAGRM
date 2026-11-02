@@ -2,7 +2,7 @@
 
 **Caso de uso:** Backend de registro de un Postulante, verificación del usuario que inicia sesión (la sesión la maneja Firebase), registro del acceso en la bitácora y catálogo de carreras para el formulario.
 **Fuente CU:** [`CU01 - Registrarse y autenticarse`](../../../CasosDeUso/CU01%20-%20Registrarse%20y%20autenticarse.md)
-**Diagramas de grado:** `images/038_CU01_Registrarse_Autenticarse.png` (contexto) y `images/051_Analisis_CU01_Registrarse_Autenticarse.png` (análisis). No hay diagrama de secuencia ni mockup de este CU en la documentación de grado.
+**Diagramas de grado:** `images/038_CU01_Registrarse_Autenticarse.png` (contexto), `images/051_Analisis_CU01_Registrarse_Autenticarse.jpg` (análisis), `images/121_Secuencia_CU01_Registrarse_Autenticarse.jpg` (secuencia) y `images/134_Mockup_CU01_Registrarse_autenticarse.png` (mockup).
 **Recurso HTTP / contrato:** `GET /api/v1/carreras` (pública), `POST /api/v1/auth/registro`, `POST /api/v1/auth/sesion` y `GET /api/v1/auth/usuario-actual`.
 
 ## Antes de implementar cualquier UT
@@ -13,6 +13,7 @@ Leer [`.claude/rules/`](../../../../.claude/rules/) — `ARQUITECTURA_BACKEND.md
 
 En estas fichas, `B/` = `projects/backend/src/main/java/com/comedoruagrm/backend/` y `T/` = `projects/backend/src/test/java/com/comedoruagrm/backend/`.
 
+- **Diagramas de grado.** El análisis (051) y la secuencia (121) ya reflejan el diseño con Firebase Auth y coinciden con estas fichas. El mockup (134) sigue mostrando el diseño anterior (contraseña de mínimo 8 con letras y números, sin carrera, registro universitario ni teléfono, con casilla de términos y login/registro en pestañas): no se corrige y **ganan el CU y estas UT**.
 - **Firebase hace el login; el backend solo verifica.** El backend nunca ve la contraseña ni los intentos fallidos: inicio de sesión, contraseña mínima de 6 caracteres, bloqueo por intentos y cierre de sesión son de Firebase y del cliente (ver [`UT-FRONTEND`](../UT-FRONTEND/README.md) y [`UT-MOBILE`](../UT-MOBILE/README.md)). Por eso el backend **no** tiene endpoint de login ni de logout (CA05, CA08, CA10, CA11 y CA17 a CA19 no tienen UT de backend).
 - **Verificación del token con el resource server de Spring Security** (`spring-boot-starter-oauth2-resource-server`) contra las claves públicas de Firebase, validando firma, `iss` (`https://securetoken.google.com/{projectId}`), `aud` (el `projectId`) y expiración. Elegido sobre el Admin SDK de Firebase porque para verificar no hace falta credencial de servicio. El Admin SDK se agregará cuando el CU14 deba crear cuentas en Firebase.
 - **Dos endpoints tras iniciar sesión.** `POST /api/v1/auth/sesion` se llama **una sola vez** justo después del login en Firebase: devuelve los datos del usuario y registra el acceso en la bitácora. `GET /api/v1/auth/usuario-actual` sirve para recuperar la sesión al recargar la página o reabrir la app **sin** volver a registrar un acceso.
