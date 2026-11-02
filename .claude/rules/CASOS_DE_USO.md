@@ -28,8 +28,9 @@ esa documentación dice y el sistema debe cumplirlo.
 | Diagrama general de CU | `images/019_Diagrama_General_CU.jpg` |
 | Diagrama de cada CU | `images/038`–`050` y `images/064`–`076` (`..._CUNN_...`) |
 | Análisis (clases de análisis) de cada CU | `images/051`–`063` y `images/077`–`089` (`Analisis_CUNN_...`) |
-| Diagramas de **secuencia** de los CU (P4/P5/P6) | `images/092`–`104` (`Secuencia_CUNN_...`) |
-| Mockups de pantallas | `images/105`–`117` (`Mockup_CUNN_...`) |
+| Diagramas de **secuencia** de los CU | `images/092`–`104` (CU05 a CU25, paquetes P4/P5/P6) y `images/121`–`133` (CU01 a CU26, paquetes P1/P2/P3) (`Secuencia_CUNN_...`) |
+| Mockups de pantallas | `images/105`–`117` y `images/134`–`146` (`Mockup_CUNN_...`) |
+| Arquitectura (despliegue, lógica general, lógica del backend) | `images/118`–`120` |
 | Requisitos funcionales (RF-01…21) y no funcionales | `secciones/05_capitulo4_ieee830/03_requisitos_especificos.tex` |
 
 Reglas:

@@ -25,7 +25,7 @@ definidos, porque no hay contra qué verificarla.
 
 Además del CU, antes de desglosar se revisan los diagramas de ese CU en la
 documentación de grado (ver [CASOS_DE_USO.md](CASOS_DE_USO.md#fuente-de-verdad-la-documentación-de-grado)):
-el **diagrama de secuencia** (`images/092`–`104`) define qué componentes
+el **diagrama de secuencia** (`images/092`–`104` y `121`–`133`) define qué componentes
 intervienen y en qué orden, el de **análisis** (`images/051`–`063` y
 `077`–`089`) las clases de análisis, y el **diseño lógico de la base de
 datos** (`images/091`, ver
