@@ -24,7 +24,7 @@ La pantalla `RegistroScreen` (ruta `/registro`) muestra el formulario y lleva al
 
 ## Alcance
 
-- `lib/features/auth/screens/registro_screen.dart`: `Form` + `TextFormField` con el `validator` nativo y los mensajes en español (misma regla de negocio que la web: campos obligatorios, registro universitario de exactamente 9 dígitos, contraseña de al menos 6 caracteres sin más exigencias, confirmación igual, correo con formato válido). `carreraCodigo` es un `DropdownButtonFormField` con las carreras (estado de carga y de error con reintento).
+- `lib/features/auth/screens/registro_screen.dart`: `Form` + `TextFormField` con el `validator` nativo y los mensajes en español (misma regla de negocio que la web: campos obligatorios, registro universitario de exactamente 9 dígitos y sin cero inicial, contraseña de al menos 6 caracteres sin más exigencias, confirmación igual, correo con formato válido). `carreraCodigo` es un `DropdownButtonFormField` con las carreras (estado de carga y de error con reintento).
 - Botón «Crear cuenta» deshabilitado mientras envía; los conflictos del backend (`ci`, `correo`, `registroUniversitario`) y los errores de Firebase se muestran en su campo; el error de red con mensaje y reintento (A9). Enlace «¿Ya tienes cuenta? Inicia sesión».
 - Sin selector de rol ni forma de crear cuentas del personal (CA16).
 - Al terminar bien: navega con `context.go(rutaInicioPorRol(rol))`.

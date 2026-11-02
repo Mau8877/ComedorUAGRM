@@ -39,6 +39,19 @@ docs/errors/
 - [`ERR_SYS_01`](system/ERRORES_SISTEMA.md#err_sys_01) — Validación de Bean Validation fallida (400)
 - [`ERR_SYS_02`](system/ERRORES_SISTEMA.md#err_sys_02) — Límite de requests por IP superado (429)
 
+### Autenticación (`AUTH`)
+
+- [`ERR_AUTH_01`](auth/ERRORES_AUTH.md#err_auth_01) — Token ausente, inválido o vencido (401)
+- [`ERR_AUTH_02`](auth/ERRORES_AUTH.md#err_auth_02) — Token válido sin usuario registrado en el sistema (401)
+- [`ERR_AUTH_03`](auth/ERRORES_AUTH.md#err_auth_03) — Cuenta desactivada (403)
+
+### Usuarios (`US`)
+
+- [`ERR_US_01`](usuarios/ERRORES_USUARIOS.md#err_us_01) — El CI ya está registrado (409)
+- [`ERR_US_02`](usuarios/ERRORES_USUARIOS.md#err_us_02) — El correo ya está registrado (409)
+- [`ERR_US_03`](usuarios/ERRORES_USUARIOS.md#err_us_03) — El registro universitario ya está registrado (409)
+- [`ERR_US_04`](usuarios/ERRORES_USUARIOS.md#err_us_04) — La carrera indicada no existe (404)
+
 <!--
   A medida que se agregan módulos de negocio (platos, menú, usuarios...),
   cada uno suma acá su propia sección "### Nombre (PREFIJO)" con la lista

@@ -34,7 +34,7 @@ Archivos esperados (crear): los cinco de arriba más el test.
 
 - Los Models `Usuario` y `Postulante` (`UT-CU01-BE-03`).
 - Endpoint o service de carreras (`UT-CU01-BE-09`).
-- Cargar carreras: follow-up.
+- Cargar carreras: ya lo hace la migración de `UT-CU01-BE-01`.
 
 ## Resultado esperado
 

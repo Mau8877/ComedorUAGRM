@@ -46,5 +46,5 @@ El formulario puede pedir las carreras sin sesión; cualquier otro recurso de ne
 ## Validación
 
 1. `./mvnw test` pasa.
-2. Con carreras insertadas a mano: `curl -i "localhost:8080/api/v1/carreras?pageSize=200"` devuelve `200`, `data` array y `meta`.
+2. Con las carreras cargadas por la migración: `curl -i "localhost:8080/api/v1/carreras?pageSize=200"` devuelve `200`, `data` array y `meta`.
 3. `curl -i localhost:8080/api/v1/otra-cosa` sin token devuelve `401`.

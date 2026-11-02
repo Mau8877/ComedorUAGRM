@@ -2,7 +2,7 @@
 
 | Id   | Nombre                     | Módulo               | Prioridad | Estado    |
 | ---- | -------------------------- | -------------------- | --------- | --------- |
-| CU01 | Registrarse y autenticarse | P1. Cuentas y acceso | Alta      | Pendiente |
+| CU01 | Registrarse y autenticarse | P1. Cuentas y acceso | Alta      | En progreso |
 
 **Actor principal:** Usuario del Sistema (actor abstracto que generaliza a Postulante, Administrador DUBSS, Directivo y Personal del Comedor Universitario)
 **Actores secundarios:** —
@@ -67,8 +67,8 @@ Este CU cubre el registro, el inicio de sesión y el cierre de sesión (este úl
 
 - **Solo el Postulante se autorregistra.** La cuenta que crea el registro siempre tiene el rol Postulante; el usuario no elige su rol. Los demás roles (Administrador DUBSS, Directivo y Personal del Comedor) los crea el Administrador DUBSS desde el CU14.
 - **Un usuario tiene un único rol** y de él depende a qué módulo se le lleva al iniciar sesión.
-- **CI, registro universitario y correo únicos** entre las cuentas existentes (una cuenta eliminada no bloquea reutilizarlos). El CI no se modifica después del registro (RF-10, CU15). El registro universitario tiene exactamente **9 dígitos** (solo números).
-- **La carrera** se elige de la lista de carreras de la UAGRM; de dónde sale esa lista (padrón de la UAGRM o carga por un administrador) está **por definir con la DUBSS**.
+- **CI, registro universitario y correo únicos** entre las cuentas existentes (una cuenta eliminada no bloquea reutilizarlos). El CI no se modifica después del registro (RF-10, CU15). El registro universitario tiene exactamente **9 dígitos** (solo números) y no empieza por 0.
+- **La carrera** se elige de la lista de carreras de la UAGRM; la lista inicial (carreras de la UAGRM con su facultad) viene cargada con el sistema; su mantenimiento posterior queda fuera de este CU.
 - **El rechazo por credenciales es siempre el mismo mensaje**, exista o no el correo.
 - **Política de contraseña:** al menos 6 caracteres, sin obligación de mayúsculas, números ni símbolos.
 - **Bloqueo por intentos fallidos:** el objetivo es 5 intentos consecutivos, un primer bloqueo de 5 minutos y una duración mayor si se sigue fallando (la escala exacta queda por definir). Se implementa **hasta donde lo permita el servicio de autenticación**; lo que no se pueda cumplir tal cual se revisa y se ajusta esta regla. Un inicio de sesión correcto reinicia el contador.

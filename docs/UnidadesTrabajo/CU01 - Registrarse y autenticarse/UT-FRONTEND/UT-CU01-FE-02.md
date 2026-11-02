@@ -32,7 +32,7 @@ Archivos esperados (crear): los tres de `schemas/` y los tests.
 
 ## Fuera de alcance (no tocar)
 
-- Formato del CI (por definir con la DUBSS): solo no vacío. El registro universitario sí se valida: exactamente 9 dígitos (`/^\d{9}$/`).
+- Formato del CI (por definir con la DUBSS): solo no vacío. El registro universitario sí se valida: exactamente 9 dígitos y sin cero inicial (`/^[1-9]\d{8}$/`).
 - Los formularios (`UT-CU01-FE-06` y `07`).
 
 ## Resultado esperado
