@@ -38,6 +38,9 @@ docs/errors/
 - [`ERR_SYS_00`](system/ERRORES_SISTEMA.md#err_sys_00) — Error interno no controlado (500)
 - [`ERR_SYS_01`](system/ERRORES_SISTEMA.md#err_sys_01) — Validación de Bean Validation fallida (400)
 - [`ERR_SYS_02`](system/ERRORES_SISTEMA.md#err_sys_02) — Límite de requests por IP superado (429)
+- [`ERR_SYS_03`](system/ERRORES_SISTEMA.md#err_sys_03) — La ruta no existe (404)
+- [`ERR_SYS_04`](system/ERRORES_SISTEMA.md#err_sys_04) — Método HTTP no permitido (405)
+- [`ERR_SYS_05`](system/ERRORES_SISTEMA.md#err_sys_05) — Request mal formado o con parámetros inválidos (400)
 
 ### Autenticación (`AUTH`)
 
@@ -51,6 +54,7 @@ docs/errors/
 - [`ERR_US_02`](usuarios/ERRORES_USUARIOS.md#err_us_02) — El correo ya está registrado (409)
 - [`ERR_US_03`](usuarios/ERRORES_USUARIOS.md#err_us_03) — El registro universitario ya está registrado (409)
 - [`ERR_US_04`](usuarios/ERRORES_USUARIOS.md#err_us_04) — La carrera indicada no existe (404)
+- [`ERR_US_05`](usuarios/ERRORES_USUARIOS.md#err_us_05) — Registro simultáneo de la misma cuenta (409)
 
 <!--
   A medida que se agregan módulos de negocio (platos, menú, usuarios...),

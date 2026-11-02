@@ -147,6 +147,17 @@ class UsuarioServiceTest {
     }
 
     @Test
+    void registrarPostulante_conUnRegistroSimultaneoDelMismoToken_traduceAErrUs05() {
+        when(usuarioRepository.saveAndFlush(any(Usuario.class))).thenThrow(new DataIntegrityViolationException(
+                "violacion", new RuntimeException("duplicate key value violates unique constraint \"uq_usuario_firebase_uid\"")));
+
+        assertThatThrownBy(() -> service.registrarPostulante(UID, CORREO, request()))
+                .isInstanceOf(ConflictException.class)
+                .extracting(e -> ((BusinessException) e).getErrorCode())
+                .isEqualTo(UsuarioErrorCodes.ERR_US_05);
+    }
+
+    @Test
     void obtenerPorCodigo_conUnCodigoInexistente_lanzaUnauthorizedException() {
         UUID codigo = UUID.randomUUID();
         when(usuarioRepository.findByCodigo(codigo)).thenReturn(Optional.empty());

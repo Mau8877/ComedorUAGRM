@@ -32,3 +32,13 @@ Errores del registro y la gestión de cuentas de usuario.
 - **Significado:** La carrera indicada en el registro no existe en el
   catálogo de carreras.
 - **Dónde se lanza:** `UsuarioService.registrarPostulante()`
+
+## `ERR_US_05`
+
+- **HTTP:** 409
+- **Excepción:** `ConflictException`
+- **Significado:** La misma cuenta de Firebase se está registrando en otra
+  solicitud simultánea (doble clic, reintento automático): una de las dos
+  choca contra el índice único de `firebase_uid`. Reintentar con el mismo
+  token responde 200 (registro idempotente).
+- **Dónde se lanza:** `UsuarioService.registrarPostulante()`

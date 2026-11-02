@@ -111,8 +111,10 @@ public class UsuarioService {
     // * Dos registros simultaneos pueden pasar las verificaciones de arriba y
     // * chocar recien contra los indices unicos de la base: se traduce al mismo
     // * error de negocio que habria dado la verificacion. Una violacion de otro
-    // * indice (ej. firebase_uid) no es un error de negocio catalogado y se deja
-    // * subir tal cual (termina en el 500 generico).
+    // * indice se deja subir tal cual (termina en el 500 generico). El choque de
+    // * firebase_uid es el mismo token registrandose dos veces a la vez: la
+    // * transaccion ya no sirve para releer, asi que se pide reintentar y el
+    // * reintento cae en la rama idempotente (200).
     private RuntimeException traducirConflicto(DataIntegrityViolationException e) {
         String causa = String.valueOf(e.getMostSpecificCause().getMessage());
         if (causa.contains("uq_usuario_ci")) {
@@ -125,6 +127,10 @@ public class UsuarioService {
         if (causa.contains("uq_postulante_registro_universitario")) {
             return rechazar(new ConflictException(UsuarioErrorCodes.ERR_US_03,
                     "Ya existe una cuenta con ese registro universitario"));
+        }
+        if (causa.contains("uq_usuario_firebase_uid")) {
+            return rechazar(new ConflictException(UsuarioErrorCodes.ERR_US_05,
+                    "Tu registro ya se está procesando. Vuelve a intentarlo en unos segundos."));
         }
         return e;
     }

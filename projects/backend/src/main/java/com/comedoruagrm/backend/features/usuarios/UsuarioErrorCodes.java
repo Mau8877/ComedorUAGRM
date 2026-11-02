@@ -18,6 +18,9 @@ public final class UsuarioErrorCodes {
     /** 404 - La carrera indicada no existe. */
     public static final String ERR_US_04 = "ERR_US_04";
 
+    /** 409 - La misma cuenta se esta registrando en otra solicitud simultanea. */
+    public static final String ERR_US_05 = "ERR_US_05";
+
     private UsuarioErrorCodes() {
     }
 }
