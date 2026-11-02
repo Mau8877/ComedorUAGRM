@@ -38,7 +38,7 @@ Archivos esperados (crear): `RegistroScreen.tsx`, `screens/index.ts`, `routes/re
 ## Fuera de alcance (no tocar)
 
 - La pantalla de login (`UT-CU01-FE-07`).
-- Pedir o validar el formato del CI y del registro universitario.
+- Pedir o validar el formato del CI (la validación del registro universitario ya la hace el schema de `UT-CU01-FE-02`).
 - Verificación de correo.
 
 ## Resultado esperado

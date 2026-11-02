@@ -37,7 +37,7 @@ En estas fichas, `B/` = `projects/backend/src/main/java/com/comedoruagrm/backend
 | `POST` | `/auth/sesion` | ID token + `usuario` activo | — | `200` con `UsuarioResponse` y acceso anotado en la bitácora | `401` `ERR_AUTH_01`/`02`; `403` `ERR_AUTH_03` |
 | `GET` | `/auth/usuario-actual` | ID token + `usuario` activo | — | `200` con `UsuarioResponse` | igual que `/auth/sesion` |
 
-**`RegistroRequest`:** `nombres` (≤100), `apellidos` (≤100), `ci` (≤20), `registroUniversitario` (≤20), `carreraCodigo` (UUID), `telefono` (≤20); todos obligatorios. Sin `correo`, `rol` ni `firebaseUid`: el correo sale del token y el rol siempre es `POSTULANTE` (CA06). El formato de CI y registro universitario está **por definir con la DUBSS**: por ahora solo se valida que no estén vacíos y su largo máximo.
+**`RegistroRequest`:** `nombres` (≤100), `apellidos` (≤100), `ci` (≤20), `registroUniversitario` (exactamente 9 dígitos), `carreraCodigo` (UUID), `telefono` (≤20); todos obligatorios. Sin `correo`, `rol` ni `firebaseUid`: el correo sale del token y el rol siempre es `POSTULANTE` (CA06). El registro universitario son exactamente 9 dígitos (`^\d{9}$`); el formato del CI está **por definir con la DUBSS**: por ahora solo se valida que no esté vacío y su largo máximo.
 
 **`UsuarioResponse`:** `codigo` (UUID), `nombres`, `apellidos`, `correo`, `rol` (nombre del rol).
 
@@ -98,7 +98,7 @@ En estas fichas, `B/` = `projects/backend/src/main/java/com/comedoruagrm/backend
 ## Follow-ups (no se implementan en estas UT)
 
 - Carga inicial de la tabla `carrera` (de dónde sale la lista: padrón de la UAGRM o carga manual) — **por definir con la DUBSS**. Mientras tanto se inserta a mano o en los tests.
-- Formato del CI y del registro universitario — por definir con la DUBSS.
+- Formato del CI — por definir con la DUBSS.
 - Consulta de la bitácora desde el panel: CU25.
 - Alta de cuentas del personal (incluida su creación en Firebase con el Admin SDK): CU14.
 - Protección por rol con `@PreAuthorize` en endpoints de negocio: la primera UT de otro CU que lo necesite. En este CU solo queda habilitada la seguridad por método (UT-CU01-BE-08).

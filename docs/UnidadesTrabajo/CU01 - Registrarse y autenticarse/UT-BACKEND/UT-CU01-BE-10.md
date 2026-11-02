@@ -24,7 +24,7 @@ Existen `RegistroRequest`, `UsuarioResponse` y `UsuarioErrorCodes`, con los cód
 
 ## Alcance
 
-- `B/features/auth/dto/RegistroRequest.java` (`record`) con las validaciones de Bean Validation del contrato del README (`@NotBlank`, `@Size` máximas, `@NotNull` en `carreraCodigo`), mensajes en español. Sin formato de CI ni de registro universitario (por definir con la DUBSS).
+- `B/features/auth/dto/RegistroRequest.java` (`record`) con las validaciones de Bean Validation del contrato del README (`@NotBlank`, `@Size` máximas, `@NotNull` en `carreraCodigo`), mensajes en español. `registroUniversitario` con `@Pattern(regexp = "^\\d{9}$")` (exactamente 9 dígitos, mensaje en español); sin formato de CI (por definir con la DUBSS).
 - `B/features/usuarios/dto/UsuarioResponse.java` (`record`): `codigo`, `nombres`, `apellidos`, `correo`, `rol`.
 - `B/features/usuarios/UsuarioErrorCodes.java`: `ERR_US_01` a `ERR_US_04` (ver tabla del README).
 - `docs/errors/usuarios/ERRORES_USUARIOS.md` (cuatro secciones, formato de `GUIA_ERRORES_BACKEND.md`) y sus links en `docs/errors/README.md`.
