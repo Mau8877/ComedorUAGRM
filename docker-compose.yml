@@ -120,6 +120,8 @@ services:
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
       - SPRING_DATA_REDIS_HOST=comedor-uagrm-redis
       - MINIO_URL=http://comedor-uagrm-minio:9000
+      # projectId de Firebase: el backend verifica los ID tokens de ese proyecto
+      - FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
     depends_on:
       postgres:
         condition: service_healthy
