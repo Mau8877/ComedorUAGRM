@@ -15,12 +15,13 @@ JWT propios, refresh tokens, cookies de sesión, `BCryptPasswordEncoder` ni
 contraseñas en la base de datos (`usuario` no tiene `password_hash`; solo
 `firebase_uid`, ver [PERSISTENCIA_BD_BACKEND.md](PERSISTENCIA_BD_BACKEND.md)).
 
-> **Estado actual (punto de partida).** `SecurityConfig.java` hoy usa el
-> `InMemoryUserDetailsManager` autogenerado por Spring Boot (usuario/password
-> aleatorio impreso en el log). Es **solo un placeholder** y debe
-> reemplazarse por lo descrito abajo antes de considerar la autenticación
-> "hecha". CSRF sigue deshabilitado a propósito: no hay cookies de sesión,
-> la API es stateless y el token viaja en el header `Authorization`.
+> **Estado actual.** `SecurityConfig.java` ya verifica el ID token de
+> Firebase (resource server, ver el paso 3 de abajo) y la sesión es
+> `STATELESS`: no existe el usuario en memoria con contraseña aleatoria que
+> traía Spring Boot por defecto. CSRF sigue deshabilitado a propósito: no
+> hay cookies de sesión, la API es stateless y el token viaja en el header
+> `Authorization`. El `projectId` se configura con `FIREBASE_PROJECT_ID`
+> (`app.firebase.project-id`); sin él el backend no arranca.
 
 ## Flujo de una request autenticada
 
@@ -31,9 +32,12 @@ contraseñas en la base de datos (`usuario` no tiene `password_hash`; solo
 2. En cada request a la API: `Authorization: Bearer <ID token>`.
 3. El backend valida el token en un filtro de seguridad: **firma, `iss`
    (`https://securetoken.google.com/{projectId}`), `aud` (el projectId) y
-   expiración**. Qué librería lo hace (resource server de Spring Security o
-   el Admin SDK de Firebase) se decide en la primera UT de seguridad; el
-   contrato es el mismo.
+   expiración**. Lo hace el **resource server de Spring Security**
+   (`spring-boot-starter-security-oauth2-resource-server`) contra las
+   claves públicas de Firebase (`FirebaseJwtConfig`), y no el Admin SDK de
+   Firebase, porque para verificar no hace falta una credencial de
+   servicio. El Admin SDK se agregará cuando haya que crear cuentas en
+   Firebase desde el backend (CU14).
 4. Con el `uid` del token (`sub`) busca el `usuario` por `firebase_uid`,
    comprueba que esté **activo y no eliminado** (`usuario.activo`,
    `eliminado_en IS NULL`) y arma el `Authentication` con las `authorities`
@@ -183,10 +187,14 @@ intentar de más).
 
 ## Endpoints públicos
 
-Solo quedan sin autenticación los de infraestructura ya definidos en
+Quedan sin autenticación los de infraestructura ya definidos en
 `SecurityConfig` (`/health`, `/health/**`, `/prometheus`, `/swagger-ui/**`,
-`/v3/api-docs/**`). **Ningún endpoint de negocio es público**: incluso el
+`/v3/api-docs/**`) y **una única excepción de negocio: `GET /api/v1/carreras`**.
+El formulario de registro necesita mostrar la lista de carreras **antes** de
+que la persona tenga cuenta ni token; es solo lectura de un catálogo, sin
+datos personales. **Ningún otro endpoint de negocio es público**: incluso el
 registro exige un token de Firebase válido (ver arriba), porque el login
 y la creación de la cuenta ocurren en Firebase, no acá. Cualquier otro
 endpoint nuevo es privado por default — si necesita ser público, es una
-decisión explícita, no un olvido de agregar la regla en `SecurityConfig`.
+decisión explícita (como la de las carreras: documentada acá con su motivo),
+no un olvido de agregar la regla en `SecurityConfig`.

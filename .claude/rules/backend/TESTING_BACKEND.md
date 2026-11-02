@@ -69,6 +69,19 @@ missing` sin eso).
   test queda **SKIPPED** (no rompe el build) en vez de fallar — ver
   `TestcontainersSmokeTest.java` como referencia.
 
+- **Tests de integración con contexto de Spring** (`@SpringBootTest`/
+  `@DataJpaTest` contra una base real): usan el helper
+  `support/PostgresTestDatabase` (`@BeforeAll` →
+  `asegurarDisponible()`, `@DynamicPropertySource` → `registrar(registry)`),
+  que levanta **un solo** contenedor `postgres:18-alpine` por JVM, lo comparte
+  entre clases y lo apaga al terminar. Mismo criterio de arriba: sin Docker el
+  test queda SKIPPED. Cuando Testcontainers no conecta (el problema de Docker
+  Desktop de abajo), se puede apuntar a un Postgres ya levantado y **vacío**
+  con `-Dtest.postgres.url=jdbc:postgresql://localhost:5432/mi_base_vacia`
+  (`-Dtest.postgres.user` / `-Dtest.postgres.password`, por defecto
+  `postgres`). Flyway migra esa base: usar una descartable, nunca la de
+  desarrollo.
+
 > **Docker Desktop en Windows, nota conocida:** montar
 > `/var/run/docker.sock` no alcanza siempre — Docker Desktop puede exponer
 > un socket restringido/"stub" que responde a `/info` con casi todos los

@@ -73,6 +73,13 @@ código contra cualquiera de los dos — nunca se asume en silencio cuál
   `BaseModel` tal cual (su PK no es un `id` generado): se mapean con
   `@MapsId` / `@EmbeddedId`, y la forma exacta se fija en la primera UT que
   cree una de ellas.
+  **Ya resuelto para las tablas cuya PK es una FK (`postulante`):** el Model
+  extiende `BaseModelSinId` (`common/model/`, mismas columnas comunes que
+  `BaseModel` pero sin `id`), declara `@Id @Column(name = "usuario_id") Long`
+  y la relación con `@MapsId @OneToOne`, y fija el nombre de la columna
+  pública con `@AttributeOverride` (`codigo_postulante`). Una tabla con
+  clave compuesta (`convocatoria_documento`) se resolverá en la primera UT
+  que la cree.
 
 ## Columnas comunes a todas las tablas
 
