@@ -143,23 +143,20 @@ Todo lo relacionado a API/datos vive en `src/store/` — **no** en
   no termina en el bundle de producción). `main.tsx` monta
   `<QueryProvider><RouterProvider .../></QueryProvider>`.
 
-**Autenticación del cliente HTTP.** `apiClient` agrega a cada request el
-header `Authorization: Bearer <token de acceso>` (el JWT que devuelve
-`/api/v1/auth/login`). Como no hay cookies de sesión, **no** se usa
-`withCredentials`. `apiClient` no sabe dónde se guardan los tokens: el flujo
-de autenticación registra el proveedor del token de acceso con
-`setAuthTokenProvider()` y qué hacer ante un `401` con
-`setUnauthorizedHandler()` (ambos en `apiClient.ts`). Un `401` de la API
-significa que el token de acceso no sirve: el handler intenta renovarlo con
-`POST /api/v1/auth/refresh` (una sola renovación a la vez, aunque fallen varias
-requests juntas) y reintenta; si el refresh token tampoco sirve, se borra la
-sesión y se redirige a `/login`. Los endpoints públicos de `/auth` (login,
-registro, refresh) **no** disparan esa renovación (un `401` de `login` es
-"credenciales incorrectas", no "sesión vencida"). **Dónde se guardan:** el token
-de acceso vive solo en memoria; el refresh token en `localStorage` (permite
-sobrevivir a una recarga de página; riesgo conocido ante XSS, aceptado a
-cambio de no usar cookies). Ver
-[SEGURIDAD_AUTH_BACKEND.md](../backend/SEGURIDAD_AUTH_BACKEND.md).
+**Autenticación del cliente HTTP.** La sesión viaja en **cookies `HttpOnly`** que
+pone el backend (`access_token` y `refresh_token`); `apiClient` usa
+`withCredentials: true` para que el navegador las mande, y **la app no guarda
+ningún token** (ni en `localStorage`, ni en un store, ni en memoria: el
+JavaScript no puede leerlos). Por eso tampoco arma el header `Authorization`.
+El flujo de autenticación registra con `setUnauthorizedHandler()` qué hacer
+ante un `401`: intenta renovar con `POST /api/v1/auth/refresh` (sin cuerpo, el
+navegador manda la cookie; una sola renovación a la vez aunque fallen varias
+requests juntas) y reintenta; si no se puede, limpia la caché y redirige a
+`/login`. Los endpoints públicos de `/auth` (login, registro, refresh) **no**
+disparan esa renovación (un `401` de `login` es "credenciales incorrectas", no
+"sesión vencida"). Para saber si hay sesión al cargar la app se pregunta al
+backend (`GET /auth/usuario-actual`); no se lee ninguna cookie (no se puede).
+Ver [SEGURIDAD_AUTH_BACKEND.md](../backend/SEGURIDAD_AUTH_BACKEND.md).
 
 Todo hook de `api/` de cada feature usa `apiClient` — no se crea una
 instancia de axios nueva por feature, y no se llama a `createBaseApi()` de

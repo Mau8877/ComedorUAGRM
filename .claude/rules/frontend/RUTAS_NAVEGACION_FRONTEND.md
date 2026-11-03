@@ -94,7 +94,7 @@ layout estudiante, ver [SEGURIDAD_AUTH_BACKEND.md](../backend/SEGURIDAD_AUTH_BAC
 para el esquema de roles del lado del backend). La sesión es el JWT
 propio del backend (`POST /api/v1/auth/login`, ver
 [SEGURIDAD_AUTH_BACKEND.md](../backend/SEGURIDAD_AUTH_BACKEND.md)): el guard
-consulta si hay sesión en el cliente, y el rol y los datos del usuario salen
+pregunta al backend si hay sesión (`GET /auth/usuario-actual`; las cookies HttpOnly no se pueden leer desde JavaScript), y el rol y los datos del usuario salen
 de la respuesta del backend (`usuario.rol`), no del token (que no lleva rol).
 
 > **Nombre del layout vs. valor del rol en el backend.** Los roles del

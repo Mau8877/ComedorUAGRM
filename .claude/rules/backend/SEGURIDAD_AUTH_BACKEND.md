@@ -25,6 +25,19 @@ firma, el emisor (`JWT_ISSUER`) y la expiración del token de acceso.
 - Tiempos configurables: `JWT_ACCESS_TTL_MINUTES` (15) y
   `JWT_REFRESH_TTL_DAYS` (7).
 
+## Cómo viajan los tokens: cookies en la web, Bearer en mobile
+
+| Cliente | Token de acceso | Refresh token |
+| --- | --- | --- |
+| **Web** | Cookie `access_token` (`HttpOnly`, `SameSite=Strict`, `Path=/api/v1`) | Cookie `refresh_token` (`HttpOnly`, `SameSite=Strict`, `Path=/api/v1/auth`) |
+| **Mobile** | Header `Authorization: Bearer` (en memoria) | Cuerpo de `/refresh` y `/logout` (guardado en `flutter_secure_storage`) |
+
+- `registro`, `login` y `refresh` **siempre** escriben las cookies (`AuthCookies`) **y** devuelven los tokens en el cuerpo (`SesionResponse`); la web ignora el cuerpo y mobile ignora las cookies. `logout` vence las cookies.
+- El token se lee del header `Authorization` y, si no viene, de la cookie `access_token`; en `/refresh` y `/logout` gana el cuerpo sobre la cookie `refresh_token`. `/refresh` sin ninguno de los dos → `401` `ERR_AUTH_06`; `/logout` sin ninguno igual responde `200`.
+- **Por qué cookies HttpOnly:** el JavaScript de la página no puede leerlas, así un XSS no roba la sesión (con `localStorage` sí). Por eso la web **no guarda ningún token** en `localStorage`/`sessionStorage`/memoria.
+- **CSRF:** el backend tiene CSRF deshabilitado porque la API es stateless; con cookies la defensa es `SameSite=Strict` (el navegador no las manda desde otro sitio) más el CORS restringido a los orígenes de `app.cors.allowed-origins` (`allowCredentials=true`, nunca `*`). Web y API deben ser el mismo *site* (hoy `localhost`, y en producción el mismo dominio detrás del proxy). Si algún día el frontend vive en otro dominio, hay que replantear esto (token CSRF).
+- `COOKIE_SECURE=true` es **obligatorio en producción** (cookie solo por HTTPS); en desarrollo local por http queda en `false`.
+
 ## Endpoints de autenticación
 
 Todos bajo `/api/v1/auth`. Los cuatro primeros son **públicos** (no exigen
@@ -54,7 +67,7 @@ La "sesión" que devuelven `registro`, `login` y `refresh` es:
 
 1. El cliente inicia sesión (o se registra) y recibe `accessToken` y
    `refreshToken`.
-2. En cada request: `Authorization: Bearer <accessToken>`.
+2. En cada request: la cookie `access_token` (web, la manda el navegador) o `Authorization: Bearer <accessToken>` (mobile).
 3. El resource server valida firma, emisor y expiración. Token ausente,
    mal firmado o vencido → `401` `ERR_AUTH_01`.
 4. `UsuarioActivoFilter` busca el `usuario` por el `sub` (su `codigo`),

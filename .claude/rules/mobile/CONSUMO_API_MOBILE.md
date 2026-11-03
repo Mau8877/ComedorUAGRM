@@ -25,7 +25,7 @@ Un `Interceptor` desempaqueta el sobre estándar del backend
   `status: "failed"` como si fuera éxito. Un `service` que necesita el
   código de negocio lo lee de `dioException.error as ApiException`.
 
-Otro `Interceptor` agrega a cada request el header
+(Mobile **no** usa las cookies de la web: aunque el backend también las envíe, `ApiClient` manda el token en el header.) Otro `Interceptor` agrega a cada request el header
 `Authorization: Bearer <token de acceso>` (el JWT que devuelve
 `/api/v1/auth/login`). Ante un `401` intenta renovarlo una sola vez con
 `POST /api/v1/auth/refresh` (una renovación a la vez) y reintenta; si el
