@@ -16,11 +16,13 @@ import org.springframework.security.oauth2.server.resource.web.DefaultBearerToke
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.util.WebUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.comedoruagrm.backend.security.ApiAuthenticationEntryPoint;
+import com.comedoruagrm.backend.security.AuthCookies;
 import com.comedoruagrm.backend.security.RateLimitFilter;
 import com.comedoruagrm.backend.security.RutasPublicas;
 import com.comedoruagrm.backend.security.SecurityErrorWriter;
@@ -95,9 +97,21 @@ public class SecurityConfig {
 
     // * Una ruta pública ignora el header Authorization: sin esto, un token
     // * vencido que el cliente sigue mandando haría fallar el login con 401.
+    // * El token se toma del header Authorization (mobile) y, si no viene, de la
+    // * cookie HttpOnly de acceso (web).
     private BearerTokenResolver bearerTokenResolver() {
         DefaultBearerTokenResolver porDefecto = new DefaultBearerTokenResolver();
-        return request -> RutasPublicas.esPublica(request) ? null : porDefecto.resolve(request);
+        return request -> {
+            if (RutasPublicas.esPublica(request)) {
+                return null;
+            }
+            String delHeader = porDefecto.resolve(request);
+            if (delHeader != null) {
+                return delHeader;
+            }
+            return WebUtils.getCookie(request, AuthCookies.ACCESO) != null
+                    ? WebUtils.getCookie(request, AuthCookies.ACCESO).getValue() : null;
+        };
     }
 
     // Permite que el frontend (React/Vite, en otro origen/puerto) pueda llamar a la API.

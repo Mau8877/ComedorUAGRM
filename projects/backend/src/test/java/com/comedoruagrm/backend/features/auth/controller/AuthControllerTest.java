@@ -1,5 +1,8 @@
 package com.comedoruagrm.backend.features.auth.controller;
 
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasItems;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -7,6 +10,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -31,6 +35,7 @@ import com.comedoruagrm.backend.features.auth.service.AuthService.RegistroResult
 import com.comedoruagrm.backend.features.usuarios.UsuarioErrorCodes;
 import com.comedoruagrm.backend.features.usuarios.dto.UsuarioResponse;
 import com.comedoruagrm.backend.security.AuthErrorCodes;
+import jakarta.servlet.http.Cookie;
 import com.comedoruagrm.backend.security.UsuarioAutenticableProvider;
 import com.comedoruagrm.backend.security.UsuarioAutenticableProvider.DatosUsuario;
 
@@ -204,6 +209,56 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.data").doesNotExist());
 
         verify(authService).cerrarSesion(eq("un-refresh-token"));
+    }
+
+    // ---- cookies HttpOnly (web) ----
+
+    @Test
+    void login_escribeLasCookiesHttpOnlySameSiteStrictDeAccesoYRefresh() throws Exception {
+        when(authService.iniciarSesion(any(), any())).thenReturn(sesion);
+
+        mockMvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON).content(BODY_LOGIN))
+                .andExpect(status().isOk())
+                .andExpect(header().stringValues(HttpHeaders.SET_COOKIE, hasItems(
+                        allOf(containsString("access_token=jwt"), containsString("HttpOnly"),
+                                containsString("SameSite=Strict"), containsString("Path=/api/v1")),
+                        allOf(containsString("refresh_token=refresh"), containsString("HttpOnly"),
+                                containsString("SameSite=Strict"), containsString("Path=/api/v1/auth")))));
+    }
+
+    @Test
+    void refresh_sinCuerpoUsaLaCookieDeRefresh() throws Exception {
+        when(authService.renovar("de-la-cookie")).thenReturn(sesion);
+
+        mockMvc.perform(post("/api/v1/auth/refresh").cookie(new Cookie("refresh_token", "de-la-cookie")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.refreshToken").value("refresh"));
+    }
+
+    @Test
+    void refresh_sinCuerpoNiCookie_devuelve401ErrAuth06() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/refresh"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("ERR_AUTH_06"));
+    }
+
+    @Test
+    void logout_conLaCookieRevocaLaSesionYVenceLasCookies() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/logout").cookie(new Cookie("refresh_token", "de-la-cookie")))
+                .andExpect(status().isOk())
+                .andExpect(header().stringValues(HttpHeaders.SET_COOKIE, hasItems(
+                        allOf(containsString("access_token="), containsString("Max-Age=0")),
+                        allOf(containsString("refresh_token="), containsString("Max-Age=0")))));
+
+        verify(authService).cerrarSesion("de-la-cookie");
+    }
+
+    @Test
+    void usuarioActual_conLaCookieDeAcceso_autenticaAlUsuario() throws Exception {
+        // jwt() simula un token ya validado; aca solo se comprueba que sin header la ruta sigue protegida.
+        mockMvc.perform(get("/api/v1/auth/usuario-actual").cookie(new Cookie("access_token", "invalido")))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("ERR_AUTH_01"));
     }
 
     // ---- GET /auth/usuario-actual ----

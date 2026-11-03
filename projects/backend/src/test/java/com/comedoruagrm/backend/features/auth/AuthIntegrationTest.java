@@ -292,6 +292,44 @@ class AuthIntegrationTest {
         assertThat(guardado).isNotEqualTo(refresh).hasSize(64);
     }
 
+    // ---- cookies HttpOnly (web) ----
+
+    @Test
+    void web_conSoloLasCookies_inicia_consulta_renueva_y_cierraSesionSinHeaderAuthorization() throws Exception {
+        registrarAna().andExpect(status().isCreated());
+        var login = login("ana@uagrm.edu.bo", "secreta1").andExpect(status().isOk()).andReturn().getResponse();
+        var acceso = login.getCookie("access_token");
+        var refresh = login.getCookie("refresh_token");
+        assertThat(acceso).isNotNull();
+        assertThat(acceso.isHttpOnly()).isTrue();
+        assertThat(refresh.isHttpOnly()).isTrue();
+
+        mockMvc.perform(get("/api/v1/auth/usuario-actual").cookie(acceso))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.correo").value("ana@uagrm.edu.bo"));
+
+        var renovada = mockMvc.perform(post("/api/v1/auth/refresh").cookie(refresh))
+                .andExpect(status().isOk()).andReturn().getResponse();
+        assertThat(renovada.getCookie("refresh_token").getValue()).isNotEqualTo(refresh.getValue());
+        mockMvc.perform(post("/api/v1/auth/refresh").cookie(refresh)).andExpect(status().isUnauthorized());
+
+        mockMvc.perform(post("/api/v1/auth/logout").cookie(renovada.getCookie("refresh_token")))
+                .andExpect(status().isOk());
+        mockMvc.perform(post("/api/v1/auth/refresh").cookie(renovada.getCookie("refresh_token")))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void login_conUnaCookieDeAccesoVencidaOInvalida_laIgnoraPorSerRutaPublica() throws Exception {
+        registrarAna().andExpect(status().isCreated());
+
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .cookie(new jakarta.servlet.http.Cookie("access_token", "vencido"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"correo\":\"ana@uagrm.edu.bo\",\"contrasena\":\"secreta1\"}"))
+                .andExpect(status().isOk());
+    }
+
     // ---- ayudas ----
 
     private ResultActions registrarAna() throws Exception {
