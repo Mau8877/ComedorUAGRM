@@ -54,12 +54,12 @@ describe('apiClient', () => {
     expect(vistas[1].headers.has('Authorization')).toBe(false)
   })
 
-  it('no usa cookies: withCredentials queda sin activar', async () => {
+  it('usa cookies de sesión: withCredentials queda activado', async () => {
     usarAdapter(200, { status: 'success', data: null, message: '', timestamp: '' })
 
     await apiClient.get('/x')
 
-    expect(vistas[0].withCredentials).toBeFalsy()
+    expect(vistas[0].withCredentials).toBe(true)
   })
 
   it('ante un 401 avisa al manejador de sesión y rechaza con ApiError', async () => {

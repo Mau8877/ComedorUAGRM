@@ -39,15 +39,18 @@ export class ApiError extends Error {
  */
 export const apiClient = createBaseApi({
   baseURL: import.meta.env.VITE_API_BASE_URL,
+  // La sesión viaja en cookies HttpOnly que pone el backend (el JavaScript nunca ve los tokens).
+  withCredentials: true,
 })
 
-// * La sesión usa el JWT propio del backend (ver SEGURIDAD_AUTH_BACKEND.md): el
-// * cliente manda el token de acceso en `Authorization: Bearer` y no usa
-// * cookies (por eso no hay `withCredentials`). Este módulo no sabe dónde se
-// * guardan los tokens: el flujo de autenticación registra acá cómo obtener el
-// * token de acceso y qué hacer ante un 401 (renovarlo con el refresh token o,
-// * si no se puede, cerrar la sesión y llevar a /login), así `store/` sigue sin
-// * depender de ninguna feature.
+// * La sesión usa el JWT propio del backend (ver SEGURIDAD_AUTH_BACKEND.md). En
+// * la web viaja en cookies HttpOnly (por eso `withCredentials`): el navegador
+// * las manda solo y la app no guarda ningún token. El proveedor de token de
+// * abajo es opcional y la web no lo usa (queda por si un cliente sin cookies
+// * necesita `Authorization: Bearer`). Lo que sí registra el flujo de
+// * autenticación es qué hacer ante un 401 (renovar con `/auth/refresh` o, si
+// * no se puede, llevar a /login), así `store/` sigue sin depender de ninguna
+// * feature.
 type AuthTokenProvider = () => Promise<string | null>
 
 let authTokenProvider: AuthTokenProvider | null = null
