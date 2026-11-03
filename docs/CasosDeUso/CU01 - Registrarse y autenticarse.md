@@ -57,7 +57,7 @@ Este CU cubre el registro, el inicio de sesión y el cierre de sesión (este úl
 - **A3 (paso 9):** El correo no existe o la contraseña es incorrecta → el sistema responde `401` con el mismo mensaje en ambos casos (sin revelar cuál dato falló) y permite reintentar.
 - **A4 (paso 10):** La cuenta está desactivada → el sistema responde `403`, indica que debe comunicarse con la DUBSS y no abre sesión.
 - **A5 (paso 8):** El usuario selecciona «¿Olvidó su contraseña?» → se ejecuta el CU15.
-- **A6 (paso 9):** Tras varios intentos fallidos consecutivos la cuenta se bloquea temporalmente → el sistema niega el acceso, aunque la contraseña sea correcta, e informa que debe reintentar más tarde. Lo que se busca es bloquear a los 5 intentos, por 5 minutos la primera vez, y por más tiempo si el usuario sigue fallando; el alcance exacto depende de lo que permita el servicio de autenticación.
+- **A6 (paso 9):** Tras varios intentos fallidos consecutivos la cuenta se bloquea temporalmente → el sistema niega el acceso, aunque la contraseña sea correcta, e informa que debe reintentar más tarde. Se bloquea a los 5 intentos, por 5 minutos la primera vez, y por más tiempo si el usuario sigue fallando (la escala exacta queda por definir con la DUBSS).
 - **A7 (paso 4):** La petición de registro llega repetida (doble envío o reintento) → el sistema la procesa de forma idempotente y no crea dos cuentas.
 - **A8 (pasos 11 y 12):** La sesión ya no es válida (expiró o fue invalidada) → el sistema lleva al usuario a la pantalla de inicio de sesión.
 - **A9 (cualquier paso):** Falla la conexión con el servidor o un servicio del que depende → el sistema informa el error con un mensaje claro, no crea ni modifica nada y permite reintentar.
@@ -71,13 +71,13 @@ Este CU cubre el registro, el inicio de sesión y el cierre de sesión (este úl
 - **La carrera** se elige de la lista de carreras de la UAGRM; la lista inicial (carreras de la UAGRM con su facultad) viene cargada con el sistema; su mantenimiento posterior queda fuera de este CU.
 - **El rechazo por credenciales es siempre el mismo mensaje**, exista o no el correo.
 - **Política de contraseña:** al menos 6 caracteres, sin obligación de mayúsculas, números ni símbolos.
-- **Bloqueo por intentos fallidos:** el objetivo es 5 intentos consecutivos, un primer bloqueo de 5 minutos y una duración mayor si se sigue fallando (la escala exacta queda por definir). Se implementa **hasta donde lo permita el servicio de autenticación**; lo que no se pueda cumplir tal cual se revisa y se ajusta esta regla. Un inicio de sesión correcto reinicia el contador.
+- **Bloqueo por intentos fallidos:** 5 intentos consecutivos bloquean la cuenta; el primer bloqueo dura 5 minutos y los siguientes duran más si se sigue fallando (la escala exacta queda por definir con la DUBSS; hoy: 5 min, 15 min, 1 h y 24 h). Lo implementa el propio sistema. Un inicio de sesión correcto reinicia el contador.
 - **Una cuenta desactivada** no puede iniciar sesión; se desactiva y reactiva desde el CU14.
 - **Cerrar sesión** solo cierra la sesión del dispositivo desde el que se pide; no afecta a otros dispositivos.
 - **El registro es idempotente** (RNF-03): repetir la misma petición no duplica la cuenta.
 - **«Becado» no es un rol:** quien resulta adjudicado sigue siendo un Postulante, con una beca vigente.
 - **Contraseñas y tokens de sesión nunca se escriben en los registros del sistema** ([LOGGING_BACKEND.md](../../.claude/rules/backend/LOGGING_BACKEND.md)).
-- **Quién verifica las credenciales:** el servicio de autenticación de Firebase (RF-01); el sistema solo comprueba el token y los datos propios de la cuenta ([SEGURIDAD_AUTH_BACKEND.md](../../.claude/rules/backend/SEGURIDAD_AUTH_BACKEND.md)).
+- **Quién verifica las credenciales:** el propio backend (RF-01): guarda la contraseña solo como hash, emite un token de acceso de vida corta y un refresh token por dispositivo, y comprueba el token en cada petición ([SEGURIDAD_AUTH_BACKEND.md](../../.claude/rules/backend/SEGURIDAD_AUTH_BACKEND.md)). No se usa Firebase para esto.
 - Los mensajes al usuario están en español y no exponen detalles técnicos.
 
 ## Postcondiciones
@@ -97,8 +97,8 @@ Este CU cubre el registro, el inicio de sesión y el cierre de sesión (este úl
 - **CA07:** Dado que la cuenta está activa y las credenciales son correctas, el sistema debe abrir la sesión y llevar al usuario al módulo de su rol (Postulante, Administrador DUBSS, Directivo o Personal del Comedor).
 - **CA08:** Dado que el correo no existe o la contraseña es incorrecta, el sistema debe responder `401` con el mismo mensaje en ambos casos, sin abrir sesión.
 - **CA09:** Dado que la cuenta está desactivada, el sistema debe responder `403`, indicar que se comunique con la DUBSS y no abrir sesión.
-- **CA10:** Dado que la cuenta acumula varios intentos fallidos consecutivos, el sistema debe bloquearla temporalmente y negar el acceso, incluso con la contraseña correcta, hasta que termine el bloqueo (objetivo: 5 intentos y 5 minutos; ver la regla de bloqueo).
-- **CA11:** Dado que el usuario sigue fallando al volver a intentar después de un bloqueo, el sistema debe aumentar la duración del siguiente bloqueo, hasta donde lo permita el servicio de autenticación.
+- **CA10:** Dado que la cuenta acumula varios intentos fallidos consecutivos, el sistema debe bloquearla temporalmente y negar el acceso, incluso con la contraseña correcta, hasta que termine el bloqueo (5 intentos y 5 minutos; ver la regla de bloqueo).
+- **CA11:** Dado que el usuario sigue fallando al volver a intentar después de un bloqueo, el sistema debe aumentar la duración del siguiente bloqueo.
 - **CA12:** Dado que se envía dos veces la misma petición de registro, el sistema debe crear una sola cuenta.
 - **CA13:** Dado que el usuario selecciona «¿Olvidó su contraseña?», el sistema debe iniciar el CU15.
 - **CA14:** Dado que el usuario se registra, inicia o cierra sesión desde la web o desde la app móvil, el sistema debe ofrecer el mismo comportamiento en ambas.

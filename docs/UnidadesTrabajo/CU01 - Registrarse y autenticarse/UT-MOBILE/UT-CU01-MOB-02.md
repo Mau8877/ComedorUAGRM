@@ -24,10 +24,10 @@ Queda definida la convención de `models/` en la rule y existen los modelos del 
 ## Alcance
 
 - `CONSUMO_API_MOBILE.md` y la nota de `ARQUITECTURA_MOBILE.md` ("Modelos de datos... todavía sin convención"): documentar la decisión (carpeta `models/` por feature, clases inmutables, `fromJson`/`toJson` manuales).
-- `lib/features/auth/models/usuario.dart` (`codigo`, `nombres`, `apellidos`, `correo`, `rol`), `carrera.dart` (`codigo`, `nombre`, `facultad`) y `registro_request.dart` (`toJson()` con `nombres`, `apellidos`, `ci`, `registroUniversitario`, `carreraCodigo`, `telefono`; **sin** correo ni contraseñas).
-- Tests: `fromJson` de cada modelo con un `data` de ejemplo del backend; `RegistroRequest.toJson` no contiene `correo` ni contraseñas.
+- `lib/features/auth/models/usuario.dart` (`codigo`, `nombres`, `apellidos`, `correo`, `rol`), `carrera.dart` (`codigo`, `nombre`, `facultad`) `sesion.dart` (`accessToken`, `refreshToken`, `tokenType`, `expiresIn`, `usuario`) y `registro_request.dart` (`toJson()` con `nombres`, `apellidos`, `ci`, `registroUniversitario`, `carreraCodigo`, `telefono`, `correo`, `contrasena` y `confirmacionContrasena`).
+- Tests: `fromJson` de cada modelo con un `data` de ejemplo del backend; `Sesion.fromJson` anida al `Usuario`; `RegistroRequest.toJson` lleva `correo`, `contrasena` y `confirmacionContrasena`.
 
-Archivos esperados (crear/tocar): los tres modelos, las dos rules y los tests.
+Archivos esperados (crear/tocar): los cuatro modelos, las dos rules y los tests.
 
 ## Fuera de alcance (no tocar)
 

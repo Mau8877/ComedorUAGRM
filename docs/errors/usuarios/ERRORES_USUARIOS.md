@@ -14,8 +14,10 @@ Errores del registro y la gestión de cuentas de usuario.
 
 - **HTTP:** 409
 - **Excepción:** `ConflictException`
-- **Significado:** Ya existe un usuario con ese correo (el correo sale del
-  token de Firebase, no del formulario).
+- **Significado:** Ya existe un usuario con ese correo (se compara en
+  minúsculas y sin espacios). Si llega de nuevo la misma petición completa
+  (mismo correo, CI y contraseña) no es un error: responde 200 (registro
+  idempotente).
 - **Dónde se lanza:** `UsuarioService.registrarPostulante()`
 
 ## `ERR_US_03`
@@ -37,8 +39,9 @@ Errores del registro y la gestión de cuentas de usuario.
 
 - **HTTP:** 409
 - **Excepción:** `ConflictException`
-- **Significado:** La misma cuenta de Firebase se está registrando en otra
-  solicitud simultánea (doble clic, reintento automático): una de las dos
-  choca contra el índice único de `firebase_uid`. Reintentar con el mismo
-  token responde 200 (registro idempotente).
-- **Dónde se lanza:** `UsuarioService.registrarPostulante()`
+- **Significado:** **Retirado.** Se lanzaba cuando la misma cuenta de
+  Firebase se registraba dos veces a la vez (índice único de
+  `firebase_uid`). Con la autenticación propia con JWT ya no existe ese
+  índice; un doble registro simultáneo cae en `ERR_US_01`/`ERR_US_02`. El
+  número no se reutiliza.
+- **Dónde se lanza:** (ya no se lanza)

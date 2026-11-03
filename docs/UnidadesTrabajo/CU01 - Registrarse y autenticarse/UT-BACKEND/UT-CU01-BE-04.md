@@ -35,7 +35,7 @@ Archivos esperados (crear): los cuatro de arriba y sus tests.
 ## Fuera de alcance (no tocar)
 
 - Consultar o listar la bitácora (CU25).
-- Registrar intentos fallidos (los ve Firebase, no el backend).
+- Registrar intentos fallidos de inicio de sesión (se cuentan en `usuario.intentos_fallidos`, no en la bitácora).
 - Llamar al service: lo hacen `UT-CU01-BE-11` y `UT-CU01-BE-13`.
 
 ## Resultado esperado

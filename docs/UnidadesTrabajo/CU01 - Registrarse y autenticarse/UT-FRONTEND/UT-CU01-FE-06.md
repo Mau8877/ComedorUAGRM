@@ -26,7 +26,7 @@ La ruta `/registro` muestra el formulario de registro y lleva al Postulante a su
 ## Alcance
 
 - `src/features/auth/screens/RegistroScreen.tsx`: `PublicHeader` + tarjeta con el formulario (TanStack Form + `registroSchema`), con los campos del README; `carreraCodigo` es un `Select` de shadcn alimentado por `useCarreras` (con estado de carga y de error); botón «Crear cuenta» deshabilitado mientras envía (A7); enlace «¿Ya tienes cuenta? Inicia sesión».
-- Errores **inline y solo en campos tocados**; los conflictos del backend (`ci`, `correo`, `registroUniversitario`) y los de Firebase se muestran en su campo; errores de red con mensaje y reintento (A9).
+- Errores **inline y solo en campos tocados**; los conflictos del backend (`ci`, `correo`, `registroUniversitario`) se muestran en su campo; errores de red con mensaje y reintento (A9).
 - Al terminar bien: `navigate` a `rutaInicioPorRol(rol)` (`UT-CU01-FE-05`).
 - `src/routes/registro.tsx`: monta la pantalla; si ya hay sesión, redirige al módulo (se completa en `UT-CU01-FE-08`).
 - Sin selector de rol ni ninguna forma de crear cuentas del personal (CA16).
@@ -48,5 +48,5 @@ Un Postulante puede registrarse desde la web y entrar a su módulo.
 ## Validación
 
 1. `pnpm test`, `pnpm lint` y `pnpm build` pasan.
-2. Con el stack y Firebase configurados: completar el formulario crea la cuenta, entra a `/panel` y existe la fila en `usuario` y `postulante`.
+2. Con el stack levantado: completar el formulario crea la cuenta, entra a `/panel` y existe la fila en `usuario` y `postulante`.
 3. Repetir con el mismo CI muestra el error en el campo CI sin crear otra cuenta.

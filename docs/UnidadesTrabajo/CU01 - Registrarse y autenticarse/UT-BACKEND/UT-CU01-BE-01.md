@@ -26,12 +26,14 @@ Dos archivos de migración. El primero, `V20261102100000__crear_tablas_cuentas_y
 
 - **Todas las tablas**: `id bigint GENERATED ALWAYS AS IDENTITY` (salvo `postulante`, cuya PK es `usuario_id`), `codigo_<tabla> uuid NOT NULL DEFAULT uuidv7() UNIQUE`, y `creado_en`, `actualizado_en` (`timestamptz NOT NULL DEFAULT now()`) y `eliminado_en` (`timestamptz NULL`).
 - `rol`: `nombre varchar(50) NOT NULL`.
-- `usuario`: `rol_id bigint NOT NULL` (FK a `rol`), `ci varchar(20)`, `correo varchar(150)`, `firebase_uid varchar(128)`, `nombres varchar(100)`, `apellidos varchar(100)` (todos `NOT NULL`) y `activo boolean NOT NULL DEFAULT true`.
+- `usuario`: `rol_id bigint NOT NULL` (FK a `rol`), `ci varchar(20)`, `correo varchar(150)`, `password_hash varchar(100)`, `nombres varchar(100)`, `apellidos varchar(100)` (todos `NOT NULL`), `activo boolean NOT NULL DEFAULT true` y el control de bloqueo por intentos fallidos: `intentos_fallidos integer NOT NULL DEFAULT 0`, `bloqueos_consecutivos integer NOT NULL DEFAULT 0` y `bloqueado_hasta timestamptz NULL`.
 - `carrera`: `nombre varchar(150) NOT NULL`, `facultad varchar(150) NOT NULL`.
 - `postulante`: `usuario_id bigint` (PK y FK a `usuario`), `carrera_id bigint NOT NULL` (FK a `carrera`), `registro_universitario varchar(20) NOT NULL`, `telefono varchar(20) NOT NULL`.
 - `bitacora`: `usuario_id bigint NULL` (FK a `usuario`), `accion varchar(60) NOT NULL`, `entidad varchar(60)`, `entidad_id bigint`, `detalle jsonb`, `ip inet`.
-- **Índices únicos parciales** (`WHERE eliminado_en IS NULL`): `rol(nombre)`, `carrera(nombre)`, `usuario(ci)`, `usuario(correo)`, `usuario(firebase_uid)`, `postulante(registro_universitario)`.
-- **Índices** de FK: `usuario(rol_id)`, `postulante(carrera_id)`, `bitacora(usuario_id)`.
+- **Índices únicos parciales** (`WHERE eliminado_en IS NULL`): `rol(nombre)`, `carrera(nombre)`, `usuario(ci)`, `usuario(correo)`, `postulante(registro_universitario)`, `sesion(token_hash)`.
+- `sesion` (un refresh token por dispositivo): `usuario_id bigint NOT NULL` (FK a `usuario`), `token_hash varchar(64) NOT NULL` (SHA-256 del refresh token, nunca el token), `expira_en timestamptz NOT NULL` y `revocada_en timestamptz NULL`.
+- **Índices** de FK: `usuario(rol_id)`, `postulante(carrera_id)`, `bitacora(usuario_id)`, `sesion(usuario_id)`.
+- **Dos migraciones.** `V20261102100000__crear_tablas_cuentas_y_acceso.sql` creó el esquema inicial (con `firebase_uid`, ya aplicada: no se edita) y `V20261103100000__autenticacion_con_jwt_propio.sql` pasa a la autenticación propia: quita `usuario.firebase_uid`, agrega `password_hash` y las columnas de bloqueo, y crea `sesion`. Las cuentas que ya existían quedan con un hash inválido hasta que se les asigne una contraseña (CU15).
 - **Datos sembrados** en `rol`: `POSTULANTE`, `ADMINISTRADOR_DUBSS`, `DIRECTIVO`, `PERSONAL_COMEDOR`.
 
 El segundo, `V20261102100100__cargar_carreras.sql`, inserta las 71 carreras de la UAGRM con su facultad en texto (por ejemplo, `Ingeniería Informática` / `Facultad de Ingeniería en Ciencias de la Computación y Telecomunicaciones`). La lista de origen repite algunas carreras con distintos códigos de plan (13 filas); como `carrera(nombre)` es único, se carga **una sola vez cada nombre** (sin distinguir mayúsculas ni tildes: `Ingenieria Civil` e `Ingeniería Civil` son la misma carrera).

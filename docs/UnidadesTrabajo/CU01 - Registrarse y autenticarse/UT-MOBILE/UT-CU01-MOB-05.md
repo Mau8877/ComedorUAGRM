@@ -16,19 +16,19 @@
 
 ## Solicitud de negocio
 
-Todo el árbol de pantallas necesita saber si hay sesión y quién es el usuario, y el router debe reaccionar a sus cambios.
+Todo el árbol de pantallas necesita saber si hay sesión y quién es el usuario, la sesión debe sobrevivir al cierre de la app y el router debe reaccionar a sus cambios.
 
 ## Objetivo
 
-Existen `authSesionProvider` y `authUsuarioProvider`, y la app cierra la sesión ante un `401`.
+Existen `authSesionProvider` y `authUsuarioProvider`, la app restaura la sesión al arrancar y la cierra cuando ya no se puede renovar.
 
 ## Alcance
 
-- `lib/features/auth/providers/auth_sesion_provider.dart`: `StreamProvider<User?>` sobre `authStateChanges()` (`authSesionProvider`).
-- `lib/features/auth/providers/auth_usuario_provider.dart`: `FutureProvider<Usuario?>` (`authUsuarioProvider`) que, con sesión, llama a `AuthService.usuarioActual()`; sin sesión devuelve `null`. Ante `ERR_AUTH_02`/`ERR_AUTH_03` cierra la sesión.
-- Registro de `ApiClient.onUnauthorized` para cerrar la sesión de Firebase e invalidar el provider de usuario (A8).
+- `lib/features/auth/providers/auth_sesion_provider.dart`: `AsyncNotifier` (`authSesionProvider`) con el estado de sesión (`cargando`, `sin-sesion`, `con-sesion`). Al arrancar lee el refresh token de `TokenStorage` y lo canjea con `AuthService.renovar` (`POST /auth/refresh`); si no hay refresh token o el backend responde `ERR_AUTH_06`, queda `sin-sesion`. Expone `abrir(Sesion)` (guarda los tokens) y `cerrar()` (borra los tokens).
+- `lib/features/auth/providers/auth_usuario_provider.dart`: `FutureProvider<Usuario?>` (`authUsuarioProvider`) que, con sesión, devuelve el usuario de la `Sesion` o llama a `AuthService.usuarioActual()`; sin sesión devuelve `null`. Ante `ERR_AUTH_02`/`ERR_AUTH_03` cierra la sesión.
+- Registro de `ApiClient.onRenovar` (renovar con el refresh token guardado) y `ApiClient.onSesionInvalida` (cerrar la sesión e invalidar el provider de usuario, A8).
 - `lib/features/auth/rol_destino.dart`: `rutaInicioPorRol(String rol)` con el mapa del README (rol desconocido → `/login`).
-- Tests (`ProviderContainer`, Firebase y `AuthService` simulados): sin sesión → `null`; con sesión → el usuario; un `401` cierra la sesión; `rutaInicioPorRol` para los 4 roles y uno desconocido.
+- Tests (`ProviderContainer`, `TokenStorage` y `AuthService` simulados): sin refresh token → `sin-sesion`; con refresh token válido → `con-sesion` y el usuario; refresh inválido → `sin-sesion`; `onSesionInvalida` cierra la sesión; `rutaInicioPorRol` para los 4 roles y uno desconocido.
 
 Archivos esperados (crear): los dos providers, `rol_destino.dart` y los tests.
 
@@ -39,7 +39,7 @@ Archivos esperados (crear): los dos providers, `rol_destino.dart` y los tests.
 
 ## Resultado esperado
 
-El estado de sesión y el usuario están disponibles y probados.
+El estado de sesión y el usuario están disponibles y probados, y la sesión se restaura al reabrir la app.
 
 ## Validación
 

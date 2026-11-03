@@ -1,6 +1,7 @@
 erDiagram
   ROL ||--o{ USUARIO : tiene
   USUARIO ||--o| POSTULANTE : es
+  USUARIO ||--o{ SESION : abre
   CARRERA ||--o{ POSTULANTE : cursa
   GESTION_ACADEMICA ||--o{ CONVOCATORIA : contiene
   CONVOCATORIA ||--o{ CONVOCATORIA_DOCUMENTO : exige
@@ -65,10 +66,25 @@ erDiagram
     bigint rol_id FK
     varchar ci UK "(20)"
     varchar correo UK "(150)"
-    varchar firebase_uid UK "(128)"
+    varchar password_hash "(100)"
     varchar nombres "(100)"
     varchar apellidos "(100)"
     boolean activo
+    int intentos_fallidos
+    int bloqueos_consecutivos
+    timestamptz bloqueado_hasta
+    timestamptz creado_en
+    timestamptz actualizado_en
+    timestamptz eliminado_en
+  }
+
+  SESION {
+    bigint id PK
+    uuid codigo_sesion UK
+    bigint usuario_id FK
+    varchar token_hash UK "(64)"
+    timestamptz expira_en
+    timestamptz revocada_en
     timestamptz creado_en
     timestamptz actualizado_en
     timestamptz eliminado_en

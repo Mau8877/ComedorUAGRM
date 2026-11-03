@@ -1,9 +1,9 @@
-# UT-CU01-MOB-01 — Dependencias de Firebase y su inicialización
+# UT-CU01-MOB-01 — Almacenamiento seguro de la sesión (tokens)
 
 | Campo | Valor |
 |-------|-------|
 | **Código** | `UT-CU01-MOB-01` |
-| **Nombre** | Dependencias de Firebase y su inicialización |
+| **Nombre** | Almacenamiento seguro de la sesión (tokens) |
 | **Caso de uso** | CU01-MOB |
 | **Depende de** | — |
 
@@ -12,36 +12,35 @@
 - [`ARQUITECTURA_MOBILE.md`](../../../../.claude/rules/ARQUITECTURA_MOBILE.md)
 - [`CONSUMO_API_MOBILE.md`](../../../../.claude/rules/mobile/CONSUMO_API_MOBILE.md)
 - [`SEGURIDAD_AUTH_BACKEND.md`](../../../../.claude/rules/backend/SEGURIDAD_AUTH_BACKEND.md)
+- [`TESTING_MOBILE.md`](../../../../.claude/rules/mobile/TESTING_MOBILE.md)
 
 ## Solicitud de negocio
 
-La app debe poder hablar con Firebase Auth desde que arranca.
+La sesión usa los tokens que emite el backend: la app necesita guardarlos de forma segura para no pedir la contraseña cada vez que se abre.
 
 ## Objetivo
 
-`firebase_core` y `firebase_auth` están instalados e inicializados con la configuración del `.env`.
+Existe `TokenStorage`: guarda el refresh token en `flutter_secure_storage` y el token de acceso en memoria.
 
 ## Alcance
 
-- `pubspec.yaml`: agregar `firebase_core` y `firebase_auth` (`flutter pub get`).
-- `lib/core/firebase/firebase_options.dart`: `FirebaseOptions` armado con `dotenv.env` (`FIREBASE_API_KEY`, `FIREBASE_APP_ID`, `FIREBASE_MESSAGING_SENDER_ID`, `FIREBASE_PROJECT_ID`); si falta una variable lanza un error en español que la nombra.
-- `lib/main.dart`: `await Firebase.initializeApp(options: ...)` después de `dotenv.load()`.
-- `.env.example`: las cuatro variables con un comentario de dónde se obtienen (consola de Firebase, app Android registrada).
-- Test de la función que arma las opciones: con variables simuladas las devuelve y sin ellas falla con el mensaje esperado.
+- `pubspec.yaml`: agregar `flutter_secure_storage` (`flutter pub get`).
+- `lib/core/storage/token_storage.dart`: `TokenStorage` con `accessToken` (campo en memoria), `leerRefreshToken()`, `guardarSesion(accessToken, refreshToken)` y `borrarSesion()`. El refresh token se guarda en `flutter_secure_storage` (Keystore en Android); el token de acceso nunca se persiste. Se recibe el almacenamiento por constructor para poder simularlo en los tests.
+- Test con un almacenamiento simulado: guardar, leer y borrar; el token de acceso no pasa por el almacenamiento seguro.
 
-Archivos esperados (crear/tocar): `pubspec.yaml`, `pubspec.lock`, `firebase_options.dart`, `main.dart`, `.env.example` y el test.
+Archivos esperados (crear/tocar): `pubspec.yaml`, `pubspec.lock`, `token_storage.dart` y el test.
 
 ## Fuera de alcance (no tocar)
 
+- Llamar a la API o renovar tokens (`UT-CU01-MOB-03`, `UT-CU01-MOB-05`).
 - Login, registro y logout (`UT-CU01-MOB-06`).
-- `google-services.json` / plugin de Gradle de Google: no hacen falta con opciones desde `.env`.
-- Otros servicios de Firebase (FCM, Storage).
+- Firebase: no participa en la autenticación (queda solo para push, en otro CU).
 
 ## Resultado esperado
 
-La app arranca con Firebase inicializado.
+El resto de la feature guarda y lee los tokens solo a través de `TokenStorage`.
 
 ## Validación
 
 1. `flutter pub get`, `flutter analyze` y `flutter test` pasan.
-2. `flutter run` en un emulador Android arranca sin errores de Firebase; sin una variable en `.env`, el error nombra cuál falta.
+2. Ningún otro archivo de `lib/` usa `flutter_secure_storage` directamente.

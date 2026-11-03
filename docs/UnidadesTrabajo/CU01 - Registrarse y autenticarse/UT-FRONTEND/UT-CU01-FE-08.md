@@ -20,11 +20,11 @@ Las pantallas privadas no deben verse sin sesión, y cada rol debe llegar a su m
 
 ## Objetivo
 
-`_authenticated.tsx` valida la sesión real de Firebase y `/login` y `/registro` redirigen al módulo si ya hay sesión.
+`_authenticated.tsx` valida la sesión real (tokens del backend) y `/login` y `/registro` redirigen al módulo si ya hay sesión.
 
 ## Alcance
 
-- `src/routes/_authenticated.tsx`: `beforeLoad` espera `esperarSesionInicial()`; sin sesión → `redirect({ to: '/login' })`; con sesión, asegura el usuario actual (`ensureQueryData` de `useUsuarioActual`); si el backend responde `401`/`403` el manejador de `UT-CU01-FE-04` cierra la sesión y lleva a `/login`. Sustituye el `isLoggedIn = true` provisorio y su `TODO`.
+- `src/routes/_authenticated.tsx`: `beforeLoad` espera `esperarSesionInicial()`; sin sesión (ni token de acceso ni refresh token que se pueda canjear) → `redirect({ to: '/login' })`; con sesión, asegura el usuario actual (`ensureQueryData` de `useUsuarioActual`); si el backend responde `401`/`403` el manejador de `UT-CU01-FE-04` cierra la sesión y lleva a `/login`. Sustituye el `isLoggedIn = true` provisorio y su `TODO`.
 - `src/routes/login.tsx` y `registro.tsx`: `beforeLoad` que, con sesión activa, redirige a `rutaInicioPorRol(rol)`.
 - `src/routes/_authenticated/panel.tsx`: deja de ser un título suelto; muestra el saludo con el nombre del usuario (sin layout por ahora) y, para `DIRECTIVO` y `PERSONAL_COMEDOR`, el aviso "tu módulo aún no está disponible". Sigue siendo la ruta hija que evita el conflicto del layout vacío (ver `RUTAS_NAVEGACION_FRONTEND.md`).
 - Tests: sin sesión redirige a `/login`; con sesión no redirige; `/login` con sesión redirige a `/panel`.

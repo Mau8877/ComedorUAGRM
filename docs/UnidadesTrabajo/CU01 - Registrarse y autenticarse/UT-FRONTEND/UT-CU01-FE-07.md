@@ -36,7 +36,7 @@ Archivos esperados (crear/tocar): `LoginScreen.tsx`, `screens/index.ts`, `routes
 ## Fuera de alcance (no tocar)
 
 - Recuperar contraseña (CU15).
-- Recordar sesión con casilla "mantener sesión": Firebase ya persiste la sesión.
+- Recordar sesión con casilla "mantener sesión": la sesión ya persiste con el refresh token (`UT-CU01-FE-01`).
 - El guard de rutas (`UT-CU01-FE-08`).
 
 ## Resultado esperado

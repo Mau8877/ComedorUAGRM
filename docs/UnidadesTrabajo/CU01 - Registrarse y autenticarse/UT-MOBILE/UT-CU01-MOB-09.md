@@ -20,7 +20,7 @@ Las pantallas privadas no deben verse sin sesión y cada rol debe llegar a su m�
 
 ## Objetivo
 
-El `GoRouter` redirige según la sesión de Firebase, tiene las rutas `/login`, `/registro` y `/sin-modulo`, y manda a cada rol a su shell.
+El `GoRouter` redirige según la sesión (tokens del backend), tiene las rutas `/login`, `/registro` y `/sin-modulo`, y manda a cada rol a su shell.
 
 ## Alcance
 

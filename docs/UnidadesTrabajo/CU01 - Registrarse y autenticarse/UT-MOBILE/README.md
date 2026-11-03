@@ -1,9 +1,9 @@
 # Unidades de trabajo — CU01-MOB
 
-**Caso de uso:** Pantallas de la app móvil para crear cuenta e iniciar sesión con Firebase Auth, conexión de la sesión con la API, redirección por rol y cierre de sesión.
+**Caso de uso:** Pantallas de la app móvil para crear cuenta e iniciar sesión con el JWT propio del backend, conexión de la sesión con la API (token de acceso y renovación), redirección por rol y cierre de sesión.
 **Fuente CU:** [`CU01 - Registrarse y autenticarse`](../../../CasosDeUso/CU01%20-%20Registrarse%20y%20autenticarse.md)
 **Diagramas de grado:** `images/038_CU01_Registrarse_Autenticarse.png` (contexto), `images/051_Analisis_CU01_Registrarse_Autenticarse.jpg` (análisis), `images/121_Secuencia_CU01_Registrarse_Autenticarse.jpg` (secuencia) y `images/134_Mockup_CU01_Registrarse_autenticarse.png` (mockup).
-**Recurso HTTP / contrato:** Rutas `/login`, `/registro` y `/sin-modulo` en `go_router`; consume `GET /carreras`, `POST /auth/registro`, `POST /auth/sesion` y `GET /auth/usuario-actual` (ver [`UT-BACKEND`](../UT-BACKEND/README.md)).
+**Recurso HTTP / contrato:** Rutas `/login`, `/registro` y `/sin-modulo` en `go_router`; consume `GET /carreras`, `POST /auth/registro`, `POST /auth/login`, `POST /auth/refresh`, `POST /auth/logout` y `GET /auth/usuario-actual` (ver [`UT-BACKEND`](../UT-BACKEND/README.md)).
 
 ## Antes de implementar cualquier UT
 
@@ -13,12 +13,14 @@ Leer [`.claude/rules/`](../../../../.claude/rules/) — `ARQUITECTURA_MOBILE.md`
 
 Todo el código va en `projects/mobile/lib/` (la feature es `features/auth/`). Esta capa reproduce, con las herramientas de Flutter, lo mismo que [`UT-FRONTEND`](../UT-FRONTEND/README.md): la misma regla de negocio, los mismos mensajes y el mismo flujo (CA14).
 
-- **Diagramas de grado.** El análisis (051) y la secuencia (121) ya reflejan el diseño con Firebase Auth y coinciden con estas fichas. El mockup (134) sigue mostrando el diseño anterior (contraseña de mínimo 8 con letras y números, sin carrera, registro universitario ni teléfono, con casilla de términos y login/registro en pestañas): no se corrige y **ganan el CU y estas UT**.
-- **La sesión es de Firebase.** El estado de sesión sale de `FirebaseAuth.instance.authStateChanges()`; los datos del usuario (nombre, rol) vienen del backend (`GET /auth/usuario-actual`). No se guarda ningún token a mano (ni en `flutter_secure_storage`): lo persiste el SDK.
-- **Flujo de registro:** validar el formulario → crear la cuenta en Firebase → `POST /auth/registro` con el ID token → ir al módulo. Si Firebase dice que el correo ya existe, se prueba iniciar sesión con el mismo correo y contraseña: si funciona se continúa con el registro (recupera una cuenta de Firebase que quedó sin su registro en el sistema); si no, "correo ya registrado" (A1). Un `409` del backend marca el campo en conflicto y **no** cierra la sesión de Firebase.
-- **Flujo de inicio de sesión:** validar → iniciar sesión en Firebase → `POST /auth/sesion` (una sola vez, anota el acceso) → ir al módulo del rol. Ante `403` `ERR_AUTH_03` (desactivada) o `401` `ERR_AUTH_02` (sin cuenta en el sistema) se cierra la sesión de Firebase y se muestra el mensaje.
-- **Mensajes de error** (la política de 6 caracteres y el bloqueo son de Firebase; acá solo se traducen): `invalid-credential`, `wrong-password`, `user-not-found` → "Correo o contraseña incorrectos" (siempre el mismo, A3); `too-many-requests` → "Demasiados intentos fallidos. Intenta de nuevo más tarde." (A6); `user-disabled` → cuenta desactivada, comunicarse con la DUBSS (A4); `network-request-failed` o error de red → mensaje de conexión con reintento (A9).
-- **Configuración de Firebase desde `.env`**, sin `google-services.json` ni `GoogleService-Info.plist`: `FIREBASE_API_KEY`, `FIREBASE_APP_ID`, `FIREBASE_MESSAGING_SENDER_ID` y `FIREBASE_PROJECT_ID` arman el `FirebaseOptions`. Así se mantiene el mismo mecanismo que `API_BASE_URL` y no se commitean archivos de la consola de Firebase. Prioridad Android; iOS se verifica después.
+- **Cambio de rumbo: JWT propio en lugar de Firebase Auth.** La primera versión de estas fichas usaba Firebase Auth. Ahora el login lo resuelve el backend (ver [`UT-BACKEND`](../UT-BACKEND/README.md)); la app **no** usa `firebase_core` ni `firebase_auth` ni necesita variables `FIREBASE_*` para esto. Firebase queda solo para las notificaciones push (FCM), que son de otro CU.
+- **Diagramas de grado.** El análisis (051) y la secuencia (121) todavía muestran Firebase; el mockup (134) sigue mostrando el diseño anterior (contraseña de mínimo 8 con letras y números, sin carrera, registro universitario ni teléfono, con casilla de términos y login/registro en pestañas): **ganan el CU y estas UT**.
+- **Dónde viven los tokens.** El refresh token, en `flutter_secure_storage` (Keystore en Android); el token de acceso, solo en memoria. Todo pasa por `TokenStorage` (UT-01). Los datos del usuario (nombre, rol) vienen de la respuesta del backend y de `GET /auth/usuario-actual`.
+- **Restaurar la sesión al abrir la app:** si hay refresh token guardado se canjea con `POST /auth/refresh`; si el backend responde `ERR_AUTH_06` (o no hay refresh token), no hay sesión y el router lleva a `/login`. Ante un `401` en una petición, `ApiClient` renueva el token una sola vez y reintenta; si no se puede, cierra la sesión (A8). Un `401` de `login`, `registro` o `refresh` no dispara renovación.
+- **Flujo de registro:** validar el formulario → `POST /auth/registro` (el backend crea la cuenta y devuelve la sesión abierta) → guardar los tokens → ir al módulo. Un `409` del backend marca el campo en conflicto (CI, correo o registro universitario, A1).
+- **Flujo de inicio de sesión:** validar → `POST /auth/login` → guardar los tokens → ir al módulo del rol. El backend anota el acceso en la bitácora.
+- **Mensajes de error** (la política de contraseña, el bloqueo y el mensaje único de credenciales los aplica el backend; acá solo se muestran): `ERR_AUTH_04` → "Correo o contraseña incorrectos" (siempre el mismo, A3); `ERR_AUTH_05` → cuenta bloqueada temporalmente, con el mensaje del backend, que ya dice cuántos minutos faltan (A6); `ERR_AUTH_03` → cuenta desactivada, comunicarse con la DUBSS (A4); error de red o `5xx` → mensaje de conexión con reintento (A9).
+- **Sin variables de entorno nuevas** para la autenticación: solo `API_BASE_URL`, que ya existe.
 - **Convención de modelos (DTOs Dart) que faltaba definir:** una carpeta `models/` por feature con clases inmutables y `fromJson`/`toJson` escritos a mano (sin generación de código). Se escribe en `CONSUMO_API_MOBILE.md` en `UT-CU01-MOB-02`.
 - **Destino por rol:** `POSTULANTE` → `/estudiante` (`EstudianteShell`); `ADMINISTRADOR_DUBSS` → `/admin` (`AdminShell`); `DIRECTIVO` y `PERSONAL_COMEDOR` no tienen shell todavía → `/sin-modulo` ("Tu módulo aún no está disponible", con botón de cerrar sesión). Cuando los CU de asistencia (CU10) y dashboard (CU12) tengan sus pantallas se actualiza el mapa en un solo lugar.
 - **Las rutas de demostración** (`/ingredientes`, `/diagnostico`, `/`) pasan a ser privadas junto con el resto; `/` redirige al módulo del rol o al login.
@@ -36,21 +38,19 @@ Todo el código va en `projects/mobile/lib/` (la feature es `features/auth/`). E
 | `/estudiante`, `/admin` | Privada | Shells existentes por rol |
 | `/sin-modulo` | Privada | Aviso para los roles sin módulo todavía |
 
-**Formulario de registro:** `nombres`, `apellidos`, `ci`, `registroUniversitario`, `carreraCodigo` (selector con `GET /carreras?pageSize=200`), `telefono`, `correo`, `contrasena` (al menos 6 caracteres, sin más exigencias) y `confirmarContrasena` (igual a `contrasena`). Todos obligatorios. Al backend se envía todo **menos** `correo`, `contrasena` y su confirmación.
+**Formulario de registro:** `nombres`, `apellidos`, `ci`, `registroUniversitario`, `carreraCodigo` (selector con `GET /carreras?pageSize=200`), `telefono`, `correo`, `contrasena` (de 6 a 72 caracteres, sin más exigencias) y `confirmarContrasena` (igual a `contrasena`). Todos obligatorios. Al backend se envían todos, con la confirmación como `confirmacionContrasena`.
 
 **Formulario de login:** `correo` (formato válido) y `contrasena` (no vacía).
 
-**Respuesta del backend que consume la feature** (`UsuarioResponse`): `codigo`, `nombres`, `apellidos`, `correo`, `rol`.
-
-**Variables nuevas en `.env`:** `FIREBASE_API_KEY`, `FIREBASE_APP_ID`, `FIREBASE_MESSAGING_SENDER_ID`, `FIREBASE_PROJECT_ID`.
+**Respuesta de login/registro/refresh que consume la feature** (`Sesion`): `accessToken`, `refreshToken`, `tokenType`, `expiresIn` y `usuario` (`codigo`, `nombres`, `apellidos`, `correo`, `rol`).
 
 ## Orden de ejecución
 
 | Código | Nombre | Depende de |
 |--------|--------|------------|
-| [UT-CU01-MOB-01](./UT-CU01-MOB-01.md) | Dependencias de Firebase y su inicialización | — |
+| [UT-CU01-MOB-01](./UT-CU01-MOB-01.md) | Almacenamiento seguro de la sesión (tokens) | — |
 | [UT-CU01-MOB-02](./UT-CU01-MOB-02.md) | Modelos de la feature y convención de DTOs | — |
-| [UT-CU01-MOB-03](./UT-CU01-MOB-03.md) | ApiClient: token de Firebase en cada petición y manejo de 401 | 01 |
+| [UT-CU01-MOB-03](./UT-CU01-MOB-03.md) | ApiClient: token de acceso en cada petición y renovación ante 401 | 01 |
 | [UT-CU01-MOB-04](./UT-CU01-MOB-04.md) | AuthService: llamadas a la API de cuentas | 02, 03 |
 | [UT-CU01-MOB-05](./UT-CU01-MOB-05.md) | Providers de sesión y de usuario actual | 01, 03, 04 |
 | [UT-CU01-MOB-06](./UT-CU01-MOB-06.md) | Acciones de registro, inicio y cierre de sesión con mapeo de errores | 01, 04, 05 |
@@ -77,7 +77,7 @@ Todo el código va en `projects/mobile/lib/` (la feature es `features/auth/`). E
 | CA02, CA03, CA21 | Conflictos marcados en CI, correo y registro universitario | 06, 07 |
 | CA04, CA05 | Campos obligatorios, contraseña de al menos 6 caracteres y confirmación | 07 |
 | CA07, CA08, CA09 | Login por rol, credenciales incorrectas, cuenta desactivada | 06, 08, 09 |
-| CA10, CA11 | Bloqueo temporal: se muestra el aviso de Firebase | 06, 08 |
+| CA10, CA11 | Bloqueo temporal: se muestra el mensaje del backend con los minutos que faltan | 06, 08 |
 | CA13 | Enlace «¿Olvidó su contraseña?» | — (CU15) |
 | CA14 | Mismo comportamiento en web y móvil | 06–10 (ver UT-FRONTEND) |
 | CA15, CA18 | Sesión inválida o cerrada no deja ver pantallas privadas | 03, 09 |
@@ -91,10 +91,11 @@ Todo el código va en `projects/mobile/lib/` (la feature es `features/auth/`). E
 - Pantallas reales de cada rol y los shells de `DIRECTIVO` y `PERSONAL_COMEDOR`: CU12, CU10 y demás.
 - Verificar en iOS (la prioridad es Android).
 - Verificación del correo (la documentación no la pide por ahora).
+- Desbloquear la app con biometría usando el refresh token guardado.
 
 ## Qué NO incluyen estas UT
 
-- Cualquier regla de contraseña, bloqueo o expiración propia: es de Firebase.
+- Cualquier regla de contraseña, bloqueo o expiración propia del cliente: son del backend.
 - Gestión de usuarios (CU14) y de perfil (CU15).
 - Web (ver `UT-FRONTEND`) y backend (ver `UT-BACKEND`).
-- Notificaciones push (FCM) y biometría.
+- Notificaciones push (FCM, el único uso previsto de Firebase en mobile) y biometría.

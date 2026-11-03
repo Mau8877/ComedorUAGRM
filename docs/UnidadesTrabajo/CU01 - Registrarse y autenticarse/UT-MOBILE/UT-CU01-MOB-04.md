@@ -22,14 +22,14 @@ La app necesita hablar con el backend para listar carreras, registrar, anotar el
 
 ## Alcance
 
-- `lib/features/auth/services/auth_service.dart`: recibe el `Dio` de `ApiClient.instance` (no crea el suyo). Métodos: `listarCarreras()` → `GET /carreras?pageSize=200`; `registrar(RegistroRequest)` → `POST /auth/registro` (devuelve el `Usuario`); `iniciarSesion()` → `POST /auth/sesion`; `usuarioActual()` → `GET /auth/usuario-actual`. Los errores de negocio salen como `ApiException` (ya implementado en el interceptor).
+- `lib/features/auth/services/auth_service.dart`: recibe el `Dio` de `ApiClient.instance` (no crea el suyo). Métodos: `listarCarreras()` → `GET /carreras?pageSize=200`; `registrar(RegistroRequest)` → `POST /auth/registro` (devuelve la `Sesion`); `iniciarSesion(correo, contrasena)` → `POST /auth/login` (devuelve la `Sesion`); `renovar(refreshToken)` → `POST /auth/refresh`; `cerrarSesion(refreshToken)` → `POST /auth/logout`; `usuarioActual()` → `GET /auth/usuario-actual`. Los errores de negocio salen como `ApiException` (ya implementado en el interceptor).
 - Tests con `Dio` simulado: cada método usa la ruta y el método HTTP correctos y devuelve el modelo; un error `ERR_US_01` llega como `ApiException` con su `code`.
 
 Archivos esperados (crear): `auth_service.dart` y su test.
 
 ## Fuera de alcance (no tocar)
 
-- Firebase (`UT-CU01-MOB-06`).
+- Guardar los tokens y la lógica de los flujos (`UT-CU01-MOB-05` y `UT-CU01-MOB-06`).
 - Estado, providers y pantallas.
 
 ## Resultado esperado

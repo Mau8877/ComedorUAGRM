@@ -16,22 +16,22 @@
 
 ## Solicitud de negocio
 
-La web y la app necesitan una forma de completar el registro del Postulante una vez creada su cuenta en Firebase.
+La web y la app necesitan una forma de crear su cuenta de Postulante y quedar con la sesión abierta.
 
 ## Objetivo
 
-`POST /api/v1/auth/registro` crea la cuenta y responde `201` (o `200` si ya existía).
+`POST /api/v1/auth/registro` (público) crea la cuenta, abre la sesión y responde `201` (o `200` si la misma petición ya se había procesado).
 
 ## Alcance
 
-- `B/features/auth/controller/AuthController.java`: `POST /api/v1/auth/registro`, `@Valid @RequestBody RegistroRequest`, toma el principal `FirebaseSinRegistro` del `SecurityContext`, llama a `AuthService.registrar(...)` con la IP (`request.getRemoteAddr()`) y devuelve `ApiResponse.success(usuario, "Registro exitoso")` con `201` o `200`. Sin lógica ni `try/catch`.
-- Tests (`@WebMvcTest` o `MockMvc`, `AuthService` simulado): `201` con el sobre correcto; `200` si ya existía; `400` `ERR_SYS_01` con body inválido; `409` con `ERR_US_01` y su mensaje; `401` sin token; y que un body con `rol` o `correo` no los usa.
+- `B/features/auth/controller/AuthController.java`: `POST /api/v1/auth/registro`, `@Valid @RequestBody RegistroRequest`, llama a `AuthService.registrar(...)` con la IP (`request.getRemoteAddr()`) y devuelve `ApiResponse.success(sesion, "Registro exitoso")` con `201` o `200`; `sesion` es la `SesionResponse` (tokens y usuario). No exige token de acceso. Sin lógica ni `try/catch`.
+- Tests (`@WebMvcTest` o `MockMvc`, `AuthService` simulado): `201` con el sobre correcto; `200` si ya existía; `400` `ERR_SYS_01` con body inválido; `409` con `ERR_US_01` y su mensaje; una confirmación de contraseña distinta da `400` `ERR_SYS_01`; un header `Authorization` vencido se ignora (ruta pública); y que un body con `rol` no lo usa.
 
 Archivos esperados (crear): `AuthController.java` y su test.
 
 ## Fuera de alcance (no tocar)
 
-- `POST /auth/sesion` y `GET /auth/usuario-actual` (`UT-CU01-BE-13`).
+- Login, refresh, logout y `GET /auth/usuario-actual` (`UT-CU01-BE-13`).
 - Cambiar `GlobalExceptionHandler`: ya mapea `BusinessException` y la validación.
 
 ## Resultado esperado

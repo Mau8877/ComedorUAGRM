@@ -24,19 +24,18 @@ Existen `RegistroRequest`, `UsuarioResponse` y `UsuarioErrorCodes`, con los cód
 
 ## Alcance
 
-- `B/features/auth/dto/RegistroRequest.java` (`record`) con las validaciones de Bean Validation del contrato del README (`@NotBlank`, `@Size` máximas, `@NotNull` en `carreraCodigo`), mensajes en español. `registroUniversitario` con `@Pattern(regexp = "^[1-9]\\d{8}$")` (exactamente 9 dígitos y sin cero inicial, mensaje en español); sin formato de CI (por definir con la DUBSS).
+- `B/features/auth/dto/RegistroRequest.java` (`record`) con las validaciones de Bean Validation del contrato del README (`@NotBlank`, `@Size` máximas, `@NotNull` en `carreraCodigo`, `@Email` en `correo`, contraseña de 6 a 72 caracteres y `@AssertTrue` en `confirmacionCoincide`), mensajes en español. `registroUniversitario` con `@Pattern(regexp = "^[1-9]\\d{8}$")` (exactamente 9 dígitos y sin cero inicial, mensaje en español); sin formato de CI (por definir con la DUBSS).
 - `B/features/usuarios/dto/UsuarioResponse.java` (`record`): `codigo`, `nombres`, `apellidos`, `correo`, `rol`.
 - `B/features/usuarios/UsuarioErrorCodes.java`: `ERR_US_01` a `ERR_US_04` (ver tabla del README).
 - `docs/errors/usuarios/ERRORES_USUARIOS.md` (cuatro secciones, formato de `GUIA_ERRORES_BACKEND.md`) y sus links en `docs/errors/README.md`.
-- Test de validación (`spring-boot-starter-validation-test`): campos vacíos y largos excedidos producen violaciones; un request completo no.
+- Test de validación (`spring-boot-starter-validation-test`): campos vacíos y largos excedidos producen violaciones; contraseña de 5 caracteres, de más de 72 o que no coincide con su confirmación, y un correo sin formato, también; un request completo no.
 
 Archivos esperados (crear/tocar): los tres Java, `docs/errors/usuarios/ERRORES_USUARIOS.md`, `docs/errors/README.md`, test.
 
 ## Fuera de alcance (no tocar)
 
 - Lanzar los errores (`UT-CU01-BE-11`).
-- Validar la política de contraseña: el backend no recibe la contraseña.
-- Campos `correo`, `rol` o `firebaseUid` en el request (nunca se aceptan del cliente).
+- Un campo `rol` en el request (nunca se acepta del cliente: siempre es `POSTULANTE`).
 
 ## Resultado esperado
 

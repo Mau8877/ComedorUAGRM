@@ -1,9 +1,9 @@
-# UT-CU01-FE-03 — Hooks y llamadas a la API de cuentas (carreras, registro, sesión, usuario actual)
+# UT-CU01-FE-03 — Hooks y llamadas a la API de cuentas (carreras, registro, login, refresh, logout, usuario actual)
 
 | Campo | Valor |
 |-------|-------|
 | **Código** | `UT-CU01-FE-03` |
-| **Nombre** | Hooks y llamadas a la API de cuentas (carreras, registro, sesión, usuario actual) |
+| **Nombre** | Hooks y llamadas a la API de cuentas (carreras, registro, login, refresh, logout, usuario actual) |
 | **Caso de uso** | CU01-FE |
 | **Depende de** | `UT-CU01-FE-01` |
 
@@ -24,17 +24,18 @@ Existen los hooks y funciones del contrato HTTP del CU01 usando `apiClient`, con
 
 ## Alcance
 
-- `src/features/auth/types/index.ts`: `Usuario` (`UsuarioResponse`), `Carrera`.
+- `src/features/auth/types/index.ts`: `Usuario` (`UsuarioResponse`), `Sesion` (`SesionResponse`: `accessToken`, `refreshToken`, `tokenType`, `expiresIn`, `usuario`), `Carrera`.
 - `src/features/auth/api/keys.ts`: `authKeys` (`all: ['auth']`, `usuarioActual`) y `carrerasKeys` (`['carreras', 'list', params]`).
 - `useCarreras.ts`: `useQuery` de `GET /carreras?pageSize=200`.
-- `registrarUsuarioApi(request)`: `POST /auth/registro` (devuelve el `Usuario` y si fue creado `201` o ya existía `200`); `iniciarSesionApi()`: `POST /auth/sesion`; `useUsuarioActual({ enabled })`: `useQuery` de `GET /auth/usuario-actual` (`retry: false`, para que un `401` no reintente).
-- Tests (mockeando `apiClient`, sin backend real): cada llamada pega a la ruta y el método correctos y devuelve el `data` desempaquetado; un `ApiError` con `ERR_US_01` se propaga con su `code`.
+- Funciones sin hook (las usan las mutations de `UT-CU01-FE-05` y el manejador de `401` de `UT-CU01-FE-04`): `registrarApi(request)` → `POST /auth/registro` (devuelve la `Sesion` y si fue creada `201` o ya existía `200`), `loginApi(correo, contrasena)` → `POST /auth/login`, `refreshApi(refreshToken)` → `POST /auth/refresh` y `logoutApi(refreshToken)` → `POST /auth/logout`.
+- `useUsuarioActual({ enabled })`: `useQuery` de `GET /auth/usuario-actual` (`retry: false`, para que un `401` no reintente).
+- Tests (mockeando `apiClient`, sin backend real): cada llamada pega a la ruta y el método correctos y devuelve el `data` desempaquetado; un `ApiError` con `ERR_US_01` o `ERR_AUTH_04` se propaga con su `code`.
 
 Archivos esperados (crear): `types/index.ts`, `api/keys.ts`, `api/useCarreras.ts`, `api/authApi.ts`, `api/useUsuarioActual.ts`, `api/index.ts` y tests.
 
 ## Fuera de alcance (no tocar)
 
-- Firebase (`UT-CU01-FE-04` y `05`).
+- Guardar los tokens (`UT-CU01-FE-01`) y renovarlos ante un `401` (`UT-CU01-FE-04`).
 - Mutations con navegación o mensajes: son de `UT-CU01-FE-05`.
 
 ## Resultado esperado

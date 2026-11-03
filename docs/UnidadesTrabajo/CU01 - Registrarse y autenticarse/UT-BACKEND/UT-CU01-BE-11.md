@@ -25,18 +25,17 @@ Registrar a un Postulante debe crear su cuenta una sola vez, sin duplicar CI, co
 
 ## Alcance
 
-- `B/features/usuarios/service/UsuarioService.java`: `registrarPostulante(String firebaseUid, String correo, RegistroRequest req)`: en una transacción valida y crea, en este orden: carrera existente (si no, `NotFoundException` `ERR_US_04`), CI libre (`ConflictException` `ERR_US_01`), correo libre (`ERR_US_02`), registro universitario libre (`ERR_US_03`); crea `Usuario` con el rol `POSTULANTE` (de `RolRepository`) y `activo = true`, y su `Postulante`. Si ya existe un `usuario` con ese `firebaseUid`, **devuelve el existente sin crear nada** (idempotencia, A7/CA12). Traduce una `DataIntegrityViolationException` por carrera de concurrencia al `ERR_US_xx` del campo que corresponda.
-- `B/features/auth/service/AuthService.java`: `registrar(FirebaseSinRegistro token, RegistroRequest req, String ip)` → llama a `UsuarioService` y a `BitacoraService.registrar(..., REGISTRO_USUARIO, ...)` solo cuando **creó** la cuenta; devuelve `UsuarioResponse` y un indicador de si fue creada o ya existía.
+- `B/features/usuarios/service/UsuarioService.java`: `registrarPostulante(RegistroRequest req)`: normaliza el correo (minúsculas, sin espacios) y, en una transacción, valida y crea, en este orden: si ya existe una cuenta con ese correo, el mismo CI y la misma contraseña → **devuelve la existente sin crear nada** (idempotencia, A7/CA12); carrera existente (si no, `NotFoundException` `ERR_US_04`), CI libre (`ConflictException` `ERR_US_01`), correo libre (`ERR_US_02`), registro universitario libre (`ERR_US_03`); crea `Usuario` con el rol `POSTULANTE` (de `RolRepository`) y `activo = true`, y su `Postulante`. La contraseña se guarda solo como hash BCrypt. Traduce una `DataIntegrityViolationException` por carrera de concurrencia al `ERR_US_xx` del campo que corresponda.
+- `B/features/auth/service/AuthService.java`: `registrar(RegistroRequest req, String ip)` → llama a `UsuarioService`, a `BitacoraService.registrar(..., REGISTRO_USUARIO, ...)` solo cuando **creó** la cuenta, abre la sesión con `SesionService.abrir` (anotando también `INICIO_SESION`) y devuelve la `SesionResponse` y un indicador de si fue creada o ya existía.
 - Logging INFO en el service, **sin** CI, contraseñas ni tokens (usar el `codigo` del usuario).
-- Tests unitarios con mocks (`@Mock` de repositorios): registro correcto con rol Postulante; cada uno de los tres conflictos; carrera inexistente; repetido con el mismo `firebaseUid` no crea ni anota nada; el request no puede cambiar el rol.
+- Tests unitarios con mocks (`@Mock` de repositorios): registro correcto con rol Postulante; cada uno de los tres conflictos; carrera inexistente; repetido con los mismos datos no crea ni anota el registro; el hash guardado no es la contraseña; el request no puede cambiar el rol.
 
 Archivos esperados (crear): `UsuarioService.java`, `AuthService.java` y sus tests.
 
 ## Fuera de alcance (no tocar)
 
 - El controller y los códigos HTTP (`UT-CU01-BE-12`).
-- Crear la cuenta en Firebase (la crea el cliente).
-- Verificar el correo ni reglas de contraseña.
+- Verificar el correo (no hay verificación de correo en este CU).
 
 ## Resultado esperado
 

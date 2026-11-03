@@ -16,7 +16,7 @@
 
 ## Solicitud de negocio
 
-Los tres flujos del CU combinan Firebase y el backend; esa lógica y la traducción de errores deben estar en un solo lugar, probada.
+Los tres flujos del CU combinan la API y el almacén de tokens; esa lógica y la traducción de errores deben estar en un solo lugar, probada.
 
 ## Objetivo
 
@@ -24,16 +24,16 @@ Existe `authProvider` (notifier) con `registrar`, `iniciarSesion` y `cerrarSesio
 
 ## Alcance
 
-- `lib/features/auth/providers/auth_provider.dart`: `AsyncNotifier` con los tres métodos según las decisiones del README. Evita el doble envío mientras hay una acción en curso (A7). `cerrarSesion` solo cierra este dispositivo y no muestra error si la sesión ya había expirado (A10).
-- `lib/features/auth/auth_error_mapper.dart`: función pura que traduce errores de Firebase (`FirebaseAuthException.code`) y de la API (`ApiException.code`) a un mensaje y, si aplica, al campo en conflicto (`ci`, `correo`, `registroUniversitario`).
-- Tests con Firebase y `AuthService` simulados: cada fila de la tabla de errores del README; registro feliz; correo existente en Firebase con la misma contraseña → continúa; con otra → "correo ya registrado"; un `409` marca el campo y no cierra sesión; no se imprime ninguna contraseña ni token.
+- `lib/features/auth/providers/auth_provider.dart`: `AsyncNotifier` con los tres métodos según las decisiones del README. `registrar` e `iniciarSesion` llaman a `AuthService`, guardan los tokens con `authSesionProvider.abrir(...)` y devuelven el `Usuario`. Evita el doble envío mientras hay una acción en curso (A7). `cerrarSesion` hace `POST /auth/logout` con el refresh token (ignora cualquier error de red o `401`: A10), borra la sesión y solo cierra este dispositivo.
+- `lib/features/auth/auth_error_mapper.dart`: función pura que traduce un `ApiException.code` a un mensaje y, si aplica, al campo en conflicto (`ci`, `correo`, `registroUniversitario`): `ERR_AUTH_04` → credenciales incorrectas (siempre el mismo), `ERR_AUTH_05` → cuenta bloqueada (con el mensaje del backend, que dice los minutos que faltan), `ERR_AUTH_03` → cuenta desactivada, `ERR_US_01/02/03` → campo en conflicto, error de red → mensaje de conexión con reintento.
+- Tests con `AuthService` simulado: cada fila de la tabla de errores del README; registro feliz guarda los tokens; un `409` marca el campo; cerrar sesión limpia aunque el backend falle; no se imprime ninguna contraseña ni token.
 
 Archivos esperados (crear): `auth_provider.dart`, `auth_error_mapper.dart` y los tests.
 
 ## Fuera de alcance (no tocar)
 
 - Las pantallas (`UT-CU01-MOB-07` y `08`).
-- Reglas de contraseña o bloqueo (de Firebase).
+- Reglas de contraseña o bloqueo: las aplica el backend; acá solo se muestran sus mensajes.
 
 ## Resultado esperado
 

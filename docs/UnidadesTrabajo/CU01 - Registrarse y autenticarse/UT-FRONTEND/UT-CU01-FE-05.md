@@ -16,7 +16,7 @@
 
 ## Solicitud de negocio
 
-El registro, el login y el cierre de sesión combinan Firebase y el backend; esa lógica y la traducción de errores deben vivir en un solo lugar, probada.
+El registro, el login y el cierre de sesión combinan la API y el almacén de tokens; esa lógica y la traducción de errores deben vivir en un solo lugar, probada.
 
 ## Objetivo
 
@@ -24,19 +24,19 @@ Existen `useRegistro`, `useLogin` y `useCerrarSesion` (mutations) que implementa
 
 ## Alcance
 
-- `src/features/auth/api/mapearError.ts`: función pura que recibe un error de Firebase o de la API y devuelve `{ mensaje, campo? }` según la tabla de decisiones del README (credenciales → mensaje genérico, bloqueo, cuenta desactivada, red) y para `ERR_US_01`/`02`/`03` el campo en conflicto (`ci`, `correo`, `registroUniversitario`).
-- `useRegistro.ts`: flujo A del README (crear cuenta en Firebase, `POST /auth/registro`, recuperación si el correo ya existe en Firebase, no cerrar sesión ante un `409`). Evita el doble envío mientras está en curso (A7).
-- `useLogin.ts`: flujo B (login en Firebase, `POST /auth/sesion`; ante `403`/`401` de la API cierra la sesión de Firebase). Al terminar invalida/precarga `authKeys.usuarioActual` y devuelve el `Usuario` para decidir el destino.
-- `useCerrarSesion.ts`: `signOut` de Firebase, `queryClient.clear()` y navegación a `/login`; solo cierra este dispositivo (no revoca otras sesiones) y no muestra error si la sesión ya había expirado (A10).
+- `src/features/auth/api/mapearError.ts`: función pura que recibe un `ApiError` (o un error de red) y devuelve `{ mensaje, campo? }` según la tabla de decisiones del README: `ERR_AUTH_04` → mensaje genérico de credenciales; `ERR_AUTH_05` → cuenta bloqueada con el mensaje del backend (trae los minutos que faltan); `ERR_AUTH_03` → cuenta desactivada, comunicarse con la DUBSS; `ERR_US_01`/`02`/`03` → el campo en conflicto (`ci`, `correo`, `registroUniversitario`); red → error de conexión con reintento.
+- `useRegistro.ts`: flujo A del README (`POST /auth/registro`, guarda los tokens de la respuesta con `tokenStorage` y deja la sesión abierta). Evita el doble envío mientras está en curso (A7).
+- `useLogin.ts`: flujo B (`POST /auth/login`, guarda los tokens). Al terminar precarga `authKeys.usuarioActual` con el usuario de la respuesta y lo devuelve para decidir el destino.
+- `useCerrarSesion.ts`: `POST /auth/logout` con el refresh token (se ignora cualquier error de red o `401`: A10), `borrarSesion()`, `queryClient.clear()` y navegación a `/login`; solo cierra este dispositivo.
 - `src/features/auth/rutaInicioPorRol.ts`: `rutaInicioPorRol(rol)` → `/panel` para los 4 roles por ahora (rol desconocido → `/login`); es el único lugar a actualizar cuando cada rol tenga su módulo.
-- Tests unitarios con Firebase y `apiClient` simulados: cada fila de la tabla de errores; `rutaInicioPorRol` con los 4 roles y uno desconocido; registro feliz; correo existente en Firebase con la misma contraseña → continúa; con otra contraseña → "correo ya registrado"; `409` marca el campo y no hace `signOut`; ninguna contraseña ni token aparece en `console`.
+- Tests unitarios con `apiClient` simulado: cada fila de la tabla de errores; `rutaInicioPorRol` con los 4 roles y uno desconocido; registro feliz guarda tokens; `409` marca el campo; cerrar sesión limpia aunque el backend falle; ninguna contraseña ni token aparece en `console`.
 
 Archivos esperados (crear): `mapearError.ts`, `useRegistro.ts`, `useLogin.ts`, `useCerrarSesion.ts`, `rutaInicioPorRol.ts` y tests.
 
 ## Fuera de alcance (no tocar)
 
 - Las pantallas (`UT-CU01-FE-06`, `07`).
-- Reglas de contraseña o de bloqueo (de Firebase).
+- Reglas de contraseña o de bloqueo: las aplica el backend; acá solo se muestran sus mensajes.
 - Recuperar contraseña (CU15).
 
 ## Resultado esperado

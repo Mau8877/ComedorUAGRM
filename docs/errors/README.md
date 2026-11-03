@@ -44,9 +44,12 @@ docs/errors/
 
 ### Autenticación (`AUTH`)
 
-- [`ERR_AUTH_01`](auth/ERRORES_AUTH.md#err_auth_01) — Token ausente, inválido o vencido (401)
-- [`ERR_AUTH_02`](auth/ERRORES_AUTH.md#err_auth_02) — Token válido sin usuario registrado en el sistema (401)
+- [`ERR_AUTH_01`](auth/ERRORES_AUTH.md#err_auth_01) — Token de acceso ausente, inválido o vencido (401)
+- [`ERR_AUTH_02`](auth/ERRORES_AUTH.md#err_auth_02) — Token válido de un usuario que ya no existe (401)
 - [`ERR_AUTH_03`](auth/ERRORES_AUTH.md#err_auth_03) — Cuenta desactivada (403)
+- [`ERR_AUTH_04`](auth/ERRORES_AUTH.md#err_auth_04) — Correo o contraseña incorrectos (401)
+- [`ERR_AUTH_05`](auth/ERRORES_AUTH.md#err_auth_05) — Cuenta bloqueada temporalmente por intentos fallidos (403)
+- [`ERR_AUTH_06`](auth/ERRORES_AUTH.md#err_auth_06) — Refresh token inválido, vencido o revocado (401)
 
 ### Usuarios (`US`)
 
@@ -54,7 +57,7 @@ docs/errors/
 - [`ERR_US_02`](usuarios/ERRORES_USUARIOS.md#err_us_02) — El correo ya está registrado (409)
 - [`ERR_US_03`](usuarios/ERRORES_USUARIOS.md#err_us_03) — El registro universitario ya está registrado (409)
 - [`ERR_US_04`](usuarios/ERRORES_USUARIOS.md#err_us_04) — La carrera indicada no existe (404)
-- [`ERR_US_05`](usuarios/ERRORES_USUARIOS.md#err_us_05) — Registro simultáneo de la misma cuenta (409)
+- [`ERR_US_05`](usuarios/ERRORES_USUARIOS.md#err_us_05) — Retirado: registro simultáneo de la misma cuenta de Firebase (409)
 
 <!--
   A medida que se agregan módulos de negocio (platos, menú, usuarios...),

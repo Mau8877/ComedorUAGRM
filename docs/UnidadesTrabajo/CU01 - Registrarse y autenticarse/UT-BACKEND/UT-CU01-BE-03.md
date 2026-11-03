@@ -23,12 +23,12 @@ Existen los Models `Usuario` y `Postulante` y sus repositorios, con las búsqued
 
 ## Alcance
 
-- `B/features/usuarios/model/Usuario.java`: extiende `BaseModel`, `@Table(name = "usuario")`, `@AttributeOverride(... "codigo_usuario")`. Campos: `rol` (`@ManyToOne(fetch = LAZY)` a `Rol`), `ci`, `correo`, `firebaseUid`, `nombres`, `apellidos`, `activo`. `@Getter` de clase; `@Setter` solo en `activo` (lo usará CU14).
+- `B/features/usuarios/model/Usuario.java`: extiende `BaseModel`, `@Table(name = "usuario")`, `@AttributeOverride(... "codigo_usuario")`. Campos: `rol` (`@ManyToOne(fetch = LAZY)` a `Rol`), `ci`, `correo`, `passwordHash`, `nombres`, `apellidos`, `activo`, `intentosFallidos`, `bloqueosConsecutivos`, `bloqueadoHasta`. `@Getter` de clase; `@Setter` solo en `activo` (lo usará CU14) y en los tres campos del bloqueo (los maneja el inicio de sesión).
 - `B/features/usuarios/model/Postulante.java`: `@Table(name = "postulante")`, PK = FK a `usuario` con `@MapsId` (ver la nota de "tablas sin `id` propio" en `PERSISTENCIA_BD_BACKEND.md`: **no** hereda el `id` generado de `BaseModel`; en esta UT se resuelve cómo reutilizar `codigo`, `creadoEn`, `actualizadoEn` y `eliminadoEn`, por ejemplo con una segunda `@MappedSuperclass` sin `id`, y se deja documentado ahí). `@AttributeOverride` a `codigo_postulante`. Campos: `usuario`, `carrera` (`@ManyToOne` LAZY), `registroUniversitario`, `telefono`.
-- `UsuarioRepository`: `findByFirebaseUid(String)`, `existsByCi(String)`, `existsByCorreo(String)`.
+- `UsuarioRepository`: `findByCorreo(String)`, `findByCodigo(UUID)`, `existsByCi(String)`, `existsByCorreo(String)`.
 - `PostulanteRepository`: `existsByRegistroUniversitario(String)`.
 - Sin `@ToString`/`@EqualsAndHashCode` de Lombok.
-- Tests (con Docker, patrón de `TESTING_BACKEND.md`): guardar un `Usuario` + `Postulante` y buscarlos; duplicar `ci` lanza `DataIntegrityViolationException`; un `Usuario` con `eliminadoEn` no se encuentra por `findByFirebaseUid`.
+- Tests (con Docker, patrón de `TESTING_BACKEND.md`): guardar un `Usuario` + `Postulante` y buscarlos; duplicar `ci` lanza `DataIntegrityViolationException`; un `Usuario` con `eliminadoEn` no se encuentra por `findByCorreo`.
 
 Archivos esperados (crear): `Usuario.java`, `Postulante.java`, `UsuarioRepository.java`, `PostulanteRepository.java`, la superclase sin `id` y los tests.
 
