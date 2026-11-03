@@ -1,3 +1,5 @@
+import type { InternalAxiosRequestConfig } from 'axios'
+
 import { createBaseApi } from './createBaseApi'
 
 // Sobre estándar de todas las respuestas del backend -- ver
@@ -54,13 +56,23 @@ export const apiClient = createBaseApi({
 type AuthTokenProvider = () => Promise<string | null>
 
 let authTokenProvider: AuthTokenProvider | null = null
-let unauthorizedHandler: (() => void) | null = null
+/**
+ * Se llama ante un 401 de una petición. Devuelve `true` si logró renovar la
+ * sesión (entonces la petición original se reintenta una sola vez) y
+ * `false` si no hay nada que hacer (entonces el error sigue su camino).
+ */
+type UnauthorizedHandler = (config: InternalAxiosRequestConfig) => Promise<boolean>
+
+let unauthorizedHandler: UnauthorizedHandler | null = null
+
+// Marca de una petición ya reintentada tras renovar la sesión: evita reintentar en bucle.
+type ReintentableConfig = InternalAxiosRequestConfig & { _reintentada?: boolean }
 
 export function setAuthTokenProvider(provider: AuthTokenProvider | null) {
   authTokenProvider = provider
 }
 
-export function setUnauthorizedHandler(handler: (() => void) | null) {
+export function setUnauthorizedHandler(handler: UnauthorizedHandler | null) {
   unauthorizedHandler = handler
 }
 
@@ -78,9 +90,13 @@ apiClient.interceptors.response.use(
     response.data = envelope.meta ? { data: envelope.data, meta: envelope.meta } : envelope.data
     return response
   },
-  (error) => {
-    if (error.response?.status === 401) {
-      unauthorizedHandler?.()
+  async (error) => {
+    const config = error.config as ReintentableConfig | undefined
+    if (error.response?.status === 401 && unauthorizedHandler && config && !config._reintentada) {
+      config._reintentada = true
+      if (await unauthorizedHandler(config)) {
+        return apiClient.request(config)
+      }
     }
     const envelope = error.response?.data as ApiEnvelope<unknown> | undefined
     if (envelope?.error) {

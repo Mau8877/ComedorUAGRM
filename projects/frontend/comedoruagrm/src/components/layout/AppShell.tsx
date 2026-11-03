@@ -12,6 +12,8 @@ interface AppShellProps {
   user: LayoutUser
   /** Ver AppHeaderProps. */
   notifications?: NotificationsController
+  /** Ver AppHeaderProps. */
+  onCerrarSesion?: () => void
   children: ReactNode
 }
 
@@ -26,11 +28,17 @@ export function AppShell({
   activeHref,
   user,
   notifications,
+  onCerrarSesion,
   children,
 }: AppShellProps) {
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
-      <AppHeader appName={appName} user={user} notifications={notifications} />
+      <AppHeader
+        appName={appName}
+        user={user}
+        notifications={notifications}
+        onCerrarSesion={onCerrarSesion}
+      />
 
       {/* * p-4 acá es lo que crea el espacio real entre el sidebar y el
           header -- el sidebar es una tarjeta flotante (bordes redondeados

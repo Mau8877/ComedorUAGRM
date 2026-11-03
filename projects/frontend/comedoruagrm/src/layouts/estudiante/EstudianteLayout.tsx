@@ -7,6 +7,7 @@ export function EstudianteLayout({
   title,
   user,
   notifications,
+  onCerrarSesion,
   activeHref,
   children,
 }: EstudianteLayoutProps) {
@@ -18,6 +19,7 @@ export function EstudianteLayout({
       activeHref={activeHref}
       user={user}
       notifications={notifications}
+      onCerrarSesion={onCerrarSesion}
     >
       {children}
     </AppShell>

@@ -70,16 +70,51 @@ describe('apiClient', () => {
       timestamp: '',
       error: 'ERR_SYS_03',
     })
-    const alExpirar = vi.fn()
+    const alExpirar = vi.fn().mockResolvedValue(false)
     setUnauthorizedHandler(alExpirar)
 
     await expect(apiClient.get('/x')).rejects.toBeInstanceOf(ApiError)
     expect(alExpirar).toHaveBeenCalledTimes(1)
   })
 
+  it('si el manejador logra renovar la sesión, reintenta la petición una sola vez', async () => {
+    let llamadas = 0
+    apiClient.defaults.adapter = async (config) => {
+      llamadas += 1
+      if (llamadas === 1) {
+        const res = respuesta(config, 401, { status: 'failed', data: null, message: '', timestamp: '', error: 'ERR_AUTH_01' })
+        throw new AxiosError('fallo', '401', config, null, res)
+      }
+      return respuesta(config, 200, { status: 'success', data: { ok: true }, message: '', timestamp: '' })
+    }
+    const alExpirar = vi.fn().mockResolvedValue(true)
+    setUnauthorizedHandler(alExpirar)
+
+    const res = await apiClient.get('/x')
+
+    expect(res.data).toEqual({ ok: true })
+    expect(llamadas).toBe(2)
+    expect(alExpirar).toHaveBeenCalledTimes(1)
+  })
+
+  it('si el reintento también da 401, no vuelve a renovar ni reintenta en bucle', async () => {
+    let llamadas = 0
+    apiClient.defaults.adapter = async (config) => {
+      llamadas += 1
+      const res = respuesta(config, 401, { status: 'failed', data: null, message: '', timestamp: '', error: 'ERR_AUTH_01' })
+      throw new AxiosError('fallo', '401', config, null, res)
+    }
+    const alExpirar = vi.fn().mockResolvedValue(true)
+    setUnauthorizedHandler(alExpirar)
+
+    await expect(apiClient.get('/x')).rejects.toBeInstanceOf(ApiError)
+    expect(llamadas).toBe(2)
+    expect(alExpirar).toHaveBeenCalledTimes(1)
+  })
+
   it('un error que no es 401 no dispara el manejador de sesión', async () => {
     usarAdapter(404, { status: 'failed', data: null, message: 'No existe', timestamp: '', error: 'ERR_XX_01' })
-    const alExpirar = vi.fn()
+    const alExpirar = vi.fn().mockResolvedValue(false)
     setUnauthorizedHandler(alExpirar)
 
     await expect(apiClient.get('/x')).rejects.toMatchObject({ code: 'ERR_XX_01' })

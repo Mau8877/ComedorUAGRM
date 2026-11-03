@@ -7,6 +7,8 @@ export interface AdminLayoutProps {
   user: LayoutUser
   /** Ver AppHeaderProps. */
   notifications?: NotificationsController
+  /** Ver AppHeaderProps. */
+  onCerrarSesion?: () => void
   /** Solo para pantallas de prueba: fuerza qué ítem se ve activo. */
   activeHref?: string
   children: ReactNode
