@@ -38,10 +38,11 @@ reimplementa un `if` de sesión al principio de cada pantalla.
 El `redirect` necesita leer si hay sesión válida — esto se resuelve contra
 el provider de autenticación de `features/auth/providers/` (ver
 [ESTADO_GLOBAL_MOBILE.md](ESTADO_GLOBAL_MOBILE.md)), no leyendo
-el SDK de Firebase directo desde el router. El estado de sesión es el de
-**Firebase Auth** (el SDK persiste la sesión por su cuenta; no hay
-refresh token propio que guardar en `flutter_secure_storage`). El router
-depende del provider de auth, no al revés.
+el almacenamiento de tokens directo desde el router. La sesión es el JWT
+propio del backend: el provider de auth carga al arrancar el refresh token
+guardado en `flutter_secure_storage` y lo canjea por un token de acceso
+(`POST /api/v1/auth/refresh`); si no hay refresh token o ya no sirve, no hay
+sesión. El router depende del provider de auth, no al revés.
 
 ## Estructura
 

@@ -22,7 +22,7 @@ en el mismo cambio.
 **Antes de crear un Model/tabla nuevo** (o de diseñar la Unidad de Trabajo
 que lo hace, ver [UNIDADES_DE_TRABAJO.md](../UNIDADES_DE_TRABAJO.md)) se
 revisa la entidad en ese diagrama: sus columnas, tipos, relaciones y
-nombres exactos (`ci` y no `cedula`, `firebase_uid`, `eliminado_en`, etc.)
+nombres exactos (`ci` y no `cedula`, `password_hash`, `eliminado_en`, etc.)
 son los que se implementan, no una versión "razonable" inventada a partir
 del nombre de la entidad o del caso de uso.
 
@@ -160,9 +160,10 @@ una decisión deliberada para evitar conflictos de merge, no un descuido.
 - **Archivos**: los binarios viven en **Firebase Storage**; la base solo
   guarda la ruta (`storage_path`), el tipo (`mime_type`) y el tamaño
   (`tamano_bytes`). Nunca se guarda un binario en PostgreSQL.
-- **Contraseñas**: no existen en la base de datos — las gestiona Firebase
-  Auth; el enlace es `usuario.firebase_uid` (ver
-  [SEGURIDAD_AUTH_BACKEND.md](SEGURIDAD_AUTH_BACKEND.md)).
+- **Contraseñas**: solo existe su hash BCrypt (`usuario.password_hash`),
+  nunca la contraseña en texto plano. Los refresh tokens tampoco se guardan:
+  la tabla `sesion` guarda solo su hash SHA-256 (`token_hash`). Ver
+  [SEGURIDAD_AUTH_BACKEND.md](SEGURIDAD_AUTH_BACKEND.md).
 
 ## Claves foráneas e índices
 

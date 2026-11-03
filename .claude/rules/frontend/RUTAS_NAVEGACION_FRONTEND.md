@@ -70,7 +70,7 @@ src/routes/
 
 `_authenticated.tsx` usa el hook `beforeLoad` de TanStack Router para
 verificar sesión antes de renderizar cualquier ruta hija, y hace
-`throw redirect({ to: '/login' })` si no hay sesión de Firebase. **Cualquier ruta
+`throw redirect({ to: '/login' })` si no hay sesión (ni token de acceso ni refresh token). **Cualquier ruta
 nueva que necesite autenticación se agrega dentro de `_authenticated/`** —
 no se copia la validación de sesión adentro de cada ruta nueva.
 
@@ -91,10 +91,11 @@ no se copia la validación de sesión adentro de cada ruta nueva.
 
 Distintos layouts según el rol del usuario autenticado (ej. layout admin vs.
 layout estudiante, ver [SEGURIDAD_AUTH_BACKEND.md](../backend/SEGURIDAD_AUTH_BACKEND.md)
-para el esquema de roles del lado del backend). La sesión la maneja el SDK
-de **Firebase Auth** (no hay login propio del backend): el guard consulta
-el estado de Firebase, y el rol y los datos del usuario salen de la
-respuesta del backend (`usuario.rol`), no del token.
+para el esquema de roles del lado del backend). La sesión es el JWT
+propio del backend (`POST /api/v1/auth/login`, ver
+[SEGURIDAD_AUTH_BACKEND.md](../backend/SEGURIDAD_AUTH_BACKEND.md)): el guard
+consulta si hay sesión en el cliente, y el rol y los datos del usuario salen
+de la respuesta del backend (`usuario.rol`), no del token (que no lleva rol).
 
 > **Nombre del layout vs. valor del rol en el backend.** Los roles del
 > backend son `POSTULANTE`, `ADMINISTRADOR_DUBSS`, `DIRECTIVO` y

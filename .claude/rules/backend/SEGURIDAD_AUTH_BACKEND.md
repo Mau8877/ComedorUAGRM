@@ -1,81 +1,131 @@
 # Seguridad y Autenticación — Backend
 
-## Modelo: Firebase Auth + backend como servidor de recursos
+## Modelo: JWT propio (access token + refresh token)
 
-La autenticación **no la implementa este backend**: la hace **Firebase
-Auth** (stack definido en la documentación de grado: *Spring Boot (REST,
-JWT, HTTPS)* + *Firebase: Auth, FCM, Storage*). Firebase se encarga de las
-credenciales, el registro de la cuenta, la verificación de correo, la
-recuperación de contraseña, el bloqueo por intentos fallidos y la emisión y
-renovación de los tokens. El backend solo **verifica** el token que llega y
-**autoriza** según los datos del dominio.
+La autenticación **la implementa este backend**: guarda las contraseñas
+(solo como hash BCrypt), verifica las credenciales, emite los tokens y los
+verifica en cada request. **No se usa Firebase Auth** (Firebase queda
+únicamente para notificaciones push desde mobile, ver
+[ARQUITECTURA_BACKEND.md](../ARQUITECTURA_BACKEND.md#módulos-del-dominio)).
 
-Por eso este backend **no** tiene: endpoint de login propio, emisión de
-JWT propios, refresh tokens, cookies de sesión, `BCryptPasswordEncoder` ni
-contraseñas en la base de datos (`usuario` no tiene `password_hash`; solo
-`firebase_uid`, ver [PERSISTENCIA_BD_BACKEND.md](PERSISTENCIA_BD_BACKEND.md)).
+| Pieza | Qué es | Dónde vive |
+| --- | --- | --- |
+| **Token de acceso** | JWT firmado con HS256 (`JWT_SECRET`), vida corta (15 min por default). Lleva el `codigo` público del usuario como `sub`, y nada más (ni rol ni correo). Viaja en `Authorization: Bearer`. | `security/TokenService`, `config/AutenticacionConfig` |
+| **Refresh token** | Cadena aleatoria opaca de 256 bits (no es un JWT), vida larga (7 días por default). Sirve para renovar el token de acceso. Uno por dispositivo/sesión. | tabla `sesion` (solo su hash SHA-256), `features/auth/service/SesionService` |
+| **Contraseña** | Hash BCrypt en `usuario.password_hash`. Nunca en texto plano, nunca en un DTO de salida, nunca en un log. | `features/usuarios/` |
 
-> **Estado actual.** `SecurityConfig.java` ya verifica el ID token de
-> Firebase (resource server, ver el paso 3 de abajo) y la sesión es
-> `STATELESS`: no existe el usuario en memoria con contraseña aleatoria que
-> traía Spring Boot por defecto. CSRF sigue deshabilitado a propósito: no
-> hay cookies de sesión, la API es stateless y el token viaja en el header
-> `Authorization`. El `projectId` se configura con `FIREBASE_PROJECT_ID`
-> (`app.firebase.project-id`); sin él el backend no arranca.
+El backend usa el **resource server de Spring Security**
+(`spring-boot-starter-security-oauth2-resource-server`) para verificar la
+firma, el emisor (`JWT_ISSUER`) y la expiración del token de acceso.
+
+- `JWT_SECRET` es **obligatorio y de al menos 32 caracteres**: si falta o es
+  corto, el backend no arranca (`AutenticacionConfig`). Nunca se versiona
+  (solo vive en el `.env`); cambiarlo invalida todos los tokens de acceso
+  emitidos.
+- Tiempos configurables: `JWT_ACCESS_TTL_MINUTES` (15) y
+  `JWT_REFRESH_TTL_DAYS` (7).
+
+## Endpoints de autenticación
+
+Todos bajo `/api/v1/auth`. Los cuatro primeros son **públicos** (no exigen
+token de acceso; ver [Endpoints públicos](#endpoints-públicos)).
+
+| Método y ruta | Qué hace | Respuesta |
+| --- | --- | --- |
+| `POST /registro` | Crea la cuenta del Postulante y abre su sesión (CU01, flujo A) | `201` (`200` si la misma petición ya se había procesado) con la sesión |
+| `POST /login` | Verifica correo y contraseña y abre la sesión (flujo B) | `200` con la sesión |
+| `POST /refresh` | Canjea un refresh token vigente por un par nuevo; el usado queda revocado (rotación) | `200` con la sesión |
+| `POST /logout` | Revoca el refresh token recibido: cierra **solo** la sesión de ese dispositivo (flujo C) | `200`, `data: null`; idempotente (un token desconocido o ya cerrado no es error) |
+| `GET /usuario-actual` | El usuario del token de acceso, para recuperar la sesión al recargar | `200` con el usuario |
+
+La "sesión" que devuelven `registro`, `login` y `refresh` es:
+
+```json
+{
+  "accessToken": "eyJ...",
+  "refreshToken": "9d3f...",
+  "tokenType": "Bearer",
+  "expiresIn": 900,
+  "usuario": { "codigo": "...", "nombres": "...", "apellidos": "...", "correo": "...", "rol": "POSTULANTE" }
+}
+```
 
 ## Flujo de una request autenticada
 
-1. El cliente (web React o app Flutter) inicia sesión con el **SDK de
-   Firebase** (correo + contraseña) y obtiene un **ID token** (JWT firmado
-   por Google, de vida corta). El SDK lo renueva solo; el cliente nunca
-   maneja el refresh token a mano ni lo copia a otro almacenamiento.
-2. En cada request a la API: `Authorization: Bearer <ID token>`.
-3. El backend valida el token en un filtro de seguridad: **firma, `iss`
-   (`https://securetoken.google.com/{projectId}`), `aud` (el projectId) y
-   expiración**. Lo hace el **resource server de Spring Security**
-   (`spring-boot-starter-security-oauth2-resource-server`) contra las
-   claves públicas de Firebase (`FirebaseJwtConfig`), y no el Admin SDK de
-   Firebase, porque para verificar no hace falta una credencial de
-   servicio. El Admin SDK se agregará cuando haya que crear cuentas en
-   Firebase desde el backend (CU14).
-4. Con el `uid` del token (`sub`) busca el `usuario` por `firebase_uid`,
-   comprueba que esté **activo y no eliminado** (`usuario.activo`,
-   `eliminado_en IS NULL`) y arma el `Authentication` con las `authorities`
-   `ROLE_{rol.nombre}`.
-5. Token válido pero **sin `usuario`** con ese `firebase_uid` →
-   `UnauthorizedException` (`401`). Usuario existente pero **inactivo** →
-   `ForbiddenException` (`403`). Token ausente, mal firmado o vencido →
-   `401`.
+1. El cliente inicia sesión (o se registra) y recibe `accessToken` y
+   `refreshToken`.
+2. En cada request: `Authorization: Bearer <accessToken>`.
+3. El resource server valida firma, emisor y expiración. Token ausente,
+   mal firmado o vencido → `401` `ERR_AUTH_01`.
+4. `UsuarioActivoFilter` busca el `usuario` por el `sub` (su `codigo`),
+   comprueba que esté **activo y no eliminado** y arma el `Authentication`
+   con las `authorities` `ROLE_{rol.nombre}`. Usuario inexistente → `401`
+   `ERR_AUTH_02`; desactivado → `403` `ERR_AUTH_03`.
+5. Con el token de acceso vencido, el cliente llama a `POST /refresh` con su
+   refresh token y reintenta. Si el refresh token también venció o fue
+   revocado → `401` `ERR_AUTH_06` y el cliente lleva al usuario al login.
 
 - El `activo` se consulta en cada request (no solo al iniciar sesión): así
-  desactivar a un usuario (CU-14) surte efecto de inmediato aunque su ID
-  token siga vigente unos minutos. Si el costo se vuelve relevante, se
-  cachea en Redis con TTL corto.
-- **El rol sale de la base de datos**, no del token: el ID token de Firebase
-  no lleva el rol y no se usan *custom claims* salvo que aparezca un
-  requisito concreto que la consulta a la base no cubra.
-- **Cerrar sesión** es del cliente (`signOut` del SDK); el backend es
-  stateless y no guarda sesiones. No hay lista de tokens revocados.
-- El `firebase_uid` **siempre** sale del token verificado, nunca de un
+  desactivar a un usuario (CU-14) surte efecto de inmediato aunque su token
+  de acceso siga vigente unos minutos, y `refresh` también lo niega. Si el
+  costo se vuelve relevante, se cachea en Redis con TTL corto.
+- **El rol sale de la base de datos**, no del token: el token no lleva
+  rol, así un cambio de rol también surte efecto de inmediato.
+- Una **ruta pública ignora el header `Authorization`** (`RutasPublicas` +
+  el `BearerTokenResolver` de `SecurityConfig`): un token vencido que el
+  cliente sigue mandando no debe hacer fallar el login con `401`.
+- El `codigo` del usuario **siempre** sale del token verificado, nunca de un
   campo del body o de la URL.
+- **Rotación del refresh token:** cada `refresh` revoca el token usado y
+  emite uno nuevo. El refresh token se guarda en la base solo como hash
+  SHA-256 (una filtración de la tabla no permite abrir sesiones).
+- Las sesiones vencidas o revocadas quedan en la tabla `sesion`; su limpieza
+  periódica no está implementada todavía.
 
-### Registro (CU-01)
+### Registro (CU01, flujo A)
 
-Firebase crea la cuenta; luego el cliente llama al backend con el ID token
-recién obtenido para crear el `usuario` del dominio (y su `postulante`):
+- Público: no exige token. El rol inicial es siempre `POSTULANTE`; el
+  cliente no elige su rol (si lo manda, se ignora).
+- La contraseña tiene 6 a 72 caracteres (72 es el máximo que procesa BCrypt)
+  y debe coincidir con su confirmación; el correo se normaliza a minúsculas
+  y sin espacios antes de guardarlo y de compararlo.
+- `ci`, `correo` y `registro_universitario` únicos → `ConflictException`
+  (`409`) con su código de error catalogado (ver
+  [EXCEPCIONES_BACKEND.md](EXCEPCIONES_BACKEND.md)).
+- **Idempotente (RNF-03):** repetir la misma petición (mismo correo, CI y
+  contraseña) devuelve la cuenta existente con `200` y abre una sesión
+  nueva, sin duplicar el `usuario`.
 
-- El endpoint de registro exige un token de Firebase **válido**, pero no
-  que ya exista un `usuario` (es el único que lo permite). El rol inicial es
-  `POSTULANTE`; el cliente no elige su rol.
-- `ci` y `correo` únicos → `ConflictException` (`409`) con su código de
-  error catalogado (ver [EXCEPCIONES_BACKEND.md](EXCEPCIONES_BACKEND.md)).
-- Si falla la creación en la base después de crear la cuenta en Firebase,
-  la cuenta de Firebase queda huérfana: el registro debe poder reintentarse
-  con el mismo token sin duplicar el `usuario` (idempotente por
-  `firebase_uid`).
-- Recuperar contraseña y verificar correo (CU-15 / CU-01) los resuelve
-  Firebase; en la base solo se reflejan datos de contacto (`telefono`,
-  `correo`). El `ci` no es modificable (RF-10).
+### Inicio de sesión y bloqueo por intentos fallidos (CU01, flujo B)
+
+Orden de las verificaciones en `UsuarioService.validarCredenciales`:
+
+1. **Cuenta bloqueada** → `403` `ERR_AUTH_05`, aunque la contraseña sea
+   correcta (el mensaje dice cuántos minutos faltan).
+2. **Contraseña incorrecta o correo inexistente** → `401` `ERR_AUTH_04` con
+   **el mismo mensaje en ambos casos** (no se revela cuál falló). Cuando el
+   correo no existe se compara igual contra un hash de relleno para que la
+   respuesta tarde lo mismo.
+3. **Cuenta desactivada** → `403` `ERR_AUTH_03`.
+
+El bloqueo lo implementa este backend (columnas `intentos_fallidos`,
+`bloqueos_consecutivos`, `bloqueado_hasta` de `usuario`):
+
+- A los **5 intentos fallidos consecutivos** la cuenta se bloquea; el
+  contador de intentos vuelve a 0.
+- La duración crece con cada bloqueo seguido: **5 min, 15 min, 1 h, 24 h**
+  (la última se repite). ⚠️ La escala exacta está **por definir con la
+  DUBSS**; hoy es una constante en `UsuarioService.DURACIONES_BLOQUEO`.
+- Un inicio de sesión correcto reinicia los intentos y la escalada.
+- El conteo debe guardarse aunque el login termine en error: por eso
+  `AuthService.iniciarSesion` y `UsuarioService.validarCredenciales` usan
+  `@Transactional(noRollbackFor = BusinessException.class)`.
+- Todo inicio de sesión exitoso (incluido el que sigue a un registro) queda
+  anotado en la bitácora (`INICIO_SESION`).
+
+- Recuperar contraseña (CU-15) y verificar el correo no están implementados
+  todavía; cuando se hagan, las define su propio caso de uso. El `ci` no es
+  modificable (RF-10).
 
 ## Roles y permisos
 
@@ -115,9 +165,8 @@ public ResponseEntity<ApiResponse<List<PostulacionResponse>>> misPostulaciones(@
 }
 ```
 
-`UUID`, no `Long` ni el `uid` de Firebase — es el `codigo_usuario` público
-del usuario (resuelto a partir del `firebase_uid` del token), nunca el `id`
-interno de la tabla `usuario`.
+`UUID`, no `Long` — es el `codigo_usuario` público del usuario (el `sub`
+del token de acceso), nunca el `id` interno de la tabla `usuario`.
 
 La anotación `@CurrentUserId` (y su `HandlerMethodArgumentResolver`) se
 define una sola vez en `security/` — ver
@@ -189,12 +238,18 @@ intentar de más).
 
 Quedan sin autenticación los de infraestructura ya definidos en
 `SecurityConfig` (`/health`, `/health/**`, `/prometheus`, `/swagger-ui/**`,
-`/v3/api-docs/**`) y **una única excepción de negocio: `GET /api/v1/carreras`**.
-El formulario de registro necesita mostrar la lista de carreras **antes** de
-que la persona tenga cuenta ni token; es solo lectura de un catálogo, sin
-datos personales. **Ningún otro endpoint de negocio es público**: incluso el
-registro exige un token de Firebase válido (ver arriba), porque el login
-y la creación de la cuenta ocurren en Firebase, no acá. Cualquier otro
-endpoint nuevo es privado por default — si necesita ser público, es una
-decisión explícita (como la de las carreras: documentada acá con su motivo),
-no un olvido de agregar la regla en `SecurityConfig`.
+`/v3/api-docs/**`) y estas excepciones de negocio, todas listadas en
+`security/RutasPublicas`:
+
+| Endpoint | Motivo |
+| --- | --- |
+| `POST /api/v1/auth/registro` | La persona todavía no tiene cuenta |
+| `POST /api/v1/auth/login` | La persona todavía no tiene sesión |
+| `POST /api/v1/auth/refresh` | Se llama justamente cuando el token de acceso ya venció; se autentica con el refresh token del body |
+| `POST /api/v1/auth/logout` | Se autentica con el refresh token del body; cerrar una sesión ya vencida no debe dar error (CU01, A10) |
+| `GET /api/v1/carreras` | El formulario de registro necesita la lista **antes** de que exista cuenta; es solo lectura de un catálogo, sin datos personales |
+
+**Ningún otro endpoint de negocio es público.** Cualquier endpoint nuevo es
+privado por default — si necesita ser público, es una decisión explícita
+(documentada acá con su motivo y agregada a `RutasPublicas`), no un olvido
+de agregar la regla en `SecurityConfig`.

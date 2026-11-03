@@ -23,7 +23,7 @@ capa** y cómo fluye una request a través de ellas:
 com.comedoruagrm.backend
 ├── common/          # Compartido entre 2+ módulos (nunca "por las dudas")
 ├── config/          # Beans de configuración de Spring (SecurityConfig, etc.)
-├── security/        # verificación del ID token de Firebase, RateLimitFilter, @CurrentUserId
+├── security/        # JWT propio (TokenService), filtro de usuario activo, RateLimitFilter, @CurrentUserId
 └── features/
     └── {modulo}/
         ├── controller/  # Entrada HTTP
@@ -86,7 +86,7 @@ detalle completo:
 | ------------------------------------------------------ | ----------------------------------------- | ---------------------------------------------------------------- |
 | Sobre de respuesta (`ApiResponse`, `PageMeta`)         | `common/response/`                        | [RESPONSES_BACKEND.md](backend/RESPONSES_BACKEND.md)             |
 | Jerarquía de excepciones + `GlobalExceptionHandler`    | `common/exception/`                       | [EXCEPCIONES_BACKEND.md](backend/EXCEPCIONES_BACKEND.md)         |
-| Autenticación (ID token de Firebase), `RateLimitFilter`, `@CurrentUserId` | `security/`                               | [SEGURIDAD_AUTH_BACKEND.md](backend/SEGURIDAD_AUTH_BACKEND.md)   |
+| Autenticación (JWT propio), `RateLimitFilter`, `@CurrentUserId` | `security/`                               | [SEGURIDAD_AUTH_BACKEND.md](backend/SEGURIDAD_AUTH_BACKEND.md)   |
 | `SecurityConfig` y demás config de Spring              | `config/`                                 | —                                                                |
 | Convención de rutas, verbos HTTP, paginación           | (no es código, es contrato)               | [ENDPOINTS_BACKEND.md](backend/ENDPOINTS_BACKEND.md)             |
 | Logging estructurado                                   | (transversal a `service/` de cada módulo) | [LOGGING_BACKEND.md](backend/LOGGING_BACKEND.md)                 |
@@ -122,8 +122,8 @@ Cada paquete de análisis es el punto de partida para agrupar los `features/`:
 - El nombre de cada carpeta `features/{modulo}/` se fija al crear el primer
   módulo; los paquetes son una guía de agrupación, no un requisito de que
   haya exactamente seis carpetas.
-- **Integraciones externas** que el backend consume: Firebase (Auth, FCM
-  para push, Storage para archivos) y el **módulo de IA en Python**
+- **Integraciones externas** que el backend consume: Firebase (FCM
+  para push y Storage para archivos; la autenticación NO es de Firebase) y el **módulo de IA en Python**
   (consumido por API para calcular el puntaje de vulnerabilidad). La
   estructura de código de esas integraciones se define al implementar la
   primera; mientras tanto, regla de dependencia: el `service` de un módulo

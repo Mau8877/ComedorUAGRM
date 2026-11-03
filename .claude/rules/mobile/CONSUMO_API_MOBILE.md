@@ -26,10 +26,14 @@ Un `Interceptor` desempaqueta el sobre estándar del backend
   código de negocio lo lee de `dioException.error as ApiException`.
 
 Otro `Interceptor` agrega a cada request el header
-`Authorization: Bearer <ID token de Firebase>` (obtenido del SDK de Firebase
-con `getIdToken()`, que lo renueva solo). Un `401` significa "sin sesión
-válida": se cierra la sesión de Firebase y el router redirige al inicio de
-sesión. Ver [SEGURIDAD_AUTH_BACKEND.md](../backend/SEGURIDAD_AUTH_BACKEND.md).
+`Authorization: Bearer <token de acceso>` (el JWT que devuelve
+`/api/v1/auth/login`). Ante un `401` intenta renovarlo una sola vez con
+`POST /api/v1/auth/refresh` (una renovación a la vez) y reintenta; si el
+refresh token tampoco sirve, borra la sesión y el router redirige al inicio de
+sesión. Los endpoints públicos de `/auth` (login, registro, refresh) no disparan
+esa renovación. El refresh token se guarda con `flutter_secure_storage`; el
+token de acceso, en memoria. Ver
+[SEGURIDAD_AUTH_BACKEND.md](../backend/SEGURIDAD_AUTH_BACKEND.md).
 
 `ENABLE_API_LOGS` (`.env`, `true`/`false`) prende un `LogInterceptor` de
 `dio` — mismo criterio que `VITE_ENABLE_API_LOGS` del frontend, apagado por

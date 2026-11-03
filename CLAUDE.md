@@ -38,8 +38,10 @@ cumplir. Antes de implementar un caso de uso hay que mirar sus diagramas
 (ver [CASOS_DE_USO.md](rules/CASOS_DE_USO.md)); el modelo de datos tiene su
 transcripción versionada en `docs/DiagramaConceptual.mermaid` (ver
 [PERSISTENCIA_BD_BACKEND.md](rules/backend/PERSISTENCIA_BD_BACKEND.md)). La
-autenticación la resuelve **Firebase Auth** (el backend solo verifica el
-token; ver [SEGURIDAD_AUTH_BACKEND.md](rules/backend/SEGURIDAD_AUTH_BACKEND.md)).
+autenticación la resuelve el propio backend con **JWT** (token de acceso +
+refresh token, contraseñas con BCrypt; ver
+[SEGURIDAD_AUTH_BACKEND.md](rules/backend/SEGURIDAD_AUTH_BACKEND.md)).
+Firebase se reserva para las notificaciones push (FCM) de mobile.
 Si algo en el código contradice esa documentación, se avisa en vez de
 elegir en silencio.
 

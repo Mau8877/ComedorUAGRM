@@ -64,11 +64,12 @@ de sumar una excepción más a la lista de 5.
 > **antes** de usarla, no se fuerza el caso dentro de una existente que no
 > le corresponde semánticamente.
 >
-> No hay `LockedException` (`423`): el bloqueo de una cuenta por intentos
-> fallidos de inicio de sesión lo maneja **Firebase Auth**, no este backend
-> (ver [SEGURIDAD_AUTH_BACKEND.md](SEGURIDAD_AUTH_BACKEND.md)). Si más
-> adelante aparece un bloqueo temporal propio del dominio, se agrega la
-> excepción a este listado **antes** de usarla.
+> No hay `LockedException` (`423`): el bloqueo temporal de una cuenta por
+> intentos fallidos de inicio de sesión lo implementa este backend y responde
+> `403` con `ForbiddenException` (`ERR_AUTH_05`, ver
+> [SEGURIDAD_AUTH_BACKEND.md](SEGURIDAD_AUTH_BACKEND.md)). Si algún día hace
+> falta distinguirlo con otro código HTTP, se agrega la excepción a este
+> listado **antes** de usarla.
 
 `500` no tiene una excepción de negocio propia: es el resultado de **no**
 mapear la excepción — un `Exception`/`RuntimeException` no controlada, o una

@@ -17,7 +17,7 @@ com.comedoruagrm.backend
 │   ├── response/        # ApiResponse, PageMeta (ver RESPONSES_BACKEND.md)
 │   └── util/            # Utilidades genéricas sin estado
 ├── config/               # Configuración de Spring (SecurityConfig, etc.)
-├── security/             # verificación del ID token de Firebase, RateLimitFilter, @CurrentUserId
+├── security/             # JWT propio (TokenService), filtro de usuario activo, RateLimitFilter, @CurrentUserId
 └── features/
     └── {modulo}/         # ej. usuarios/, auth/, pedidos/
         ├── controller/
