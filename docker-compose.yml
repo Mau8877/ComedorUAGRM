@@ -122,6 +122,8 @@ services:
       - MINIO_URL=http://comedor-uagrm-minio:9000
       # Secreto con el que el backend firma los JWT (HS256, mínimo 32 caracteres)
       - JWT_SECRET=${JWT_SECRET}
+      # Cookies de sesión del cliente web: true solo detrás de HTTPS
+      - COOKIE_SECURE=${COOKIE_SECURE:-false}
     depends_on:
       postgres:
         condition: service_healthy
