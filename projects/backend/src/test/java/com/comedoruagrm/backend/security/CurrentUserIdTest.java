@@ -56,9 +56,9 @@ class CurrentUserIdTest {
     @Test
     void currentUserId_conUsuarioActivo_recibeElCodigoDelUsuario() throws Exception {
         UUID codigo = UUID.randomUUID();
-        when(provider.buscarPorFirebaseUid("uid-1")).thenReturn(Optional.of(new DatosUsuario(codigo, "POSTULANTE", true)));
+        when(provider.buscarPorCodigo(codigo)).thenReturn(Optional.of(new DatosUsuario(codigo, "POSTULANTE", true)));
 
-        mockMvc.perform(get("/api/v1/test/current-user-id").with(jwt().jwt(j -> j.subject("uid-1"))))
+        mockMvc.perform(get("/api/v1/test/current-user-id").with(jwt().jwt(j -> j.subject(codigo.toString()))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("success"))
                 .andExpect(jsonPath("$.data").value(codigo.toString()));
@@ -73,29 +73,32 @@ class CurrentUserIdTest {
 
     @Test
     void currentUserId_conTokenSinCuenta_devuelve401ErrAuth02() throws Exception {
-        when(provider.buscarPorFirebaseUid("uid-sin-cuenta")).thenReturn(Optional.empty());
+        UUID codigo = UUID.randomUUID();
+        when(provider.buscarPorCodigo(codigo)).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/api/v1/test/current-user-id").with(jwt().jwt(j -> j.subject("uid-sin-cuenta"))))
+        mockMvc.perform(get("/api/v1/test/current-user-id").with(jwt().jwt(j -> j.subject(codigo.toString()))))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.error").value("ERR_AUTH_02"));
     }
 
     @Test
     void currentUserId_conCuentaDesactivada_devuelve403ErrAuth03() throws Exception {
-        when(provider.buscarPorFirebaseUid("uid-baja"))
-                .thenReturn(Optional.of(new DatosUsuario(UUID.randomUUID(), "POSTULANTE", false)));
+        UUID codigo = UUID.randomUUID();
+        when(provider.buscarPorCodigo(codigo))
+                .thenReturn(Optional.of(new DatosUsuario(codigo, "POSTULANTE", false)));
 
-        mockMvc.perform(get("/api/v1/test/current-user-id").with(jwt().jwt(j -> j.subject("uid-baja"))))
+        mockMvc.perform(get("/api/v1/test/current-user-id").with(jwt().jwt(j -> j.subject(codigo.toString()))))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error").value("ERR_AUTH_03"));
     }
 
     @Test
     void preAuthorize_conElRolCorrecto_dejaPasar() throws Exception {
-        when(provider.buscarPorFirebaseUid("uid-admin"))
-                .thenReturn(Optional.of(new DatosUsuario(UUID.randomUUID(), "ADMINISTRADOR_DUBSS", true)));
+        UUID codigo = UUID.randomUUID();
+        when(provider.buscarPorCodigo(codigo))
+                .thenReturn(Optional.of(new DatosUsuario(codigo, "ADMINISTRADOR_DUBSS", true)));
 
-        mockMvc.perform(get("/api/v1/test/solo-admin").with(jwt().jwt(j -> j.subject("uid-admin"))))
+        mockMvc.perform(get("/api/v1/test/solo-admin").with(jwt().jwt(j -> j.subject(codigo.toString()))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data").value("admin"));
     }

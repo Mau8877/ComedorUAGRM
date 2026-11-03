@@ -8,8 +8,7 @@ import java.lang.annotation.Target;
 
 /**
  * Inyecta en un parametro `UUID` de controller el `codigo` del usuario
- * autenticado (el identificador publico, nunca el `id` interno ni el uid de
- * Firebase). Ver CurrentUserIdArgumentResolver.
+ * autenticado (el identificador publico, nunca el `id` interno). Ver CurrentUserIdArgumentResolver.
  */
 @Documented
 @Target(ElementType.PARAMETER)

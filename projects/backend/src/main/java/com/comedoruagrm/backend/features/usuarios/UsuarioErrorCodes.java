@@ -18,7 +18,7 @@ public final class UsuarioErrorCodes {
     /** 404 - La carrera indicada no existe. */
     public static final String ERR_US_04 = "ERR_US_04";
 
-    /** 409 - La misma cuenta se esta registrando en otra solicitud simultanea. */
+    /** Retirado: era el registro simultaneo con el mismo firebase_uid. No se reasigna el numero. */
     public static final String ERR_US_05 = "ERR_US_05";
 
     private UsuarioErrorCodes() {

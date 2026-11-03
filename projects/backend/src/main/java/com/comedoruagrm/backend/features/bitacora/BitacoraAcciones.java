@@ -2,7 +2,7 @@ package com.comedoruagrm.backend.features.bitacora;
 
 /**
  * Valores de `bitacora.accion` que escribe el backend. Los intentos fallidos
- * de inicio de sesion no estan: los ve Firebase, no este backend.
+ * de inicio de sesion no estan: se cuentan en `usuario.intentos_fallidos`.
  */
 public final class BitacoraAcciones {
 

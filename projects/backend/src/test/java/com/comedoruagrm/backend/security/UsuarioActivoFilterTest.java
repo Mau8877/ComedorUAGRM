@@ -2,6 +2,7 @@ package com.comedoruagrm.backend.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
@@ -20,10 +21,10 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 
 import com.comedoruagrm.backend.security.UsuarioAutenticableProvider.DatosUsuario;
 
-class FirebaseUsuarioFilterTest {
+class UsuarioActivoFilterTest {
 
     private final UsuarioAutenticableProvider provider = mock(UsuarioAutenticableProvider.class);
-    private final FirebaseUsuarioFilter filter = new FirebaseUsuarioFilter(provider, new SecurityErrorWriter());
+    private final UsuarioActivoFilter filter = new UsuarioActivoFilter(provider, new SecurityErrorWriter());
 
     @AfterEach
     void limpiarContexto() {
@@ -33,15 +34,15 @@ class FirebaseUsuarioFilterTest {
     @Test
     void filtrar_conUsuarioActivo_dejaElPrincipalConSuRolYContinua() throws Exception {
         UUID codigo = UUID.randomUUID();
-        when(provider.buscarPorFirebaseUid("uid-1")).thenReturn(Optional.of(new DatosUsuario(codigo, "POSTULANTE", true)));
-        conToken("uid-1", "ana@uagrm.edu.bo");
+        when(provider.buscarPorCodigo(codigo)).thenReturn(Optional.of(new DatosUsuario(codigo, "POSTULANTE", true)));
+        conToken(codigo.toString());
         MockHttpServletResponse response = new MockHttpServletResponse();
         MockFilterChain chain = new MockFilterChain();
 
         filter.doFilter(request("GET", "/api/v1/auth/usuario-actual"), response, chain);
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        assertThat(auth.getPrincipal()).isEqualTo(new UsuarioAutenticado(codigo, "POSTULANTE", "uid-1"));
+        assertThat(auth.getPrincipal()).isEqualTo(new UsuarioAutenticado(codigo, "POSTULANTE"));
         assertThat(auth.getAuthorities()).extracting(Object::toString).containsExactly("ROLE_POSTULANTE");
         assertThat(chain.getRequest()).isNotNull();
         assertThat(response.getStatus()).isEqualTo(200);
@@ -49,9 +50,9 @@ class FirebaseUsuarioFilterTest {
 
     @Test
     void filtrar_conUsuarioDesactivado_responde403ErrAuth03SinContinuar() throws Exception {
-        when(provider.buscarPorFirebaseUid("uid-2"))
-                .thenReturn(Optional.of(new DatosUsuario(UUID.randomUUID(), "POSTULANTE", false)));
-        conToken("uid-2", "baja@uagrm.edu.bo");
+        UUID codigo = UUID.randomUUID();
+        when(provider.buscarPorCodigo(codigo)).thenReturn(Optional.of(new DatosUsuario(codigo, "POSTULANTE", false)));
+        conToken(codigo.toString());
         MockHttpServletResponse response = new MockHttpServletResponse();
         MockFilterChain chain = new MockFilterChain();
 
@@ -63,13 +64,14 @@ class FirebaseUsuarioFilterTest {
     }
 
     @Test
-    void filtrar_sinCuentaEnUnaRutaNormal_responde401ErrAuth02SinContinuar() throws Exception {
-        when(provider.buscarPorFirebaseUid("uid-3")).thenReturn(Optional.empty());
-        conToken("uid-3", "nuevo@uagrm.edu.bo");
+    void filtrar_conUnUsuarioQueYaNoExiste_responde401ErrAuth02SinContinuar() throws Exception {
+        UUID codigo = UUID.randomUUID();
+        when(provider.buscarPorCodigo(codigo)).thenReturn(Optional.empty());
+        conToken(codigo.toString());
         MockHttpServletResponse response = new MockHttpServletResponse();
         MockFilterChain chain = new MockFilterChain();
 
-        filter.doFilter(request("POST", "/api/v1/auth/sesion"), response, chain);
+        filter.doFilter(request("GET", "/api/v1/auth/usuario-actual"), response, chain);
 
         assertThat(response.getStatus()).isEqualTo(401);
         assertThat(response.getContentAsString()).contains("\"error\":\"ERR_AUTH_02\"");
@@ -77,28 +79,17 @@ class FirebaseUsuarioFilterTest {
     }
 
     @Test
-    void filtrar_sinCuentaEnElRegistro_dejaPasarConElPrincipalSinRegistro() throws Exception {
-        when(provider.buscarPorFirebaseUid("uid-4")).thenReturn(Optional.empty());
-        conToken("uid-4", "nuevo@uagrm.edu.bo");
+    void filtrar_conUnSubjectQueNoEsUnCodigo_responde401ErrAuth01SinConsultar() throws Exception {
+        conToken("no-es-un-uuid");
         MockHttpServletResponse response = new MockHttpServletResponse();
         MockFilterChain chain = new MockFilterChain();
 
-        filter.doFilter(request("POST", "/api/v1/auth/registro"), response, chain);
+        filter.doFilter(request("GET", "/api/v1/auth/usuario-actual"), response, chain);
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        assertThat(auth.getPrincipal()).isEqualTo(new FirebaseSinRegistro("uid-4", "nuevo@uagrm.edu.bo"));
-        assertThat(chain.getRequest()).isNotNull();
-    }
-
-    @Test
-    void filtrar_elListadoPublicoDeCarreras_noConsultaAlProvider() throws Exception {
-        conToken("uid-5", "x@uagrm.edu.bo");
-        MockFilterChain chain = new MockFilterChain();
-
-        filter.doFilter(request("GET", "/api/v1/carreras"), new MockHttpServletResponse(), chain);
-
-        assertThat(chain.getRequest()).isNotNull();
-        org.mockito.Mockito.verifyNoInteractions(provider);
+        assertThat(response.getStatus()).isEqualTo(401);
+        assertThat(response.getContentAsString()).contains("\"error\":\"ERR_AUTH_01\"");
+        assertThat(chain.getRequest()).isNull();
+        verifyNoInteractions(provider);
     }
 
     @Test
@@ -108,7 +99,18 @@ class FirebaseUsuarioFilterTest {
         filter.doFilter(request("GET", "/api/v1/algo"), new MockHttpServletResponse(), chain);
 
         assertThat(chain.getRequest()).isNotNull();
-        org.mockito.Mockito.verifyNoInteractions(provider);
+        verifyNoInteractions(provider);
+    }
+
+    @Test
+    void filtrar_unaRutaFueraDeLaApiDeNegocio_noConsultaAlProvider() throws Exception {
+        conToken(UUID.randomUUID().toString());
+        MockFilterChain chain = new MockFilterChain();
+
+        filter.doFilter(request("GET", "/health"), new MockHttpServletResponse(), chain);
+
+        assertThat(chain.getRequest()).isNotNull();
+        verifyNoInteractions(provider);
     }
 
     private MockHttpServletRequest request(String metodo, String ruta) {
@@ -117,11 +119,10 @@ class FirebaseUsuarioFilterTest {
         return request;
     }
 
-    private void conToken(String uid, String correo) {
+    private void conToken(String subject) {
         Jwt jwt = Jwt.withTokenValue("token-de-prueba")
-                .header("alg", "RS256")
-                .subject(uid)
-                .claim("email", correo)
+                .header("alg", "HS256")
+                .subject(subject)
                 .issuedAt(Instant.now())
                 .expiresAt(Instant.now().plusSeconds(3600))
                 .build();

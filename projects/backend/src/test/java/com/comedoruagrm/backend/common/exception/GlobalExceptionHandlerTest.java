@@ -37,14 +37,14 @@ class GlobalExceptionHandlerTest {
 
     @BeforeEach
     void usuarioActivo() {
-        when(provider.buscarPorFirebaseUid(any()))
+        when(provider.buscarPorCodigo(any()))
                 .thenReturn(Optional.of(new DatosUsuario(UUID.randomUUID(), "POSTULANTE", true)));
     }
 
     @Test
     void get_aUnaRutaInexistente_devuelve404ErrSys03() throws Exception {
         mockMvc.perform(get("/api/v1/no-existe-esta-ruta")
-                        .with(jwt().jwt(j -> j.subject("uid-x").claim("email", "x@uagrm.edu.bo"))))
+                        .with(jwt().jwt(j -> j.subject(UUID.randomUUID().toString()))))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value("failed"))
                 .andExpect(jsonPath("$.error").value("ERR_SYS_03"));
@@ -53,7 +53,7 @@ class GlobalExceptionHandlerTest {
     @Test
     void put_aUnaRutaQueSoloAdmiteGet_devuelve405ErrSys04() throws Exception {
         mockMvc.perform(put("/api/v1/carreras")
-                        .with(jwt().jwt(j -> j.subject("uid-x").claim("email", "x@uagrm.edu.bo"))))
+                        .with(jwt().jwt(j -> j.subject(UUID.randomUUID().toString()))))
                 .andExpect(status().isMethodNotAllowed())
                 .andExpect(jsonPath("$.error").value("ERR_SYS_04"));
     }
@@ -68,7 +68,7 @@ class GlobalExceptionHandlerTest {
     @Test
     void post_conUnJsonIlegible_devuelve400ErrSys05() throws Exception {
         mockMvc.perform(post("/api/v1/auth/registro")
-                        .with(jwt().jwt(j -> j.subject("uid-x").claim("email", "x@uagrm.edu.bo")))
+                        .with(jwt().jwt(j -> j.subject(UUID.randomUUID().toString())))
                         .contentType(MediaType.APPLICATION_JSON).content("{no es json"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("ERR_SYS_05"));

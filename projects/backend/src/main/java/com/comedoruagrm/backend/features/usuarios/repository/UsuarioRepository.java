@@ -9,7 +9,7 @@ import com.comedoruagrm.backend.features.usuarios.model.Usuario;
 
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
-    Optional<Usuario> findByFirebaseUid(String firebaseUid);
+    Optional<Usuario> findByCorreo(String correo);
 
     Optional<Usuario> findByCodigo(UUID codigo);
 

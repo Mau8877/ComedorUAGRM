@@ -1,5 +1,7 @@
 package com.comedoruagrm.backend.features.usuarios.model;
 
+import java.time.Instant;
+
 import com.comedoruagrm.backend.common.model.BaseModel;
 
 import jakarta.persistence.AttributeOverride;
@@ -15,10 +17,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Cuenta de acceso del sistema. La contraseña no existe aca: la gestiona
- * Firebase Auth y el enlace es `firebaseUid` (ver SEGURIDAD_AUTH_BACKEND.md).
+ * Cuenta de acceso del sistema. Guarda solo el hash BCrypt de la contraseña
+ * (nunca en texto plano) y el estado del bloqueo por intentos fallidos
+ * (ver SEGURIDAD_AUTH_BACKEND.md).
  *
- * * Solo `activo` tiene setter: activar/desactivar cuentas lo usara CU14.
+ * * `activo` tiene setter porque activar/desactivar cuentas lo usara CU14;
+ * * los tres campos del bloqueo, porque los maneja el inicio de sesion.
+ * ! `passwordHash` nunca se loguea ni sale en un DTO.
  */
 @Getter
 @Entity
@@ -37,8 +42,8 @@ public class Usuario extends BaseModel {
     @Column(name = "correo", nullable = false, length = 150)
     private String correo;
 
-    @Column(name = "firebase_uid", nullable = false, length = 128)
-    private String firebaseUid;
+    @Column(name = "password_hash", nullable = false, length = 100)
+    private String passwordHash;
 
     @Column(name = "nombres", nullable = false, length = 100)
     private String nombres;
@@ -50,11 +55,23 @@ public class Usuario extends BaseModel {
     @Column(name = "activo", nullable = false)
     private boolean activo = true;
 
-    public Usuario(Rol rol, String ci, String correo, String firebaseUid, String nombres, String apellidos) {
+    @Setter
+    @Column(name = "intentos_fallidos", nullable = false)
+    private int intentosFallidos;
+
+    @Setter
+    @Column(name = "bloqueos_consecutivos", nullable = false)
+    private int bloqueosConsecutivos;
+
+    @Setter
+    @Column(name = "bloqueado_hasta")
+    private Instant bloqueadoHasta;
+
+    public Usuario(Rol rol, String ci, String correo, String passwordHash, String nombres, String apellidos) {
         this.rol = rol;
         this.ci = ci;
         this.correo = correo;
-        this.firebaseUid = firebaseUid;
+        this.passwordHash = passwordHash;
         this.nombres = nombres;
         this.apellidos = apellidos;
     }

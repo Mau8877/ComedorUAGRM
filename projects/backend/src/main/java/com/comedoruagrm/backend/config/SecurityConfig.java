@@ -11,6 +11,8 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
+import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -19,9 +21,10 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.comedoruagrm.backend.security.ApiAuthenticationEntryPoint;
-import com.comedoruagrm.backend.security.FirebaseUsuarioFilter;
 import com.comedoruagrm.backend.security.RateLimitFilter;
+import com.comedoruagrm.backend.security.RutasPublicas;
 import com.comedoruagrm.backend.security.SecurityErrorWriter;
+import com.comedoruagrm.backend.security.UsuarioActivoFilter;
 import com.comedoruagrm.backend.security.UsuarioAutenticableProvider;
 
 @Configuration
@@ -52,7 +55,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             // CSRF deshabilitado a propósito: no hay cookies de sesión, la API es
-            // stateless y el ID token de Firebase viaja en el header Authorization.
+            // stateless y el token de acceso viaja en el header Authorization.
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -60,15 +63,16 @@ public class SecurityConfig {
             // y RateLimitFilter. Antes del filtro de autenticación: un cliente sin
             // token igual cuenta contra su límite, no es gratis intentar de más.
             .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
-            // Verificación del ID token de Firebase (ver FirebaseJwtConfig). Los
-            // rechazos de token salen en el sobre estándar de la API (ERR_AUTH_01).
+            // Verificación del JWT propio (ver AutenticacionConfig). Los rechazos de
+            // token salen en el sobre estándar de la API (ERR_AUTH_01).
             .oauth2ResourceServer(oauth2 -> oauth2
+                .bearerTokenResolver(bearerTokenResolver())
                 .jwt(Customizer.withDefaults())
                 .authenticationEntryPoint(authenticationEntryPoint))
             .exceptionHandling(handling -> handling.authenticationEntryPoint(authenticationEntryPoint))
             // Token válido -> usuario activo del sistema con su rol (ERR_AUTH_02/03).
-            // Se instancia acá y no es un bean: ver FirebaseUsuarioFilter.
-            .addFilterAfter(new FirebaseUsuarioFilter(usuarioProvider, securityErrorWriter),
+            // Se instancia acá y no es un bean: ver UsuarioActivoFilter.
+            .addFilterAfter(new UsuarioActivoFilter(usuarioProvider, securityErrorWriter),
                     BearerTokenAuthenticationFilter.class)
             .authorizeHttpRequests(auth -> auth
                 // 1. Permitimos el tráfico a los endpoints de Actuator (expuestos en la raíz, ver
@@ -76,14 +80,24 @@ public class SecurityConfig {
                 .requestMatchers("/health", "/health/**", "/prometheus").permitAll()
                 // Swagger / OpenAPI (documentación de la API)
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
-                // El formulario de registro necesita las carreras antes de que exista una
-                // cuenta (ni token): única excepción de negocio, solo lectura de un catálogo.
-                .requestMatchers(HttpMethod.GET, "/api/v1/carreras").permitAll()
-                // 2. Cualquier otra ruta exige un token válido de Firebase
+                // Endpoints de negocio sin sesión (ver RutasPublicas y SEGURIDAD_AUTH_BACKEND.md):
+                // las carreras (solo lectura de un catálogo, el formulario de registro las
+                // necesita antes de tener cuenta) y registro / login / refresh / logout.
+                .requestMatchers(HttpMethod.GET, RutasPublicas.CARRERAS).permitAll()
+                .requestMatchers(HttpMethod.POST, RutasPublicas.REGISTRO, RutasPublicas.LOGIN,
+                        RutasPublicas.REFRESH, RutasPublicas.LOGOUT).permitAll()
+                // 2. Cualquier otra ruta exige un token de acceso válido
                 .anyRequest().authenticated()
             );
 
         return http.build();
+    }
+
+    // * Una ruta pública ignora el header Authorization: sin esto, un token
+    // * vencido que el cliente sigue mandando haría fallar el login con 401.
+    private BearerTokenResolver bearerTokenResolver() {
+        DefaultBearerTokenResolver porDefecto = new DefaultBearerTokenResolver();
+        return request -> RutasPublicas.esPublica(request) ? null : porDefecto.resolve(request);
     }
 
     // Permite que el frontend (React/Vite, en otro origen/puerto) pueda llamar a la API.

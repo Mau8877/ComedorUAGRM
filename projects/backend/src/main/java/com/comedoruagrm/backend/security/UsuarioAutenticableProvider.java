@@ -10,7 +10,7 @@ import java.util.UUID;
  */
 public interface UsuarioAutenticableProvider {
 
-    Optional<DatosUsuario> buscarPorFirebaseUid(String firebaseUid);
+    Optional<DatosUsuario> buscarPorCodigo(UUID codigo);
 
     record DatosUsuario(UUID codigo, String rol, boolean activo) {
     }

@@ -1,16 +1,11 @@
 package com.comedoruagrm.backend.features.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -22,34 +17,31 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.security.oauth2.jwt.BadJwtException;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.comedoruagrm.backend.support.PostgresTestDatabase;
 
 /**
  * Flujo completo del CU01 contra un Postgres real: migraciones de Flyway,
- * indices unicos, filtro de usuario y bitacora. Solo se simula el
- * JwtDecoder (los tokens de prueba son de mentira; no se llama a Firebase).
+ * indices unicos, JWT firmados de verdad (sin simular nada), sesiones,
+ * bloqueo por intentos fallidos y bitacora.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
 class AuthIntegrationTest {
+
+    private static final ObjectMapper JSON = new ObjectMapper();
 
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
     private JdbcTemplate jdbc;
-
-    @MockitoBean
-    private JwtDecoder jwtDecoder;
 
     @BeforeAll
     static void saltarSiNoHayPostgres() {
@@ -62,29 +54,40 @@ class AuthIntegrationTest {
     }
 
     @BeforeEach
-    void limpiarYPrepararTokens() {
+    void limpiar() {
         jdbc.update("DELETE FROM bitacora");
+        jdbc.update("DELETE FROM sesion");
         jdbc.update("DELETE FROM postulante");
         jdbc.update("DELETE FROM usuario");
-        // doThrow/doReturn (y no when(...)) porque llamar a decode() sobre el mock ya stubbeado lanzaria.
-        doThrow(new BadJwtException("token desconocido")).when(jwtDecoder).decode(anyString());
-        doReturn(jwt("uid-ana", "ana@uagrm.edu.bo")).when(jwtDecoder).decode("token-ana");
-        doReturn(jwt("uid-luis", "luis@uagrm.edu.bo")).when(jwtDecoder).decode("token-luis");
     }
 
+    // ---- registro ----
+
     @Test
-    void registro_conUnTokenNuevo_creaUsuarioYPostulanteYResponde201() throws Exception {
+    void registro_conDatosNuevos_creaLaCuentaAbreLaSesionYResponde201() throws Exception {
         registrarAna().andExpect(status().isCreated())
-                .andExpect(jsonPath("$.data.correo").value("ana@uagrm.edu.bo"))
-                .andExpect(jsonPath("$.data.rol").value("POSTULANTE"));
+                .andExpect(jsonPath("$.data.usuario.correo").value("ana@uagrm.edu.bo"))
+                .andExpect(jsonPath("$.data.usuario.rol").value("POSTULANTE"))
+                .andExpect(jsonPath("$.data.accessToken").isNotEmpty())
+                .andExpect(jsonPath("$.data.refreshToken").isNotEmpty());
 
         assertThat(contar("usuario")).isEqualTo(1);
         assertThat(contar("postulante")).isEqualTo(1);
+        assertThat(contar("sesion")).isEqualTo(1);
         assertThat(contarBitacora("REGISTRO_USUARIO")).isEqualTo(1);
+        assertThat(contarBitacora("INICIO_SESION")).isEqualTo(1);
     }
 
     @Test
-    void registro_repetidoConElMismoToken_responde200SinDuplicarFilas() throws Exception {
+    void registro_guardaLaContrasenaSoloComoHash() throws Exception {
+        registrarAna().andExpect(status().isCreated());
+
+        String hash = jdbc.queryForObject("SELECT password_hash FROM usuario", String.class);
+        assertThat(hash).isNotEqualTo("secreta1").startsWith("$2");
+    }
+
+    @Test
+    void registro_repetidoConLosMismosDatos_responde200SinDuplicarFilas() throws Exception {
         registrarAna().andExpect(status().isCreated());
 
         registrarAna().andExpect(status().isOk());
@@ -95,11 +98,10 @@ class AuthIntegrationTest {
     }
 
     @Test
-    void registro_conOtroTokenYElMismoCi_responde409ErrUs01() throws Exception {
+    void registro_conOtroCorreoYElMismoCi_responde409ErrUs01() throws Exception {
         registrarAna().andExpect(status().isCreated());
 
-        mockMvc.perform(post("/api/v1/auth/registro").header(HttpHeaders.AUTHORIZATION, "Bearer token-luis")
-                        .contentType(MediaType.APPLICATION_JSON).content(bodyRegistro("1234567", "219999999")))
+        registrar("1234567", "219999999", "luis@uagrm.edu.bo")
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.error").value("ERR_US_01"));
 
@@ -107,57 +109,123 @@ class AuthIntegrationTest {
     }
 
     @Test
-    void registro_conOtroTokenYElMismoRegistroUniversitario_responde409ErrUs03() throws Exception {
+    void registro_conElMismoCorreoEnOtraCapitalizacion_responde409ErrUs02() throws Exception {
         registrarAna().andExpect(status().isCreated());
 
-        mockMvc.perform(post("/api/v1/auth/registro").header(HttpHeaders.AUTHORIZATION, "Bearer token-luis")
-                        .contentType(MediaType.APPLICATION_JSON).content(bodyRegistro("7654321", "219012345")))
+        registrar("7654321", "219999999", "ANA@uagrm.edu.bo")
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error").value("ERR_US_02"));
+    }
+
+    @Test
+    void registro_conOtroCorreoYElMismoRegistroUniversitario_responde409ErrUs03() throws Exception {
+        registrarAna().andExpect(status().isCreated());
+
+        registrar("7654321", "219012345", "luis@uagrm.edu.bo")
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.error").value("ERR_US_03"));
     }
 
+    // ---- login ----
+
     @Test
-    void sesion_conUnUsuarioRegistrado_devuelveElUsuarioYDejaUnaFilaInicioSesion() throws Exception {
+    void login_conCredencialesCorrectas_devuelveUnTokenQueAbreLasRutasPrivadas() throws Exception {
         registrarAna().andExpect(status().isCreated());
 
-        mockMvc.perform(post("/api/v1/auth/sesion").header(HttpHeaders.AUTHORIZATION, "Bearer token-ana"))
+        JsonNode sesion = datos(login("ana@uagrm.edu.bo", "secreta1").andExpect(status().isOk()));
+
+        mockMvc.perform(get("/api/v1/auth/usuario-actual")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + sesion.get("accessToken").asText()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.correo").value("ana@uagrm.edu.bo"))
                 .andExpect(jsonPath("$.data.rol").value("POSTULANTE"));
-
-        assertThat(contarBitacora("INICIO_SESION")).isEqualTo(1);
+        assertThat(contarBitacora("INICIO_SESION")).isEqualTo(2);
     }
 
     @Test
-    void usuarioActual_noAgregaFilasALaBitacora() throws Exception {
+    void login_conUnTokenVencidoEnElHeader_loIgnora() throws Exception {
         registrarAna().andExpect(status().isCreated());
-        long antes = contar("bitacora");
 
-        mockMvc.perform(get("/api/v1/auth/usuario-actual").header(HttpHeaders.AUTHORIZATION, "Bearer token-ana"))
+        mockMvc.perform(post("/api/v1/auth/login").header(HttpHeaders.AUTHORIZATION, "Bearer token-viejo")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"correo\":\"ana@uagrm.edu.bo\",\"contrasena\":\"secreta1\"}"))
                 .andExpect(status().isOk());
-        mockMvc.perform(get("/api/v1/auth/usuario-actual").header(HttpHeaders.AUTHORIZATION, "Bearer token-ana"))
-                .andExpect(status().isOk());
-
-        assertThat(contar("bitacora")).isEqualTo(antes);
     }
 
     @Test
-    void sesion_conElUsuarioDesactivado_responde403ErrAuth03() throws Exception {
+    void login_conContrasenaIncorrectaOCorreoInexistente_dan401ConElMismoMensaje() throws Exception {
         registrarAna().andExpect(status().isCreated());
-        jdbc.update("UPDATE usuario SET activo = false WHERE firebase_uid = 'uid-ana'");
 
-        mockMvc.perform(post("/api/v1/auth/sesion").header(HttpHeaders.AUTHORIZATION, "Bearer token-ana"))
-                .andExpect(status().isForbidden())
+        String conContrasenaMala = login("ana@uagrm.edu.bo", "mala").andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("ERR_AUTH_04")).andReturn().getResponse().getContentAsString();
+        String sinCorreo = login("nadie@uagrm.edu.bo", "mala").andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("ERR_AUTH_04")).andReturn().getResponse().getContentAsString();
+
+        assertThat(JSON.readTree(conContrasenaMala).get("message")).isEqualTo(JSON.readTree(sinCorreo).get("message"));
+    }
+
+    @Test
+    void login_conLaCuentaDesactivada_responde403ErrAuth03SinAbrirSesion() throws Exception {
+        registrarAna().andExpect(status().isCreated());
+        jdbc.update("UPDATE usuario SET activo = false");
+        long sesionesAntes = contar("sesion");
+
+        login("ana@uagrm.edu.bo", "secreta1").andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error").value("ERR_AUTH_03"));
 
-        assertThat(contarBitacora("INICIO_SESION")).isZero();
+        assertThat(contar("sesion")).isEqualTo(sesionesAntes);
     }
 
     @Test
-    void sesion_conUnTokenSinRegistrar_responde401ErrAuth02() throws Exception {
-        mockMvc.perform(post("/api/v1/auth/sesion").header(HttpHeaders.AUTHORIZATION, "Bearer token-luis"))
+    void login_tras5IntentosFallidos_bloqueaLaCuentaAunqueLaContrasenaSeaCorrecta() throws Exception {
+        registrarAna().andExpect(status().isCreated());
+
+        for (int i = 0; i < 5; i++) {
+            login("ana@uagrm.edu.bo", "mala").andExpect(status().isUnauthorized());
+        }
+
+        login("ana@uagrm.edu.bo", "secreta1").andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("ERR_AUTH_05"));
+        assertThat(jdbc.queryForObject("SELECT bloqueado_hasta IS NOT NULL FROM usuario", Boolean.class)).isTrue();
+    }
+
+    @Test
+    void login_conMenosDe5FallosSeguidosDeUnAcierto_reiniciaElContador() throws Exception {
+        registrarAna().andExpect(status().isCreated());
+        for (int i = 0; i < 4; i++) {
+            login("ana@uagrm.edu.bo", "mala").andExpect(status().isUnauthorized());
+        }
+        assertThat(jdbc.queryForObject("SELECT intentos_fallidos FROM usuario", Integer.class)).isEqualTo(4);
+
+        login("ana@uagrm.edu.bo", "secreta1").andExpect(status().isOk());
+
+        assertThat(jdbc.queryForObject("SELECT intentos_fallidos FROM usuario", Integer.class)).isZero();
+    }
+
+    // ---- rutas privadas ----
+
+    @Test
+    void usuarioActual_sinToken_responde401ErrAuth01() throws Exception {
+        mockMvc.perform(get("/api/v1/auth/usuario-actual"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.error").value("ERR_AUTH_02"));
+                .andExpect(jsonPath("$.error").value("ERR_AUTH_01"));
+    }
+
+    @Test
+    void usuarioActual_conUnTokenInventado_responde401ErrAuth01() throws Exception {
+        mockMvc.perform(get("/api/v1/auth/usuario-actual").header(HttpHeaders.AUTHORIZATION, "Bearer inventado"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("ERR_AUTH_01"));
+    }
+
+    @Test
+    void usuarioActual_conLaCuentaDesactivadaDespuesDeEmitirElToken_responde403ErrAuth03() throws Exception {
+        String acceso = datos(registrarAna().andExpect(status().isCreated())).get("accessToken").asText();
+        jdbc.update("UPDATE usuario SET activo = false");
+
+        mockMvc.perform(get("/api/v1/auth/usuario-actual").header(HttpHeaders.AUTHORIZATION, "Bearer " + acceso))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("ERR_AUTH_03"));
     }
 
     @Test
@@ -167,16 +235,96 @@ class AuthIntegrationTest {
                 .andExpect(jsonPath("$.meta.totalItems").value(71));
     }
 
-    private ResultActions registrarAna() throws Exception {
-        return mockMvc.perform(post("/api/v1/auth/registro").header(HttpHeaders.AUTHORIZATION, "Bearer token-ana")
-                .contentType(MediaType.APPLICATION_JSON).content(bodyRegistro("1234567", "219012345")));
+    // ---- refresh y logout ----
+
+    @Test
+    void refresh_conUnRefreshTokenVigente_entregaUnParNuevoYRevocaElUsado() throws Exception {
+        String refresh = datos(registrarAna().andExpect(status().isCreated())).get("refreshToken").asText();
+
+        JsonNode nuevo = datos(refresh(refresh).andExpect(status().isOk()));
+
+        assertThat(nuevo.get("refreshToken").asText()).isNotEqualTo(refresh);
+        refresh(refresh).andExpect(status().isUnauthorized()).andExpect(jsonPath("$.error").value("ERR_AUTH_06"));
+        refresh(nuevo.get("refreshToken").asText()).andExpect(status().isOk());
     }
 
-    private String bodyRegistro(String ci, String registroUniversitario) {
+    @Test
+    void refresh_conUnTokenDesconocido_responde401ErrAuth06() throws Exception {
+        refresh("desconocido").andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("ERR_AUTH_06"));
+    }
+
+    @Test
+    void refresh_conLaCuentaDesactivada_responde403ErrAuth03() throws Exception {
+        String refresh = datos(registrarAna().andExpect(status().isCreated())).get("refreshToken").asText();
+        jdbc.update("UPDATE usuario SET activo = false");
+
+        refresh(refresh).andExpect(status().isForbidden()).andExpect(jsonPath("$.error").value("ERR_AUTH_03"));
+    }
+
+    @Test
+    void logout_revocaSoloLaSesionDeEseDispositivo() throws Exception {
+        registrarAna().andExpect(status().isCreated());
+        String celular = datos(login("ana@uagrm.edu.bo", "secreta1")).get("refreshToken").asText();
+        String web = datos(login("ana@uagrm.edu.bo", "secreta1")).get("refreshToken").asText();
+
+        logout(celular).andExpect(status().isOk());
+
+        refresh(celular).andExpect(status().isUnauthorized());
+        refresh(web).andExpect(status().isOk());
+    }
+
+    @Test
+    void logout_conUnaSesionYaCerradaODesconocida_responde200SinError() throws Exception {
+        String refresh = datos(registrarAna().andExpect(status().isCreated())).get("refreshToken").asText();
+        logout(refresh).andExpect(status().isOk());
+
+        logout(refresh).andExpect(status().isOk());
+        logout("desconocido").andExpect(status().isOk());
+    }
+
+    @Test
+    void sesion_noGuardaElRefreshTokenEnTextoPlano() throws Exception {
+        String refresh = datos(registrarAna().andExpect(status().isCreated())).get("refreshToken").asText();
+
+        String guardado = jdbc.queryForObject("SELECT token_hash FROM sesion", String.class);
+
+        assertThat(guardado).isNotEqualTo(refresh).hasSize(64);
+    }
+
+    // ---- ayudas ----
+
+    private ResultActions registrarAna() throws Exception {
+        return registrar("1234567", "219012345", "ana@uagrm.edu.bo");
+    }
+
+    private ResultActions registrar(String ci, String registroUniversitario, String correo) throws Exception {
         UUID carrera = jdbc.queryForObject("SELECT codigo_carrera FROM carrera LIMIT 1", UUID.class);
-        return """
+        String body = """
                 {"nombres":"Ana","apellidos":"Perez","ci":"%s","registroUniversitario":"%s",
-                 "carreraCodigo":"%s","telefono":"70000001"}""".formatted(ci, registroUniversitario, carrera);
+                 "carreraCodigo":"%s","telefono":"70000001","correo":"%s",
+                 "contrasena":"secreta1","confirmacionContrasena":"secreta1"}"""
+                .formatted(ci, registroUniversitario, carrera, correo);
+        return mockMvc.perform(post("/api/v1/auth/registro").contentType(MediaType.APPLICATION_JSON).content(body));
+    }
+
+    private ResultActions login(String correo, String contrasena) throws Exception {
+        return mockMvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"correo\":\"%s\",\"contrasena\":\"%s\"}".formatted(correo, contrasena)));
+    }
+
+    private ResultActions refresh(String refreshToken) throws Exception {
+        return mockMvc.perform(post("/api/v1/auth/refresh").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"refreshToken\":\"%s\"}".formatted(refreshToken)));
+    }
+
+    private ResultActions logout(String refreshToken) throws Exception {
+        return mockMvc.perform(post("/api/v1/auth/logout").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"refreshToken\":\"%s\"}".formatted(refreshToken)));
+    }
+
+    private JsonNode datos(ResultActions resultado) throws Exception {
+        return JSON.readTree(resultado.andReturn().getResponse().getContentAsString()).get("data");
     }
 
     private long contar(String tabla) {
@@ -185,11 +333,5 @@ class AuthIntegrationTest {
 
     private long contarBitacora(String accion) {
         return jdbc.queryForObject("SELECT count(*) FROM bitacora WHERE accion = ?", Long.class, accion);
-    }
-
-    private Jwt jwt(String uid, String correo) {
-        return Jwt.withTokenValue("token-de-prueba").header("alg", "RS256").subject(uid).claim("email", correo)
-                .issuedAt(Instant.now()).expiresAt(Instant.now().plusSeconds(3600))
-                .audience(List.of("comedor-uagrm-test")).build();
     }
 }

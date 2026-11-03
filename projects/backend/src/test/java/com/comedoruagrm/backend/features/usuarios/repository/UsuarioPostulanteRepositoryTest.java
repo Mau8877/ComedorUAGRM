@@ -56,14 +56,17 @@ class UsuarioPostulanteRepositoryTest {
 
     @Test
     void guardar_unUsuarioYSuPostulante_losPuedeBuscarPorLosDatosUnicos() {
-        Usuario usuario = usuarioRepository.saveAndFlush(nuevoUsuario("1234567", "ana@uagrm.edu.bo", "uid-ana"));
+        Usuario usuario = usuarioRepository.saveAndFlush(nuevoUsuario("1234567", "ana@uagrm.edu.bo"));
         postulanteRepository.saveAndFlush(new Postulante(usuario, unaCarrera(), "219012345", "70000001"));
         entityManager.clear();
 
-        Usuario encontrado = usuarioRepository.findByFirebaseUid("uid-ana").orElseThrow();
+        Usuario encontrado = usuarioRepository.findByCorreo("ana@uagrm.edu.bo").orElseThrow();
 
         assertThat(encontrado.getCodigo()).isNotNull();
         assertThat(encontrado.isActivo()).isTrue();
+        assertThat(encontrado.getPasswordHash()).isEqualTo("$2a$04$hash-de-prueba");
+        assertThat(encontrado.getIntentosFallidos()).isZero();
+        assertThat(encontrado.getBloqueadoHasta()).isNull();
         assertThat(encontrado.getRol().getNombre()).isEqualTo(RolNombres.POSTULANTE);
         assertThat(usuarioRepository.existsByCi("1234567")).isTrue();
         assertThat(usuarioRepository.existsByCorreo("ana@uagrm.edu.bo")).isTrue();
@@ -73,37 +76,37 @@ class UsuarioPostulanteRepositoryTest {
 
     @Test
     void guardar_conCiDuplicado_lanzaDataIntegrityViolationException() {
-        usuarioRepository.saveAndFlush(nuevoUsuario("7654321", "uno@uagrm.edu.bo", "uid-uno"));
+        usuarioRepository.saveAndFlush(nuevoUsuario("7654321", "uno@uagrm.edu.bo"));
 
-        assertThatThrownBy(() -> usuarioRepository.saveAndFlush(nuevoUsuario("7654321", "dos@uagrm.edu.bo", "uid-dos")))
+        assertThatThrownBy(() -> usuarioRepository.saveAndFlush(nuevoUsuario("7654321", "dos@uagrm.edu.bo")))
                 .isInstanceOf(DataIntegrityViolationException.class);
     }
 
     @Test
-    void findByFirebaseUid_conUsuarioEliminadoLogicamente_noLoEncuentra() {
-        Usuario usuario = usuarioRepository.saveAndFlush(nuevoUsuario("1111111", "baja@uagrm.edu.bo", "uid-baja"));
+    void findByCorreo_conUsuarioEliminadoLogicamente_noLoEncuentra() {
+        Usuario usuario = usuarioRepository.saveAndFlush(nuevoUsuario("1111111", "baja@uagrm.edu.bo"));
         usuario.setEliminadoEn(Instant.now());
         usuarioRepository.saveAndFlush(usuario);
         entityManager.clear();
 
-        assertThat(usuarioRepository.findByFirebaseUid("uid-baja")).isEmpty();
+        assertThat(usuarioRepository.findByCorreo("baja@uagrm.edu.bo")).isEmpty();
         assertThat(usuarioRepository.existsByCi("1111111")).isFalse();
     }
 
     @Test
     void guardar_conElMismoCiQueUnUsuarioEliminado_loPermite() {
-        Usuario viejo = usuarioRepository.saveAndFlush(nuevoUsuario("2222222", "viejo@uagrm.edu.bo", "uid-viejo"));
+        Usuario viejo = usuarioRepository.saveAndFlush(nuevoUsuario("2222222", "viejo@uagrm.edu.bo"));
         viejo.setEliminadoEn(Instant.now());
         usuarioRepository.saveAndFlush(viejo);
 
-        Usuario nuevo = usuarioRepository.saveAndFlush(nuevoUsuario("2222222", "nuevo@uagrm.edu.bo", "uid-nuevo"));
+        Usuario nuevo = usuarioRepository.saveAndFlush(nuevoUsuario("2222222", "nuevo@uagrm.edu.bo"));
 
         assertThat(nuevo.getId()).isNotNull();
     }
 
-    private Usuario nuevoUsuario(String ci, String correo, String firebaseUid) {
+    private Usuario nuevoUsuario(String ci, String correo) {
         Rol rol = rolRepository.findByNombre(RolNombres.POSTULANTE).orElseThrow();
-        return new Usuario(rol, ci, correo, firebaseUid, "Ana", "Perez");
+        return new Usuario(rol, ci, correo, "$2a$04$hash-de-prueba", "Ana", "Perez");
     }
 
     private Carrera unaCarrera() {
