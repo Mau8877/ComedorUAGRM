@@ -1,9 +1,9 @@
-# UT-CU01-FE-01 — Almacén de la sesión (tokens)
+# UT-CU01-FE-01 — Cliente HTTP con cookies de sesión
 
 | Campo | Valor |
 |-------|-------|
 | **Código** | `UT-CU01-FE-01` |
-| **Nombre** | Almacén de la sesión (tokens) |
+| **Nombre** | Cliente HTTP con cookies de sesión |
 | **Caso de uso** | CU01-FE |
 | **Depende de** | — |
 
@@ -11,36 +11,38 @@
 
 - [`ARQUITECTURA_FRONTEND.md`](../../../../.claude/rules/ARQUITECTURA_FRONTEND.md)
 - [`TESTING_FRONTEND.md`](../../../../.claude/rules/frontend/TESTING_FRONTEND.md)
-- [`SEGURIDAD_AUTH_BACKEND.md`](../../../../.claude/rules/backend/SEGURIDAD_AUTH_BACKEND.md)
+- [`SEGURIDAD_AUTH_BACKEND.md`](../../../../.claude/rules/backend/SEGURIDAD_AUTH_BACKEND.md) (sección "Cómo viajan los tokens")
 - [`TANSTACK_QUERY_FRONTEND.md`](../../../../.claude/rules/frontend/TANSTACK_QUERY_FRONTEND.md) (sección de autenticación del cliente HTTP)
 
 ## Solicitud de negocio
 
-La sesión usa los tokens que emite el backend: el cliente necesita un lugar único donde guardarlos, leerlos y borrarlos, sin esparcir `localStorage` por la app.
+La sesión de la web viaja en cookies `HttpOnly` que pone el backend: el JavaScript de la página nunca debe ver ni guardar los tokens, para que un XSS no pueda robar la sesión.
 
 ## Objetivo
 
-Existe `tokenStorage`: guarda el token de acceso **en memoria** y el refresh token en `localStorage`, y nadie más toca esos dos lugares.
+`apiClient` manda las cookies del backend en cada petición (`withCredentials`) y la feature `auth` queda creada sin ningún almacén de tokens.
 
 ## Alcance
 
-- `src/features/auth/api/tokenStorage.ts`: `getAccessToken()`, `getRefreshToken()`, `guardarSesion({ accessToken, refreshToken })` y `borrarSesion()`. El token de acceso vive en una variable de módulo (se pierde al recargar y se recupera con el refresh token); el refresh token en `localStorage` con una clave propia (`comedoruagrm.refresh`). Todo acceso a `localStorage` va en `try/catch` (modo privado o almacenamiento bloqueado → la sesión simplemente no sobrevive a la recarga).
+- `src/store/apiClient.ts`: `withCredentials: true` en la instancia (ya hecho) y comentario que explica que no hay token que guardar ni header `Authorization` en la web.
+- `src/store/apiClient.test.ts`: una petición sale con `withCredentials`.
 - `src/features/auth/index.ts` (barrel, por ahora exporta solo lo que necesite el resto de la app).
-- Test `src/features/auth/tests/tokenStorage.test.ts`: guardar, leer y borrar; con `localStorage` que lanza, no rompe y el token de acceso sigue disponible en memoria.
+- Verificar que el origen del frontend está en `app.cors.allowed-origins` del backend (ya lo está: `http://localhost:5173` y `http://localhost`) y que web y API son el mismo *site* (`SameSite=Strict`).
 
-Archivos esperados (crear/tocar): `tokenStorage.ts`, `auth/index.ts`, test.
+Archivos esperados (crear/tocar): `apiClient.ts`, `apiClient.test.ts`, `auth/index.ts`.
 
 ## Fuera de alcance (no tocar)
 
-- Llamar a la API o renovar tokens (`UT-CU01-FE-03`, `UT-CU01-FE-04`).
-- Funciones de registro, login y logout (`UT-CU01-FE-05`).
-- Cualquier SDK de Firebase: no se usa para la autenticación.
+- Llamar a la API o renovar la sesión (`UT-CU01-FE-03`, `UT-CU01-FE-04`).
+- Registro, login y logout (`UT-CU01-FE-05`).
+- Guardar tokens en `localStorage`, `sessionStorage`, cookies legibles por JavaScript o un store: **nunca**.
+- Cualquier SDK de Firebase.
 
 ## Resultado esperado
 
-El resto de la feature guarda y lee los tokens solo a través de `tokenStorage`.
+Las peticiones de la web llevan las cookies de sesión del backend sin que la app toque ningún token.
 
 ## Validación
 
 1. `pnpm test`, `pnpm lint` y `pnpm build` pasan.
-2. Ningún otro archivo de `src/` usa `localStorage` para los tokens (búsqueda de `comedoruagrm.refresh`).
+2. Búsqueda en `src/`: ningún uso de `localStorage`/`sessionStorage` para tokens ni de `Authorization: Bearer`.

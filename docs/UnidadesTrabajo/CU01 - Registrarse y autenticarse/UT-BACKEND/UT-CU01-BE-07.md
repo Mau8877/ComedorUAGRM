@@ -26,6 +26,7 @@ Cada petición autenticada queda asociada a un `usuario` activo con su rol, o es
 - `B/security/UsuarioAutenticableProvider.java` (interfaz, definida en `security/`): `Optional<DatosUsuario> buscarPorCodigo(UUID codigo)`, con el `record DatosUsuario(UUID codigo, String rol, boolean activo)`.
 - `B/security/UsuarioAutenticado.java` (`record`): `UUID codigo`, `String rol`.
 - `B/security/UsuarioActivoFilter.java` (`OncePerRequestFilter`, registrado después del filtro de bearer token): toma el `sub` del JWT (un `sub` que no es un UUID → `401` `ERR_AUTH_01`) y consulta el provider. Existe y está activo → deja el `Authentication` con principal `UsuarioAutenticado` y `authorities` `ROLE_{rol}`. Existe y está desactivado → `403` `ERR_AUTH_03`. No existe → `401` `ERR_AUTH_02`. Solo actúa sobre `/api/v1/**`.
+- El `BearerTokenResolver` de `SecurityConfig` toma el token del header `Authorization` y, si no viene, de la cookie `access_token` (web).
 - `B/security/RutasPublicas.java`: lista de los endpoints sin sesión (`GET /carreras`, `POST /auth/registro|login|refresh|logout`) y `esPublica(request)`. `SecurityConfig` los usa en `permitAll` y en un `BearerTokenResolver` que **ignora el header `Authorization` en esas rutas**: así un token vencido que el cliente sigue mandando no hace fallar el login.
 - `B/features/usuarios/service/UsuarioAutenticableAdapter.java` (`@Service`): implementa el provider con `UsuarioRepository`.
 - `SecurityConfig`: registrar el filtro y el resolver.

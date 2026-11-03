@@ -15,10 +15,10 @@ Todo el código va en `projects/frontend/comedoruagrm/src/` (la feature nueva es
 
 - **Cambio de rumbo: JWT propio en lugar de Firebase Auth.** La primera versión de estas fichas usaba el SDK de Firebase. Ahora el login lo resuelve el backend (ver [`UT-BACKEND`](../UT-BACKEND/README.md)); la web **no** instala el SDK de Firebase ni necesita variables `VITE_FIREBASE_*`. Firebase queda solo para push en mobile.
 - **Diagramas de grado.** El análisis (051) y la secuencia (121) todavía muestran Firebase; el mockup (134) sigue mostrando el diseño anterior (contraseña de mínimo 8 con letras y números, sin carrera, registro universitario ni teléfono, con casilla de términos y login/registro en pestañas): **ganan el CU y estas UT**.
-- **Dónde viven los tokens.** El token de acceso, solo en memoria; el refresh token, en `localStorage` (permite sobrevivir a una recarga; riesgo conocido ante XSS, aceptado a cambio de no usar cookies). Todo pasa por `tokenStorage` (UT-01). Zustand sigue siendo solo estado de UI y los datos del usuario (nombre, rol) vienen del backend con TanStack Query (`GET /auth/usuario-actual`), no se copian a un store (`ESTADO_GLOBAL_FRONTEND.md`).
-- **Renovación automática.** `apiClient` manda `Authorization: Bearer` con el token de acceso. Ante un `401` de una ruta protegida se renueva con `POST /auth/refresh` (una sola renovación a la vez aunque fallen varias peticiones juntas) y se reintenta la petición; si el refresh token tampoco sirve, se borra la sesión y se lleva a `/login` (A8). Un `401` de `login`, `registro` o `refresh` **no** dispara renovación: es un error del formulario.
-- **Flujo de registro:** (1) validar el formulario con Zod; (2) `POST /auth/registro` — el backend crea la cuenta y devuelve la sesión ya abierta —; (3) guardar los tokens y llevar al usuario a su módulo. Si el backend responde `409`, se marca el campo en conflicto (CI, correo o registro universitario, A1).
-- **Flujo de inicio de sesión:** (1) validar; (2) `POST /auth/login`; (3) guardar los tokens; (4) llevar al módulo del rol. El backend anota el acceso en la bitácora al iniciar sesión.
+- **Dónde viven los tokens: en ningún lado del JavaScript.** El backend los pone en cookies `HttpOnly` (`access_token` y `refresh_token`, `SameSite=Strict`) y el navegador las manda solo (`withCredentials`); la web no guarda ni lee ningún token, así un XSS no puede robar la sesión. Para saber si hay sesión se pregunta al backend (`GET /auth/usuario-actual`). Zustand sigue siendo solo estado de UI y los datos del usuario (nombre, rol) vienen del backend con TanStack Query (`GET /auth/usuario-actual`), no se copian a un store (`ESTADO_GLOBAL_FRONTEND.md`).
+- **Renovación automática.** Ante un `401` de una ruta protegida se renueva con `POST /auth/refresh` sin cuerpo (una sola renovación a la vez aunque fallen varias peticiones juntas) y se reintenta la petición; si el refresh token tampoco sirve, se limpia la caché y se lleva a `/login` (A8). Un `401` de `login`, `registro` o `refresh` **no** dispara renovación: es un error del formulario.
+- **Flujo de registro:** (1) validar el formulario con Zod; (2) `POST /auth/registro` — el backend crea la cuenta y deja la sesión abierta con las cookies —; (3) llevar al usuario a su módulo. Si el backend responde `409`, se marca el campo en conflicto (CI, correo o registro universitario, A1).
+- **Flujo de inicio de sesión:** (1) validar; (2) `POST /auth/login`; (3) llevar al módulo del rol. El backend anota el acceso en la bitácora al iniciar sesión.
 - **Errores del backend → mensajes** (la política de contraseña, el bloqueo y el mensaje único de credenciales los aplica el backend; el cliente solo los muestra): `ERR_AUTH_04` → "Correo o contraseña incorrectos" (siempre el mismo, A3); `ERR_AUTH_05` → cuenta bloqueada temporalmente, con el mensaje del backend, que ya dice cuántos minutos faltan (A6); `ERR_AUTH_03` → cuenta desactivada, comunicarse con la DUBSS (A4); error de red o `5xx` → error de conexión con opción de reintentar (A9).
 - **Mientras no existan los módulos de cada rol, todos aterrizan en `/panel`** (el placeholder de `_authenticated/`). `rutaInicioPorRol(rol)` es el único lugar a actualizar cuando los CU de postulación, auditoría, dashboard y asistencia creen sus pantallas. Los roles `DIRECTIVO` y `PERSONAL_COMEDOR` no tienen layout todavía: ven una pantalla "tu módulo aún no está disponible" con el botón de cerrar sesión.
 - **El enlace «¿Olvidó su contraseña?»** (A5, CA13) lo agrega el CU15, que crea su ruta; en este CU la pantalla de login no lo muestra todavía.
@@ -39,16 +39,16 @@ Todo el código va en `projects/frontend/comedoruagrm/src/` (la feature nueva es
 
 **Formulario de login** (`loginSchema`): `correo` (formato de correo) y `contrasena` (no vacía).
 
-**Respuesta de login/registro/refresh que consume la feature** (`Sesion`): `accessToken`, `refreshToken`, `tokenType`, `expiresIn` y `usuario` (`codigo`, `nombres`, `apellidos`, `correo`, `rol`).
+**Respuesta de login/registro/refresh** (`Sesion`): trae `accessToken`, `refreshToken`, `tokenType` y `expiresIn` (son para mobile: la web los **ignora**) y `usuario` (`codigo`, `nombres`, `apellidos`, `correo`, `rol`), que es lo único que usa la feature.
 
 ## Orden de ejecución
 
 | Código | Nombre | Depende de |
 |--------|--------|------------|
-| [UT-CU01-FE-01](./UT-CU01-FE-01.md) | Almacén de la sesión (tokens) | — |
+| [UT-CU01-FE-01](./UT-CU01-FE-01.md) | Cliente HTTP con cookies de sesión | — |
 | [UT-CU01-FE-02](./UT-CU01-FE-02.md) | Schemas de Zod de registro y login | — |
 | [UT-CU01-FE-03](./UT-CU01-FE-03.md) | Hooks y llamadas a la API de cuentas (carreras, registro, login, refresh, logout, usuario actual) | 01 |
-| [UT-CU01-FE-04](./UT-CU01-FE-04.md) | Sesión conectada a la API (token, renovación ante 401 y estado de sesión) | 01, 03 |
+| [UT-CU01-FE-04](./UT-CU01-FE-04.md) | Sesión conectada a la API (renovación ante 401 y estado de sesión) | 01, 03 |
 | [UT-CU01-FE-05](./UT-CU01-FE-05.md) | Acciones de registro, inicio y cierre de sesión con mapeo de errores | 02, 03, 04 |
 | [UT-CU01-FE-06](./UT-CU01-FE-06.md) | Pantalla de registro (/registro) | 02, 03, 05 |
 | [UT-CU01-FE-07](./UT-CU01-FE-07.md) | Pantalla de inicio de sesión (/login) | 02, 05 |
@@ -86,7 +86,7 @@ Todo el código va en `projects/frontend/comedoruagrm/src/` (la feature nueva es
 - Enlace y pantalla de recuperar contraseña: CU15.
 - Pantallas reales de cada rol (postulación, auditoría, dashboard, asistencia) y su layout: CU02, CU05, CU12, CU10 y los demás.
 - Verificación del correo (la documentación no la pide por ahora).
-- Evaluar mover el refresh token a una cookie `HttpOnly` si el riesgo de XSS pasa a importar.
+- Si el frontend pasa a otro dominio (otro *site*), replantear `SameSite=Strict` y la defensa CSRF.
 
 ## Qué NO incluyen estas UT
 

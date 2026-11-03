@@ -27,7 +27,7 @@ Existen los hooks y funciones del contrato HTTP del CU01 usando `apiClient`, con
 - `src/features/auth/types/index.ts`: `Usuario` (`UsuarioResponse`), `Sesion` (`SesionResponse`: `accessToken`, `refreshToken`, `tokenType`, `expiresIn`, `usuario`), `Carrera`.
 - `src/features/auth/api/keys.ts`: `authKeys` (`all: ['auth']`, `usuarioActual`) y `carrerasKeys` (`['carreras', 'list', params]`).
 - `useCarreras.ts`: `useQuery` de `GET /carreras?pageSize=200`.
-- Funciones sin hook (las usan las mutations de `UT-CU01-FE-05` y el manejador de `401` de `UT-CU01-FE-04`): `registrarApi(request)` → `POST /auth/registro` (devuelve la `Sesion` y si fue creada `201` o ya existía `200`), `loginApi(correo, contrasena)` → `POST /auth/login`, `refreshApi(refreshToken)` → `POST /auth/refresh` y `logoutApi(refreshToken)` → `POST /auth/logout`.
+- Funciones sin hook (las usan las mutations de `UT-CU01-FE-05` y el manejador de `401` de `UT-CU01-FE-04`): `registrarApi(request)` → `POST /auth/registro` (devuelve la `Sesion` y si fue creada `201` o ya existía `200`), `loginApi(correo, contrasena)` → `POST /auth/login`, `refreshApi()` → `POST /auth/refresh` y `logoutApi()` → `POST /auth/logout` (ambas **sin cuerpo**: el navegador manda la cookie `refresh_token`).
 - `useUsuarioActual({ enabled })`: `useQuery` de `GET /auth/usuario-actual` (`retry: false`, para que un `401` no reintente).
 - Tests (mockeando `apiClient`, sin backend real): cada llamada pega a la ruta y el método correctos y devuelve el `data` desempaquetado; un `ApiError` con `ERR_US_01` o `ERR_AUTH_04` se propaga con su `code`.
 
@@ -35,7 +35,7 @@ Archivos esperados (crear): `types/index.ts`, `api/keys.ts`, `api/useCarreras.ts
 
 ## Fuera de alcance (no tocar)
 
-- Guardar los tokens (`UT-CU01-FE-01`) y renovarlos ante un `401` (`UT-CU01-FE-04`).
+- Renovar la sesión ante un `401` (`UT-CU01-FE-04`).
 - Mutations con navegación o mensajes: son de `UT-CU01-FE-05`.
 
 ## Resultado esperado
