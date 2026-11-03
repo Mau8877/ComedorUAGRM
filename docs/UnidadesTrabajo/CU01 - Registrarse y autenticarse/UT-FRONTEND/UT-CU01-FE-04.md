@@ -20,18 +20,18 @@ La sesión debe sobrevivir a una recarga de la página, renovarse sola cuando el
 
 ## Objetivo
 
-Existe `AuthProvider` que registra el manejador de `401` en `apiClient`, sabe si hay sesión consultando al backend y expone el estado (`cargando`, `sin-sesion`, `con-sesion`).
+Existe `instalarManejadorDeSesion` que registra el manejador de `401` en `apiClient`, y el estado de sesión (`cargando`, `sin-sesion`, `con-sesion`) sale de consultar al backend.
 
 ## Alcance
 
-- `src/features/auth/api/renovarSesion.ts`: `renovarSesion()` llama a `refreshApi()` (`POST /auth/refresh` **sin cuerpo**: el navegador manda la cookie `refresh_token`); devuelve `true` si renovó y `false` si el backend responde `401` (`ERR_AUTH_06`). **Una sola renovación a la vez** (promesa compartida): varias peticiones que fallan juntas con `401` esperan la misma.
-- `src/features/auth/components/AuthProvider.tsx`: al montarse llama `setUnauthorizedHandler(...)`: ante un `401` de una ruta **que no sea** `/auth/login`, `/auth/registro` ni `/auth/refresh` intenta `renovarSesion()` y reintenta la petición; si no se puede renovar, limpia la caché de TanStack Query y lleva a `/login` (A8). Al desmontarse, lo desregistra. **No hay token que registrar**: las cookies las manda el navegador.
-- `src/features/auth/api/useSesion.ts`: como las cookies `HttpOnly` no se pueden leer desde JavaScript, el estado de sesión sale de `GET /auth/usuario-actual` (`useUsuarioActual`, que ante un `401` ya pasa por la renovación): `cargando` mientras consulta, `con-sesion` si responde el usuario, `sin-sesion` si no. También `esperarSesionInicial()` para el guard del router.
-- `src/store/apiClient.ts`: ajustar `setUnauthorizedHandler` para que el manejador pueda **reintentar la petición** original tras renovar (hoy solo se notifica); sin importar nada de `features/`.
-- `src/main.tsx`: montar `<AuthProvider>` dentro de `QueryProvider` y alrededor de `RouterProvider`.
+- `renovarSesion()` (en `sesion.ts`) llama a `refreshApi()` (`POST /auth/refresh` **sin cuerpo**: el navegador manda la cookie `refresh_token`); devuelve `true` si renovó y `false` si el backend responde `401` (`ERR_AUTH_06`). **Una sola renovación a la vez** (promesa compartida): varias peticiones que fallan juntas con `401` esperan la misma.
+- `src/features/auth/api/sesion.ts`: `instalarManejadorDeSesion({ alPerderSesion })` llama a `setUnauthorizedHandler(...)`: ante un `401` de una ruta **que no sea** `/auth/login`, `/auth/registro`, `/auth/refresh` ni `/auth/logout` intenta `renovarSesion()` y `apiClient` reintenta la petición; si no se puede renovar, llama a `alPerderSesion` (lleva a `/login` salvo en `/`, `/login` y `/registro`). **No hay token que registrar**: las cookies las manda el navegador. Se instala en `main.tsx` justo después de crear el router, **no** con un componente `AuthProvider`: los guards (`beforeLoad`) ya hacen peticiones antes de que se monte cualquier componente, así que el manejador tiene que existir antes.
+- `src/features/auth/api/useSesion.ts` y `useUsuarioActual.ts`: como las cookies `HttpOnly` no se pueden leer desde JavaScript, el estado de sesión sale de `GET /auth/usuario-actual` (`usuarioActualApi` devuelve `null` si no hay sesión, sin lanzar): `useSesion()` da `cargando`/`con-sesion`/`sin-sesion`, y `esperarSesionInicial()` (`cargarUsuarioActual`) sirve al guard del router.
+- `src/store/apiClient.ts`: `setUnauthorizedHandler` pasa a recibir la configuración de la petición fallida y devolver `Promise<boolean>`; si devuelve `true`, `apiClient` **reintenta la petición una sola vez** (marca interna para no reintentar en bucle). Sin importar nada de `features/`.
+- `src/main.tsx`: llamar a `instalarManejadorDeSesion` tras `createRouter`.
 - Tests (con `apiClient`/`refreshApi` simulados): un `401` renueva una sola vez aunque fallen tres peticiones a la vez y reintenta; si el refresh falla, limpia y navega a `/login`; un `401` de `/auth/login` **no** dispara renovación; el estado pasa de `cargando` a `con-sesion`/`sin-sesion`.
 
-Archivos esperados (crear/tocar): `renovarSesion.ts`, `AuthProvider.tsx`, `useSesion.ts`, `apiClient.ts`, `main.tsx`, `components/index.ts`, `api/index.ts` y tests.
+Archivos esperados (crear/tocar): `sesion.ts`, `useSesion.ts`, `useUsuarioActual.ts`, `apiClient.ts`, `main.tsx`, `api/index.ts` y tests.
 
 ## Fuera de alcance (no tocar)
 
