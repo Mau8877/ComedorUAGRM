@@ -25,7 +25,7 @@ Existe `TokenStorage`: guarda el refresh token en `flutter_secure_storage` y el 
 ## Alcance
 
 - `pubspec.yaml`: agregar `flutter_secure_storage` (`flutter pub get`).
-- `lib/core/storage/token_storage.dart`: `TokenStorage` con `accessToken` (campo en memoria), `leerRefreshToken()`, `guardarSesion(accessToken, refreshToken)` y `borrarSesion()`. El refresh token se guarda en `flutter_secure_storage` (Keystore en Android); el token de acceso nunca se persiste. Se recibe el almacenamiento por constructor para poder simularlo en los tests.
+- `lib/core/storage/token_storage.dart`: `TokenStorage` (con una instancia compartida `TokenStorage.instance`, que usa `core/network` sin depender de `features/`) con `accessToken` (campo en memoria), `leerRefreshToken()`, `guardarSesion(accessToken, refreshToken)` y `borrarSesion()`. El refresh token se guarda en `flutter_secure_storage` (Keystore en Android); el token de acceso nunca se persiste. Se recibe el almacenamiento por constructor para poder simularlo en los tests.
 - Test con un almacenamiento simulado: guardar, leer y borrar; el token de acceso no pasa por el almacenamiento seguro.
 
 Archivos esperados (crear/tocar): `pubspec.yaml`, `pubspec.lock`, `token_storage.dart` y el test.

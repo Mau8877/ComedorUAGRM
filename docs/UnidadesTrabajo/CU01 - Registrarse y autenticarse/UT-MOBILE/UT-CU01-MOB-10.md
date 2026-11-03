@@ -23,7 +23,7 @@ El usuario debe poder terminar su sesión desde la app y el AppBar debe mostrar 
 
 ## Alcance
 
-- `lib/layouts/admin/admin_shell.dart` y `lib/layouts/estudiante/estudiante_shell.dart`: en el `AppBar`, un menú (`PopupMenuButton`) con el nombre y el rol del usuario (de `authUsuarioProvider`) y la opción «Cerrar sesión», que llama a `authProvider.cerrarSesion()`. Sin importar features desde `layouts/` más allá del provider de auth (los shells ya montan contenido de prueba).
+- `lib/layouts/admin/admin_shell.dart` y `lib/layouts/estudiante/estudiante_shell.dart`: en el `AppBar`, un menú (`PopupMenuButton`) con el nombre y el rol del usuario (de `authUsuarioProvider`) y la opción «Cerrar sesión», que llama a `authProvider.cerrarSesion()`. El menú es el widget `features/auth/widgets/menu_usuario.dart` (`MenuUsuario`), que los shells importan; es la única excepción a "`layouts/` no importa `features/`" (junto con el provider de auth) (los shells ya montan contenido de prueba).
 - `sin_modulo_screen.dart` (de `UT-CU01-MOB-09`) usa la misma acción.
 - Tras cerrar sesión el router lleva a `/login` y el botón «atrás» no vuelve a una pantalla privada (CA18).
 

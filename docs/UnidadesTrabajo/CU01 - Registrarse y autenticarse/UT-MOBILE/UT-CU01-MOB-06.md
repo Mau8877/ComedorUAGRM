@@ -20,11 +20,11 @@ Los tres flujos del CU combinan la API y el almacén de tokens; esa lógica y la
 
 ## Objetivo
 
-Existe `authProvider` (notifier) con `registrar`, `iniciarSesion` y `cerrarSesion`, que implementan los flujos A, B y C y devuelven errores ya traducidos.
+Existe `authProvider` (un `Notifier<bool>`, `true` mientras hay una acción en curso) con `registrar`, `iniciarSesion` y `cerrarSesion`, que implementan los flujos A, B y C y devuelven errores ya traducidos.
 
 ## Alcance
 
-- `lib/features/auth/providers/auth_provider.dart`: `AsyncNotifier` con los tres métodos según las decisiones del README. `registrar` e `iniciarSesion` llaman a `AuthService`, guardan los tokens con `authSesionProvider.abrir(...)` y devuelven el `Usuario`. Evita el doble envío mientras hay una acción en curso (A7). `cerrarSesion` hace `POST /auth/logout` con el refresh token (ignora cualquier error de red o `401`: A10), borra la sesión y solo cierra este dispositivo.
+- `lib/features/auth/providers/auth_provider.dart`: `Notifier<bool>` (síncrono y no `AsyncNotifier`, para que arranque en `false` y no en `loading`) con `registrar(RegistroRequest)` e `iniciarSesion(correo, contrasena)`, que devuelven `null` si salió bien (la sesión queda abierta con `authSesionProvider.abrir(...)` y el router lleva al módulo) o un `AuthError` ya traducido, y `cerrarSesion()`. Una segunda acción mientras hay una en curso se ignora (A7). `cerrarSesion` hace `POST /auth/logout` con el refresh token (ignora cualquier error de red o `401`: A10), borra la sesión y solo cierra este dispositivo.
 - `lib/features/auth/auth_error_mapper.dart`: función pura que traduce un `ApiException.code` a un mensaje y, si aplica, al campo en conflicto (`ci`, `correo`, `registroUniversitario`): `ERR_AUTH_04` → credenciales incorrectas (siempre el mismo), `ERR_AUTH_05` → cuenta bloqueada (con el mensaje del backend, que dice los minutos que faltan), `ERR_AUTH_03` → cuenta desactivada, `ERR_US_01/02/03` → campo en conflicto, error de red → mensaje de conexión con reintento.
 - Tests con `AuthService` simulado: cada fila de la tabla de errores del README; registro feliz guarda los tokens; un `409` marca el campo; cerrar sesión limpia aunque el backend falle; no se imprime ninguna contraseña ni token.
 

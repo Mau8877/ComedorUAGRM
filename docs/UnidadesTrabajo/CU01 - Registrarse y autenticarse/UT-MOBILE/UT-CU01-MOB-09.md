@@ -24,8 +24,9 @@ El `GoRouter` redirige según la sesión (tokens del backend), tiene las rutas `
 
 ## Alcance
 
-- `lib/core/routing/app_router.dart`: el router pasa a ser un provider (`appRouterProvider`) que escucha `authSesionProvider` y `authUsuarioProvider` (`refreshListenable`). `redirect`: sin sesión → `/login` salvo en `/login` y `/registro`; con sesión en `/login`, `/registro` o `/` → `rutaInicioPorRol(rol)`; mientras la sesión se resuelve no redirige (pantalla de carga). Sustituye el `redirect` con `TODO` actual.
-- Rutas nuevas: `/login` (`LoginScreen`), `/registro` (`RegistroScreen`) y `/sin-modulo` (aviso para `DIRECTIVO` y `PERSONAL_COMEDOR` con botón de cerrar sesión).
+- `lib/core/routing/app_router.dart`: el router pasa a ser un provider (`appRouterProvider`) que escucha `authSesionProvider` y `authUsuarioProvider` (`refreshListenable`). `redirect`: sin sesión → `/login` salvo en `/login` y `/registro`; con sesión en `/login`, `/registro` o `/` → `rutaInicioPorRol(rol)`; mientras la sesión se resuelve va a `/cargando` (pantalla de carga). Sustituye el `redirect` con `TODO` actual.
+- La lógica del `redirect` es la función pura `redirectDeSesion` (probada sin montar la app).
+- Rutas nuevas: `/cargando` (`CargandoScreen`, mientras se restaura la sesión), `/login` (`LoginScreen`), `/registro` (`RegistroScreen`) y `/sin-modulo` (aviso para `DIRECTIVO` y `PERSONAL_COMEDOR` con botón de cerrar sesión).
 - `lib/main.dart`: `MaterialApp.router(routerConfig: ref.watch(appRouterProvider))` (la app pasa a `ConsumerWidget`).
 - `test/widget_test.dart`: ajustado al nuevo provider del router.
 - `NAVEGACION_MOBILE.md`: reemplazar el `TODO` descrito en la regla por el redirect real.
