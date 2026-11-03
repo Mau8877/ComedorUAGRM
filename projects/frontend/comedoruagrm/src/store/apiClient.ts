@@ -41,12 +41,12 @@ export const apiClient = createBaseApi({
   baseURL: import.meta.env.VITE_API_BASE_URL,
 })
 
-// * La sesión es de Firebase Auth (ver SEGURIDAD_AUTH_BACKEND.md): el cliente
-// * manda el ID token en `Authorization: Bearer` y no usa cookies (por eso
-// * no hay `withCredentials`). Este módulo no importa el SDK de Firebase: el
-// * flujo de autenticación registra acá cómo obtener el token
-// * (`getIdToken()` del SDK, que lo renueva solo) y qué hacer ante un 401
-// * (cerrar la sesión de Firebase y llevar a /login), así `store/` sigue sin
+// * La sesión usa el JWT propio del backend (ver SEGURIDAD_AUTH_BACKEND.md): el
+// * cliente manda el token de acceso en `Authorization: Bearer` y no usa
+// * cookies (por eso no hay `withCredentials`). Este módulo no sabe dónde se
+// * guardan los tokens: el flujo de autenticación registra acá cómo obtener el
+// * token de acceso y qué hacer ante un 401 (renovarlo con el refresh token o,
+// * si no se puede, cerrar la sesión y llevar a /login), así `store/` sigue sin
 // * depender de ninguna feature.
 type AuthTokenProvider = () => Promise<string | null>
 

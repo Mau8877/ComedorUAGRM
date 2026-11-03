@@ -36,11 +36,11 @@ describe('apiClient', () => {
 
   it('agrega Authorization: Bearer con el token del proveedor registrado', async () => {
     usarAdapter(200, { status: 'success', data: { ok: true }, message: '', timestamp: '' })
-    setAuthTokenProvider(async () => 'token-firebase')
+    setAuthTokenProvider(async () => 'token-de-acceso')
 
     await apiClient.get('/x')
 
-    expect(vistas[0].headers.get('Authorization')).toBe('Bearer token-firebase')
+    expect(vistas[0].headers.get('Authorization')).toBe('Bearer token-de-acceso')
   })
 
   it('no manda Authorization si no hay proveedor o no hay sesión', async () => {
