@@ -38,7 +38,7 @@ dependencies:
   go_router: ^18.0.0
   flutter_riverpod: ^2.6.1
   flutter_dotenv: ^6.0.1
-  flutter_secure_storage: ^11.0.0
+  flutter_secure_storage: ^10.3.1
   google_fonts: ^8.2.1
   comedoru_palette:
     path: ../../packages/palette
