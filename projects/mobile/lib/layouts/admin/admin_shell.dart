@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../features/auth/widgets/menu_usuario.dart';
 import '../../shared/widgets/comedoru_logo.dart';
 
 /// Shell del rol Admin -- AppBar + `NavigationDrawer` (Material 3, cuatro
@@ -44,6 +45,7 @@ class _AdminShellState extends State<AdminShell> {
             Text('ComedorU Admin'),
           ],
         ),
+        actions: const [MenuUsuario()],
       ),
       drawer: NavigationDrawer(
         selectedIndex: _selected,

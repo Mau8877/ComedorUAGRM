@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../features/auth/widgets/menu_usuario.dart';
 import '../../shared/widgets/comedoru_logo.dart';
 
 /// Shell del rol Estudiante -- AppBar + `NavigationBar` (Material 3) inferior,
@@ -43,6 +44,7 @@ class _EstudianteShellState extends State<EstudianteShell> {
             Text('ComedorU'),
           ],
         ),
+        actions: const [MenuUsuario()],
       ),
       body: Padding(
         padding: const EdgeInsets.all(24),
