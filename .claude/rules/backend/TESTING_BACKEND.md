@@ -82,6 +82,8 @@ missing` sin eso).
   `postgres`). Flyway migra esa base: usar una descartable, nunca la de
   desarrollo.
 
+- **Un solo Postgres por JVM, tests que no se pisan.** Cada contexto de Spring distinto que cachean los tests abre su propio pool y lo mantiene hasta el final: `src/test/resources/config/application.properties` fija un pool chico (`spring.datasource.hikari.maximum-pool-size`), porque con el pool por defecto una docena de contextos supera el `max_connections` de Postgres y los siguientes fallan con "too many clients". Y un test de integración que **commitea** datos (`@SpringBootTest` + `MockMvc`) deja la base vacía al terminar (`@AfterEach`), para que los tests de repositorio que corren después sobre la misma base no vean sus cuentas.
+
 > **Docker Desktop en Windows, nota conocida:** montar
 > `/var/run/docker.sock` no alcanza siempre — Docker Desktop puede exponer
 > un socket restringido/"stub" que responde a `/info` con casi todos los

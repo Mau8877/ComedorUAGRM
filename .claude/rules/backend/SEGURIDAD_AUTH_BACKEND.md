@@ -162,6 +162,8 @@ se almacena como rol.
   `@PreAuthorize("hasRole('ADMINISTRADOR_DUBSS')")` (o `hasAnyRole(...)`) a
   nivel de método de `service` (no en el controller — mantiene la regla de
   controllers delgados de [ENDPOINTS_BACKEND.md](ENDPOINTS_BACKEND.md)).
+- Un usuario autenticado que llama a algo que exige un rol que no tiene recibe
+  `403` con `ERR_AUTH_07` en el sobre estándar (lo escribe `ApiAccessDeniedHandler`).
 - El nombre exacto de cada rol y a qué endpoints accede lo fija el caso de
   uso que lo necesita.
 

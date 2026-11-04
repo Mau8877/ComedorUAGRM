@@ -89,6 +89,7 @@ falla de infraestructura (DB caída, etc.), cae en el handler genérico del
   de `@Valid`/Bean Validation → `400`, con el código genérico de validación
   del módulo correspondiente (ej. `ERR_SYS_01` si no aplica a un módulo
   específico).
+- Un `@ExceptionHandler(AccessDeniedException.class)` que **vuelve a lanzar** la excepción: la falta de rol (`@PreAuthorize`) la responde `ApiAccessDeniedHandler` de `security/` (`403` `ERR_AUTH_07`), no este advice. Sin ese handler, el catch-all de abajo la convertiría en un `500`.
 - Un `@ExceptionHandler(Exception.class)` catch-all → `500`, con un código
   genérico (ej. `ERR_SYS_00`), **sin** exponer el mensaje/stacktrace real al
   cliente (el mensaje de negocio es genérico: "Ocurrió un error inesperado"),
