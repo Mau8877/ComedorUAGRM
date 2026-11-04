@@ -14,17 +14,18 @@ está configurada como está.
                     │           docker-compose.yml (dev)             │
                     │                                                │
   Internet/host ───▶│  proxy (nginx :80)                             │
-                    │    ├── /api/*          ──▶ backend  (:8080)    │
+                    │    ├── /api/*          ──▶ core     (:8080)    │
                     │    ├── /landing-page/* ──▶ nexware-landing (:4321)│
                     │    └── /*               ──▶ comedoruagrm (:5173)│
                     │                                                │
-                    │  backend  ──▶ postgres (:5432)                 │
+                    │  core     ──▶ postgres (:5432)                 │
                     │           ──▶ redis    (:6379)                 │
                     │           ──▶ minio    (:9000)                 │
                     │           ──▶ Docker socket (Testcontainers)    │
+                    │  ia (:8000)  (interno, sin pasar por el proxy) │
                     │                                                │
                     │  minio-init ──▶ minio (crea el bucket)         │
-                    │  prometheus ──▶ scrapea backend (:8080)        │
+                    │  prometheus ──▶ scrapea core    (:8080)        │
                     │  grafana    ──▶ lee de prometheus              │
                     └──────────────────────────────────────────────┘
 ```
@@ -40,14 +41,15 @@ pasar por el proxy.
 | `80` | `proxy` (nginx) | Punto de entrada único, simula cómo se accedería en producción |
 | `5173` | `comedoruagrm` (Vite) | Acceso directo al dev server de React, con HMR |
 | `4321` | `nexware-landing` (Astro) | Acceso directo al dev server de la landing de Nexware |
-| `8080` | `backend` (Spring Boot) | Acceso directo a la API, Swagger, `/health`, `/prometheus` |
+| `8080` | `core` (Spring Boot) | Acceso directo a la API, Swagger, `/health`, `/prometheus` |
+| `8000` | `ia` (FastAPI) | Acceso directo al módulo de IA y su `/health` (no pasa por el proxy) |
 | `5432` | `postgres` | Conectar un cliente SQL (DBeaver, pgAdmin, etc.) directo |
 | `6379` | `redis` | Conectar un cliente Redis directo |
 | `9000` / `9001` | `minio` | API S3 (`9000`) y consola web de administración (`9001`) |
 | `9090` | `prometheus` | UI de Prometheus (ver targets, correr queries PromQL) |
 | `3000` | `grafana` | Dashboards (sin ninguno provisionado todavía, ver sección 7) |
 
-## 2. Los 10 servicios de `docker-compose.yml`
+## 2. Los servicios de `docker-compose.yml`
 
 ### 2.1 `proxy` — reverse proxy (nginx)
 
@@ -57,12 +59,12 @@ pasar por el proxy.
   servicio).
 - **Config**: monta `infrastructure/nginx/nginx.conf` de solo lectura.
 - **Reglas de enrutamiento** (ver [sección 3](#3-nginx-enrutamiento-y-el-fix-de-dns-dinámico)):
-  `/api/*` → `backend:8080`, `/landing-page/*` → `nexware-landing:4321`
+  `/api/*` → `core:8080`, `/landing-page/*` → `nexware-landing:4321`
   (sin recortar el prefijo), cualquier otra ruta → `comedoruagrm:5173`.
 - **`restart: unless-stopped`**: si el contenedor muere (ver el bug de DNS
   explicado abajo), Docker lo reintenta solo en vez de quedar caído hasta
   que alguien lo note.
-- **Depende de**: `comedoruagrm`, `nexware-landing` y `backend` (orden de
+- **Depende de**: `comedoruagrm`, `nexware-landing` y `core` (orden de
   arranque, no espera a que estén realmente listos — ver sección 3 para
   por qué esto ya no es un problema).
 
@@ -103,11 +105,14 @@ pasar por el proxy.
 - **Volumen**: `nexware_landing_node_modules`, aislado del bind mount por
   el mismo motivo que `comedoruagrm_node_modules_pkg` (ver sección 4).
 
-### 2.3 `backend` — Spring Boot 4.1 / Java 21 (modo desarrollo)
+### 2.3 `core` — Spring Boot 4.1 / Java 21 (modo desarrollo)
+
+El servicio corre `projects/backend/comedor-uagrm-core`. Su contenedor se
+llama `comedor-uagrm-core` y es el que usan nginx y Prometheus.
 
 - **Imagen**: `maven:3.9-eclipse-temurin-21-alpine` (Maven + JDK 21, imagen
   genérica).
-- **`working_dir`**: `/app/projects/backend`.
+- **`working_dir`**: `/app/projects/backend/comedor-uagrm-core`.
 - **Comando**: `mvn spring-boot:run -Dspring-boot.run.profiles=dev` — corre
   con Spring Boot DevTools activo (recarga en caliente al cambiar código,
   ver `pom.xml`).
@@ -149,7 +154,7 @@ pasar por el proxy.
     la imagen oficial de Postgres). **Hoy está vacía** (`.gitkeep`), no hay
     ningún script de inicialización custom todavía — el esquema real lo
     crea Flyway desde el backend (`V1__init_schema.sql`), no este mecanismo.
-- **Healthcheck**: `pg_isready` cada 10s — es lo que usa `backend` para
+- **Healthcheck**: `pg_isready` cada 10s — es lo que usa `core` para
   saber cuándo arrancar.
 
 ### 2.5 `redis` — caché (Redis 8)
@@ -205,10 +210,10 @@ pasar por el proxy.
   global:
     scrape_interval: 5s
   scrape_configs:
-    - job_name: 'comedor-uagrm-backend'
+    - job_name: 'comedor-uagrm-core'
       metrics_path: '/prometheus'
       static_configs:
-        - targets: ['comedor-uagrm-backend:8080']
+        - targets: ['comedor-uagrm-core:8080']
   ```
   Scrapea el backend cada 5 segundos en `/prometheus` (no `/actuator/prometheus`
   — el backend expone Actuator en la raíz, ver `LOGGING_BACKEND.md`/`SEGURIDAD_AUTH_BACKEND.md`).
@@ -243,18 +248,18 @@ pasar por el proxy.
 
 | Ruta | Va a | Notas |
 | --- | --- | --- |
-| `/api/*` | `comedor-uagrm-backend:8080` | Pasa `X-Real-IP`/`X-Forwarded-For`/`X-Forwarded-Proto` para que el backend sepa la IP real del cliente |
+| `/api/*` | `comedor-uagrm-core:8080` | Pasa `X-Real-IP`/`X-Forwarded-For`/`X-Forwarded-Proto` para que el backend sepa la IP real del cliente |
 | `/*` (todo lo demás) | `comedor-uagrm-frontend:5173` | Incluye soporte de WebSockets (`Upgrade`/`Connection: upgrade`) — **obligatorio** para que el HMR de Vite funcione a través del proxy |
 
 **Detalle importante, no obvio**: la resolución de esos nombres de
-contenedor (`comedor-uagrm-backend`, `comedor-uagrm-frontend`) es
+contenedor (`comedor-uagrm-core`, `comedor-uagrm-frontend`) es
 **dinámica, en tiempo de request**, no fija al arrancar nginx:
 
 ```nginx
 resolver 127.0.0.11 valid=10s;
 
 location /api/ {
-    set $backend_upstream http://comedor-uagrm-backend:8080;
+    set $backend_upstream http://comedor-uagrm-core:8080;
     proxy_pass $backend_upstream;
     ...
 }
@@ -266,7 +271,7 @@ con el hostname fijo) hace que nginx resuelva el nombre **en cada
 request**, no una sola vez al arrancar.
 
 **Por qué importa**: con un `upstream {}` fijo (la config original de este
-proyecto), si `backend`/`frontend` no estaban levantados en el instante
+proyecto), si `core`/`frontend` no estaban levantados en el instante
 exacto en que nginx arrancaba, nginx fallaba con
 `host not found in upstream` y **el proceso moría por completo**, sin
 reintentar — pasó de verdad en esta máquina tras un reinicio de Docker
@@ -358,7 +363,7 @@ Usadas por `docker-compose.yml` para levantar `postgres` y `minio`:
 | `MINIO_ROOT_USER` | `minio_admin` | Usuario admin de MinIO (mínimo 3 caracteres, si no MinIO no arranca) |
 | `MINIO_ROOT_PASSWORD` | `minio_local_pass_123` | Password admin de MinIO (**mínimo 8 caracteres**, si no MinIO tira `FATAL` y no arranca — pasó de verdad en esta sesión) |
 
-### 6.2 Backend (`projects/backend/.env`, a partir de `.env.example`)
+### 6.2 Backend core (`projects/backend/comedor-uagrm-core/.env`, a partir de `.env.example`)
 
 Usadas directamente por Spring Boot (`application.properties` las lee vía
 `${VARIABLE:default}`):
@@ -401,10 +406,10 @@ genéricas + bind mount del código, sin build). Para producción existen dos
 `Dockerfile` independientes, probados manualmente esta sesión con
 `docker build`/`docker run` reales (no solo revisados a ojo):
 
-### 7.1 `projects/backend/Dockerfile`
+### 7.1 `projects/backend/comedor-uagrm-core/Dockerfile`
 
-Build multi-stage self-contenido (contexto = `projects/backend`, no la
-raíz — el backend no es un workspace, es un único módulo Maven):
+Build multi-stage self-contenido (contexto = `projects/backend/comedor-uagrm-core`,
+no la raíz — el core no es un workspace, es un único módulo Maven):
 
 1. **Etapa `builder`** (`maven:3.9.6-eclipse-temurin-21-alpine`): copia
    `pom.xml` primero (cache de capas de Docker), descarga dependencias
@@ -417,7 +422,7 @@ raíz — el backend no es un workspace, es un único módulo Maven):
    root.
 
 ```bash
-docker build -f projects/backend/Dockerfile -t comedor-uagrm-backend projects/backend
+docker build -f projects/backend/comedor-uagrm-core/Dockerfile -t comedor-uagrm-core projects/backend/comedor-uagrm-core
 ```
 
 Probado real: build exitoso, y corriendo contra la red de

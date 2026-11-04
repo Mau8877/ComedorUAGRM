@@ -5,7 +5,7 @@
 El componente de UI **ya está construido y funcionando en el frontend**,
 pero corriendo 100% sobre datos mock -- no existe todavía ningún endpoint
 de `notificaciones` en el backend (no hay `features/notificaciones/` en
-`projects/backend/src/main/java/com/comedoruagrm/backend/`). Este
+`projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/`). Este
 documento es el contrato que el backend necesita implementar para que el
 frontend deje de simular y pase a hablar con la API real.
 

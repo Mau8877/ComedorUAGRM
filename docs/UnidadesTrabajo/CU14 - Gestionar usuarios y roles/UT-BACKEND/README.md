@@ -11,7 +11,7 @@ Leer [`.claude/rules/`](../../../../.claude/rules/) — `ARQUITECTURA_BACKEND.md
 
 ## Decisiones de diseño
 
-En estas fichas, `B/` = `projects/backend/src/main/java/com/comedoruagrm/backend/` y `T/` = `projects/backend/src/test/java/com/comedoruagrm/backend/`.
+En estas fichas, `B/` = `projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/` y `T/` = `projects/backend/comedor-uagrm-core/src/test/java/com/comedoruagrm/backend/`.
 
 - **Qué sigue del diagrama de secuencia.** Crear: buscar CI y correo (`Usuario`), buscar el rol (`Rol`), y recién si no hay conflicto **generar la contraseña temporal y crear** la cuenta. Desactivar: **validar primero** que no sea la propia cuenta ni el último Administrador activo y recién después `activo = false` e **invalidar las sesiones**. Listar, editar y cambiar rol siguen el mismo patrón (`list`, `update`, `find(rol)`). Reactivar usa `activo = true`.
 - **Un módulo y dos clases nuevas.** Todo vive en `features/usuarios/`: `UsuarioController` (`/api/v1/usuarios`, el `UsuarioController` del análisis) y `UsuarioPersonalService`, que se agrega **al lado** de `UsuarioService` (que sigue siendo del registro y las credenciales del CU01) para no mezclar dos responsabilidades en una clase. `UsuarioPersonalService` usa `SesionService` (módulo `auth`) y no toca su repositorio.

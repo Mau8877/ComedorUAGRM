@@ -11,7 +11,7 @@ Leer [`.claude/rules/`](../../../../.claude/rules/) — `ARQUITECTURA_BACKEND.md
 
 ## Decisiones de diseño
 
-En estas fichas, `B/` = `projects/backend/src/main/java/com/comedoruagrm/backend/` y `T/` = `projects/backend/src/test/java/com/comedoruagrm/backend/`.
+En estas fichas, `B/` = `projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/` y `T/` = `projects/backend/comedor-uagrm-core/src/test/java/com/comedoruagrm/backend/`.
 
 - **Cambio de rumbo: JWT propio en lugar de Firebase Auth.** La primera versión de estas fichas delegaba el login en Firebase Auth. Se decidió que la autenticación la implemente el propio backend; Firebase queda solo para las notificaciones push (FCM) de mobile. Todo lo que dependía de Firebase (verificación de su ID token, `firebase_uid`, registro idempotente por uid, "el backend no tiene login") se reemplazó por lo de abajo.
 - **Diagramas de grado.** El análisis (051) y la secuencia (121) todavía muestran Firebase Auth como proveedor de identidad: **ganan el CU y estas UT**, y esos diagramas quedan por actualizar en la documentación de grado (también el diseño lógico 091, que ahora tiene `usuario.password_hash`, las columnas de bloqueo y la tabla `sesion`; `docs/DiagramaConceptual.mermaid` ya está al día). El mockup (134) sigue mostrando el diseño anterior (contraseña de mínimo 8 con letras y números, sin carrera, registro universitario ni teléfono, con casilla de términos y login/registro en pestañas): tampoco se corrige.

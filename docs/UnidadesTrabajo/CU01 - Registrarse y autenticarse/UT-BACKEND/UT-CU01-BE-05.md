@@ -28,7 +28,7 @@ El backend firma sus tokens de acceso (JWT HS256), valida firma, emisor y expira
 - `B/config/AutenticacionConfig.java`: beans `SecretKey` (falla el arranque con un mensaje que nombra `JWT_SECRET` si falta o tiene menos de 32 bytes), `JwtEncoder` y `JwtDecoder` (HS256, con validadores de **emisor** y expiración) y `PasswordEncoder` (`BCryptPasswordEncoder`).
 - `B/security/TokenService.java`: `emitirAcceso(UUID codigoUsuario)` → JWT con `iss`, `sub` = código del usuario, `iat` y `exp`; devuelve el token y su vida en segundos. El token **no** lleva rol ni correo.
 - `B/config/SecurityConfig.java`: `oauth2ResourceServer(jwt)`, sesión `STATELESS`, el resto de las reglas actuales (infra pública, `anyRequest().authenticated()`).
-- `projects/backend/.env.example`, `.env.example` de la raíz y `docker-compose.yml` (servicio `backend`): variable `JWT_SECRET`. `src/test/resources/config/application.properties`: secreto de pruebas.
+- `projects/backend/comedor-uagrm-core/.env.example`, `.env.example` de la raíz y `docker-compose.yml` (servicio `core`): variable `JWT_SECRET`. `src/test/resources/config/application.properties`: secreto de pruebas.
 - `SEGURIDAD_AUTH_BACKEND.md`: documentar el modelo.
 - Tests (`T/config/AutenticacionConfigTest`): un token emitido se decodifica con el mismo secreto y lleva el `sub`; uno firmado con otro secreto, de otro emisor o vencido es rechazado; secreto ausente o corto falla con un mensaje que nombra `JWT_SECRET`; el hash BCrypt no es la contraseña y se verifica.
 

@@ -38,7 +38,7 @@ Dos archivos de migración. El primero, `V20261102100000__crear_tablas_cuentas_y
 
 El segundo, `V20261102100100__cargar_carreras.sql`, inserta las 71 carreras de la UAGRM con su facultad en texto (por ejemplo, `Ingeniería Informática` / `Facultad de Ingeniería en Ciencias de la Computación y Telecomunicaciones`). La lista de origen repite algunas carreras con distintos códigos de plan (13 filas); como `carrera(nombre)` es único, se carga **una sola vez cada nombre** (sin distinguir mayúsculas ni tildes: `Ingenieria Civil` e `Ingeniería Civil` son la misma carrera).
 
-Archivos esperados (crear): `projects/backend/src/main/resources/db/migration/V20261102100000__crear_tablas_cuentas_y_acceso.sql` y `.../V20261102100100__cargar_carreras.sql`.
+Archivos esperados (crear): `projects/backend/comedor-uagrm-core/src/main/resources/db/migration/V20261102100000__crear_tablas_cuentas_y_acceso.sql` y `.../V20261102100100__cargar_carreras.sql`.
 
 ## Fuera de alcance (no tocar)
 
