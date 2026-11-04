@@ -85,8 +85,9 @@ En estas fichas, `B/` = `projects/backend/src/main/java/com/comedoruagrm/backend
 | [UT-CU01-BE-15](./UT-CU01-BE-15.md) | Sesiones por dispositivo: refresh tokens | 01, 03, 05 |
 | [UT-CU01-BE-13](./UT-CU01-BE-13.md) | Login, refresh, logout y usuario actual | 04, 08, 11, 15 |
 | [UT-CU01-BE-14](./UT-CU01-BE-14.md) | Pruebas de integración con base real del registro y la sesión | 09, 12, 13 |
+| [UT-CU01-BE-16](./UT-CU01-BE-16.md) | Anotación `@Auditar` para la bitácora | 04, 11, 13 |
 
-**Cadena:** `01 → 02 → 03 → 04`; `05 → 06 → 07 → 08`; `02, 05 → 09`; `02 → 10`; `01, 03, 05 → 15`; `03, 04, 05, 10, 15 → 11`; `07, 10, 11 → 12`; `04, 08, 11, 15 → 13`; `09, 12, 13 → 14`. (La UT-15 se agregó al cambiar a JWT propio; por eso su número va después de la 14 aunque se ejecute antes de la 11.)
+**Cadena:** `01 → 02 → 03 → 04`; `05 → 06 → 07 → 08`; `02, 05 → 09`; `02 → 10`; `01, 03, 05 → 15`; `03, 04, 05, 10, 15 → 11`; `07, 10, 11 → 12`; `04, 08, 11, 15 → 13`; `09, 12, 13 → 14`; `04, 11, 13 → 16` (la UT-16 reemplaza las llamadas manuales a la bitácora de 11 y 13 por `@Auditar`). (La UT-15 se agregó al cambiar a JWT propio; por eso su número va después de la 14 aunque se ejecute antes de la 11.)
 
 ## Cobertura del caso de uso
 
@@ -113,7 +114,7 @@ En estas fichas, `B/` = `projects/backend/src/main/java/com/comedoruagrm/backend
 | CA14 | Mismo comportamiento web y móvil: es la misma API | 12, 13 |
 | CA15 | Sesión inválida → 401 | 05, 06, 07, 15 |
 | CA17 a CA19 | Cerrar sesión solo en este dispositivo | 13, 15 |
-| CA20 | Acceso en la bitácora; sin contraseñas ni tokens en logs | 04, 11, 13, 15 |
+| CA20 | Acceso en la bitácora; sin contraseñas ni tokens en logs | 04, 11, 13, 15, 16 |
 
 ## Follow-ups (no se implementan en estas UT)
 
