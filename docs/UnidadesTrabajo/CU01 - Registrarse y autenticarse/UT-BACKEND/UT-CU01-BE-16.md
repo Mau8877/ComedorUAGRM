@@ -25,7 +25,7 @@ Los eventos `REGISTRO_USUARIO` e `INICIO_SESION` se anotan con `@Auditar` sobre 
 
 - `B/common/auditoria/Auditar.java`: anotación de método con `accion` y `entidad`.
 - `B/common/auditoria/Auditable.java`: contrato del resultado (`actorId`, `actorCodigo`, y por defecto `entidadId`, `detalle`, `auditar`). Vive en `common/` para que los módulos de negocio no dependan de `bitacora/`.
-- `B/features/bitacora/AuditoriaAspect.java`: `@AfterReturning` que anota si el método terminó bien y su resultado es un `Auditable` con `auditar() == true`. La IP sale del request en curso (`RequestContextHolder`).
+- `B/features/bitacora/aspect/AuditoriaAspect.java`: `@AfterReturning` que anota si el método terminó bien y su resultado es un `Auditable` con `auditar() == true`. La IP sale del request en curso (`RequestContextHolder`).
 - `BitacoraService.registrar(Long actorId, UUID actorCodigo, ...)`: sobrecarga que usa una referencia (`EntityManager.getReference`) en lugar de consultar al usuario. La llamada directa existente se mantiene para eventos que no encajan en la anotación.
 - Adopción: `UsuarioService.registrarPostulante` (`REGISTRO_USUARIO`, solo si `creado`) y `SesionService.abrir` (`INICIO_SESION`); `ResultadoRegistro` y `SesionAbierta` implementan `Auditable`. `AuthService` y `AuthController` dejan de recibir `ip` y `AuthService` deja de depender de `BitacoraService`.
 - `pom.xml`: `spring-boot-starter-aspectj` (ya venía de forma transitiva; se declara por claridad).

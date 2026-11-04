@@ -26,7 +26,7 @@ Existen `RegistroRequest`, `UsuarioResponse` y `UsuarioErrorCodes`, con los cód
 
 - `B/features/auth/dto/RegistroRequest.java` (`record`) con las validaciones de Bean Validation del contrato del README (`@NotBlank`, `@Size` máximas, `@NotNull` en `carreraCodigo`, `@Email` en `correo`, contraseña de 6 a 72 caracteres y `@AssertTrue` en `confirmacionCoincide`), mensajes en español. `registroUniversitario` con `@Pattern(regexp = "^[1-9]\\d{8}$")` (exactamente 9 dígitos y sin cero inicial, mensaje en español); sin formato de CI (por definir con la DUBSS).
 - `B/features/usuarios/dto/UsuarioResponse.java` (`record`): `codigo`, `nombres`, `apellidos`, `correo`, `rol`.
-- `B/features/usuarios/UsuarioErrorCodes.java`: `ERR_US_01` a `ERR_US_04` (ver tabla del README).
+- `B/features/usuarios/exception/UsuarioErrorCodes.java`: `ERR_US_01` a `ERR_US_04` (ver tabla del README).
 - `docs/errors/usuarios/ERRORES_USUARIOS.md` (cuatro secciones, formato de `GUIA_ERRORES_BACKEND.md`) y sus links en `docs/errors/README.md`.
 - Test de validación (`spring-boot-starter-validation-test`): campos vacíos y largos excedidos producen violaciones; contraseña de 5 caracteres, de más de 72 o que no coincide con su confirmación, y un correo sin formato, también; un request completo no.
 

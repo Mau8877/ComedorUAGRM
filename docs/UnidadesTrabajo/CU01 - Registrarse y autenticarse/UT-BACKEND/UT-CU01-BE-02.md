@@ -24,7 +24,7 @@ Existen los Models `Rol` y `Carrera`, las constantes de nombres de rol y sus rep
 ## Alcance
 
 - `B/features/usuarios/model/Rol.java` y `Carrera.java`: extienden `BaseModel`, `@Entity`, `@Table(name = "rol")` / `"carrera"`, `@AttributeOverride(name = "codigo", column = @Column(name = "codigo_rol"))` (y `codigo_carrera`). `@Getter` de clase; **sin setters** (son catálogos de solo lectura para la aplicación).
-- `B/features/usuarios/RolNombres.java`: constantes de texto `POSTULANTE`, `ADMINISTRADOR_DUBSS`, `DIRECTIVO`, `PERSONAL_COMEDOR` (no un enum Java).
+- `B/features/usuarios/constant/RolNombres.java`: constantes de texto `POSTULANTE`, `ADMINISTRADOR_DUBSS`, `DIRECTIVO`, `PERSONAL_COMEDOR` (no un enum Java).
 - `B/features/usuarios/repository/RolRepository.java` (`JpaRepository<Rol, Long>`, `Optional<Rol> findByNombre(String)`) y `CarreraRepository.java` (`findByCodigo(UUID)`, `Page<Carrera> findAll(Pageable)`).
 - Test `T/features/usuarios/repository/…` solo si hay Docker (patrón de `TESTING_BACKEND.md`): `findByNombre("POSTULANTE")` existe tras la migración.
 

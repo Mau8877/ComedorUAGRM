@@ -25,7 +25,7 @@ Existe `BitacoraService.registrar(...)`, que inserta una fila append-only en `bi
 ## Alcance
 
 - `B/features/bitacora/model/Bitacora.java`: extiende `BaseModel`, `@Table(name = "bitacora")`, `@AttributeOverride(... "codigo_bitacora")`. Campos: `usuario` (`@ManyToOne` LAZY, nullable), `accion`, `entidad`, `entidadId`, `detalle` (`Map<String, Object>` con `@JdbcTypeCode(SqlTypes.JSON)`), `ip` (`@JdbcTypeCode(SqlTypes.INET)`). **Sin setters** (append-only; nunca se actualiza ni se borra).
-- `B/features/bitacora/BitacoraAcciones.java`: constantes `REGISTRO_USUARIO` e `INICIO_SESION`.
+- `B/features/bitacora/constant/BitacoraAcciones.java`: constantes `REGISTRO_USUARIO` e `INICIO_SESION`.
 - `B/features/bitacora/repository/BitacoraRepository.java`.
 - `B/features/bitacora/service/BitacoraService.java`: `registrar(Usuario usuario, String accion, String entidad, Long entidadId, Map<String, Object> detalle, String ip)`, con `@Transactional` (se une a la transacción de quien lo llama). Loguea a nivel INFO el evento **sin** datos sensibles.
 - Tests: unitario del service con `BitacoraRepository` mockeado (se guarda lo indicado); con Docker, que `detalle` e `ip` se guardan y leen.
