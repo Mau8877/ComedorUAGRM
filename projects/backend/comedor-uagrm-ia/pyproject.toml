@@ -1,0 +1,16 @@
+[project]
+name = "comedor-uagrm-ia"
+version = "0.0.1"
+description = "Módulo de IA de ComedorUAGRM: puntaje de vulnerabilidad para la preselección de la Beca Comedor"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
