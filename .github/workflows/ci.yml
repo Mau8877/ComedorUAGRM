@@ -11,12 +11,13 @@ on:
 
 jobs:
   # Detecta qué carpetas cambiaron para no correr, por ejemplo, todo el
-  # pipeline de Flutter cuando el cambio solo tocó el backend -- ver
+  # pipeline de Flutter cuando el cambio solo tocó el backend core -- ver
   # .claude/rules/CI_CD.md#un-job-por-proyecto-no-uno-solo-para-todo.
   changes:
     runs-on: ubuntu-latest
     outputs:
-      backend: ${{ steps.filter.outputs.backend }}
+      core: ${{ steps.filter.outputs.core }}
+      ia: ${{ steps.filter.outputs.ia }}
       frontend: ${{ steps.filter.outputs.frontend }}
       landing: ${{ steps.filter.outputs.landing }}
       mobile: ${{ steps.filter.outputs.mobile }}
@@ -26,8 +27,10 @@ jobs:
         id: filter
         with:
           filters: |
-            backend:
-              - 'projects/backend/**'
+            core:
+              - 'projects/backend/comedor-uagrm-core/**'
+            ia:
+              - 'projects/backend/comedor-uagrm-ia/**'
             frontend:
               - 'projects/frontend/comedoruagrm/**'
               - 'pnpm-lock.yaml'
@@ -37,13 +40,14 @@ jobs:
             mobile:
               - 'projects/mobile/**'
 
-  backend:
+  # Backend core (Spring Boot): projects/backend/comedor-uagrm-core.
+  core:
     needs: changes
-    if: needs.changes.outputs.backend == 'true'
+    if: needs.changes.outputs.core == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: projects/backend
+        working-directory: projects/backend/comedor-uagrm-core
     # ComedorUagrmBackendApplicationTests/SecurityConfigTest usan @SpringBootTest
     # (contexto completo), y Flyway/JPA necesitan una conexión real al arrancar
     # -- el datasource por defecto de application.properties apunta a
@@ -94,6 +98,26 @@ jobs:
         run: ./mvnw -B test
       - name: Build
         run: ./mvnw -B clean package -DskipTests
+
+  # Backend IA (FastAPI): projects/backend/comedor-uagrm-ia.
+  ia:
+    needs: changes
+    if: needs.changes.outputs.ia == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: projects/backend/comedor-uagrm-ia
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: projects/backend/comedor-uagrm-ia/requirements*.txt
+      - run: pip install -r requirements-dev.txt
+      - run: ruff check .
+      - run: ruff format --check .
+      - run: pytest
 
   frontend:
     needs: changes

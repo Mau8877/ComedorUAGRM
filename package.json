@@ -17,8 +17,8 @@
 		"projects/mobile/**/*.dart": [
 			"sh -c 'cd projects/mobile && flutter analyze'"
 		],
-		"projects/backend/**/*.java": [
-			"sh -c 'cd projects/backend && ./mvnw -q checkstyle:check'"
+		"projects/backend/comedor-uagrm-core/**/*.java": [
+			"sh -c 'cd projects/backend/comedor-uagrm-core && ./mvnw -q checkstyle:check'"
 		]
 	},
 	"devDependencies": {
