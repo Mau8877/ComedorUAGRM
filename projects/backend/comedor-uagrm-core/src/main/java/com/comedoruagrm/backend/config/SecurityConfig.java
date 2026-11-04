@@ -21,6 +21,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.comedoruagrm.backend.security.ApiAccessDeniedHandler;
 import com.comedoruagrm.backend.security.ApiAuthenticationEntryPoint;
 import com.comedoruagrm.backend.security.AuthCookies;
 import com.comedoruagrm.backend.security.RateLimitFilter;
@@ -39,16 +40,19 @@ public class SecurityConfig {
 
     private final RateLimitFilter rateLimitFilter;
     private final ApiAuthenticationEntryPoint authenticationEntryPoint;
+    private final ApiAccessDeniedHandler accessDeniedHandler;
     private final UsuarioAutenticableProvider usuarioProvider;
     private final SecurityErrorWriter securityErrorWriter;
 
     public SecurityConfig(
             RateLimitFilter rateLimitFilter,
             ApiAuthenticationEntryPoint authenticationEntryPoint,
+            ApiAccessDeniedHandler accessDeniedHandler,
             UsuarioAutenticableProvider usuarioProvider,
             SecurityErrorWriter securityErrorWriter) {
         this.rateLimitFilter = rateLimitFilter;
         this.authenticationEntryPoint = authenticationEntryPoint;
+        this.accessDeniedHandler = accessDeniedHandler;
         this.usuarioProvider = usuarioProvider;
         this.securityErrorWriter = securityErrorWriter;
     }
@@ -71,7 +75,10 @@ public class SecurityConfig {
                 .bearerTokenResolver(bearerTokenResolver())
                 .jwt(Customizer.withDefaults())
                 .authenticationEntryPoint(authenticationEntryPoint))
-            .exceptionHandling(handling -> handling.authenticationEntryPoint(authenticationEntryPoint))
+            // 401 (sin token / token inválido) y 403 por falta de rol (ERR_AUTH_07), ambos en el sobre.
+            .exceptionHandling(handling -> handling
+                .authenticationEntryPoint(authenticationEntryPoint)
+                .accessDeniedHandler(accessDeniedHandler))
             // Token válido -> usuario activo del sistema con su rol (ERR_AUTH_02/03).
             // Se instancia acá y no es un bean: ver UsuarioActivoFilter.
             .addFilterAfter(new UsuarioActivoFilter(usuarioProvider, securityErrorWriter),

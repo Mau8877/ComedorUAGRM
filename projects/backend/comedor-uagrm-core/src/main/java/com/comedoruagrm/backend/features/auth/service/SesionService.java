@@ -1,5 +1,7 @@
 package com.comedoruagrm.backend.features.auth.service;
 
+import static net.logstash.logback.argument.StructuredArguments.kv;
+
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -11,6 +13,8 @@ import java.util.HexFormat;
 import java.util.Map;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +44,8 @@ import com.comedoruagrm.backend.security.TokenService.TokenAcceso;
  */
 @Service
 public class SesionService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SesionService.class);
 
     private static final SecureRandom RANDOM = new SecureRandom();
 
@@ -107,6 +113,19 @@ public class SesionService {
         }
         sesion.setRevocadaEn(ahora);
         return abrir(usuario);
+    }
+
+    /**
+     * Revoca TODAS las sesiones de una cuenta (todos sus dispositivos). Es lo que usa la
+     * gestion de cuentas (CU14) al desactivar una cuenta o cambiarle el rol; el cierre de
+     * sesion del propio usuario sigue siendo `cerrar` (solo su dispositivo, CU01).
+     * Idempotente: sin sesiones vigentes no hace nada ni es un error.
+     */
+    @Transactional
+    public void revocarTodas(Usuario usuario) {
+        int cerradas = sesionRepository.revocarTodasDe(usuario.getId(), Instant.now());
+        LOG.info("Sesiones de la cuenta revocadas",
+                kv("module", "auth"), kv("userId", usuario.getCodigo()), kv("sesionesCerradas", cerradas));
     }
 
     /** Idempotente: un token desconocido, vencido o ya cerrado se ignora (no es un error, A10). */

@@ -21,6 +21,27 @@ public final class UsuarioErrorCodes {
     /** Retirado: era el registro simultaneo con el mismo firebase_uid. No se reasigna el numero. */
     public static final String ERR_US_05 = "ERR_US_05";
 
+    /** 404 - La cuenta del personal no existe, esta eliminada o es de un Postulante. */
+    public static final String ERR_US_06 = "ERR_US_06";
+
+    /** 409 - La cuenta ya esta en el estado pedido (desactivar una desactivada, reactivar una activa). */
+    public static final String ERR_US_07 = "ERR_US_07";
+
+    /** 403 - No se puede desactivar ni cambiar el rol de la propia cuenta. */
+    public static final String ERR_US_08 = "ERR_US_08";
+
+    /** 403 - La operacion dejaria al sistema sin Administrador activo. */
+    public static final String ERR_US_09 = "ERR_US_09";
+
+    /** 400 - Rol no valido para el personal (inexistente o Postulante). */
+    public static final String ERR_US_10 = "ERR_US_10";
+
+    /** 400 - `sort` o `filter` no soportado en el listado de cuentas del personal. */
+    public static final String ERR_US_11 = "ERR_US_11";
+
+    /** 409 - La cuenta ya tiene ese rol. */
+    public static final String ERR_US_12 = "ERR_US_12";
+
     private UsuarioErrorCodes() {
     }
 }

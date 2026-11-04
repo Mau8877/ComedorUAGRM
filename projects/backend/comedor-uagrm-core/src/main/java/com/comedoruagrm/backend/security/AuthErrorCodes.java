@@ -24,6 +24,9 @@ public final class AuthErrorCodes {
     /** 401 - Refresh token invalido, vencido o ya revocado. */
     public static final String ERR_AUTH_06 = "ERR_AUTH_06";
 
+    /** 403 - El usuario autenticado no tiene el rol que exige la operacion. */
+    public static final String ERR_AUTH_07 = "ERR_AUTH_07";
+
     private AuthErrorCodes() {
     }
 }

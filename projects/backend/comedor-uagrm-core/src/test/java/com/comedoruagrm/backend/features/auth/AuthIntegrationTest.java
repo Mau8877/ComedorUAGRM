@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.UUID;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,6 +52,13 @@ class AuthIntegrationTest {
     @DynamicPropertySource
     static void propiedades(DynamicPropertyRegistry registry) {
         PostgresTestDatabase.registrar(registry);
+    }
+
+    // Deja la base vacia al terminar: los tests de repositorio que corren despues sobre la
+    // misma base (un solo Postgres por JVM) no deben ver las cuentas de estos flujos.
+    @AfterEach
+    void limpiarAlTerminar() {
+        limpiar();
     }
 
     @BeforeEach

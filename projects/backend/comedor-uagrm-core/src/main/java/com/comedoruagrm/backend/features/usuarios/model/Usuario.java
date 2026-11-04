@@ -21,8 +21,9 @@ import lombok.Setter;
  * (nunca en texto plano) y el estado del bloqueo por intentos fallidos
  * (ver SEGURIDAD_AUTH_BACKEND.md).
  *
- * * `activo` tiene setter porque activar/desactivar cuentas lo usara CU14;
- * * los tres campos del bloqueo, porque los maneja el inicio de sesion.
+ * * `activo`, `rol`, `nombres`, `apellidos` y `correo` tienen setter porque la
+ * * gestion de cuentas (CU14) los modifica; los tres campos del bloqueo,
+ * * porque los maneja el inicio de sesion. El `ci` y el hash NO tienen setter.
  * ! `passwordHash` nunca se loguea ni sale en un DTO.
  */
 @Getter
@@ -32,6 +33,7 @@ import lombok.Setter;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Usuario extends BaseModel {
 
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "rol_id", nullable = false)
     private Rol rol;
@@ -39,15 +41,18 @@ public class Usuario extends BaseModel {
     @Column(name = "ci", nullable = false, length = 20)
     private String ci;
 
+    @Setter
     @Column(name = "correo", nullable = false, length = 150)
     private String correo;
 
     @Column(name = "password_hash", nullable = false, length = 100)
     private String passwordHash;
 
+    @Setter
     @Column(name = "nombres", nullable = false, length = 100)
     private String nombres;
 
+    @Setter
     @Column(name = "apellidos", nullable = false, length = 100)
     private String apellidos;
 

@@ -3,6 +3,7 @@ package com.comedoruagrm.backend.features.auth.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -52,6 +53,26 @@ class SesionServiceTest {
         assertThat(captor.getValue().getTokenHash()).hasSize(64).isNotEqualTo(abierta.refreshToken());
         assertThat(captor.getValue().getExpiraEn()).isAfter(Instant.now().plusSeconds(6 * 24 * 3600));
         assertThat(abierta.acceso().token()).isEqualTo("jwt");
+    }
+
+    @Test
+    void revocarTodas_pideAlRepositorioRevocarLasSesionesDeEsaCuenta() {
+        when(usuario.getId()).thenReturn(9L);
+        when(sesionRepository.revocarTodasDe(eq(9L), any(Instant.class))).thenReturn(3);
+
+        service.revocarTodas(usuario);
+
+        verify(sesionRepository).revocarTodasDe(eq(9L), any(Instant.class));
+    }
+
+    @Test
+    void revocarTodas_sinSesionesVigentes_noEsUnError() {
+        when(usuario.getId()).thenReturn(9L);
+        when(sesionRepository.revocarTodasDe(eq(9L), any(Instant.class))).thenReturn(0);
+
+        service.revocarTodas(usuario);
+
+        verify(sesionRepository).revocarTodasDe(eq(9L), any(Instant.class));
     }
 
     @Test
