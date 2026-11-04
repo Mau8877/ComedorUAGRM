@@ -69,3 +69,14 @@ y el refresh los lanzan los services como excepciones de negocio (ver
   revocado (por un logout o porque ya se usó para renovar la sesión). El
   cliente debe llevar al usuario a la pantalla de inicio de sesión.
 - **Dónde se lanza:** `SesionService.renovar()`
+
+## `ERR_AUTH_07`
+
+- **HTTP:** 403
+- **Excepción:** ninguna (lo escribe `ApiAccessDeniedHandler` directo, igual
+  que los rechazos de `security/`)
+- **Significado:** El usuario está autenticado y su cuenta está activa, pero
+  no tiene el rol que exige la operación (por ejemplo, un Directivo llamando
+  a la gestión de cuentas, que es solo del Administrador DUBSS).
+- **Dónde se lanza:** `ApiAccessDeniedHandler.handle()` (cuando un
+  `@PreAuthorize` de un `service` lanza `AccessDeniedException`)

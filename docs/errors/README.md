@@ -50,6 +50,7 @@ docs/errors/
 - [`ERR_AUTH_04`](auth/ERRORES_AUTH.md#err_auth_04) — Correo o contraseña incorrectos (401)
 - [`ERR_AUTH_05`](auth/ERRORES_AUTH.md#err_auth_05) — Cuenta bloqueada temporalmente por intentos fallidos (403)
 - [`ERR_AUTH_06`](auth/ERRORES_AUTH.md#err_auth_06) — Refresh token inválido, vencido o revocado (401)
+- [`ERR_AUTH_07`](auth/ERRORES_AUTH.md#err_auth_07) — El usuario no tiene el rol necesario (403)
 
 ### Usuarios (`US`)
 
@@ -58,6 +59,13 @@ docs/errors/
 - [`ERR_US_03`](usuarios/ERRORES_USUARIOS.md#err_us_03) — El registro universitario ya está registrado (409)
 - [`ERR_US_04`](usuarios/ERRORES_USUARIOS.md#err_us_04) — La carrera indicada no existe (404)
 - [`ERR_US_05`](usuarios/ERRORES_USUARIOS.md#err_us_05) — Retirado: registro simultáneo de la misma cuenta de Firebase (409)
+- [`ERR_US_06`](usuarios/ERRORES_USUARIOS.md#err_us_06) — La cuenta del personal no existe o es de un Postulante (404)
+- [`ERR_US_07`](usuarios/ERRORES_USUARIOS.md#err_us_07) — La cuenta ya está en el estado pedido (409)
+- [`ERR_US_08`](usuarios/ERRORES_USUARIOS.md#err_us_08) — No se puede operar sobre la propia cuenta (403)
+- [`ERR_US_09`](usuarios/ERRORES_USUARIOS.md#err_us_09) — La operación dejaría al sistema sin Administrador activo (403)
+- [`ERR_US_10`](usuarios/ERRORES_USUARIOS.md#err_us_10) — Rol no válido para el personal (400)
+- [`ERR_US_11`](usuarios/ERRORES_USUARIOS.md#err_us_11) — `sort` o `filter` no soportado en el listado (400)
+- [`ERR_US_12`](usuarios/ERRORES_USUARIOS.md#err_us_12) — La cuenta ya tiene ese rol (409)
 
 <!--
   A medida que se agregan módulos de negocio (platos, menú, usuarios...),
