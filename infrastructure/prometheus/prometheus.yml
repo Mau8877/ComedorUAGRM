@@ -3,7 +3,7 @@ global:
   scrape_interval: 5s
 
 scrape_configs:
-  - job_name: 'comedor-uagrm-backend'
+  - job_name: 'comedor-uagrm-core'
     metrics_path: '/prometheus'
     static_configs:
-      - targets: ['comedor-uagrm-backend:8080']
+      - targets: ['comedor-uagrm-core:8080']

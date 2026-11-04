@@ -11,7 +11,7 @@ set -e
 mc alias set myminio http://minio:9000 "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD"
 
 # Crear el bucket si no existe. Nombre debe coincidir con
-# app.minio.bucket-name en projects/backend/src/main/resources/application.properties.
+# app.minio.bucket-name en projects/backend/comedor-uagrm-core/src/main/resources/application.properties.
 mc mb myminio/comedor-uagrm-storage --ignore-existing
 
 # Hacer el bucket público para lectura (ej. servir imágenes/archivos
