@@ -24,7 +24,6 @@ import com.comedoruagrm.backend.security.AuthCookies;
 import com.comedoruagrm.backend.security.AuthErrorCodes;
 import com.comedoruagrm.backend.security.CurrentUserId;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -46,8 +45,8 @@ public class AuthController {
 
     @PostMapping("/registro")
     public ResponseEntity<ApiResponse<SesionResponse>> registro(
-            @Valid @RequestBody RegistroRequest request, HttpServletRequest http, HttpServletResponse response) {
-        RegistroResultado resultado = authService.registrar(request, http.getRemoteAddr());
+            @Valid @RequestBody RegistroRequest request, HttpServletResponse response) {
+        RegistroResultado resultado = authService.registrar(request);
         escribirCookies(response, resultado.sesion());
         HttpStatus estado = resultado.creado() ? HttpStatus.CREATED : HttpStatus.OK;
         return ResponseEntity.status(estado).body(ApiResponse.success(resultado.sesion(), "Registro exitoso"));
@@ -55,8 +54,8 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<SesionResponse>> login(
-            @Valid @RequestBody LoginRequest request, HttpServletRequest http, HttpServletResponse response) {
-        SesionResponse sesion = authService.iniciarSesion(request, http.getRemoteAddr());
+            @Valid @RequestBody LoginRequest request, HttpServletResponse response) {
+        SesionResponse sesion = authService.iniciarSesion(request);
         escribirCookies(response, sesion);
         return ResponseEntity.ok(ApiResponse.success(sesion, "Sesión iniciada correctamente"));
     }

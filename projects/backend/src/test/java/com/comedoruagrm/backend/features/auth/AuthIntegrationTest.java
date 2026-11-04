@@ -79,6 +79,20 @@ class AuthIntegrationTest {
     }
 
     @Test
+    void registro_anotaEnLaBitacoraElActorLaEntidadElRolYLaIpDelRequest() throws Exception {
+        registrarAna().andExpect(status().isCreated());
+
+        var fila = jdbc.queryForMap("""
+                SELECT b.entidad, b.entidad_id = u.id AS misma_fila, b.usuario_id = u.id AS mismo_actor,
+                       b.detalle ->> 'rol' AS rol, b.ip IS NOT NULL AS con_ip
+                FROM bitacora b JOIN usuario u ON u.id = b.usuario_id
+                WHERE b.accion = 'REGISTRO_USUARIO'""");
+        assertThat(fila).containsEntry("entidad", "usuario").containsEntry("misma_fila", true)
+                .containsEntry("mismo_actor", true).containsEntry("rol", "POSTULANTE")
+                .containsEntry("con_ip", true);
+    }
+
+    @Test
     void registro_guardaLaContrasenaSoloComoHash() throws Exception {
         registrarAna().andExpect(status().isCreated());
 
@@ -246,6 +260,15 @@ class AuthIntegrationTest {
         assertThat(nuevo.get("refreshToken").asText()).isNotEqualTo(refresh);
         refresh(refresh).andExpect(status().isUnauthorized()).andExpect(jsonPath("$.error").value("ERR_AUTH_06"));
         refresh(nuevo.get("refreshToken").asText()).andExpect(status().isOk());
+    }
+
+    @Test
+    void refresh_noAnotaUnInicioDeSesionNuevoEnLaBitacora() throws Exception {
+        String refresh = datos(registrarAna().andExpect(status().isCreated())).get("refreshToken").asText();
+
+        refresh(refresh).andExpect(status().isOk());
+
+        assertThat(contarBitacora("INICIO_SESION")).isEqualTo(1);
     }
 
     @Test

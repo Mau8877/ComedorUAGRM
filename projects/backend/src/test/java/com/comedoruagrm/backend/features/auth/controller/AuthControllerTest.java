@@ -75,7 +75,7 @@ class AuthControllerTest {
 
     @Test
     void registro_conUnaCuentaNueva_devuelve201ConLaSesion() throws Exception {
-        when(authService.registrar(any(), any())).thenReturn(new RegistroResultado(sesion, true));
+        when(authService.registrar(any())).thenReturn(new RegistroResultado(sesion, true));
 
         mockMvc.perform(post("/api/v1/auth/registro").contentType(MediaType.APPLICATION_JSON).content(BODY_VALIDO))
                 .andExpect(status().isCreated())
@@ -90,7 +90,7 @@ class AuthControllerTest {
 
     @Test
     void registro_conUnaCuentaQueYaExistia_devuelve200() throws Exception {
-        when(authService.registrar(any(), any())).thenReturn(new RegistroResultado(sesion, false));
+        when(authService.registrar(any())).thenReturn(new RegistroResultado(sesion, false));
 
         mockMvc.perform(post("/api/v1/auth/registro").contentType(MediaType.APPLICATION_JSON).content(BODY_VALIDO))
                 .andExpect(status().isOk())
@@ -99,7 +99,7 @@ class AuthControllerTest {
 
     @Test
     void registro_conUnTokenVencidoEnElHeader_loIgnoraPorSerUnaRutaPublica() throws Exception {
-        when(authService.registrar(any(), any())).thenReturn(new RegistroResultado(sesion, true));
+        when(authService.registrar(any())).thenReturn(new RegistroResultado(sesion, true));
 
         mockMvc.perform(post("/api/v1/auth/registro").header(HttpHeaders.AUTHORIZATION, "Bearer token-vencido")
                         .contentType(MediaType.APPLICATION_JSON).content(BODY_VALIDO))
@@ -129,7 +129,7 @@ class AuthControllerTest {
 
     @Test
     void registro_conElCiYaRegistrado_devuelve409ConErrUs01() throws Exception {
-        when(authService.registrar(any(), any())).thenThrow(
+        when(authService.registrar(any())).thenThrow(
                 new ConflictException(UsuarioErrorCodes.ERR_US_01, "Ya existe una cuenta con ese CI"));
 
         mockMvc.perform(post("/api/v1/auth/registro").contentType(MediaType.APPLICATION_JSON).content(BODY_VALIDO))
@@ -143,7 +143,7 @@ class AuthControllerTest {
 
     @Test
     void login_conCredencialesCorrectas_devuelve200ConLaSesion() throws Exception {
-        when(authService.iniciarSesion(any(), any())).thenReturn(sesion);
+        when(authService.iniciarSesion(any())).thenReturn(sesion);
 
         mockMvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON).content(BODY_LOGIN))
                 .andExpect(status().isOk())
@@ -153,7 +153,7 @@ class AuthControllerTest {
 
     @Test
     void login_conCredencialesIncorrectas_devuelve401ErrAuth04() throws Exception {
-        when(authService.iniciarSesion(any(), any())).thenThrow(
+        when(authService.iniciarSesion(any())).thenThrow(
                 new UnauthorizedException(AuthErrorCodes.ERR_AUTH_04, "Correo o contraseña incorrectos."));
 
         mockMvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON).content(BODY_LOGIN))
@@ -164,7 +164,7 @@ class AuthControllerTest {
 
     @Test
     void login_conLaCuentaBloqueada_devuelve403ErrAuth05() throws Exception {
-        when(authService.iniciarSesion(any(), any())).thenThrow(
+        when(authService.iniciarSesion(any())).thenThrow(
                 new ForbiddenException(AuthErrorCodes.ERR_AUTH_05, "Cuenta bloqueada."));
 
         mockMvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON).content(BODY_LOGIN))
@@ -215,7 +215,7 @@ class AuthControllerTest {
 
     @Test
     void login_escribeLasCookiesHttpOnlySameSiteStrictDeAccesoYRefresh() throws Exception {
-        when(authService.iniciarSesion(any(), any())).thenReturn(sesion);
+        when(authService.iniciarSesion(any())).thenReturn(sesion);
 
         mockMvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON).content(BODY_LOGIN))
                 .andExpect(status().isOk())

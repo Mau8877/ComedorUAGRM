@@ -3,8 +3,10 @@ package com.comedoruagrm.backend.features.bitacora.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -14,10 +16,28 @@ import com.comedoruagrm.backend.features.bitacora.model.Bitacora;
 import com.comedoruagrm.backend.features.bitacora.repository.BitacoraRepository;
 import com.comedoruagrm.backend.features.usuarios.model.Usuario;
 
+import jakarta.persistence.EntityManager;
+
 class BitacoraServiceTest {
 
     private final BitacoraRepository repository = mock(BitacoraRepository.class);
-    private final BitacoraService service = new BitacoraService(repository);
+    private final EntityManager entityManager = mock(EntityManager.class);
+    private final BitacoraService service = new BitacoraService(repository, entityManager);
+
+    @Test
+    void registrar_conElActorPorId_guardaUnaReferenciaAlUsuarioSinConsultarla() {
+        Usuario referencia = mock(Usuario.class);
+        when(entityManager.getReference(Usuario.class, 9L)).thenReturn(referencia);
+
+        service.registrar(9L, UUID.randomUUID(), BitacoraAcciones.INICIO_SESION, "usuario", 9L,
+                Map.of("rol", "POSTULANTE"), "203.0.113.10");
+
+        ArgumentCaptor<Bitacora> captor = ArgumentCaptor.forClass(Bitacora.class);
+        verify(repository).save(captor.capture());
+        assertThat(captor.getValue().getUsuario()).isSameAs(referencia);
+        assertThat(captor.getValue().getAccion()).isEqualTo("INICIO_SESION");
+        assertThat(captor.getValue().getEntidadId()).isEqualTo(9L);
+    }
 
     @Test
     void registrar_conUnEventoCompleto_guardaLaBitacoraConLosDatosRecibidos() {

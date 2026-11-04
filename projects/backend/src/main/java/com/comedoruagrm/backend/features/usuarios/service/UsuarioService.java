@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -20,7 +21,10 @@ import com.comedoruagrm.backend.common.exception.ConflictException;
 import com.comedoruagrm.backend.common.exception.ForbiddenException;
 import com.comedoruagrm.backend.common.exception.NotFoundException;
 import com.comedoruagrm.backend.common.exception.UnauthorizedException;
+import com.comedoruagrm.backend.common.auditoria.Auditable;
+import com.comedoruagrm.backend.common.auditoria.Auditar;
 import com.comedoruagrm.backend.features.auth.dto.RegistroRequest;
+import com.comedoruagrm.backend.features.bitacora.BitacoraAcciones;
 import com.comedoruagrm.backend.features.usuarios.RolNombres;
 import com.comedoruagrm.backend.features.usuarios.UsuarioErrorCodes;
 import com.comedoruagrm.backend.features.usuarios.dto.UsuarioResponse;
@@ -60,8 +64,31 @@ public class UsuarioService {
     // tarde lo mismo que con un correo real (sin delatar cual de los dos datos fallo).
     private volatile String hashSenuelo;
 
-    /** `creado` es false cuando la cuenta ya existia (registro repetido). */
-    public record ResultadoRegistro(Usuario usuario, boolean creado) {
+    /**
+     * `creado` es false cuando la cuenta ya existia (registro repetido): en ese
+     * caso no se anota el alta en la bitacora.
+     */
+    public record ResultadoRegistro(Usuario usuario, boolean creado) implements Auditable {
+
+        @Override
+        public Long actorId() {
+            return usuario.getId();
+        }
+
+        @Override
+        public UUID actorCodigo() {
+            return usuario.getCodigo();
+        }
+
+        @Override
+        public Map<String, Object> detalle() {
+            return Map.of("rol", usuario.getRol().getNombre());
+        }
+
+        @Override
+        public boolean auditar() {
+            return creado;
+        }
     }
 
     /**
@@ -73,6 +100,7 @@ public class UsuarioService {
      * * asi el doble envio o el reintento no dan un 409.
      */
     @Transactional
+    @Auditar(accion = BitacoraAcciones.REGISTRO_USUARIO, entidad = "usuario")
     public ResultadoRegistro registrarPostulante(RegistroRequest request) {
         String correo = normalizarCorreo(request.correo());
 

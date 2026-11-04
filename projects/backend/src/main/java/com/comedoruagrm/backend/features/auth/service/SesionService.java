@@ -8,15 +8,20 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.HexFormat;
+import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.comedoruagrm.backend.common.auditoria.Auditable;
+import com.comedoruagrm.backend.common.auditoria.Auditar;
 import com.comedoruagrm.backend.common.exception.ForbiddenException;
 import com.comedoruagrm.backend.common.exception.UnauthorizedException;
 import com.comedoruagrm.backend.features.auth.model.Sesion;
 import com.comedoruagrm.backend.features.auth.repository.SesionRepository;
+import com.comedoruagrm.backend.features.bitacora.BitacoraAcciones;
 import com.comedoruagrm.backend.features.usuarios.model.Usuario;
 import com.comedoruagrm.backend.security.AuthErrorCodes;
 import com.comedoruagrm.backend.security.TokenService;
@@ -39,7 +44,22 @@ public class SesionService {
     private static final SecureRandom RANDOM = new SecureRandom();
 
     /** Par de tokens recien emitido; `usuario` es el dueño de la sesion. */
-    public record SesionAbierta(Usuario usuario, TokenAcceso acceso, String refreshToken) {
+    public record SesionAbierta(Usuario usuario, TokenAcceso acceso, String refreshToken) implements Auditable {
+
+        @Override
+        public Long actorId() {
+            return usuario.getId();
+        }
+
+        @Override
+        public UUID actorCodigo() {
+            return usuario.getCodigo();
+        }
+
+        @Override
+        public Map<String, Object> detalle() {
+            return Map.of("rol", usuario.getRol().getNombre());
+        }
     }
 
     private final SesionRepository sesionRepository;
@@ -53,7 +73,17 @@ public class SesionService {
         this.vidaRefresh = Duration.ofDays(vidaRefreshDias);
     }
 
+    /**
+     * Abre una sesion nueva y anota el inicio de sesion en la bitacora (por login
+     * o por registro).
+     *
+     * ! `renovar` llama a este metodo desde la misma clase, y el proxy no
+     * ! intercepta esa llamada: renovar el token NO anota un acceso nuevo, a
+     * ! proposito (CU01). Si algun dia `renovar` pasa a llamar a otro bean,
+     * ! hay que revisar que no empiece a auditar.
+     */
     @Transactional
+    @Auditar(accion = BitacoraAcciones.INICIO_SESION, entidad = "usuario")
     public SesionAbierta abrir(Usuario usuario) {
         byte[] aleatorio = new byte[32];
         RANDOM.nextBytes(aleatorio);
