@@ -34,7 +34,7 @@ public class CarreraService {
         }
 
         Page<Carrera> pagina = carreraRepository.findAll(
-                PageRequest.of(page - 1, pageSize, Sort.sort(Carrera.class).by(Carrera::getNombre)));
+                PageRequest.of(page - 1, pageSize, Sort.by(Carrera::getNombre)));
 
         List<CarreraResponse> datos = pagina.getContent().stream()
                 .map(c -> new CarreraResponse(c.getCodigo(), c.getNombre(), c.getFacultad()))
