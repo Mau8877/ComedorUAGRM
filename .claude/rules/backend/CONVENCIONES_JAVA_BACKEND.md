@@ -1,5 +1,5 @@
 ---
-globs: projects/backend/**/*
+globs: projects/backend/comedor-uagrm-core/**/*
 ---
 
 # Convenciones de Código Java — Backend

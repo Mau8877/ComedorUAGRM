@@ -1,5 +1,5 @@
 ---
-globs: projects/backend/**/*
+globs: projects/backend/comedor-uagrm-core/**/*
 ---
 
 # Testing — Backend
@@ -56,9 +56,9 @@ missing` sin eso).
   lógica de negocio pura en el `service`, se sigue mockeando el repositorio
   (`@Mock`/`@MockBean`) — no todo test pasa a ser de integración por default.
 - **Prerequisito de infra**: Testcontainers necesita hablar con el daemon de
-  Docker desde DENTRO del contenedor del backend — `docker-compose.yml`
+  Docker desde DENTRO del contenedor de `core` (el backend Spring Boot) — `docker-compose.yml`
   monta `/var/run/docker.sock:/var/run/docker.sock` en el servicio
-  `backend` para esto.
+  `core` para esto.
 - **Patrón obligatorio para tests que usan Testcontainers**: no manejar el
   container con `@Testcontainers`/`@Container` (arranca automático y sin
   forma limpia de saltear el test si Docker no está disponible). En cambio,
@@ -92,7 +92,7 @@ missing` sin eso).
 > Docker socket to be used"** (tiene que estar tildado). Confirmado en esta
 > sesión: con el mount + `DOCKER_HOST=unix:///var/run/docker.sock` +
 > `TESTCONTAINERS_RYUK_DISABLED=true` en el `environment` del servicio
-> `backend`, seguía sin conectar — es un tema de configuración de Docker
+> `core`, seguía sin conectar — es un tema de configuración de Docker
 > Desktop en el host, no del código ni de `docker-compose.yml`. Por eso el
 > patrón de `assumeTrue` de arriba es obligatorio: un dev sin ese setting
 > tildado sigue pudiendo correr `mvn test` sin que le rompa el build.

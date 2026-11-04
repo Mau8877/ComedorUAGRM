@@ -1,12 +1,19 @@
 # ComedorUAGRM
 
 Sistema de gestión del comedor universitario de la UAGRM. Monorepo con
-pnpm workspaces (`pnpm-workspace.yaml`) que contiene tres proyectos
-independientes más la infraestructura de desarrollo:
+pnpm workspaces (`pnpm-workspace.yaml`) que contiene tres grupos de
+proyectos independientes más la infraestructura de desarrollo:
 
-- **`projects/backend`** — API REST en Java 21 + Spring Boot 4.1 (Maven),
-  PostgreSQL + Flyway para persistencia, Redis para caché, MinIO para
-  almacenamiento de archivos.
+- **`projects/backend`** — contiene dos proyectos de backend
+  independientes, cada uno con su propio stack:
+  - **`comedor-uagrm-core/`** — API REST en Java 21 + Spring Boot 4.1
+    (Maven), PostgreSQL + Flyway para persistencia, Redis para caché, MinIO
+    para almacenamiento de archivos. Es el backend que consumen el panel web
+    y la app mobile, y al que le aplican las rules de `.claude/rules/backend/`.
+  - **`comedor-uagrm-ia/`** — módulo de IA en Python + FastAPI (el puntaje de
+    vulnerabilidad de la preselección, que consumirá `comedor-uagrm-core` por
+    la red interna). Hoy es un esqueleto vacío que solo expone `/health`; no
+    tiene rules propias todavía (se definen junto con su primer caso de uso).
 - **`projects/frontend`** — contiene dos proyectos de frontend
   independientes, cada uno con su propio stack:
   - **`comedoruagrm/`** — panel web en React 19 + TypeScript + Vite,
@@ -21,6 +28,10 @@ independientes más la infraestructura de desarrollo:
   `go_router` para navegación, `dio` como cliente HTTP.
 - **`infrastructure/`** — configuración de Docker Compose: nginx (proxy),
   postgres, redis, minio, prometheus, grafana.
+
+Cuando una regla o un comando dice «backend» a secas, es
+`projects/backend/comedor-uagrm-core` (el Spring Boot); el módulo de IA se
+nombra siempre como `comedor-uagrm-ia`.
 
 ## Fuente de verdad del dominio: documentación de grado
 
@@ -52,12 +63,22 @@ descompone en **unidades de trabajo** (`docs/UnidadesTrabajo/`), ver
 
 ## Comandos básicos
 
-### Backend (`projects/backend`)
+### Backend core (`projects/backend/comedor-uagrm-core`)
 
 ```bash
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev   # correr en modo dev
 ./mvnw test                                              # tests
 ./mvnw clean package                                     # build
+```
+
+### Backend IA (`projects/backend/comedor-uagrm-ia`)
+
+```bash
+python -m venv .venv                              # entorno virtual (una vez)
+pip install -r requirements-dev.txt               # instalar dependencias
+uvicorn app.main:app --reload                     # correr en modo dev (puerto 8000)
+pytest                                            # tests
+ruff check . ; ruff format --check .              # lint y formato
 ```
 
 ### Frontend — ComedorUAGRM (`projects/frontend/comedoruagrm`)
@@ -92,7 +113,7 @@ flutter analyze       # análisis estático
 ### Stack completo (Docker Compose)
 
 Desde la raíz del repo, con los `.env` ya creados a partir de sus
-`.env.example` correspondientes (raíz, `projects/backend/`,
+`.env.example` correspondientes (raíz, `projects/backend/comedor-uagrm-core/`,
 `projects/frontend/comedoruagrm/`):
 
 ```bash
@@ -100,8 +121,9 @@ docker compose up
 ```
 
 Levanta proxy (puerto 80), comedoruagrm (5173), nexware-landing (4321),
-backend (8080), postgres (5432), redis (6379), minio (9000/9001),
-prometheus (9090) y grafana (3000). El proxy sirve ComedorUAGRM en `/` y la
+core (8080, el backend Spring Boot), ia (8000, FastAPI; no pasa por el
+proxy), postgres (5432), redis (6379), minio (9000/9001), prometheus (9090)
+y grafana (3000). El proxy sirve ComedorUAGRM en `/`, la API en `/api/` y la
 landing de Nexware en `/landing-page`. Ver [docs/README.md](../docs/README.md)
 para el detalle completo de variables de entorno y el checklist de puesta
 en marcha.

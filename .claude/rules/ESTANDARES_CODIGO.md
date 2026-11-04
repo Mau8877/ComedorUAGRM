@@ -29,8 +29,13 @@ commit **se cancela**.
 | Lenguaje | Herramienta | Config | Alcance |
 | --- | --- | --- | --- |
 | TypeScript (frontend, ComedorUAGRM) | ESLint (`--fix`) | `projects/frontend/comedoruagrm/eslint.config.js` | `projects/frontend/comedoruagrm/**/*.{ts,tsx}` |
-| Java (backend) | Checkstyle | `projects/backend/checkstyle.xml` | `projects/backend/**/*.java` |
+| Java (backend core) | Checkstyle | `projects/backend/comedor-uagrm-core/checkstyle.xml` | `projects/backend/comedor-uagrm-core/**/*.java` |
 | Dart (mobile) | `flutter analyze` | `projects/mobile/analysis_options.yaml` (`flutter_lints`) | `projects/mobile/**/*.dart` |
+
+> **Python (backend IA, `projects/backend/comedor-uagrm-ia`)** usa Ruff
+> (`ruff check` y `ruff format --check`, config en su `pyproject.toml`), pero
+> **no** está enganchado al pre-commit: corre en el job `ia` del CI y en
+> local con `ruff check .` dentro de esa carpeta.
 
 **El pre-commit solo lintea, no corre tests.** Se evaluó agregar
 `vitest run`/`flutter test`/`mvn test` al mismo hook, pero se decidió que

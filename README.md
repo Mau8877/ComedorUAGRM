@@ -1,15 +1,16 @@
 # ComedorUAGRM
 
 Sistema de gestión del comedor universitario de la UAGRM (Universidad
-Autónoma Gabriel René Moreno). Monorepo con tres proyectos independientes
-(backend, frontend, mobile) más la infraestructura de desarrollo que los
-conecta a todos.
+Autónoma Gabriel René Moreno). Monorepo con proyectos independientes
+(backend con dos módulos, frontend con dos aplicaciones y mobile) más la
+infraestructura de desarrollo que los conecta a todos.
 
 ## Stack
 
 | Proyecto | Tecnología |
 | --- | --- |
-| **Backend** (`projects/backend`) | Java 21 + Spring Boot 4.1 (Maven), PostgreSQL + Flyway, Redis (caché), MinIO (archivos) |
+| **Backend — core** (`projects/backend/comedor-uagrm-core`) | Java 21 + Spring Boot 4.1 (Maven), PostgreSQL + Flyway, Redis (caché), MinIO (archivos) |
+| **Backend — IA** (`projects/backend/comedor-uagrm-ia`) | Python 3.12 + FastAPI (módulo de IA de la preselección; hoy un esqueleto con `/health`) |
 | **Frontend — ComedorUAGRM** (`projects/frontend/comedoruagrm`) | React 19 + TypeScript + Vite, TanStack (Query/Router/Form/Table), Tailwind CSS 4 + shadcn |
 | **Frontend — Landing Nexware** (`projects/frontend/nexware-landing`) | Astro + TypeScript, landing bilingüe (es/en) de Nexware, la empresa ficticia dueña de este proyecto |
 | **Mobile** (`projects/mobile`) | Flutter/Dart, Riverpod (estado), `go_router` (navegación), `dio` (HTTP) |
@@ -17,8 +18,9 @@ conecta a todos.
 
 `pnpm-workspace.yaml` incluye `projects/*` y
 `projects/frontend/comedoruagrm` como workspace de pnpm (`comedoruagrm` y
-mobile comparten herramientas de raíz; el backend es un proyecto Maven
-independiente que vive dentro del mismo repo). `nexware-landing` queda
+mobile comparten herramientas de raíz; `comedor-uagrm-core` es un proyecto
+Maven y `comedor-uagrm-ia` un proyecto Python, ambos independientes que
+viven dentro del mismo repo). `nexware-landing` queda
 **fuera** del workspace pnpm a propósito: es un proyecto Astro
 independiente que usa npm (ver "Nexware guía de marca y guía técnica.md").
 
@@ -27,7 +29,9 @@ independiente que usa npm (ver "Nexware guía de marca y guía técnica.md").
 ```
 ComedorUAGRM/
 ├── projects/
-│   ├── backend/        # API REST (Spring Boot)
+│   ├── backend/
+│   │   ├── comedor-uagrm-core/  # API REST (Spring Boot)
+│   │   └── comedor-uagrm-ia/    # Módulo de IA (FastAPI)
 │   ├── frontend/
 │   │   ├── comedoruagrm/     # Panel web (React) -- se sirve en /
 │   │   └── nexware-landing/  # Landing de Nexware (Astro) -- se sirve en /landing-page
@@ -52,27 +56,28 @@ Requiere Docker Desktop. Desde la raíz del repo:
 
 ```bash
 cp .env.example .env
-cp projects/backend/.env.example projects/backend/.env
+cp projects/backend/comedor-uagrm-core/.env.example projects/backend/comedor-uagrm-core/.env
 cp projects/frontend/comedoruagrm/.env.example projects/frontend/comedoruagrm/.env
 docker compose up
 ```
 
 Esto levanta todos los servicios en modo desarrollo (hot-reload incluido
-en los dos frontends y el backend):
+en los dos frontends, `core` e `ia`):
 
 | Servicio | Puerto | URL |
 | --- | --- | --- |
 | Proxy (nginx) | `80` | http://localhost (`/` → ComedorUAGRM, `/landing-page` → landing Nexware) |
 | ComedorUAGRM (Vite) | `5173` | http://localhost:5173 |
 | Landing Nexware (Astro) | `4321` | http://localhost:4321 |
-| Backend (API) | `8080` | http://localhost:8080 |
+| Backend core (API) | `8080` | http://localhost:8080 |
+| Backend IA (FastAPI) | `8000` | http://localhost:8000/health (solo interno: no pasa por el proxy) |
 | PostgreSQL | `5432` | — |
 | Redis | `6379` | — |
 | MinIO (API / consola) | `9000` / `9001` | http://localhost:9001 |
 | Prometheus | `9090` | http://localhost:9090 |
 | Grafana | `3000` | http://localhost:3000 |
 
-Verificación rápida de que el backend levantó bien:
+Verificación rápida de que el backend core levantó bien:
 
 ```bash
 curl http://localhost:8080/health        # {"status":"UP", ...}
@@ -83,13 +88,23 @@ Swagger UI de la API: http://localhost:8080/swagger-ui/index.html
 
 ### Opción B — Cada proyecto por separado (sin Docker)
 
-**Backend** (`projects/backend`, necesita PostgreSQL/Redis/MinIO corriendo
+**Backend core** (`projects/backend/comedor-uagrm-core`, necesita PostgreSQL/Redis/MinIO corriendo
 por su cuenta o vía `docker compose up postgres redis minio`):
 
 ```bash
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev   # correr en modo dev
 ./mvnw test                                              # tests
 ./mvnw clean package                                     # build
+```
+
+**Backend IA** (`projects/backend/comedor-uagrm-ia`, requiere Python 3.12+):
+
+```bash
+python -m venv .venv && source .venv/bin/activate   # en Windows: .venv\Scripts\activate
+pip install -r requirements-dev.txt
+uvicorn app.main:app --reload     # correr en modo dev (puerto 8000)
+pytest                            # tests
+ruff check . ; ruff format --check .   # lint y formato
 ```
 
 **Frontend — ComedorUAGRM** (`projects/frontend/comedoruagrm`):
@@ -203,7 +218,7 @@ Detalle completo en
 
 Cada Pull Request contra `main` (y cada push directo a `main`) dispara
 [`.github/workflows/ci.yml`](.github/workflows/ci.yml): un job
-independiente por proyecto (`backend`, `frontend`, `mobile`) que solo
+independiente por proyecto (`core`, `ia`, `frontend`, `landing`, `mobile`) que solo
 corre si cambió algo dentro de esa carpeta, y que hace lint + tests +
 build — los mismos comandos documentados arriba en "Puesta en marcha",
 no algo distinto inventado para CI.
@@ -222,7 +237,7 @@ corresponde según qué archivos quedaron staged:
 | Lenguaje | Herramienta |
 | --- | --- |
 | TypeScript (frontend) | ESLint (`--fix`) |
-| Java (backend) | Checkstyle |
+| Java (backend core) | Checkstyle |
 | Dart (mobile) | `flutter analyze` |
 
 El pre-commit solo lintea — correr la suite de tests de cada proyecto
