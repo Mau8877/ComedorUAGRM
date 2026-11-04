@@ -2,7 +2,7 @@
 
 | Id   | Nombre                     | Módulo               | Prioridad | Estado    |
 | ---- | -------------------------- | -------------------- | --------- | --------- |
-| CU01 | Registrarse y autenticarse | P1. Cuentas y acceso | Alta      | En progreso |
+| CU01 | Registrarse y autenticarse | P1. Cuentas y acceso | Alta      | Hecho |
 
 **Actor principal:** Usuario del Sistema (actor abstracto que generaliza a Postulante, Administrador DUBSS, Directivo y Personal del Comedor Universitario)
 **Actores secundarios:** —
@@ -33,7 +33,7 @@ Este CU cubre el registro, el inicio de sesión y el cierre de sesión (este úl
 3. El usuario completa los datos y confirma el registro.
 4. El sistema valida que los campos obligatorios estén completos, que su formato sea correcto, que la contraseña cumpla la política y coincida con su confirmación, y que el CI, el registro universitario y el correo no existan en el sistema.
 5. El sistema crea la cuenta con el rol Postulante, activa, sin guardar nunca la contraseña en texto plano.
-6. El sistema informa que el registro fue exitoso, inicia la sesión del usuario y lo lleva al módulo del Postulante.
+6. El sistema registra el alta y el acceso en la bitácora, informa que el registro fue exitoso, inicia la sesión del usuario y lo lleva al módulo del Postulante.
 
 ### Flujo B: inicio de sesión
 
@@ -50,6 +50,11 @@ Este CU cubre el registro, el inicio de sesión y el cierre de sesión (este úl
 14. El sistema cierra la sesión del usuario en ese dispositivo y deja de reconocerla.
 15. El sistema lleva al usuario a la pantalla de acceso.
 
+### Flujo D: continuidad de la sesión
+
+16. Cuando el token de acceso de la sesión vence, el sistema lo renueva automáticamente con el refresh token del dispositivo, sin pedir de nuevo las credenciales: el refresh token usado queda revocado y se emite uno nuevo.
+17. Cuando el usuario vuelve a abrir o recarga el portal web o la app móvil con una sesión vigente, el sistema consulta quién es el usuario de esa sesión y lo lleva a su módulo sin pedirle iniciar sesión otra vez.
+
 ## Flujos alternativos y excepciones
 
 - **A1 (paso 4):** El CI, el registro universitario o el correo electrónico ya están registrados → el sistema rechaza el registro con `409`, indica el campo en conflicto y no crea la cuenta.
@@ -57,9 +62,9 @@ Este CU cubre el registro, el inicio de sesión y el cierre de sesión (este úl
 - **A3 (paso 9):** El correo no existe o la contraseña es incorrecta → el sistema responde `401` con el mismo mensaje en ambos casos (sin revelar cuál dato falló) y permite reintentar.
 - **A4 (paso 10):** La cuenta está desactivada → el sistema responde `403`, indica que debe comunicarse con la DUBSS y no abre sesión.
 - **A5 (paso 8):** El usuario selecciona «¿Olvidó su contraseña?» → se ejecuta el CU15.
-- **A6 (paso 9):** Tras varios intentos fallidos consecutivos la cuenta se bloquea temporalmente → el sistema niega el acceso, aunque la contraseña sea correcta, e informa que debe reintentar más tarde. Se bloquea a los 5 intentos, por 5 minutos la primera vez, y por más tiempo si el usuario sigue fallando (la escala exacta queda por definir con la DUBSS).
+- **A6 (paso 9):** Tras varios intentos fallidos consecutivos la cuenta se bloquea temporalmente → el sistema responde `403`, niega el acceso, aunque la contraseña sea correcta, e informa que debe reintentar más tarde (indicando cuánto falta). Se bloquea a los 5 intentos, por 5 minutos la primera vez, y por más tiempo si el usuario sigue fallando (la escala exacta queda por definir con la DUBSS).
 - **A7 (paso 4):** La petición de registro llega repetida (doble envío o reintento) → el sistema la procesa de forma idempotente y no crea dos cuentas.
-- **A8 (pasos 11 y 12):** La sesión ya no es válida (expiró o fue invalidada) → el sistema lleva al usuario a la pantalla de inicio de sesión.
+- **A8 (pasos 11, 12, 16 y 17):** La sesión ya no es válida (expiró o fue invalidada, o el refresh token venció o fue revocado) → el sistema lleva al usuario a la pantalla de inicio de sesión.
 - **A9 (cualquier paso):** Falla la conexión con el servidor o un servicio del que depende → el sistema informa el error con un mensaje claro, no crea ni modifica nada y permite reintentar.
 - **A10 (paso 14):** La sesión ya había expirado o se había cerrado antes de pedir el cierre → el sistema igual lleva al usuario a la pantalla de acceso, sin mostrar error.
 
@@ -71,7 +76,7 @@ Este CU cubre el registro, el inicio de sesión y el cierre de sesión (este úl
 - **La carrera** se elige de la lista de carreras de la UAGRM; la lista inicial (carreras de la UAGRM con su facultad) viene cargada con el sistema; su mantenimiento posterior queda fuera de este CU.
 - **El rechazo por credenciales es siempre el mismo mensaje**, exista o no el correo.
 - **Política de contraseña:** al menos 6 caracteres, sin obligación de mayúsculas, números ni símbolos.
-- **Bloqueo por intentos fallidos:** 5 intentos consecutivos bloquean la cuenta; el primer bloqueo dura 5 minutos y los siguientes duran más si se sigue fallando (la escala exacta queda por definir con la DUBSS; hoy: 5 min, 15 min, 1 h y 24 h). Lo implementa el propio sistema. Un inicio de sesión correcto reinicia el contador.
+- **Bloqueo por intentos fallidos:** 5 intentos consecutivos bloquean la cuenta; el primer bloqueo dura 5 minutos y los siguientes duran más si se sigue fallando (la escala exacta queda por definir con la DUBSS; hoy: 5 min, 15 min, 1 h y 24 h). Lo implementa el propio sistema. Un inicio de sesión correcto reinicia el contador. Mientras la cuenta está bloqueada, el sistema informa del bloqueo (no usa el mensaje genérico de credenciales); el diagrama de secuencia de la documentación de grado (imagen 121) muestra ese caso con el mensaje genérico, y queda pendiente decidir con la DUBSS cuál prevalece y alinear el diagrama.
 - **Una cuenta desactivada** no puede iniciar sesión; se desactiva y reactiva desde el CU14.
 - **Cerrar sesión** solo cierra la sesión del dispositivo desde el que se pide; no afecta a otros dispositivos.
 - **El registro es idempotente** (RNF-03): repetir la misma petición no duplica la cuenta.
@@ -82,7 +87,7 @@ Este CU cubre el registro, el inicio de sesión y el cierre de sesión (este úl
 
 ## Postcondiciones
 
-- **Registro:** existe una cuenta nueva, activa y con rol Postulante, y el usuario tiene una sesión abierta.
+- **Registro:** existe una cuenta nueva, activa y con rol Postulante, el usuario tiene una sesión abierta y el alta y el acceso quedaron registrados en la bitácora.
 - **Inicio de sesión:** el usuario tiene una sesión activa con los permisos de su rol, está en el módulo que le corresponde y su acceso quedó registrado en la bitácora (se consulta en el CU25).
 - **Cierre de sesión:** el dispositivo ya no tiene sesión y cualquier pantalla privada lleva a la pantalla de acceso.
 
@@ -100,15 +105,17 @@ Este CU cubre el registro, el inicio de sesión y el cierre de sesión (este úl
 - **CA10:** Dado que la cuenta acumula varios intentos fallidos consecutivos, el sistema debe bloquearla temporalmente y negar el acceso, incluso con la contraseña correcta, hasta que termine el bloqueo (5 intentos y 5 minutos; ver la regla de bloqueo).
 - **CA11:** Dado que el usuario sigue fallando al volver a intentar después de un bloqueo, el sistema debe aumentar la duración del siguiente bloqueo.
 - **CA12:** Dado que se envía dos veces la misma petición de registro, el sistema debe crear una sola cuenta.
-- **CA13:** Dado que el usuario selecciona «¿Olvidó su contraseña?», el sistema debe iniciar el CU15.
+- **CA13:** Dado que el usuario selecciona «¿Olvidó su contraseña?», el sistema debe iniciar el CU15. (El enlace se agrega a las pantallas de acceso cuando se implemente el CU15.)
 - **CA14:** Dado que el usuario se registra, inicia o cierra sesión desde la web o desde la app móvil, el sistema debe ofrecer el mismo comportamiento en ambas.
 - **CA15:** Dado que la sesión expiró o ya no es válida, el sistema debe llevar al usuario a la pantalla de inicio de sesión.
-- **CA16:** Dado que un usuario del personal quiere acceder, el sistema no debe ofrecerle crear su cuenta por sí mismo.
+- **CA16:** Dado que un usuario del personal (Administrador DUBSS, Directivo o Personal del Comedor) quiere acceder, el sistema debe permitirle solo iniciar sesión con la cuenta que le creó el Administrador DUBSS; cualquier registro propio crea siempre una cuenta de Postulante.
 - **CA17:** Dado que el usuario tiene una sesión abierta y selecciona «Cerrar sesión», el sistema debe cerrarla y llevarlo a la pantalla de acceso.
 - **CA18:** Dado que el usuario cerró sesión, el sistema no debe permitirle ver pantallas privadas hasta que vuelva a iniciar sesión.
 - **CA19:** Dado que el usuario tiene sesión abierta en otro dispositivo, el sistema debe mantenerla al cerrar sesión en este.
-- **CA20:** Dado cualquier registro o inicio de sesión, ni la contraseña ni los tokens de sesión deben aparecer en los registros del sistema, y todo inicio de sesión exitoso debe quedar anotado en la bitácora.
+- **CA20:** Dado cualquier registro o inicio de sesión, ni la contraseña ni los tokens de sesión deben aparecer en los registros del sistema, y todo registro y todo inicio de sesión exitoso (incluido el que sigue a un registro) deben quedar anotados en la bitácora.
 - **CA21:** Dado que el registro universitario ya está registrado, el sistema debe responder `409` indicando el registro universitario como campo en conflicto y no crear la cuenta.
+- **CA22:** Dado que el token de acceso venció y el refresh token del dispositivo sigue vigente, el sistema debe renovar la sesión sin pedir credenciales, revocar el refresh token usado y emitir uno nuevo.
+- **CA23:** Dado que el usuario vuelve a abrir o recarga el portal o la app con una sesión vigente, el sistema debe reconocerlo y llevarlo al módulo de su rol sin pedirle iniciar sesión.
 
 ## Desarrollador
 
