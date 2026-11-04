@@ -22,7 +22,7 @@ Existen las constantes `ERR_US_06` a `ERR_US_12` y su documentación, listas par
 
 ## Alcance
 
-- `B/features/usuarios/UsuarioErrorCodes.java`: agrega `ERR_US_06` (404, cuenta no encontrada o de Postulante), `ERR_US_07` (409, ya está en ese estado), `ERR_US_08` (403, propia cuenta), `ERR_US_09` (403, dejaría al sistema sin Administrador activo), `ERR_US_10` (400, rol no válido para el personal), `ERR_US_11` (400, `sort` o `filter` no soportado) y `ERR_US_12` (409, la cuenta ya tiene ese rol). **No reasigna `ERR_US_05`** (retirado).
+- `B/features/usuarios/exception/UsuarioErrorCodes.java`: agrega `ERR_US_06` (404, cuenta no encontrada o de Postulante), `ERR_US_07` (409, ya está en ese estado), `ERR_US_08` (403, propia cuenta), `ERR_US_09` (403, dejaría al sistema sin Administrador activo), `ERR_US_10` (400, rol no válido para el personal), `ERR_US_11` (400, `sort` o `filter` no soportado) y `ERR_US_12` (409, la cuenta ya tiene ese rol). **No reasigna `ERR_US_05`** (retirado).
 - `docs/errors/usuarios/ERRORES_USUARIOS.md`: una sección por código con el formato de la guía (HTTP, excepción, significado, dónde se lanza). «Dónde se lanza» apunta a la clase y el método previstos por las UT 07 a 11 (`UsuarioPersonalService.…`).
 - `docs/errors/README.md`: un link por código nuevo en la sección de Usuarios.
 

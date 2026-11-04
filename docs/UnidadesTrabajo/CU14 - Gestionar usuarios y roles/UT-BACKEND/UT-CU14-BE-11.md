@@ -23,7 +23,7 @@ Cuando alguien deja el cargo, su cuenta se desactiva sin perder lo que hizo, y s
 
 ## Alcance
 
-- `B/features/bitacora/BitacoraAcciones.java`: agrega `DESACTIVACION_USUARIO` y `REACTIVACION_USUARIO`.
+- `B/features/bitacora/constant/BitacoraAcciones.java`: agrega `DESACTIVACION_USUARIO` y `REACTIVACION_USUARIO`.
 - `UsuarioPersonalService.desactivar(UUID actorCodigo, UUID codigo)`, con `@Transactional`, `@PreAuthorize` y `@Auditar(accion = DESACTIVACION_USUARIO, entidad = "usuario")`. Valida **en este orden**, siguiendo el diagrama de secuencia: la cuenta existe y no es de un Postulante (`ERR_US_06`); no es la propia cuenta (`ForbiddenException` `ERR_US_08`); no está ya desactivada (`ConflictException` `ERR_US_07`); si es Administrador, que no sea el último activo (`validarNoUltimoAdministrador`, reutilizado de `UT-CU14-BE-10`, `ERR_US_09`). Después marca `activo = false`, llama a `SesionService.revocarTodas` y **no elimina nada** (`eliminado_en` queda en `NULL`).
 - `UsuarioPersonalService.reactivar(UUID actorCodigo, UUID codigo)`, con `@Transactional`, `@PreAuthorize` y `@Auditar(accion = REACTIVACION_USUARIO, entidad = "usuario")`: la cuenta existe y no es de un Postulante (`ERR_US_06`); si ya está activa, `ConflictException` `ERR_US_07`; marca `activo = true`. **No cambia el rol**, que es el que tenía (A6), ni restaura sesiones: la persona inicia sesión de nuevo.
 - Ambos devuelven `ResultadoAuditado<UsuarioPersonalResponse>` con `detalle` vacío (el rol de la cuenta se ve en su respuesta) y loguean un `INFO` (`module=usuarios`, `userId`).

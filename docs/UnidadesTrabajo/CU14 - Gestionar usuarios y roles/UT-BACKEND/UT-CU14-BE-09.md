@@ -24,7 +24,7 @@ Los datos de un funcionario cambian (un apellido mal escrito, un correo nuevo) y
 ## Alcance
 
 - `B/features/usuarios/model/Usuario.java`: agrega `@Setter` **solo** en `nombres`, `apellidos` y `correo`. No en `ci`, `passwordHash` ni `rol` (el rol lo cambia `UT-CU14-BE-10`).
-- `B/features/bitacora/BitacoraAcciones.java`: agrega `EDICION_USUARIO`.
+- `B/features/bitacora/constant/BitacoraAcciones.java`: agrega `EDICION_USUARIO`.
 - `UsuarioPersonalService.editar(UUID actorCodigo, UUID codigo, ActualizarUsuarioPersonalRequest)`, con `@Transactional`, `@PreAuthorize` y `@Auditar(accion = EDICION_USUARIO, entidad = "usuario")`. Busca la cuenta con `findPersonalByCodigo` (si no existe o es de un Postulante, `NotFoundException` `ERR_US_06`; método privado que reutilizan las UT 10 y 11); aplica solo los campos que llegan; normaliza el correo; si el correo cambia y ya lo usa **otra** cuenta, `ConflictException` `ERR_US_02`. Un administrador puede editar sus propios datos.
 - Devuelve `ResultadoAuditado<UsuarioPersonalResponse>` con `detalle = {camposModificados: [nombres, ...]}` (solo los **nombres** de los campos). Si el `Request` no cambia nada, `auditar = false` (no se anota una edición vacía) y responde igual la cuenta.
 - Loguea un `INFO` (`module=usuarios`, `userId`). Los lecturas y los no-cambios no se loguean.

@@ -24,7 +24,7 @@ Cuando una persona cambia de funciones, el Administrador le cambia el rol, sin d
 ## Alcance
 
 - `B/features/usuarios/model/Usuario.java`: agrega `@Setter` en `rol`.
-- `B/features/bitacora/BitacoraAcciones.java`: agrega `CAMBIO_ROL`.
+- `B/features/bitacora/constant/BitacoraAcciones.java`: agrega `CAMBIO_ROL`.
 - `UsuarioPersonalService.cambiarRol(UUID actorCodigo, UUID codigo, CambiarRolRequest)`, con `@Transactional`, `@PreAuthorize` y `@Auditar(accion = CAMBIO_ROL, entidad = "usuario")`. Valida **en este orden**: la cuenta existe y no es de un Postulante (`ERR_US_06`); el rol pedido es uno de los tres del personal (`ValidationException` `ERR_US_10`); no es la propia cuenta del administrador (`ForbiddenException` `ERR_US_08`); la cuenta no tiene ya ese rol (`ConflictException` `ERR_US_12`); si la cuenta es un Administrador **activo** y el rol nuevo no es Administrador, que no sea el último (`validarNoUltimoAdministrador`: cuenta `UsuarioRepository.bloquearAdministradoresActivos()` dentro de la transacción; si queda en cero, `ForbiddenException` `ERR_US_09`).
 - Si pasa las validaciones: guarda el rol nuevo y llama a `SesionService.revocarTodas` (A3: la persona entra de nuevo y aterriza en el módulo de su rol).
 - Devuelve `ResultadoAuditado<UsuarioPersonalResponse>` con `detalle = {rolAnterior, rolNuevo}`.
