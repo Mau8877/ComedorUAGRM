@@ -1,4 +1,4 @@
-package com.comedoruagrm.backend.features.bitacora;
+package com.comedoruagrm.backend.features.bitacora.aspect;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;

@@ -1,4 +1,4 @@
-package com.comedoruagrm.backend.features.usuarios;
+package com.comedoruagrm.backend.features.usuarios.exception;
 
 /**
  * Catalogo de codigos de error del modulo usuarios (prefijo US). Documentados

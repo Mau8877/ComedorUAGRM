@@ -32,7 +32,7 @@ import com.comedoruagrm.backend.common.exception.UnauthorizedException;
 import com.comedoruagrm.backend.features.auth.dto.SesionResponse;
 import com.comedoruagrm.backend.features.auth.service.AuthService;
 import com.comedoruagrm.backend.features.auth.service.AuthService.RegistroResultado;
-import com.comedoruagrm.backend.features.usuarios.UsuarioErrorCodes;
+import com.comedoruagrm.backend.features.usuarios.exception.UsuarioErrorCodes;
 import com.comedoruagrm.backend.features.usuarios.dto.UsuarioResponse;
 import com.comedoruagrm.backend.security.AuthErrorCodes;
 import jakarta.servlet.http.Cookie;

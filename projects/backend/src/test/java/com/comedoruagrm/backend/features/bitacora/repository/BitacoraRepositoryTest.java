@@ -13,7 +13,7 @@ import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabas
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
-import com.comedoruagrm.backend.features.bitacora.BitacoraAcciones;
+import com.comedoruagrm.backend.features.bitacora.constant.BitacoraAcciones;
 import com.comedoruagrm.backend.features.bitacora.model.Bitacora;
 import com.comedoruagrm.backend.support.PostgresTestDatabase;
 

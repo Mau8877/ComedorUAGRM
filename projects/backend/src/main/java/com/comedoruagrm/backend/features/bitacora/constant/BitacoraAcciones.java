@@ -1,4 +1,4 @@
-package com.comedoruagrm.backend.features.bitacora;
+package com.comedoruagrm.backend.features.bitacora.constant;
 
 /**
  * Valores de `bitacora.accion` que escribe el backend. Los intentos fallidos

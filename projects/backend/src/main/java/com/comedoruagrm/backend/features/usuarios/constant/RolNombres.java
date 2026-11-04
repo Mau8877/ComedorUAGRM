@@ -1,4 +1,4 @@
-package com.comedoruagrm.backend.features.usuarios;
+package com.comedoruagrm.backend.features.usuarios.constant;
 
 /**
  * Valores de `rol.nombre`. Son constantes de texto y no un enum Java porque

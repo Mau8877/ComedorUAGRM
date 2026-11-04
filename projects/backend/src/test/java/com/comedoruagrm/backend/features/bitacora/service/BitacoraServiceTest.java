@@ -11,7 +11,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
-import com.comedoruagrm.backend.features.bitacora.BitacoraAcciones;
+import com.comedoruagrm.backend.features.bitacora.constant.BitacoraAcciones;
 import com.comedoruagrm.backend.features.bitacora.model.Bitacora;
 import com.comedoruagrm.backend.features.bitacora.repository.BitacoraRepository;
 import com.comedoruagrm.backend.features.usuarios.model.Usuario;

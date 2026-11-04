@@ -21,7 +21,7 @@ import com.comedoruagrm.backend.common.exception.ForbiddenException;
 import com.comedoruagrm.backend.common.exception.UnauthorizedException;
 import com.comedoruagrm.backend.features.auth.model.Sesion;
 import com.comedoruagrm.backend.features.auth.repository.SesionRepository;
-import com.comedoruagrm.backend.features.bitacora.BitacoraAcciones;
+import com.comedoruagrm.backend.features.bitacora.constant.BitacoraAcciones;
 import com.comedoruagrm.backend.features.usuarios.model.Usuario;
 import com.comedoruagrm.backend.security.AuthErrorCodes;
 import com.comedoruagrm.backend.security.TokenService;

@@ -15,7 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
-import com.comedoruagrm.backend.features.usuarios.RolNombres;
+import com.comedoruagrm.backend.features.usuarios.constant.RolNombres;
 import com.comedoruagrm.backend.features.usuarios.model.Carrera;
 import com.comedoruagrm.backend.features.usuarios.model.Postulante;
 import com.comedoruagrm.backend.features.usuarios.model.Rol;
