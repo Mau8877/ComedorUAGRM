@@ -155,9 +155,9 @@ base de datos). Catálogo actual (valores de `rol.nombre`):
 «Usuario del Sistema» (el actor abstracto del diagrama de casos de uso) no
 se almacena como rol.
 
-- Los nombres de rol se usan como **constantes de texto** (`RolNombres` o
-  similar, en el módulo dueño del dato de `usuario`), no como un enum Java
-  cerrado: son filas de la tabla `rol`.
+- Los nombres de rol se usan como **constantes de texto** (`RolNombres`, en
+  `features/usuarios/constant/`, el módulo dueño del dato de `usuario`), no
+  como un enum Java cerrado: son filas de la tabla `rol`.
 - Las `authorities` son `ROLE_{nombre}`. Se protege por rol con
   `@PreAuthorize("hasRole('ADMINISTRADOR_DUBSS')")` (o `hasAnyRole(...)`) a
   nivel de método de `service` (no en el controller — mantiene la regla de

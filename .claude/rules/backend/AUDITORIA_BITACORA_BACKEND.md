@@ -22,11 +22,11 @@ public SesionAbierta abrir(Usuario usuario) { ... }
   ids internos.
 - `auditar()` devuelve `false` cuando esta vez no hay nada que anotar (ej. un
   registro repetido que no crea la cuenta).
-- `AuditoriaAspect` (`features/bitacora/`) anota solo si el método **termina
+- `AuditoriaAspect` (`features/bitacora/aspect/`) anota solo si el método **termina
   bien**, dentro de la transacción de quien llama (un rollback deshace la
   fila), y toma la IP del request en curso: **no se pasa `ip` por parámetro**.
-- La acción es una constante de `BitacoraAcciones`; no se escriben strings
-  sueltos.
+- La acción es una constante de `BitacoraAcciones`
+  (`features/bitacora/constant/`); no se escriben strings sueltos.
 
 ## Cuándo NO sirve la anotación
 
@@ -45,7 +45,7 @@ expresa bien (ej. anotar sobre un id que viene en el argumento y no en el
 resultado, o anotar también cuando el método falla), se agrega una anotación
 nueva en vez de repetir llamadas manuales o torcer `@Auditar`:
 
-- La anotación va en `common/auditoria/` y su advice en `features/bitacora/`
+- La anotación va en `common/auditoria/` y su advice en `features/bitacora/aspect/`
   (el mismo `AuditoriaAspect` o un aspecto hermano), siempre delegando en
   `BitacoraService`: ningún otro código inserta filas en `bitacora`.
 - Se documenta acá con su regla de cuándo usarla, y se cubre con su propio

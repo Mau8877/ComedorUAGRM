@@ -25,10 +25,12 @@ com.comedoruagrm.backend
 ├── config/          # Beans de configuración de Spring (SecurityConfig, etc.)
 ├── security/        # JWT propio (TokenService), filtro de usuario activo, RateLimitFilter, @CurrentUserId
 └── features/
-    └── {modulo}/
+    └── {modulo}/        # Nada suelto en la raíz: todo va en una de estas carpetas
+        ├── aspect/      # Aspectos de Spring AOP del módulo (si aplica)
+        ├── constant/    # Constantes de texto del módulo (si aplica)
         ├── controller/  # Entrada HTTP
         ├── enums/       # Enumeraciones de negocio (si aplica)
-        ├── exception/   # Excepciones de negocio (si aplica)
+        ├── exception/   # Excepciones de negocio y {Recurso}ErrorCodes (si aplica)
         ├── service/     # Lógica de negocio
         ├── repository/  # Acceso a datos (Spring Data JPA)
         ├── dto/         # Contrato con el cliente (Request/Response)

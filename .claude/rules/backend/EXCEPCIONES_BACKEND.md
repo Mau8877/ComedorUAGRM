@@ -127,7 +127,8 @@ reemplaza ni duplica esa fuente real — si alguna vez quedan
 desincronizados, gana `docs/errors/`.
 
 Cada módulo mantiene su catálogo como constantes (interfaz o `enum` Java,
-ej. `UsuarioErrorCodes`) en su propio paquete de feature, no en un único
+ej. `UsuarioErrorCodes`) en la carpeta `exception/` de su feature
+(`features/{modulo}/exception/`), no en un único
 archivo gigante compartido — así el código y su catálogo viven juntos y es
 fácil ubicar en qué módulo y punto ocurrió un error solo leyendo el prefijo.
 

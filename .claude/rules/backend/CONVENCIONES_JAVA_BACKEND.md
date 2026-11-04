@@ -20,14 +20,25 @@ com.comedoruagrm.backend
 ├── security/             # JWT propio (TokenService), filtro de usuario activo, RateLimitFilter, @CurrentUserId
 └── features/
     └── {modulo}/         # ej. usuarios/, auth/, pedidos/
+        ├── aspect/       # Aspectos de Spring AOP del módulo (si aplica)
+        ├── constant/     # Constantes de texto del módulo: RolNombres, BitacoraAcciones (si aplica)
         ├── controller/
         ├── enums/        # Enumeraciones de negocio del módulo (si aplica, ver nota abajo)
+        ├── exception/    # Excepciones de negocio y {Recurso}ErrorCodes del módulo (si aplica)
         ├── service/
         ├── repository/
         ├── dto/          # XxxRequest, XxxResponse
         ├── model/        # La clase mapeada a una tabla (sigue llevando @Entity de JPA, ver nota abajo)
         └── mapper/       # (si el mapeo Model↔DTO no es trivial)
 ```
+
+**Ninguna clase vive suelta en la raíz de `features/{modulo}/`**: todo va en la
+subcarpeta que le corresponde (la raíz del módulo solo contiene esas
+subcarpetas). Una carpeta que el módulo no necesita directamente no se crea
+(no se deja vacía "por si acaso"). Los tests siguen el mismo árbol de paquetes
+(el test de `features/bitacora/aspect/AuditoriaAspect` vive en
+`features/bitacora/aspect/`); un test de integración que cruza varias capas
+(`AuthIntegrationTest`) queda en la raíz de su módulo.
 
 Una clase que solo la usa un módulo vive **dentro de ese módulo**, no en
 `common/` — `common/` es exclusivamente para lo que de verdad comparten dos o
@@ -39,8 +50,10 @@ un campo del Model que solo puede tomar un set fijo de valores, persistido
 `@Enumerated(EnumType.STRING)` (nunca `ORDINAL`; ver
 [PERSISTENCIA_BD_BACKEND.md](PERSISTENCIA_BD_BACKEND.md#convención-de-nombres-models-tablas-columnas)).
 No confundir con `{Recurso}ErrorCodes` (el catálogo de códigos de error del
-módulo, ver [EXCEPCIONES_BACKEND.md](EXCEPCIONES_BACKEND.md)) — eso sigue
-sin una subcarpeta dedicada, vive suelto en la raíz del paquete del módulo.
+módulo, ver [EXCEPCIONES_BACKEND.md](EXCEPCIONES_BACKEND.md)) — eso va en
+`exception/` junto a las excepciones del módulo, no en `enums/`. Las
+constantes de texto del módulo (ej. `RolNombres`, `BitacoraAcciones`) van en
+`constant/`.
 Si el módulo no tiene ninguna enumeración de negocio, la carpeta
 directamente no existe (no se crea vacía "por si acaso").
 
