@@ -26,11 +26,12 @@ Cuando un usuario autenticado llama a un método protegido con `@PreAuthorize` y
 - `B/security/AuthErrorCodes.java`: agrega `ERR_AUTH_07` (403, el usuario no tiene el rol necesario).
 - `B/security/ApiAccessDeniedHandler.java`: `AccessDeniedHandler` que escribe el `403` con el mismo `ErrorWriter` que ya usan `ApiAuthenticationEntryPoint` y `UsuarioActivoFilter`, y loguea un `WARN` (`module=auth`, `errorCode`, `userId`; nunca el token).
 - `B/config/SecurityConfig.java`: registra el handler en `exceptionHandling(...)`, al lado del `authenticationEntryPoint`.
+- `B/common/exception/GlobalExceptionHandler.java`: un `@ExceptionHandler(AccessDeniedException.class)` que **vuelve a lanzar** la excepción. Sin él, el catch-all de `Exception` la convertía en un `500` y nunca llegaba al handler de seguridad (se comprobó con el test de esta UT). Se vuelve a lanzar en vez de armar el `403` ahí porque `common/` no puede importar de `security/`.
 - `docs/errors/auth/ERRORES_AUTH.md` y `docs/errors/README.md`: documentan `ERR_AUTH_07`.
 - `.claude/rules/backend/SEGURIDAD_AUTH_BACKEND.md`: una línea en [Roles y permisos](../../../../.claude/rules/backend/SEGURIDAD_AUTH_BACKEND.md#roles-y-permisos) que dice que la falta de rol responde `403` `ERR_AUTH_07`.
 - Tests: con un endpoint de prueba (o un `service` anotado) protegido por rol, un usuario con otro rol recibe `403` con `status = failed` y `error = ERR_AUTH_07`; con el rol correcto, `200`; sin token, `401` `ERR_AUTH_01` (sin cambio).
 
-Archivos esperados (crear/tocar): los de arriba y su test.
+Archivos esperados (crear/tocar): los de arriba y su test (`T/security/ApiAccessDeniedHandlerTest.java`).
 
 ## Fuera de alcance (no tocar)
 

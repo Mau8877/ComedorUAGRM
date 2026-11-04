@@ -2,7 +2,7 @@
 
 | Id   | Nombre                    | Módulo               | Prioridad | Estado    |
 | ---- | ------------------------- | -------------------- | --------- | --------- |
-| CU14 | Gestionar usuarios y roles | P1. Cuentas y acceso | Alta      | Pendiente |
+| CU14 | Gestionar usuarios y roles | P1. Cuentas y acceso | Alta      | En progreso |
 
 **Actor principal:** Administrador DUBSS
 **Actores secundarios:** —
