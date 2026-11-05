@@ -8,6 +8,8 @@ export interface ErrorMapeado {
   campo?: 'ci' | 'correo' | 'registroUniversitario' | 'carreraCodigo'
   /** Error de conexión: el formulario ofrece reintentar. */
   red?: boolean
+  /** El enlace de restablecimiento no sirve (venció, ya se usó o lo reemplazó uno nuevo): se ofrece pedir otro. */
+  enlaceInvalido?: boolean
 }
 
 const CAMPO_POR_CODIGO: Record<string, ErrorMapeado['campo']> = {
@@ -33,6 +35,8 @@ export function mapearError(error: unknown): ErrorMapeado {
         return { mensaje: error.message }
       case 'ERR_AUTH_03':
         return { mensaje: 'Tu cuenta está desactivada. Comunícate con la DUBSS.' }
+      case 'ERR_AUTH_08': // CU15: el mismo mensaje para vencido, usado, reemplazado o inventado
+        return { mensaje: 'El enlace ya no sirve. Solicita uno nuevo.', enlaceInvalido: true }
       case 'ERR_US_01':
       case 'ERR_US_02':
       case 'ERR_US_03':

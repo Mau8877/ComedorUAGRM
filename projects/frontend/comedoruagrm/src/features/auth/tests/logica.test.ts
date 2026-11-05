@@ -51,6 +51,13 @@ describe('mapearError', () => {
     expect(mapearError(new ApiError('ERR_US_03', 'm')).campo).toBe('registroUniversitario')
   })
 
+  it('ERR_AUTH_08 marca el enlace como inválido para ofrecer pedir uno nuevo (CU15, A2)', () => {
+    expect(mapearError(new ApiError('ERR_AUTH_08', 'lo que diga el backend'))).toEqual({
+      mensaje: 'El enlace ya no sirve. Solicita uno nuevo.',
+      enlaceInvalido: true,
+    })
+  })
+
   it('un error de red ofrece reintentar', () => {
     const sinRespuesta = new AxiosError('Network Error', 'ERR_NETWORK')
     expect(mapearError(sinRespuesta)).toMatchObject({ red: true })

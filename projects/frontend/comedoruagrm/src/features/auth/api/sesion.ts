@@ -7,7 +7,15 @@ import { refreshApi } from './authApi'
 // * pedir uno nuevo con POST /auth/refresh sin cuerpo.
 
 /** Rutas donde un 401 es un error del formulario ("credenciales incorrectas"), no una sesión vencida. */
-const RUTAS_DE_ACCESO = ['/auth/login', '/auth/registro', '/auth/refresh', '/auth/logout']
+const RUTAS_DE_ACCESO = [
+  '/auth/login',
+  '/auth/registro',
+  '/auth/refresh',
+  '/auth/logout',
+  // CU15: públicas; la persona todavía no tiene sesión que renovar.
+  '/auth/recuperar-contrasena',
+  '/auth/restablecer-contrasena',
+]
 
 export function esRutaDeAcceso(url: string | undefined): boolean {
   return RUTAS_DE_ACCESO.some((ruta) => url?.includes(ruta))

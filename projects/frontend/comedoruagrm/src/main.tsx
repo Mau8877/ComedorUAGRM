@@ -13,7 +13,7 @@ const router = createRouter({ routeTree })
 // * Ante un 401 el cliente HTTP intenta renovar la sesión; si no se puede, lleva
 // * al login (salvo que ya se esté en una pantalla pública). Se instala acá, antes
 // * de que corra cualquier guard, porque los guards ya hacen peticiones.
-const RUTAS_PUBLICAS = ['/', '/login', '/registro']
+const RUTAS_PUBLICAS = ['/', '/login', '/registro', '/recuperar-contrasena', '/restablecer-contrasena']
 instalarManejadorDeSesion({
   alPerderSesion: () => {
     if (!RUTAS_PUBLICAS.includes(router.state.location.pathname)) {

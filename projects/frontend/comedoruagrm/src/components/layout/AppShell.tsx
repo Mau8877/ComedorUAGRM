@@ -14,6 +14,10 @@ interface AppShellProps {
   notifications?: NotificationsController
   /** Ver AppHeaderProps. */
   onCerrarSesion?: () => void
+  /** Ver AppHeaderProps. */
+  onPerfil?: () => void
+  /** Ver AppHeaderProps. */
+  onCambiarContrasena?: () => void
   children: ReactNode
 }
 
@@ -29,6 +33,8 @@ export function AppShell({
   user,
   notifications,
   onCerrarSesion,
+  onPerfil,
+  onCambiarContrasena,
   children,
 }: AppShellProps) {
   return (
@@ -38,6 +44,8 @@ export function AppShell({
         user={user}
         notifications={notifications}
         onCerrarSesion={onCerrarSesion}
+        onPerfil={onPerfil}
+        onCambiarContrasena={onCambiarContrasena}
       />
 
       {/* * p-4 acá es lo que crea el espacio real entre el sidebar y el

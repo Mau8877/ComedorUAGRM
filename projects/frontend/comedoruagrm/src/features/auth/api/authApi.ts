@@ -1,6 +1,6 @@
 import { apiClient, ApiError } from '@/store'
 
-import type { RegistroRequest } from '../schemas'
+import type { RegistroRequest, RestablecerContrasenaRequest } from '../schemas'
 import type { Carrera, Sesion, Usuario } from '../types'
 
 // * Funciones sin hook: las usan las mutations de useRegistro/useLogin/
@@ -39,6 +39,19 @@ export async function refreshApi(): Promise<Sesion> {
 
 export async function logoutApi(): Promise<void> {
   await apiClient.post('/auth/logout')
+}
+
+/**
+ * Pide el enlace de recuperación (CU15, flujo A). El backend responde siempre igual exista o no la
+ * cuenta: acá no se lee nada de la respuesta, para no poder distinguir los casos.
+ */
+export async function solicitarRecuperacionApi(correo: string): Promise<void> {
+  await apiClient.post('/auth/recuperar-contrasena', { correo })
+}
+
+/** Define la contraseña nueva con el token del enlace (CU15, flujo B). El backend cierra todas las sesiones. */
+export async function restablecerContrasenaApi(request: RestablecerContrasenaRequest): Promise<void> {
+  await apiClient.post('/auth/restablecer-contrasena', request)
 }
 
 /** `null` si no hay sesión (sin cookie, vencida o cuenta desactivada); cualquier otro error se propaga. */

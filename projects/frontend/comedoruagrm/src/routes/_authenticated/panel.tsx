@@ -3,6 +3,7 @@ import { Loader2Icon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { etiquetaRol, useCerrarSesion } from '@/features/auth'
+import { useAccionesDeCuenta } from '@/features/perfil'
 import { AdminLayout, EstudianteLayout } from '@/layouts'
 
 // * Sigue siendo la ruta hija que evita el conflicto del layout pathless vacío
@@ -17,13 +18,14 @@ function PanelPage() {
   const { usuario } = Route.useRouteContext()
   const cerrarSesion = useCerrarSesion()
   const alCerrarSesion = () => cerrarSesion.mutate()
+  const acciones = useAccionesDeCuenta()
 
   const user = { nombre: `${usuario.nombres} ${usuario.apellidos}`, rol: etiquetaRol(usuario.rol) }
   const saludo = <p className="text-muted-foreground">Hola, {usuario.nombres}. Tu módulo se irá habilitando pronto.</p>
 
   if (usuario.rol === 'ADMINISTRADOR_DUBSS') {
     return (
-      <AdminLayout title="Panel" user={user} onCerrarSesion={alCerrarSesion}>
+      <AdminLayout title="Panel" user={user} onCerrarSesion={alCerrarSesion} {...acciones}>
         {saludo}
       </AdminLayout>
     )
@@ -31,7 +33,7 @@ function PanelPage() {
 
   if (usuario.rol === 'POSTULANTE') {
     return (
-      <EstudianteLayout title="Panel" user={user} onCerrarSesion={alCerrarSesion}>
+      <EstudianteLayout title="Panel" user={user} onCerrarSesion={alCerrarSesion} {...acciones}>
         {saludo}
       </EstudianteLayout>
     )

@@ -45,6 +45,10 @@ interface AppHeaderProps {
   notifications?: NotificationsController
   /** Acción del ítem «Cerrar sesión» del menú de usuario; el componente no sabe cómo se cierra la sesión. */
   onCerrarSesion?: () => void
+  /** Acción del ítem «Mi perfil» del menú de usuario; el componente no sabe a dónde se navega. */
+  onPerfil?: () => void
+  /** Acción del ítem «Cambiar contraseña» del menú de usuario. */
+  onCambiarContrasena?: () => void
 }
 
 const EMPTY_NOTIFICATIONS: NotificationsController = {
@@ -87,6 +91,8 @@ export function AppHeader({
   user,
   notifications = EMPTY_NOTIFICATIONS,
   onCerrarSesion,
+  onPerfil,
+  onCambiarContrasena,
 }: AppHeaderProps) {
   const theme = useUiStore((s) => s.theme)
   const toggleTheme = useUiStore((s) => s.toggleTheme)
@@ -131,11 +137,11 @@ export function AppHeader({
             <DropdownMenuGroup>
               <DropdownMenuLabel>{user.nombre}</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={onPerfil}>
                 <UserIcon />
                 Mi perfil
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={onCambiarContrasena}>
                 <KeyRoundIcon />
                 Cambiar contraseña
               </DropdownMenuItem>

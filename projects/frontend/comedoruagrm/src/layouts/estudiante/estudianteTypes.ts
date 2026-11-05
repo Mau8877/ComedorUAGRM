@@ -9,6 +9,10 @@ export interface EstudianteLayoutProps {
   notifications?: NotificationsController
   /** Ver AppHeaderProps. */
   onCerrarSesion?: () => void
+  /** Ver AppHeaderProps. */
+  onPerfil?: () => void
+  /** Ver AppHeaderProps. */
+  onCambiarContrasena?: () => void
   /** Solo para pantallas de prueba: fuerza qué ítem se ve activo. */
   activeHref?: string
   children: ReactNode

@@ -87,10 +87,13 @@ describe('LoginScreen', () => {
     expect(screen.getByRole('button', { name: 'Iniciar sesión' })).toBeDisabled()
   })
 
-  it('ofrece crear cuenta pero no recuperar contraseña (CU15)', () => {
+  it('ofrece crear cuenta y recuperar la contraseña (CU15, CA21)', () => {
     montar()
 
     expect(screen.getByRole('link', { name: 'Crear cuenta' })).toHaveAttribute('href', '/registro')
-    expect(screen.queryByText(/olvid/i)).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: '¿Olvidó su contraseña?' })).toHaveAttribute(
+      'href',
+      '/recuperar-contrasena',
+    )
   })
 })

@@ -5,6 +5,8 @@ import { Input } from '@/components/ui/input'
 interface CampoFormularioProps {
   field: AnyFieldApi
   label: string
+  /** `id` del input; por defecto el nombre del campo. Se pasa cuando dos formularios de una misma página comparten nombres. */
+  id?: string
   type?: 'text' | 'email' | 'password' | 'tel'
   autoComplete?: string
   inputMode?: 'numeric' | 'tel' | 'text'
@@ -21,6 +23,7 @@ interface CampoFormularioProps {
 export function CampoFormulario({
   field,
   label,
+  id,
   type = 'text',
   autoComplete,
   inputMode,
@@ -30,14 +33,15 @@ export function CampoFormulario({
 }: CampoFormularioProps) {
   const errorValidacion = field.state.meta.isTouched ? field.state.meta.errors[0]?.message : undefined
   const error = errorExterno ?? errorValidacion
+  const idInput = id ?? field.name
 
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor={field.name} className="text-sm font-medium text-foreground">
+      <label htmlFor={idInput} className="text-sm font-medium text-foreground">
         {label}
       </label>
       <Input
-        id={field.name}
+        id={idInput}
         name={field.name}
         type={type}
         autoComplete={autoComplete}

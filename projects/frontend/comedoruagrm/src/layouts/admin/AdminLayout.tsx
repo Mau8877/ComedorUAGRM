@@ -8,6 +8,8 @@ export function AdminLayout({
   user,
   notifications,
   onCerrarSesion,
+  onPerfil,
+  onCambiarContrasena,
   activeHref,
   children,
 }: AdminLayoutProps) {
@@ -20,6 +22,8 @@ export function AdminLayout({
       user={user}
       notifications={notifications}
       onCerrarSesion={onCerrarSesion}
+      onPerfil={onPerfil}
+      onCambiarContrasena={onCambiarContrasena}
     >
       {children}
     </AppShell>

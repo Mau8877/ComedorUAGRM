@@ -55,6 +55,15 @@ describe('esRutaDeAcceso', () => {
     expect(esRutaDeAcceso('/auth/usuario-actual')).toBe(false)
     expect(esRutaDeAcceso(undefined)).toBe(false)
   })
+
+  it('reconoce las rutas públicas de recuperación de contraseña (CU15): un 401 ahí no renueva la sesión', () => {
+    expect(esRutaDeAcceso('/auth/recuperar-contrasena')).toBe(true)
+    expect(esRutaDeAcceso('/auth/restablecer-contrasena')).toBe(true)
+  })
+
+  it('cambiar-contrasena exige sesión: un 401 ahí sí intenta renovar', () => {
+    expect(esRutaDeAcceso('/auth/cambiar-contrasena')).toBe(false)
+  })
 })
 
 describe('instalarManejadorDeSesion', () => {

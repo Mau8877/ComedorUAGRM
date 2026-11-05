@@ -27,4 +27,26 @@ describe('AppHeader', () => {
 
     expect(onCerrarSesion).toHaveBeenCalledTimes(1)
   })
+
+  it('el ítem «Mi perfil» llama a onPerfil', async () => {
+    const onPerfil = vi.fn()
+    const usuario = userEvent.setup()
+    render(<AppHeader appName="ComedorU" user={user} onPerfil={onPerfil} />)
+
+    await usuario.click(screen.getByText('Ana Perez'))
+    await usuario.click(await screen.findByText('Mi perfil'))
+
+    expect(onPerfil).toHaveBeenCalledTimes(1)
+  })
+
+  it('el ítem «Cambiar contraseña» llama a onCambiarContrasena', async () => {
+    const onCambiarContrasena = vi.fn()
+    const usuario = userEvent.setup()
+    render(<AppHeader appName="ComedorU" user={user} onCambiarContrasena={onCambiarContrasena} />)
+
+    await usuario.click(screen.getByText('Ana Perez'))
+    await usuario.click(await screen.findByText('Cambiar contraseña'))
+
+    expect(onCambiarContrasena).toHaveBeenCalledTimes(1)
+  })
 })

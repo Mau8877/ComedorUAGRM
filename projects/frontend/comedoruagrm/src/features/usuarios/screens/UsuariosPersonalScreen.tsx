@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/tanstack-table'
 import type { DataTableToolbarFilter } from '@/components/ui/tanstack-table'
 import { etiquetaRol, useCerrarSesion } from '@/features/auth'
+import { useAccionesDeCuenta } from '@/features/perfil'
 import type { Usuario } from '@/features/auth'
 import { AdminLayout } from '@/layouts'
 import { debounce } from '@/utils/debounce'
@@ -97,6 +98,7 @@ export interface UsuariosPersonalScreenProps {
 
 export function UsuariosPersonalScreen({ rol, titulo, activeHref, usuarioActual }: UsuariosPersonalScreenProps) {
   const cerrarSesion = useCerrarSesion()
+  const accionesDeCuenta = useAccionesDeCuenta()
 
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(PAGE_SIZE_INICIAL)
@@ -215,6 +217,7 @@ export function UsuariosPersonalScreen({ rol, titulo, activeHref, usuarioActual 
       activeHref={activeHref}
       user={{ nombre: `${usuarioActual.nombres} ${usuarioActual.apellidos}`, rol: etiquetaRol(usuarioActual.rol) }}
       onCerrarSesion={() => cerrarSesion.mutate()}
+      {...accionesDeCuenta}
     >
       <div className="rounded-2xl border border-border bg-card p-4">
         <DataTableToolbar

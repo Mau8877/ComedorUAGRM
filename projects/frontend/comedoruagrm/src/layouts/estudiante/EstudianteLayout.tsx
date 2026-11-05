@@ -8,6 +8,8 @@ export function EstudianteLayout({
   user,
   notifications,
   onCerrarSesion,
+  onPerfil,
+  onCambiarContrasena,
   activeHref,
   children,
 }: EstudianteLayoutProps) {
@@ -20,6 +22,8 @@ export function EstudianteLayout({
       user={user}
       notifications={notifications}
       onCerrarSesion={onCerrarSesion}
+      onPerfil={onPerfil}
+      onCambiarContrasena={onCambiarContrasena}
     >
       {children}
     </AppShell>

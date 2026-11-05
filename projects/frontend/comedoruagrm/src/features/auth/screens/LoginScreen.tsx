@@ -72,6 +72,13 @@ export function LoginScreen() {
                 )}
               </form.Field>
 
+              <Link
+                to="/recuperar-contrasena"
+                className="w-fit text-sm font-medium text-primary underline-offset-4 hover:underline"
+              >
+                ¿Olvidó su contraseña?
+              </Link>
+
               <Button type="submit" disabled={login.isPending}>
                 {login.isPending && <Loader2Icon className="animate-spin" />}
                 Iniciar sesión

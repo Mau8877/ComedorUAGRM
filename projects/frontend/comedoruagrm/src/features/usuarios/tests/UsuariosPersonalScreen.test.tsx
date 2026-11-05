@@ -10,6 +10,8 @@ vi.mock('@/features/auth', async () => {
   const sim = await import('./clienteSimulado')
   return { etiquetaRol: sim.etiquetaRolSimulada, useCerrarSesion: () => ({ mutate: sim.cerrarSesion }) }
 })
+// El menú de cuenta (CU15) navega con el router; acá no se prueba, así que se simula.
+vi.mock('@/features/perfil', () => ({ useAccionesDeCuenta: () => ({}) }))
 vi.mock('@/layouts', () => ({
   AdminLayout: ({ title, children }: { title: string; children: ReactNode }) => (
     <div>
