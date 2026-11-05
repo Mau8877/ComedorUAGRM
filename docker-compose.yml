@@ -124,10 +124,21 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       # Cookies de sesión del cliente web: true solo detrás de HTTPS
       - COOKIE_SECURE=${COOKIE_SECURE:-false}
+      # Correo (recuperación de contraseña): en desarrollo cae en Mailpit
+      - MAIL_HOST=${MAIL_HOST:-comedor-uagrm-mailpit}
+      - MAIL_PORT=${MAIL_PORT:-1025}
+      - MAIL_USERNAME=${MAIL_USERNAME:-}
+      - MAIL_PASSWORD=${MAIL_PASSWORD:-}
+      - MAIL_SMTP_AUTH=${MAIL_SMTP_AUTH:-false}
+      - MAIL_SMTP_STARTTLS=${MAIL_SMTP_STARTTLS:-false}
+      - MAIL_FROM=${MAIL_FROM:-no-responder@comedoru.local}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost}
     depends_on:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      mailpit:
         condition: service_healthy
     networks:
       - comedor-uagrm-network
@@ -203,6 +214,30 @@ services:
     command: redis-server /usr/local/etc/redis/redis.conf
     healthcheck:
       test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------
+  # CORREO DE PRUEBAS (Mailpit)
+  # ---------------------------------------
+  # Servidor SMTP de desarrollo: recibe los correos del backend (recuperación
+  # de contraseña) y NO entrega nada a nadie; los muestra en una bandeja web en
+  # http://localhost:8025. No pasa por el proxy. En producción se reemplaza por
+  # un SMTP real cambiando solo las variables MAIL_* (ver .env.example).
+  mailpit:
+    image: axllent/mailpit:v1.33.0
+    container_name: comedor-uagrm-mailpit
+    environment:
+      - MP_SMTP_AUTH_ACCEPT_ANY=1
+      - MP_SMTP_AUTH_ALLOW_INSECURE=1
+    ports:
+      - '8025:8025'
+      - '1025:1025'
+    networks:
+      - comedor-uagrm-network
+    healthcheck:
+      test: ['CMD', '/mailpit', 'readyz']
       interval: 10s
       timeout: 5s
       retries: 5
