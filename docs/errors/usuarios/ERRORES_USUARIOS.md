@@ -111,3 +111,11 @@ Errores del registro y la gestión de cuentas de usuario.
 - **Significado:** Se pidió cambiar el rol de una cuenta al mismo rol que ya
   tiene.
 - **Dónde se lanza:** `UsuarioPersonalService.cambiarRol()`
+
+## `ERR_US_13`
+
+- **HTTP:** 400
+- **Excepción:** `ValidationException`
+- **Significado:** Se intentó actualizar el teléfono de una cuenta que no es de
+  un Postulante: solo el Postulante tiene teléfono.
+- **Dónde se lanza:** `PerfilService.actualizar()`

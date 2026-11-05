@@ -51,6 +51,8 @@ docs/errors/
 - [`ERR_AUTH_05`](auth/ERRORES_AUTH.md#err_auth_05) — Cuenta bloqueada temporalmente por intentos fallidos (403)
 - [`ERR_AUTH_06`](auth/ERRORES_AUTH.md#err_auth_06) — Refresh token inválido, vencido o revocado (401)
 - [`ERR_AUTH_07`](auth/ERRORES_AUTH.md#err_auth_07) — El usuario no tiene el rol necesario (403)
+- [`ERR_AUTH_08`](auth/ERRORES_AUTH.md#err_auth_08) — El enlace de restablecimiento no sirve (400)
+- [`ERR_AUTH_09`](auth/ERRORES_AUTH.md#err_auth_09) — La contraseña actual es incorrecta o falta (400)
 
 ### Usuarios (`US`)
 
@@ -66,6 +68,7 @@ docs/errors/
 - [`ERR_US_10`](usuarios/ERRORES_USUARIOS.md#err_us_10) — Rol no válido para el personal (400)
 - [`ERR_US_11`](usuarios/ERRORES_USUARIOS.md#err_us_11) — `sort` o `filter` no soportado en el listado (400)
 - [`ERR_US_12`](usuarios/ERRORES_USUARIOS.md#err_us_12) — La cuenta ya tiene ese rol (409)
+- [`ERR_US_13`](usuarios/ERRORES_USUARIOS.md#err_us_13) — Solo el Postulante tiene teléfono (400)
 
 <!--
   A medida que se agregan módulos de negocio (platos, menú, usuarios...),

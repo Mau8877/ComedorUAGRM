@@ -73,6 +73,8 @@ erDiagram
     int intentos_fallidos
     int bloqueos_consecutivos
     timestamptz bloqueado_hasta
+    varchar restablecimiento_token_hash UK "(64) nullable"
+    timestamptz restablecimiento_expira_en "nullable"
     timestamptz creado_en
     timestamptz actualizado_en
     timestamptz eliminado_en

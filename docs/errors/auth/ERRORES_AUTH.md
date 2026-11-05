@@ -80,3 +80,24 @@ y el refresh los lanzan los services como excepciones de negocio (ver
   a la gestión de cuentas, que es solo del Administrador DUBSS).
 - **Dónde se lanza:** `ApiAccessDeniedHandler.handle()` (cuando un
   `@PreAuthorize` de un `service` lanza `AccessDeniedException`)
+
+## `ERR_AUTH_08`
+
+- **HTTP:** 400
+- **Excepción:** `ValidationException`
+- **Significado:** El enlace de restablecimiento de contraseña no sirve: no
+  existe, venció (60 minutos), ya se usó, lo reemplazó uno más reciente o es de
+  una cuenta desactivada. No se distingue cuál de los casos fue. El cliente
+  ofrece pedir un enlace nuevo.
+- **Dónde se lanza:** `RestablecimientoContrasenaService.restablecer()`
+
+## `ERR_AUTH_09`
+
+- **HTTP:** 400
+- **Excepción:** `ValidationException`
+- **Significado:** La contraseña actual ingresada es incorrecta, o no se envió
+  al cambiar el correo o la contraseña desde el perfil. Es `400` y no `401` a
+  propósito: un `401` haría que el cliente intente renovar la sesión o vaya al
+  login, y la persona sigue autenticada.
+- **Dónde se lanza:** `UsuarioService.verificarContrasenaActual()` (usado por
+  `PerfilService.actualizar()` y `PerfilService.cambiarContrasena()`)

@@ -46,6 +46,7 @@ pasar por el proxy.
 | `5432` | `postgres` | Conectar un cliente SQL (DBeaver, pgAdmin, etc.) directo |
 | `6379` | `redis` | Conectar un cliente Redis directo |
 | `9000` / `9001` | `minio` | API S3 (`9000`) y consola web de administración (`9001`) |
+| `8025` / `1025` | `mailpit` | Bandeja web de los correos de desarrollo (`8025`) y SMTP (`1025`); no entrega nada a personas reales |
 | `9090` | `prometheus` | UI de Prometheus (ver targets, correr queries PromQL) |
 | `3000` | `grafana` | Dashboards (sin ninguno provisionado todavía, ver sección 7) |
 
@@ -380,6 +381,12 @@ Usadas directamente por Spring Boot (`application.properties` las lee vía
 | `CORS_ALLOWED_ORIGINS` | Orígenes permitidos para CORS (separados por coma) | `http://localhost:5173,http://localhost` |
 | `RATE_LIMIT_CAPACITY` | Cupo del rate limit por IP (ver `SEGURIDAD_AUTH_BACKEND.md#rate-limit`) | `100` |
 | `RATE_LIMIT_REFILL_PER_MINUTE` | Cuántos tokens se regeneran por minuto | `100` |
+| `MAIL_HOST` / `MAIL_PORT` | Servidor SMTP (en desarrollo, Mailpit) | `localhost` / `1025` |
+| `MAIL_USERNAME` / `MAIL_PASSWORD` | Credenciales del SMTP real (vacías con Mailpit) | vacías |
+| `MAIL_SMTP_AUTH` / `MAIL_SMTP_STARTTLS` | `true` con un proveedor real | `false` |
+| `MAIL_FROM` | Remitente de los correos | `no-responder@comedoru.local` |
+| `FRONTEND_URL` | URL del portal web, base del enlace del correo de recuperación | `http://localhost` |
+| `RESET_TTL_MINUTES` | Vigencia del enlace de restablecimiento (minutos) | `60` |
 
 > `CORS_ALLOWED_ORIGINS` y las dos de `RATE_LIMIT_*` tienen default
 > razonable en `application.properties`, así que no es obligatorio
