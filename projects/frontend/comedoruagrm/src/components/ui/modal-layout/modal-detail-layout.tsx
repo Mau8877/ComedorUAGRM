@@ -27,10 +27,16 @@ export function ModalDetailLayout({
   closeLabel = 'Cerrar',
   actionLabel,
   onAction,
+  dismissible = true,
   children,
 }: ModalDetailLayoutProps) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      // * Con dismissible=false se cancelan Escape y el click afuera; el botón
+      // * del footer sigue cerrando porque llama a onOpenChange directo.
+      onOpenChange={dismissible ? onOpenChange : (_, eventDetails) => eventDetails.cancel()}
+    >
       <DialogContent
         className={cn('flex max-h-[85vh] flex-col gap-0 overflow-hidden p-0', sizeClassName[size])}
         showCloseButton={false}

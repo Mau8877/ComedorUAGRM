@@ -49,5 +49,11 @@ export interface ModalDetailLayoutProps {
    */
   actionLabel?: string
   onAction?: () => void
+  /**
+   * Default `true`. Con `false`, solo el botón de cerrar del footer cierra el
+   * modal (Escape y el click afuera se ignoran) -- para contenido que se
+   * muestra una única vez y no debe perderse por un click accidental.
+   */
+  dismissible?: boolean
   children: ReactNode
 }
