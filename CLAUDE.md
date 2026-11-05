@@ -27,7 +27,7 @@ proyectos independientes más la infraestructura de desarrollo:
 - **`projects/mobile`** — App en Flutter/Dart, Riverpod para estado,
   `go_router` para navegación, `dio` como cliente HTTP.
 - **`infrastructure/`** — configuración de Docker Compose: nginx (proxy),
-  postgres, redis, minio, prometheus, grafana.
+  postgres, redis, minio, mailpit (SMTP de pruebas), prometheus, grafana.
 
 Cuando una regla o un comando dice «backend» a secas, es
 `projects/backend/comedor-uagrm-core` (el Spring Boot); el módulo de IA se
@@ -122,7 +122,7 @@ docker compose up
 
 Levanta proxy (puerto 80), comedoruagrm (5173), nexware-landing (4321),
 core (8080, el backend Spring Boot), ia (8000, FastAPI; no pasa por el
-proxy), postgres (5432), redis (6379), minio (9000/9001), prometheus (9090)
+proxy), postgres (5432), redis (6379), minio (9000/9001), mailpit (8025 bandeja web, 1025 SMTP; correos de desarrollo), prometheus (9090)
 y grafana (3000). El proxy sirve ComedorUAGRM en `/`, la API en `/api/` y la
 landing de Nexware en `/landing-page`. Ver [docs/README.md](../docs/README.md)
 para el detalle completo de variables de entorno y el checklist de puesta

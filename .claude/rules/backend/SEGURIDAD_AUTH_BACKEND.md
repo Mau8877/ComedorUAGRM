@@ -50,6 +50,9 @@ token de acceso; ver [Endpoints públicos](#endpoints-públicos)).
 | `POST /refresh` | Canjea un refresh token vigente por un par nuevo; el usado queda revocado (rotación) | `200` con la sesión |
 | `POST /logout` | Revoca el refresh token recibido: cierra **solo** la sesión de ese dispositivo (flujo C) | `200`, `data: null`; idempotente (un token desconocido o ya cerrado no es error) |
 | `GET /usuario-actual` | El usuario del token de acceso, para recuperar la sesión al recargar | `200` con el usuario |
+| `POST /recuperar-contrasena` | Pide el enlace para restablecer la contraseña (CU15). Público. Responde siempre `200` con el mismo mensaje exista o no la cuenta | `200`, `data: null` |
+| `POST /restablecer-contrasena` | Define la contraseña nueva con el token del enlace del correo (CU15). Público | `200`, `data: null`; `400` `ERR_AUTH_08` si el enlace no sirve |
+| `POST /cambiar-contrasena` | Cambia la contraseña desde el perfil con la actual (CU15). Exige sesión; cierra las demás sesiones y conserva la actual | `200`, `data: null`; `400` `ERR_AUTH_09` si la actual es incorrecta |
 
 La "sesión" que devuelven `registro`, `login` y `refresh` es:
 
@@ -136,9 +139,33 @@ El bloqueo lo implementa este backend (columnas `intentos_fallidos`,
 - Todo inicio de sesión exitoso (incluido el que sigue a un registro) queda
   anotado en la bitácora (`INICIO_SESION`).
 
-- Recuperar contraseña (CU-15) y verificar el correo no están implementados
-  todavía; cuando se hagan, las define su propio caso de uso. El `ci` no es
-  modificable (RF-10).
+- Verificar el correo no está implementado todavía; cuando se haga, lo define
+  su propio caso de uso. El `ci` no es modificable (RF-10).
+
+### Recuperar y cambiar la contraseña (CU15)
+
+- **Enlace por correo.** `recuperar-contrasena` genera un token aleatorio de 256
+  bits (`TokenEnlace`), guarda **solo su hash SHA-256** y su vencimiento en las
+  columnas `restablecimiento_token_hash` y `restablecimiento_expira_en` de
+  `usuario` (60 minutos, `app.auth.reset-ttl-minutes`) y lo envía por correo
+  (`CorreoRestablecimientoService`, asíncrono) a `{app.web.base-url}/restablecer-contrasena?token=…`.
+  Solo hay un enlace vigente por cuenta: pedir otro lo sobrescribe, y usarlo lo borra.
+- **Mensaje neutro.** La solicitud responde siempre igual, exista o no el correo y
+  esté o no activa la cuenta; no se anota en la bitácora. Un fallo del SMTP se
+  registra (sin correo ni token) y no llega al cliente.
+- **Restablecer** guarda el hash BCrypt nuevo, reinicia el bloqueo por intentos
+  fallidos, borra el enlace y **cierra todas las sesiones** de la cuenta. Un enlace
+  desconocido, vencido, usado, reemplazado o de una cuenta desactivada da el mismo
+  `400` `ERR_AUTH_08`.
+- **Cambiar la contraseña desde el perfil** exige la actual (`400` `ERR_AUTH_09` si
+  es incorrecta: no es `401`, para que el cliente no intente renovar la sesión) y
+  cierra las sesiones de los **demás** dispositivos conservando la actual
+  (`SesionService.revocarOtras`, que identifica la sesión por el refresh token del
+  cuerpo —mobile— o de la cookie —web—). Por eso vive en `/api/v1/auth`, donde viaja
+  la cookie `refresh_token`.
+- **Correo.** `spring-boot-starter-mail`; en desarrollo los correos caen en Mailpit
+  (`http://localhost:8025`), y pasar a un proveedor real es cambiar las variables
+  `MAIL_*` y `FRONTEND_URL`, sin tocar código.
 
 ## Roles y permisos
 
@@ -262,6 +289,8 @@ Quedan sin autenticación los de infraestructura ya definidos en
 | `POST /api/v1/auth/login` | La persona todavía no tiene sesión |
 | `POST /api/v1/auth/refresh` | Se llama justamente cuando el token de acceso ya venció; se autentica con el refresh token del body |
 | `POST /api/v1/auth/logout` | Se autentica con el refresh token del body; cerrar una sesión ya vencida no debe dar error (CU01, A10) |
+| `POST /api/v1/auth/recuperar-contrasena` | La persona olvidó la contraseña y no tiene sesión; la respuesta es siempre neutra (CU15) |
+| `POST /api/v1/auth/restablecer-contrasena` | Se autentica con el token de un solo uso del enlace del correo (CU15) |
 | `GET /api/v1/carreras` | El formulario de registro necesita la lista **antes** de que exista cuenta; es solo lectura de un catálogo, sin datos personales |
 
 **Ningún otro endpoint de negocio es público.** Cualquier endpoint nuevo es
