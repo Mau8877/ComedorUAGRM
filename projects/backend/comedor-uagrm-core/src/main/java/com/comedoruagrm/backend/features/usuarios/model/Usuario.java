@@ -72,6 +72,13 @@ public class Usuario extends BaseModel {
     @Column(name = "bloqueado_hasta")
     private Instant bloqueadoHasta;
 
+    // Enlace de recuperacion de contraseña vigente (CU15): solo el hash del token, nunca el token.
+    @Column(name = "restablecimiento_token_hash", length = 64)
+    private String restablecimientoTokenHash;
+
+    @Column(name = "restablecimiento_expira_en")
+    private Instant restablecimientoExpiraEn;
+
     public Usuario(Rol rol, String ci, String correo, String passwordHash, String nombres, String apellidos) {
         this.rol = rol;
         this.ci = ci;
@@ -79,5 +86,27 @@ public class Usuario extends BaseModel {
         this.passwordHash = passwordHash;
         this.nombres = nombres;
         this.apellidos = apellidos;
+    }
+
+    /** Guarda el enlace de restablecimiento; sobrescribe el anterior, que deja de servir. */
+    public void iniciarRestablecimiento(String tokenHash, Instant expiraEn) {
+        this.restablecimientoTokenHash = tokenHash;
+        this.restablecimientoExpiraEn = expiraEn;
+    }
+
+    /** El enlace ya no sirve (se uso o se invalido). */
+    public void limpiarRestablecimiento() {
+        this.restablecimientoTokenHash = null;
+        this.restablecimientoExpiraEn = null;
+    }
+
+    public boolean tieneRestablecimientoVigente(Instant ahora) {
+        return restablecimientoTokenHash != null && restablecimientoExpiraEn != null
+                && restablecimientoExpiraEn.isAfter(ahora);
+    }
+
+    /** Cambia el hash BCrypt de la contraseña (el hash nunca se expone con un setter generico). */
+    public void cambiarPasswordHash(String nuevoHash) {
+        this.passwordHash = nuevoHash;
     }
 }

@@ -15,6 +15,7 @@ import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * Datos de un Postulante. Su clave primaria es la FK a `usuario`
@@ -43,6 +44,7 @@ public class Postulante extends BaseModelSinId {
     @Column(name = "registro_universitario", nullable = false, length = 20)
     private String registroUniversitario;
 
+    @Setter
     @Column(name = "telefono", nullable = false, length = 20)
     private String telefono;
 

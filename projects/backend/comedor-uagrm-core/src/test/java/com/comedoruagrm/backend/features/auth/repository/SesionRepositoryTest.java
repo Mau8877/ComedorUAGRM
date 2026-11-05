@@ -81,6 +81,35 @@ class SesionRepositoryTest {
         assertThat(sesionRepository.findByTokenHash("hash-vieja").orElseThrow().getRevocadaEn()).isEqualTo(antes);
     }
 
+    @Test
+    void revocarTodasMenos_dejaVigenteSoloLaIndicadaYNoTocaOtraCuenta() {
+        Usuario ana = usuario("1", "ana@uagrm.edu.bo");
+        Usuario beto = usuario("2", "beto@uagrm.edu.bo");
+        sesion(ana, "hash-actual");
+        sesion(ana, "hash-otro-1");
+        sesion(ana, "hash-otro-2");
+        sesion(beto, "hash-beto-1");
+
+        int cerradas = sesionRepository.revocarTodasMenos(ana.getId(), "hash-actual", Instant.now());
+        entityManager.clear();
+
+        assertThat(cerradas).isEqualTo(2);
+        assertThat(sesionRepository.findByTokenHash("hash-actual").orElseThrow().getRevocadaEn()).isNull();
+        assertThat(sesionRepository.findByTokenHash("hash-otro-1").orElseThrow().getRevocadaEn()).isNotNull();
+        assertThat(sesionRepository.findByTokenHash("hash-otro-2").orElseThrow().getRevocadaEn()).isNotNull();
+        assertThat(sesionRepository.findByTokenHash("hash-beto-1").orElseThrow().getRevocadaEn()).isNull();
+    }
+
+    @Test
+    void revocarTodasMenos_esIdempotente() {
+        Usuario ana = usuario("1", "ana@uagrm.edu.bo");
+        sesion(ana, "hash-actual");
+        sesion(ana, "hash-otro");
+
+        assertThat(sesionRepository.revocarTodasMenos(ana.getId(), "hash-actual", Instant.now())).isEqualTo(1);
+        assertThat(sesionRepository.revocarTodasMenos(ana.getId(), "hash-actual", Instant.now())).isZero();
+    }
+
     private Usuario usuario(String ci, String correo) {
         return usuarioRepository.saveAndFlush(new Usuario(
                 rolRepository.findByNombre(RolNombres.DIRECTIVO).orElseThrow(), ci, correo,

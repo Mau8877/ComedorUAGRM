@@ -27,6 +27,12 @@ public final class AuthErrorCodes {
     /** 403 - El usuario autenticado no tiene el rol que exige la operacion. */
     public static final String ERR_AUTH_07 = "ERR_AUTH_07";
 
+    /** 400 - El enlace de restablecimiento no sirve: desconocido, vencido, ya usado o reemplazado. */
+    public static final String ERR_AUTH_08 = "ERR_AUTH_08";
+
+    /** 400 - La contraseña actual es incorrecta, o falta al cambiar el correo. */
+    public static final String ERR_AUTH_09 = "ERR_AUTH_09";
+
     private AuthErrorCodes() {
     }
 }

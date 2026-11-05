@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -73,6 +75,29 @@ class SesionServiceTest {
         service.revocarTodas(usuario);
 
         verify(sesionRepository).revocarTodasDe(eq(9L), any(Instant.class));
+    }
+
+    @Test
+    void revocarOtras_conElRefreshTokenActual_conservaEsaSesionPorSuHash() {
+        when(usuario.getId()).thenReturn(9L);
+        ArgumentCaptor<String> hash = ArgumentCaptor.forClass(String.class);
+        when(sesionRepository.revocarTodasMenos(eq(9L), hash.capture(), any(Instant.class))).thenReturn(2);
+
+        service.revocarOtras(usuario, "refresh-actual");
+
+        assertThat(hash.getValue()).hasSize(64).isNotEqualTo("refresh-actual");
+        verify(sesionRepository, never()).revocarTodasDe(any(), any());
+    }
+
+    @Test
+    void revocarOtras_sinRefreshToken_revocaTodasLasSesiones() {
+        when(usuario.getId()).thenReturn(9L);
+
+        service.revocarOtras(usuario, null);
+        service.revocarOtras(usuario, "  ");
+
+        verify(sesionRepository, times(2)).revocarTodasDe(eq(9L), any(Instant.class));
+        verify(sesionRepository, never()).revocarTodasMenos(any(), any(), any());
     }
 
     @Test

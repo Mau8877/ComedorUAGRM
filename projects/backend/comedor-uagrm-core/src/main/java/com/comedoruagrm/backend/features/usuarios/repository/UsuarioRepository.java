@@ -21,6 +21,9 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     Optional<Usuario> findByCodigo(UUID codigo);
 
+    /** La cuenta cuyo enlace de restablecimiento tiene ese hash (vigente o no: quien llama revisa el vencimiento). */
+    Optional<Usuario> findByRestablecimientoTokenHash(String restablecimientoTokenHash);
+
     boolean existsByCi(String ci);
 
     boolean existsByCorreo(String correo);

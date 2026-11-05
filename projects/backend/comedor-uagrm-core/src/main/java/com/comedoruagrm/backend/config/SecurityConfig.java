@@ -94,7 +94,8 @@ public class SecurityConfig {
                 // necesita antes de tener cuenta) y registro / login / refresh / logout.
                 .requestMatchers(HttpMethod.GET, RutasPublicas.CARRERAS).permitAll()
                 .requestMatchers(HttpMethod.POST, RutasPublicas.REGISTRO, RutasPublicas.LOGIN,
-                        RutasPublicas.REFRESH, RutasPublicas.LOGOUT).permitAll()
+                        RutasPublicas.REFRESH, RutasPublicas.LOGOUT,
+                        RutasPublicas.RECUPERAR_CONTRASENA, RutasPublicas.RESTABLECER_CONTRASENA).permitAll()
                 // 2. Cualquier otra ruta exige un token de acceso válido
                 .anyRequest().authenticated()
             );

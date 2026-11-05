@@ -19,8 +19,12 @@ public final class RutasPublicas {
     public static final String LOGIN = "/api/v1/auth/login";
     public static final String REFRESH = "/api/v1/auth/refresh";
     public static final String LOGOUT = "/api/v1/auth/logout";
+    // Recuperacion de contraseña (CU15): la persona todavia no tiene sesion; el enlace del correo es su credencial.
+    public static final String RECUPERAR_CONTRASENA = "/api/v1/auth/recuperar-contrasena";
+    public static final String RESTABLECER_CONTRASENA = "/api/v1/auth/restablecer-contrasena";
 
-    private static final Set<String> POST_PUBLICOS = Set.of(REGISTRO, LOGIN, REFRESH, LOGOUT);
+    private static final Set<String> POST_PUBLICOS = Set.of(REGISTRO, LOGIN, REFRESH, LOGOUT,
+            RECUPERAR_CONTRASENA, RESTABLECER_CONTRASENA);
 
     private RutasPublicas() {
     }

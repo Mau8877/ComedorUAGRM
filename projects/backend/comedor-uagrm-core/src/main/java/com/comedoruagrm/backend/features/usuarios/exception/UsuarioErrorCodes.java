@@ -42,6 +42,9 @@ public final class UsuarioErrorCodes {
     /** 409 - La cuenta ya tiene ese rol. */
     public static final String ERR_US_12 = "ERR_US_12";
 
+    /** 400 - Solo el Postulante tiene teléfono: no se puede actualizar en otra cuenta. */
+    public static final String ERR_US_13 = "ERR_US_13";
+
     private UsuarioErrorCodes() {
     }
 }

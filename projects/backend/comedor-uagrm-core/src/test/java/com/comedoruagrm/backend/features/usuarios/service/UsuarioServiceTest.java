@@ -25,6 +25,7 @@ import com.comedoruagrm.backend.common.exception.ConflictException;
 import com.comedoruagrm.backend.common.exception.ForbiddenException;
 import com.comedoruagrm.backend.common.exception.NotFoundException;
 import com.comedoruagrm.backend.common.exception.UnauthorizedException;
+import com.comedoruagrm.backend.common.exception.ValidationException;
 import com.comedoruagrm.backend.features.auth.dto.RegistroRequest;
 import com.comedoruagrm.backend.features.usuarios.constant.RolNombres;
 import com.comedoruagrm.backend.features.usuarios.exception.UsuarioErrorCodes;
@@ -319,6 +320,85 @@ class UsuarioServiceTest {
         assertThat(respuesta.codigo()).isEqualTo(codigo);
         assertThat(respuesta.rol()).isEqualTo("POSTULANTE");
         assertThat(respuesta.correo()).isEqualTo(CORREO);
+    }
+
+    @Test
+    void verificarContrasenaActual_conLaCorrecta_noLanzaNada() {
+        Usuario usuario = usuarioExistente("1234567", CONTRASENA);
+
+        service.verificarContrasenaActual(usuario, CONTRASENA);
+    }
+
+    @Test
+    void verificarContrasenaActual_incorrectaVaciaONula_lanzaErrAuth09() {
+        Usuario usuario = usuarioExistente("1234567", CONTRASENA);
+
+        for (String intento : new String[] {"otra-clave", "", null}) {
+            assertThatThrownBy(() -> service.verificarContrasenaActual(usuario, intento))
+                    .isInstanceOfSatisfying(ValidationException.class,
+                            e -> assertThat(e.getErrorCode()).isEqualTo(AuthErrorCodes.ERR_AUTH_09));
+        }
+    }
+
+    @Test
+    void verificarContrasenaActual_incorrecta_noCuentaComoIntentoFallidoDeLogin() {
+        Usuario usuario = usuarioExistente("1234567", CONTRASENA);
+
+        assertThatThrownBy(() -> service.verificarContrasenaActual(usuario, "otra-clave"))
+                .isInstanceOf(ValidationException.class);
+
+        assertThat(usuario.getIntentosFallidos()).isZero();
+        assertThat(usuario.getBloqueadoHasta()).isNull();
+    }
+
+    @Test
+    void cambiarContrasena_conLaActualCorrecta_guardaElHashDeLaNueva() {
+        Usuario usuario = usuarioExistente("1234567", CONTRASENA);
+        String hashViejo = usuario.getPasswordHash();
+
+        service.cambiarContrasena(usuario, CONTRASENA, "nueva-clave-1");
+
+        assertThat(usuario.getPasswordHash()).isNotEqualTo(hashViejo).isNotEqualTo("nueva-clave-1");
+        assertThat(passwordEncoder.matches("nueva-clave-1", usuario.getPasswordHash())).isTrue();
+        assertThat(passwordEncoder.matches(CONTRASENA, usuario.getPasswordHash())).isFalse();
+        verify(usuarioRepository).save(usuario);
+    }
+
+    @Test
+    void cambiarContrasena_conLaActualIncorrecta_noCambiaNada() {
+        Usuario usuario = usuarioExistente("1234567", CONTRASENA);
+        String hashViejo = usuario.getPasswordHash();
+
+        assertThatThrownBy(() -> service.cambiarContrasena(usuario, "incorrecta", "nueva-clave-1"))
+                .isInstanceOf(ValidationException.class);
+
+        assertThat(usuario.getPasswordHash()).isEqualTo(hashViejo);
+        verify(usuarioRepository, never()).save(any());
+    }
+
+    @Test
+    void restablecerContrasena_guardaElHashYDesbloqueaLaCuenta() {
+        Usuario usuario = usuarioExistente("1234567", CONTRASENA);
+        usuario.setIntentosFallidos(3);
+        usuario.setBloqueosConsecutivos(2);
+        usuario.setBloqueadoHasta(Instant.now().plus(Duration.ofHours(1)));
+
+        service.restablecerContrasena(usuario, "nueva-clave-1");
+
+        assertThat(passwordEncoder.matches("nueva-clave-1", usuario.getPasswordHash())).isTrue();
+        assertThat(usuario.getIntentosFallidos()).isZero();
+        assertThat(usuario.getBloqueosConsecutivos()).isZero();
+        assertThat(usuario.getBloqueadoHasta()).isNull();
+        verify(usuarioRepository).save(usuario);
+    }
+
+    @Test
+    void restablecerContrasena_enUnaCuentaHeredadaConHashInvalido_lePermiteTenerContrasena() {
+        Usuario heredada = new Usuario(rolPostulante, "999", CORREO, "!", "Ana", "Perez");
+
+        service.restablecerContrasena(heredada, "nueva-clave-1");
+
+        assertThat(passwordEncoder.matches("nueva-clave-1", heredada.getPasswordHash())).isTrue();
     }
 
     private Usuario usuarioExistente(String ci, String contrasena) {

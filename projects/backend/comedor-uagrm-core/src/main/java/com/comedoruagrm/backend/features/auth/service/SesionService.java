@@ -128,6 +128,22 @@ public class SesionService {
                 kv("module", "auth"), kv("userId", usuario.getCodigo()), kv("sesionesCerradas", cerradas));
     }
 
+    /**
+     * Revoca las sesiones de una cuenta MENOS la del dispositivo actual (cambio de contraseña
+     * desde el perfil, CU15). Si no se sabe cual es la actual (sin refresh token) no se puede
+     * conservar ninguna y se cierran todas. Un token desconocido tampoco conserva nada.
+     */
+    @Transactional
+    public void revocarOtras(Usuario usuario, String refreshTokenActual) {
+        if (refreshTokenActual == null || refreshTokenActual.isBlank()) {
+            revocarTodas(usuario);
+            return;
+        }
+        int cerradas = sesionRepository.revocarTodasMenos(usuario.getId(), hash(refreshTokenActual), Instant.now());
+        LOG.info("Sesiones de los demas dispositivos revocadas",
+                kv("module", "auth"), kv("userId", usuario.getCodigo()), kv("sesionesCerradas", cerradas));
+    }
+
     /** Idempotente: un token desconocido, vencido o ya cerrado se ignora (no es un error, A10). */
     @Transactional
     public void cerrar(String refreshToken) {

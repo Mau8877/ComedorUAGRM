@@ -16,6 +16,11 @@ public final class BitacoraAcciones {
     public static final String DESACTIVACION_USUARIO = "DESACTIVACION_USUARIO";
     public static final String REACTIVACION_USUARIO = "REACTIVACION_USUARIO";
 
+    // Recuperacion de contraseña y perfil (CU15): el actor es el dueño de la cuenta.
+    public static final String RESTABLECIMIENTO_CONTRASENA = "RESTABLECIMIENTO_CONTRASENA";
+    public static final String CAMBIO_CONTRASENA = "CAMBIO_CONTRASENA";
+    public static final String ACTUALIZACION_PERFIL = "ACTUALIZACION_PERFIL";
+
     private BitacoraAcciones() {
     }
 }

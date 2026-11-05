@@ -21,6 +21,7 @@ import com.comedoruagrm.backend.common.exception.ConflictException;
 import com.comedoruagrm.backend.common.exception.ForbiddenException;
 import com.comedoruagrm.backend.common.exception.NotFoundException;
 import com.comedoruagrm.backend.common.exception.UnauthorizedException;
+import com.comedoruagrm.backend.common.exception.ValidationException;
 import com.comedoruagrm.backend.common.auditoria.Auditable;
 import com.comedoruagrm.backend.common.auditoria.Auditar;
 import com.comedoruagrm.backend.features.auth.dto.RegistroRequest;
@@ -192,6 +193,43 @@ public class UsuarioService {
     @Transactional(readOnly = true)
     public UsuarioResponse obtenerResumen(UUID codigo) {
         return aRespuesta(obtenerPorCodigo(codigo));
+    }
+
+    /**
+     * Comprueba la contraseña actual de una cuenta ya autenticada (cambio de correo o de
+     * contraseña desde el perfil, CU15). Incorrecta o ausente: 400, no 401 (un 401 haria que el
+     * cliente intente renovar la sesion o vaya al login). No cuenta como intento fallido de login.
+     */
+    @Transactional(readOnly = true)
+    public void verificarContrasenaActual(Usuario usuario, String contrasenaActual) {
+        if (contrasenaActual == null || contrasenaActual.isEmpty()
+                || !passwordEncoder.matches(contrasenaActual, usuario.getPasswordHash())) {
+            LOG.warn("Contraseña actual incorrecta o ausente en el perfil",
+                    kv("module", "usuarios"), kv("errorCode", AuthErrorCodes.ERR_AUTH_09),
+                    kv("userId", usuario.getCodigo()));
+            throw new ValidationException(AuthErrorCodes.ERR_AUTH_09, "La contraseña actual es incorrecta.");
+        }
+    }
+
+    /** Cambia la contraseña desde el perfil: verifica la actual y guarda el hash BCrypt de la nueva. */
+    @Transactional
+    public void cambiarContrasena(Usuario usuario, String contrasenaActual, String contrasenaNueva) {
+        verificarContrasenaActual(usuario, contrasenaActual);
+        usuario.cambiarPasswordHash(passwordEncoder.encode(contrasenaNueva));
+        usuarioRepository.save(usuario);
+    }
+
+    /**
+     * Restablece la contraseña con el enlace del correo (CU15): no pide la actual, guarda el hash
+     * de la nueva y desbloquea la cuenta (intentos, bloqueos seguidos y bloqueo temporal).
+     */
+    @Transactional
+    public void restablecerContrasena(Usuario usuario, String contrasenaNueva) {
+        usuario.cambiarPasswordHash(passwordEncoder.encode(contrasenaNueva));
+        usuario.setIntentosFallidos(0);
+        usuario.setBloqueosConsecutivos(0);
+        usuario.setBloqueadoHasta(null);
+        usuarioRepository.save(usuario);
     }
 
     /** Mapeo inline (1:1 de campos); el rol se lee de forma perezosa, dentro de una transaccion. */
