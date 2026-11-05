@@ -47,6 +47,16 @@ void main() {
     expect(adapter.peticiones.single.queryParameters, {'pageSize': 200});
   });
 
+  test('solicitarRecuperacion hace POST /auth/recuperar-contrasena solo con el correo', () async {
+    final servicio = servicioCon((_) => respuestaJson(200, exito(null)));
+
+    await servicio.solicitarRecuperacion('ana@uagrm.edu.bo');
+
+    expect(adapter.peticiones.single.method, 'POST');
+    expect(adapter.peticiones.single.path, '/auth/recuperar-contrasena');
+    expect(adapter.peticiones.single.data, {'correo': 'ana@uagrm.edu.bo'});
+  });
+
   test('registrar hace POST /auth/registro con todos los campos y devuelve la sesión', () async {
     final servicio = servicioCon((_) => respuestaJson(201, exito(sesionJson())));
 

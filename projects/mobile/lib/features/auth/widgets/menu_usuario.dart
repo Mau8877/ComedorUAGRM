@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../providers/auth_provider.dart';
 import '../providers/auth_usuario_provider.dart';
@@ -21,7 +22,14 @@ class MenuUsuario extends ConsumerWidget {
       tooltip: 'Cuenta',
       icon: const Icon(Icons.account_circle_outlined),
       enabled: !cerrando,
-      onSelected: (_) => ref.read(authProvider.notifier).cerrarSesion(),
+      onSelected: (accion) {
+        if (accion == 'perfil') {
+          // Se apila sobre el módulo: la tecla atrás vuelve (CU15, flujo C).
+          context.push('/perfil');
+        } else {
+          ref.read(authProvider.notifier).cerrarSesion();
+        }
+      },
       itemBuilder: (context) => [
         PopupMenuItem<String>(
           enabled: false,
@@ -34,6 +42,14 @@ class MenuUsuario extends ConsumerWidget {
           ),
         ),
         const PopupMenuDivider(),
+        const PopupMenuItem<String>(
+          value: 'perfil',
+          child: ListTile(
+            leading: Icon(Icons.person_outline),
+            title: Text('Mi perfil'),
+            contentPadding: EdgeInsets.zero,
+          ),
+        ),
         const PopupMenuItem<String>(
           value: 'cerrar',
           child: ListTile(

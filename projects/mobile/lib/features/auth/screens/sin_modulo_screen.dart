@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../providers/auth_provider.dart';
 import '../providers/auth_usuario_provider.dart';
@@ -38,6 +39,11 @@ class SinModuloScreen extends ConsumerWidget {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
+                OutlinedButton(
+                  onPressed: () => context.push('/perfil'),
+                  child: const Text('Mi perfil'),
+                ),
+                const SizedBox(height: 12),
                 FilledButton(
                   onPressed: cerrando ? null : () => ref.read(authProvider.notifier).cerrarSesion(),
                   child: const Text('Cerrar sesión'),

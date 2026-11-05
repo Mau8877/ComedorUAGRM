@@ -44,11 +44,11 @@ void main() {
       expect(find.text('La contraseña es obligatoria'), findsOneWidget);
     });
 
-    testWidgets('ofrece crear cuenta pero no recuperar la contraseña (CU15)', (tester) async {
+    testWidgets('ofrece crear cuenta y recuperar la contraseña (CU15, CA21)', (tester) async {
       await tester.pumpWidget(_app(const LoginScreen(), acciones: FakeAcciones()));
 
       expect(find.text('¿No tienes cuenta? Crear cuenta'), findsOneWidget);
-      expect(find.textContaining('olvid', findRichText: true), findsNothing);
+      expect(find.text('¿Olvidó su contraseña?'), findsOneWidget);
     });
 
     testWidgets('el botón está habilitado al abrir la pantalla', (tester) async {

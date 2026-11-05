@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../features/auth/widgets/menu_usuario.dart';
+import '../../features/perfil/widgets/perfil_vista.dart';
 import '../../shared/widgets/comedoru_logo.dart';
 
 /// Shell del rol Estudiante -- AppBar + `NavigationBar` (Material 3) inferior,
@@ -28,6 +29,9 @@ const _secciones = [
   _EstudianteSeccion('Perfil', Icons.person_outline),
 ];
 
+/// Posición de «Perfil» en [_secciones].
+const _indicePerfil = 2;
+
 class _EstudianteShellState extends State<EstudianteShell> {
   int _selected = 0;
 
@@ -46,20 +50,23 @@ class _EstudianteShellState extends State<EstudianteShell> {
         ),
         actions: const [MenuUsuario()],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(seccionActual.label, style: Theme.of(context).textTheme.headlineSmall),
-            const SizedBox(height: 8),
-            Text(
-              'Pantalla de prueba del layout -- acá va el contenido real de "${seccionActual.label}" cuando exista esa feature.',
-              style: Theme.of(context).textTheme.bodyMedium,
+      // La sección «Perfil» (CU15) muestra el perfil real; las demás siguen de prueba hasta que exista su feature.
+      body: _selected == _indicePerfil
+          ? const PerfilVista()
+          : Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(seccionActual.label, style: Theme.of(context).textTheme.headlineSmall),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Pantalla de prueba del layout -- acá va el contenido real de "${seccionActual.label}" cuando exista esa feature.',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
-      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selected,
         onDestinationSelected: (index) => setState(() => _selected = index),

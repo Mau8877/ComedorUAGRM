@@ -33,6 +33,12 @@ class AuthAcciones extends Notifier<bool> {
     });
   }
 
+  /// Flujo A del CU15: pide el enlace de recuperación. Devuelve `null` si el backend respondió bien
+  /// (la pantalla muestra siempre el mismo mensaje neutro) o un [AuthError] (red, límite de peticiones).
+  Future<AuthError?> solicitarRecuperacion(String correo) {
+    return _ejecutar(() => ref.read(authServiceProvider).solicitarRecuperacion(correo.trim()));
+  }
+
   Future<void> cerrarSesion() async {
     state = true;
     try {

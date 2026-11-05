@@ -2,8 +2,9 @@ import 'package:dio/dio.dart';
 
 import '../../core/network/api_client.dart';
 
-/// Campo del formulario de registro en conflicto con un dato ya existente.
-enum CampoAuth { ci, correo, registroUniversitario, carrera }
+/// Campo del formulario en conflicto con un dato ya existente o con un dato incorrecto
+/// (`contrasenaActual`: la contraseña actual del perfil no coincide, CU15 A6).
+enum CampoAuth { ci, correo, registroUniversitario, carrera, contrasenaActual }
 
 /// Error ya traducido a lo que ve la persona.
 class AuthError {
@@ -53,6 +54,9 @@ AuthError _deApi(ApiException e) {
       return AuthError(e.message, campo: CampoAuth.registroUniversitario);
     case 'ERR_US_04':
       return AuthError(e.message, campo: CampoAuth.carrera);
+    case 'ERR_AUTH_09': // CU15: 400, no 401, para que el cliente no cierre la sesión
+      return const AuthError('La contraseña actual es incorrecta.', campo: CampoAuth.contrasenaActual);
+    case 'ERR_US_13':
     case 'ERR_SYS_01':
       return AuthError(e.message);
     case 'ERR_SYS_02':

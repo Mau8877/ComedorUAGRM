@@ -137,11 +137,21 @@ void main() {
       expect(redirectDeSesion(sesion: sinSesion, ubicacion: '/estudiante'), '/login');
       expect(redirectDeSesion(sesion: sinSesion, ubicacion: '/'), '/login');
       expect(redirectDeSesion(sesion: sinSesion, ubicacion: '/sin-modulo'), '/login');
+      expect(redirectDeSesion(sesion: sinSesion, ubicacion: '/perfil'), '/login');
     });
 
-    test('sin sesión se pueden ver /login y /registro', () {
+    test('sin sesión se pueden ver /login, /registro y /recuperar-contrasena', () {
       expect(redirectDeSesion(sesion: sinSesion, ubicacion: '/login'), isNull);
       expect(redirectDeSesion(sesion: sinSesion, ubicacion: '/registro'), isNull);
+      expect(redirectDeSesion(sesion: sinSesion, ubicacion: '/recuperar-contrasena'), isNull);
+    });
+
+    test('con sesión /recuperar-contrasena lleva al módulo del rol (CU15)', () {
+      expect(redirectDeSesion(sesion: AsyncData<Usuario?>(_usuario('POSTULANTE')), ubicacion: '/recuperar-contrasena'), '/estudiante');
+    });
+
+    test('mientras se restaura la sesión /recuperar-contrasena también espera en /cargando', () {
+      expect(redirectDeSesion(sesion: cargando, ubicacion: '/recuperar-contrasena'), '/cargando');
     });
 
     test('al salir de /cargando sin sesión va a /login', () {

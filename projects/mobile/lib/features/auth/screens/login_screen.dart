@@ -94,6 +94,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       validator: AuthValidators.contrasenaLogin,
                       onFieldSubmitted: (_) => _enviar(),
                     ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: enviando ? null : () => context.go('/recuperar-contrasena'),
+                        child: const Text('¿Olvidó su contraseña?'),
+                      ),
+                    ),
                     const SizedBox(height: 24),
                     FilledButton(
                       onPressed: enviando ? null : _enviar,

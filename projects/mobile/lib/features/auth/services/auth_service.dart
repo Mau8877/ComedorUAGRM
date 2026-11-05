@@ -48,6 +48,12 @@ class AuthService {
     await _dio.post<void>('/auth/logout', data: {'refreshToken': refreshToken});
   }
 
+  /// Pide el enlace de recuperación (CU15, flujo A). El backend responde siempre igual exista o no
+  /// la cuenta: no se lee nada de la respuesta, para no poder distinguir los casos.
+  Future<void> solicitarRecuperacion(String correo) async {
+    await _dio.post<void>('/auth/recuperar-contrasena', data: {'correo': correo});
+  }
+
   Future<Usuario> usuarioActual() async {
     final response = await _dio.get<Map<String, dynamic>>('/auth/usuario-actual');
     return Usuario.fromJson(response.data!);

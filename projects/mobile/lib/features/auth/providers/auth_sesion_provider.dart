@@ -44,6 +44,12 @@ class AuthSesionNotifier extends AsyncNotifier<Usuario?> {
     state = AsyncData(sesion.usuario);
   }
 
+  /// Actualiza los datos del usuario de la sesión (ej. el correo, tras cambiarlo en el perfil)
+  /// sin tocar los tokens.
+  void actualizarUsuario(Usuario usuario) {
+    state = AsyncData(usuario);
+  }
+
   /// Borra la sesión de este dispositivo (los tokens) y deja la app sin sesión.
   Future<void> cerrar() async {
     await ref.read(tokenStorageProvider).borrarSesion();
