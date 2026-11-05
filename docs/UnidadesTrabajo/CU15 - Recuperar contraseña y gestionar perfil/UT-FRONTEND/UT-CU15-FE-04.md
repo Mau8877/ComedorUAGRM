@@ -28,13 +28,13 @@ El enlace del correo abre una pantalla para definir la contraseña nueva y, al t
   - Lee el `token` de la URL, lo guarda en el estado de la pantalla y lo **quita de la dirección** (`navigate({ replace: true, search: {} })`) para que no quede en el historial ni en el `Referer`.
   - Sin token (o vacío) muestra directamente el aviso de enlace inválido.
   - Formulario: «Nueva contraseña» y «Confirmar contraseña» (`type="password"`, `autoComplete="new-password"`), con el requisito visible («De 6 a 72 caracteres») y los errores inline del schema (CA07). Botón «Guardar contraseña» con estado de carga.
-  - Éxito → navega a `/login` con un aviso «Contraseña actualizada. Inicia sesión con tu nueva contraseña.» (estado de navegación o `search` del login, **sin** datos sensibles); el `LoginScreen` lo muestra una vez.
+  - Éxito → toast «Contraseña actualizada» («Inicia sesión con tu nueva contraseña.», sin datos sensibles) y navega a `/login`. Se usa el toast global (`toastSuccess`) y no estado de navegación: así el login no necesita cambios.
   - `ERR_AUTH_08` → reemplaza el formulario por «El enlace ya no sirve (venció, ya se usó o se pidió uno más reciente)» con el botón «Solicitar un enlace nuevo» → `/recuperar-contrasena` (A2). `ERR_SYS_01` y red se muestran sobre el formulario sin perder lo escrito.
   - El token y las contraseñas no se guardan fuera del estado del formulario y no se escriben en la consola.
-- `F/features/auth/screens/LoginScreen.tsx`: mostrar el aviso de éxito si llega.
-- Tests: sin token → aviso de enlace inválido; con token válido el formulario se muestra y el token ya no está en la URL; contraseña corta o sin coincidir → error inline y sin llamada a la API; éxito → navega al login y se muestra el aviso; `ERR_AUTH_08` → aviso con enlace a la solicitud; el cuerpo enviado lleva `token`, `contrasena` y `confirmacionContrasena` y el token no está en ningún `localStorage` ni `sessionStorage`.
+- `F/main.tsx`: `/recuperar-contrasena` y `/restablecer-contrasena` se agregan a `RUTAS_PUBLICAS` (una sesión perdida ahí no redirige al login).
+- Tests: sin token → aviso de enlace inválido; con token válido el formulario se muestra y el token ya no está en la URL; contraseña corta o sin coincidir → error inline y sin llamada a la API; éxito → toast y navega al login; `ERR_AUTH_08` → aviso con enlace a la solicitud; el cuerpo enviado lleva `token`, `contrasena` y `confirmacionContrasena` y el token no está en ningún `localStorage` ni `sessionStorage`.
 
-Archivos esperados (crear): la ruta, la pantalla y su test. (Tocar): `LoginScreen.tsx`, el barrel de pantallas y el test del login.
+Archivos esperados (crear): la ruta, la pantalla y su test. (Tocar): `main.tsx` y el barrel de pantallas.
 
 ## Fuera de alcance (no tocar)
 
