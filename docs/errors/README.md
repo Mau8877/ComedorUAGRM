@@ -68,6 +68,12 @@ docs/errors/
 - [`ERR_US_10`](usuarios/ERRORES_USUARIOS.md#err_us_10) — Rol no válido para el personal (400)
 - [`ERR_US_11`](usuarios/ERRORES_USUARIOS.md#err_us_11) — `sort` o `filter` no soportado en el listado (400)
 - [`ERR_US_12`](usuarios/ERRORES_USUARIOS.md#err_us_12) — La cuenta ya tiene ese rol (409)
+
+### Lista priorizada (`PRI`)
+
+- [`ERR_PRI_01`](postulaciones/ERRORES_POSTULACIONES.md#err_pri_01) — La convocatoria no existe (404)
+- [`ERR_PRI_02`](postulaciones/ERRORES_POSTULACIONES.md#err_pri_02) — `sort` o `filter` no soportado en la lista priorizada (400)
+- [`ERR_PRI_03`](postulaciones/ERRORES_POSTULACIONES.md#err_pri_03) — No hay postulaciones para exportar (400)
 - [`ERR_US_13`](usuarios/ERRORES_USUARIOS.md#err_us_13) — Solo el Postulante tiene teléfono (400)
 
 <!--

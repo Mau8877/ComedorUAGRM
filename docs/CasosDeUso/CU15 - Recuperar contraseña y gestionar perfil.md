@@ -2,7 +2,7 @@
 
 | Id   | Nombre                                    | Módulo               | Prioridad | Estado    |
 | ---- | ----------------------------------------- | -------------------- | --------- | --------- |
-| CU15 | Recuperar contraseña y gestionar perfil   | P1. Cuentas y acceso | Baja      | Pendiente |
+| CU15 | Recuperar contraseña y gestionar perfil   | P1. Cuentas y acceso | Baja      | Hecho     |
 
 **Actor principal:** Usuario del Sistema (actor abstracto que generaliza a Postulante, Administrador DUBSS, Directivo y Personal del Comedor Universitario)
 **Actores secundarios:** Servicio de correo electrónico (envía el enlace de restablecimiento)
@@ -78,15 +78,15 @@ Extiende al [CU-01: Registrarse y autenticarse](CU01%20-%20Registrarse%20y%20aut
 
 ## Reglas de negocio
 
-- **Lo usa cualquier usuario del sistema** (Postulante, Administrador DUBSS, Directivo y Personal del Comedor). *(El RF-10 de la documentación de grado no menciona al Personal del Comedor en su «¿Quién?»; se toma el actor del CU-15, que lo incluye.)*
+- **Lo usa cualquier usuario del sistema** (Postulante, Administrador DUBSS, Directivo y Personal del Comedor). *(El RF-10 de la documentación de grado ya incluye al Personal del Comedor en su «¿Quién?», igual que el actor del CU-15.)*
 - **Mensaje neutro:** la solicitud de recuperación responde siempre igual, exista o no el correo y esté o no activa la cuenta.
 - **El enlace de restablecimiento** es de un solo uso, vence a los **60 minutos** (valor de la maqueta de la documentación de grado; por confirmar con la DUBSS) y solo hay uno vigente por cuenta: pedir otro invalida el anterior. El sistema guarda solo un hash del token del enlace, nunca el token en claro. Lo genera y lo verifica el propio backend (RF-10); no se usa Firebase.
 - **Política de contraseña:** la misma del CU-01: al menos 6 caracteres, sin obligación de mayúsculas, números ni símbolos, y debe coincidir con su confirmación.
 - **Restablecer la contraseña cierra todas las sesiones** de la cuenta y reinicia su bloqueo temporal por intentos fallidos (si la cuenta estaba bloqueada, queda desbloqueada). *(Decisión del equipo: la documentación de grado no lo precisa.)*
 - **Cambiar la contraseña desde el perfil cierra las sesiones de los demás dispositivos** y mantiene la actual. *(Decisión del equipo.)*
 - **Una cuenta desactivada no recupera la contraseña:** no recibe enlace (y el mensaje sigue siendo neutro); se reactiva en el CU-14.
-- **Datos editables desde el perfil:** el correo electrónico (todos los usuarios) y el teléfono (solo el Postulante, que es el único que lo tiene). **El CI no se modifica** (RF-10), y tampoco nombres, apellidos, registro universitario ni carrera. *(Decisión del equipo: la documentación de grado deja los campos «por definir» y dice «datos de contacto»; la maqueta 140 muestra nombres, apellidos y carrera como editables. Los nombres del personal los corrige el Administrador DUBSS en el CU-14.)*
-- **Cambiar el correo exige la contraseña actual** (A7 de la documentación de grado, que lo deja «por definir»). *(Decisión del equipo.)* El correo sigue siendo único entre las cuentas.
+- **Datos editables desde el perfil:** el correo electrónico (todos los usuarios) y el teléfono (solo el Postulante, que es el único que lo tiene). **El CI no se modifica** (RF-10), y tampoco nombres, apellidos, registro universitario ni carrera. *(Decisión del equipo, ya reflejada en el detalle del CU-15 de la documentación de grado; la maqueta 140 todavía muestra nombres, apellidos y carrera como editables, ver [el pendiente](../pendientes/DOCUMENTACION_GRADO_CU15.md). Los nombres del personal los corrige el Administrador DUBSS en el CU-14.)*
+- **Cambiar el correo exige la contraseña actual** (A7 de la documentación de grado). *(Decisión del equipo, ya reflejada en la documentación de grado.)* El correo sigue siendo único entre las cuentas.
 - **Bitácora (CU-25):** se anotan el restablecimiento de la contraseña, el cambio de contraseña desde el perfil y la actualización del perfil (qué campos cambiaron, no sus contraseñas). La solicitud del enlace no se anota, para no dejar rastro de correos inexistentes.
 - **Contraseñas, tokens del enlace y tokens de sesión nunca se escriben** en la bitácora ni en los registros del sistema ([LOGGING_BACKEND.md](../../.claude/rules/backend/LOGGING_BACKEND.md)), ni el enlace completo.
 - **El enlace del correo abre el portal web**, que es donde se define la nueva contraseña; la app móvil permite solicitar el enlace. *(Decisión del equipo.)*

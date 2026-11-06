@@ -114,9 +114,19 @@ llama `comedor-uagrm-core` y es el que usan nginx y Prometheus.
 - **Imagen**: `maven:3.9-eclipse-temurin-21-alpine` (Maven + JDK 21, imagen
   genérica).
 - **`working_dir`**: `/app/projects/backend/comedor-uagrm-core`.
-- **Comando**: `mvn spring-boot:run -Dspring-boot.run.profiles=dev` — corre
-  con Spring Boot DevTools activo (recarga en caliente al cambiar código,
-  ver `pom.xml`).
+- **Comando**: `sh -c "apk add --no-cache fontconfig ttf-dejavu && mvn spring-boot:run -Dspring-boot.run.profiles=dev"`
+  — corre con Spring Boot DevTools activo (recarga en caliente al cambiar
+  código, ver `pom.xml`). Instala `fontconfig` y una fuente porque
+  JasperReports las necesita para generar el PDF de la lista priorizada
+  (CU06) y la imagen de Maven sobre alpine no las trae.
+- **Datos de desarrollo (perfil `dev`)**: al arrancar crea, una sola vez,
+  una cuenta de **Administrador DUBSS** de prueba (`admin@dubss.com` /
+  `123123123`; `DatosInicialesAdmin`) y datos de prueba para la lista
+  priorizada (3 convocatorias `[PRUEBA]`, 60 postulantes sin acceso con sus
+  postulaciones y puntajes; `DatosPruebaListaPriorizada`). Se apagan con
+  `SEED_ADMIN_ENABLED=false` y `SEED_PRIORIZACION_ENABLED=false`;
+  `SEED_PRIORIZACION_POSTULACIONES=20000` sirve para medir el rendimiento.
+  **Nunca corren fuera del perfil `dev`.**
 - **Volúmenes**:
   - `.:/app` — todo el repo.
   - `~/.m2:/root/.m2` — el repositorio local de Maven del **host** (tu
@@ -424,9 +434,10 @@ no la raíz — el core no es un workspace, es un único módulo Maven):
    para agilizar el build — los tests ya corrieron en CI/pre-commit antes
    de llegar acá).
 2. **Etapa runtime** (`eclipse-temurin:21-jre-alpine`, sin Maven ni
-   compiladores — imagen final más liviana): crea un usuario sin
-   privilegios (`springuser`) y corre el `.jar` como ese usuario, no como
-   root.
+   compiladores — imagen final más liviana): instala `fontconfig` y una
+   fuente (JasperReports las necesita para el PDF de la lista priorizada),
+   crea un usuario sin privilegios (`springuser`) y corre el `.jar` como
+   ese usuario, no como root.
 
 ```bash
 docker build -f projects/backend/comedor-uagrm-core/Dockerfile -t comedor-uagrm-core projects/backend/comedor-uagrm-core
