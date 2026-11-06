@@ -2,7 +2,7 @@
 
 | Id          | Nombre               | Módulo                      | Prioridad | Estado    |
 | ----------- | -------------------- | --------------------------- | --------- | --------- |
-| CU-EXTRA-01 | Notificaciones push  | Transversal (infraestructura) | Media     | En progreso |
+| CU-EXTRA-01 | Notificaciones push  | Transversal (infraestructura) | Media     | Hecho |
 
 **Actor principal:** Usuario del Sistema (el que tiene la app móvil instalada y recibe los avisos)
 **Actores secundarios:** Firebase Cloud Messaging (entrega el push al teléfono); Servicio de correo electrónico (entrega el aviso por correo); los módulos del sistema que originan un aviso
