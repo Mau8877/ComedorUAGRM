@@ -1,0 +1,6 @@
+# Nunca copiar secretos ni basura de build dentro de una imagen (CU-EXTRA-01)
+secrets/
+.env
+.env.*
+target/
+.mvn/wrapper/maven-wrapper.jar

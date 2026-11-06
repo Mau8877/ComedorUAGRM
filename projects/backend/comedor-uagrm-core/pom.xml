@@ -118,6 +118,12 @@
 			<version>${jasperreports.version}</version>
 		</dependency>
 		<dependency>
+			<!-- Push (FCM) del CU-EXTRA-01. Version verificada en Maven Central. -->
+			<groupId>com.google.firebase</groupId>
+			<artifactId>firebase-admin</artifactId>
+			<version>9.11.0</version>
+		</dependency>
+		<dependency>
 			<groupId>net.logstash.logback</groupId>
 			<artifactId>logstash-logback-encoder</artifactId>
 			<version>8.1</version>

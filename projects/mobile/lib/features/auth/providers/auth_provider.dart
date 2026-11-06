@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../notificaciones/providers/push_registro_provider.dart';
 import '../auth_error_mapper.dart';
 import '../models/registro_request.dart';
 import 'auth_servicios_provider.dart';
@@ -41,6 +42,9 @@ class AuthAcciones extends Notifier<bool> {
 
   Future<void> cerrarSesion() async {
     state = true;
+    // CU-EXTRA-01: la baja del teléfono necesita la sesión, así que va antes de borrarla.
+    // Nunca falla (sin conexión se cierra igual).
+    await ref.read(pushRegistroProvider.notifier).darDeBaja();
     try {
       final refresh = await ref.read(tokenStorageProvider).leerRefreshToken();
       if (refresh != null) {

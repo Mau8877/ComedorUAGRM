@@ -77,3 +77,15 @@ ios/.symlinks/
 # ===========================
 *.swp
 *.tmp
+
+# ===========================
+# Firebase (CU-EXTRA-01: notificaciones push)
+# ===========================
+# Cuenta de servicio del backend (SECRETA, nunca se versiona). La carpeta
+# conserva su README y su .gitkeep; todo lo demás queda fuera de git.
+projects/backend/comedor-uagrm-core/secrets/*
+!projects/backend/comedor-uagrm-core/secrets/.gitkeep
+!projects/backend/comedor-uagrm-core/secrets/README.md
+# Config de Firebase de la app Android (cada dev usa la de su proyecto);
+# se versiona google-services.json.example como plantilla.
+projects/mobile/android/app/google-services.json

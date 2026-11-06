@@ -104,6 +104,11 @@ services:
       # "Could not find a valid Docker environment" en cualquier test que
       # use Testcontainers.
       - /var/run/docker.sock:/var/run/docker.sock
+      # Credenciales que NO se versionan (CU-EXTRA-01): se monta la CARPETA
+      # (no el archivo suelto) porque si el archivo no existe Docker crearía una
+      # carpeta con su nombre. Sin `firebase-sa.json` el backend arranca igual y
+      # el push queda en modo log. Ver projects/backend/comedor-uagrm-core/secrets/README.md
+      - ./projects/backend/comedor-uagrm-core/secrets:/run/secrets:ro
     # fontconfig + una fuente: JasperReports las necesita para generar el PDF de la lista
     # priorizada (CU06); la imagen de Maven sobre alpine no las trae.
     command: sh -c "apk add --no-cache fontconfig ttf-dejavu && mvn spring-boot:run -Dspring-boot.run.profiles=dev"
@@ -135,6 +140,8 @@ services:
       - MAIL_SMTP_STARTTLS=${MAIL_SMTP_STARTTLS:-false}
       - MAIL_FROM=${MAIL_FROM:-no-responder@comedoru.local}
       - FRONTEND_URL=${FRONTEND_URL:-http://localhost}
+      # Cuenta de servicio de Firebase para el push (FCM); si el archivo no existe, push en modo log
+      - FIREBASE_CREDENTIALS_PATH=${FIREBASE_CREDENTIALS_PATH:-/run/secrets/firebase-sa.json}
     depends_on:
       postgres:
         condition: service_healthy
