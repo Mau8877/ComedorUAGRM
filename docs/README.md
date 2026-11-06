@@ -388,9 +388,26 @@ Usadas directamente por Spring Boot (`application.properties` las lee vía
 | `FRONTEND_URL` | URL del portal web, base del enlace del correo de recuperación | `http://localhost` |
 | `RESET_TTL_MINUTES` | Vigencia del enlace de restablecimiento (minutos) | `60` |
 
+| `FIREBASE_CREDENTIALS_PATH` | Ruta al JSON de la cuenta de servicio de Firebase (push). En Docker ya apunta a `/run/secrets/firebase-sa.json` | vacía (push en modo log) |
+| `NOTIFICACIONES_REINTENTOS` / `NOTIFICACIONES_ESPERAS_MS` | Intentos de un envío de push o correo y esperas entre ellos | `3` / `2000,8000` |
+
 > `CORS_ALLOWED_ORIGINS` y las dos de `RATE_LIMIT_*` tienen default
 > razonable en `application.properties`, así que no es obligatorio
 > definirlas en `.env` salvo que se necesite un valor distinto.
+
+#### Notificaciones push (Firebase) — CU-EXTRA-01
+
+El backend envía push con Firebase Cloud Messaging y la app Android los recibe.
+Necesita **dos archivos del mismo proyecto de Firebase**, ninguno se versiona:
+
+| Archivo | De dónde sale | Dónde se deja |
+| --- | --- | --- |
+| Cuenta de servicio (JSON) | Firebase Console → Configuración del proyecto → Cuentas de servicio → «Generar nueva clave privada» | `projects/backend/comedor-uagrm-core/secrets/firebase-sa.json` (**ese nombre exacto**) |
+| `google-services.json` | Firebase Console → Tus apps → Android (paquete `com.comedoruagrm.mobile`) | `projects/mobile/android/app/google-services.json` (hay un `.example` como plantilla) |
+
+- `docker-compose.yml` monta la carpeta `secrets/` en `core` como solo lectura en `/run/secrets`.
+- **Sin esos archivos todo funciona igual**: el backend arranca con el push en modo log (solo escribe en el log cuántos teléfonos se habrían avisado) y los avisos se guardan y salen por correo (Mailpit). El CI tampoco necesita secretos.
+- Para trabajar con push real, pídele los archivos a quien los tenga **por un canal privado** (nunca git ni un chat grupal: el JSON da permisos sobre el proyecto de Firebase), o crea tu propio proyecto de Firebase y genera ambos desde ahí.
 
 ### 6.3 Frontend — ComedorUAGRM (`projects/frontend/comedoruagrm/.env`, a partir de `.env.example`)
 

@@ -126,7 +126,9 @@ proxy), postgres (5432), redis (6379), minio (9000/9001), mailpit (8025 bandeja 
 y grafana (3000). El proxy sirve ComedorUAGRM en `/`, la API en `/api/` y la
 landing de Nexware en `/landing-page`. Ver [docs/README.md](../docs/README.md)
 para el detalle completo de variables de entorno y el checklist de puesta
-en marcha.
+en marcha. Las credenciales de Firebase para el push (`secrets/firebase-sa.json`
+del backend y `google-services.json` de la app) no se versionan y son opcionales:
+sin ellas todo corre con el push en modo log (ver esa misma guía).
 
 ## Reglas del proyecto (`.claude/rules/`)
 
