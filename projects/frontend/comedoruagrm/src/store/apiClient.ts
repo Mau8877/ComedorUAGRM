@@ -84,8 +84,23 @@ apiClient.interceptors.request.use(async (config) => {
   return config
 })
 
+// * Un error de una descarga también llega como Blob: se lee su texto para recuperar el sobre de error
+// * ({ error, message }) y poder rechazar con un ApiError, igual que cualquier otra petición.
+async function leerSobreDeError(datos: unknown): Promise<ApiEnvelope<unknown> | undefined> {
+  if (datos instanceof Blob) {
+    try {
+      return JSON.parse(await datos.text()) as ApiEnvelope<unknown>
+    } catch {
+      return undefined
+    }
+  }
+  return datos as ApiEnvelope<unknown> | undefined
+}
+
 apiClient.interceptors.response.use(
   (response) => {
+    // Una descarga (responseType 'blob') es el archivo mismo, no un sobre: se deja tal cual.
+    if (response.config.responseType === 'blob') return response
     const envelope = response.data as ApiEnvelope<unknown>
     response.data = envelope.meta ? { data: envelope.data, meta: envelope.meta } : envelope.data
     return response
@@ -98,7 +113,7 @@ apiClient.interceptors.response.use(
         return apiClient.request(config)
       }
     }
-    const envelope = error.response?.data as ApiEnvelope<unknown> | undefined
+    const envelope = await leerSobreDeError(error.response?.data)
     if (envelope?.error) {
       return Promise.reject(new ApiError(envelope.error, envelope.message))
     }

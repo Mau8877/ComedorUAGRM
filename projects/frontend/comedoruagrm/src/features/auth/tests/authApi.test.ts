@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { apiClient, ApiError } from '@/store'
 
-import { loginApi, logoutApi, listarCarrerasApi, refreshApi, registrarApi, usuarioActualApi } from '../api/authApi'
+import { loginApi, logoutApi, refreshApi, registrarApi, usuarioActualApi } from '../api/authApi'
 import type { RegistroRequest } from '../schemas'
 
 const usuario = { codigo: 'u1', nombres: 'Ana', apellidos: 'Perez', correo: 'ana@uagrm.edu.bo', rol: 'POSTULANTE' }
@@ -31,16 +31,6 @@ describe('authApi', () => {
   }
   const exito = (data: unknown, extra: object = {}) => ({ status: 'success', data, message: '', timestamp: '', ...extra })
   const fallo = (error: string) => ({ status: 'failed', data: null, message: 'm', timestamp: '', error })
-
-  it('listarCarrerasApi pide GET /carreras?pageSize=200 y devuelve el arreglo', async () => {
-    const carreras = [{ codigo: 'c1', nombre: 'Ingeniería', facultad: 'Tecnología' }]
-    responder(200, exito(carreras, { meta: { page: 1, pageSize: 200, totalItems: 1, totalPages: 1 } }))
-
-    expect(await listarCarrerasApi()).toEqual(carreras)
-    expect(vistas[0].method).toBe('get')
-    expect(vistas[0].url).toBe('/carreras')
-    expect(vistas[0].params).toEqual({ pageSize: 200 })
-  })
 
   it('registrarApi hace POST /auth/registro y distingue 201 (creada) de 200 (ya existía)', async () => {
     const request = { correo: 'ana@uagrm.edu.bo' } as RegistroRequest

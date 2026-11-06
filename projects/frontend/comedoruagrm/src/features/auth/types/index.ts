@@ -23,8 +23,5 @@ export interface Sesion {
   usuario: Usuario
 }
 
-export interface Carrera {
-  codigo: string
-  nombre: string
-  facultad: string
-}
+// Re-exportada: el catálogo vive en shared/api (lo usan el registro y la lista priorizada).
+export type { Carrera } from '@/shared/api'

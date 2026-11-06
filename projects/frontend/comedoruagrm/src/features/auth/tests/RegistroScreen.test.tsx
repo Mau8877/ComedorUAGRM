@@ -11,9 +11,9 @@ vi.mock('@tanstack/react-router', () => ({
   useNavigate: () => navigate,
 }))
 vi.mock('../api/useRegistro', () => ({ useRegistro: vi.fn() }))
-vi.mock('../api/useCarreras', () => ({ useCarreras: vi.fn() }))
+vi.mock('@/shared/api', () => ({ useCarreras: vi.fn() }))
 
-import { useCarreras } from '../api/useCarreras'
+import { useCarreras } from '@/shared/api'
 import { useRegistro } from '../api/useRegistro'
 import { RegistroScreen } from '../screens/RegistroScreen'
 

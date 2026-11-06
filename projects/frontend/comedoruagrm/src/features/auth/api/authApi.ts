@@ -1,7 +1,7 @@
 import { apiClient, ApiError } from '@/store'
 
 import type { RegistroRequest, RestablecerContrasenaRequest } from '../schemas'
-import type { Carrera, Sesion, Usuario } from '../types'
+import type { Sesion, Usuario } from '../types'
 
 // * Funciones sin hook: las usan las mutations de useRegistro/useLogin/
 // * useCerrarSesion y el manejador de 401 (sesion.ts). La sesión viaja en
@@ -13,12 +13,6 @@ const ERRORES_DE_SESION = ['ERR_AUTH_01', 'ERR_AUTH_02', 'ERR_AUTH_03', 'ERR_AUT
 
 export function esErrorDeSesion(error: unknown): boolean {
   return error instanceof ApiError && ERRORES_DE_SESION.includes(error.code)
-}
-
-export async function listarCarrerasApi(): Promise<Carrera[]> {
-  // Con `meta` el apiClient devuelve { data, meta }.
-  const respuesta = await apiClient.get<{ data: Carrera[] }>('/carreras', { params: { pageSize: 200 } })
-  return respuesta.data.data
 }
 
 /** `creado` es false si la misma petición ya se había procesado (el backend responde 200). */
