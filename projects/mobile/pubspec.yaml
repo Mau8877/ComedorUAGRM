@@ -42,6 +42,8 @@ dependencies:
   google_fonts: ^8.2.1
   comedoru_palette:
     path: ../../packages/palette
+  firebase_core: ^5.1.0
+  firebase_messaging: ^17.0.1
 
 dev_dependencies:
   flutter_test:
