@@ -28,7 +28,11 @@ FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
 
-# 5. Práctica de Seguridad: Evitar ejecutar la app como ROOT
+# JasperReports (PDF de la lista priorizada, CU06) mide y dibuja el texto con las fuentes del
+# sistema: sin fontconfig y una fuente, la JRE alpine falla al generar el PDF.
+RUN apk add --no-cache fontconfig ttf-dejavu
+
+# 5.Práctica de Seguridad: Evitar ejecutar la app como ROOT
 # Creamos un grupo y un usuario sin privilegios del sistema
 RUN addgroup -S springgroup && adduser -S springuser -G springgroup
 USER springuser:springgroup

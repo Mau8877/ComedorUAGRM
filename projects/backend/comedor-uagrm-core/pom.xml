@@ -32,6 +32,9 @@
 		     esta versiÃ³n, asÃ­ que se fija acÃ¡ para que junit-jupiter y
 		     postgresql (abajo) usen la misma versiÃ³n entre sÃ­. -->
 		<testcontainers.version>1.21.3</testcontainers.version>
+		<!-- JasperReports (PDF de la lista priorizada, CU06). Desde la 7.x el exportador a PDF
+		     (jasperreports-pdf) y el compilador (jasperreports-jdt) son artefactos aparte. -->
+		<jasperreports.version>7.1.0</jasperreports.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -91,6 +94,28 @@
 			<groupId>com.bucket4j</groupId>
 			<artifactId>bucket4j_jdk11-core</artifactId>
 			<version>8.14.0</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports</artifactId>
+			<version>${jasperreports.version}</version>
+		</dependency>
+		<!-- Opcional en el pom de jasperreports, pero sin esta no se puede cargar ningun .jrxml
+		     ("Unable to load report"): trae el soporte de lectura del XML. -->
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports-metadata</artifactId>
+			<version>${jasperreports.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports-pdf</artifactId>
+			<version>${jasperreports.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports-jdt</artifactId>
+			<version>${jasperreports.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.logstash.logback</groupId>

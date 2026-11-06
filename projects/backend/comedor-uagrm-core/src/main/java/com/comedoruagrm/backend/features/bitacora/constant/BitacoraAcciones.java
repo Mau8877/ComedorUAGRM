@@ -21,6 +21,9 @@ public final class BitacoraAcciones {
     public static final String CAMBIO_CONTRASENA = "CAMBIO_CONTRASENA";
     public static final String ACTUALIZACION_PERFIL = "ACTUALIZACION_PERFIL";
 
+    // Lista priorizada (CU06): solo se anota la exportacion a PDF (saca datos personales del sistema).
+    public static final String EXPORTACION_LISTA_PRIORIZADA = "EXPORTACION_LISTA_PRIORIZADA";
+
     private BitacoraAcciones() {
     }
 }
