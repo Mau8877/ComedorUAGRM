@@ -123,8 +123,11 @@ llama `comedor-uagrm-core` y es el que usan nginx y Prometheus.
   una cuenta de **Administrador DUBSS** de prueba (`admin@dubss.com` /
   `123123123`; `DatosInicialesAdmin`) y datos de prueba para la lista
   priorizada (3 convocatorias `[PRUEBA]`, 60 postulantes sin acceso con sus
-  postulaciones y puntajes; `DatosPruebaListaPriorizada`). Se apagan con
-  `SEED_ADMIN_ENABLED=false` y `SEED_PRIORIZACION_ENABLED=false`;
+  postulaciones y puntajes y 10 finalistas; `DatosPruebaListaPriorizada`) y,
+  para el CU21, avisos de ejemplo, un comunicado `[PRUEBA]` y la cuenta de
+  postulante finalista `postulante.finalista@prueba.local` / `123123123`
+  (`DatosPruebaFinalistas`). Se apagan con `SEED_ADMIN_ENABLED=false`,
+  `SEED_PRIORIZACION_ENABLED=false` y `SEED_FINALISTAS_ENABLED=false`;
   `SEED_PRIORIZACION_POSTULACIONES=20000` sirve para medir el rendimiento.
   **Nunca corren fuera del perfil `dev`.**
 - **Volúmenes**:

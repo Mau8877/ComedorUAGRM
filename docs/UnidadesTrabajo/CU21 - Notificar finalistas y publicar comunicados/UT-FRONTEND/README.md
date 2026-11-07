@@ -11,7 +11,11 @@ Leer [`.claude/rules/`](../../../../.claude/rules/): `ARQUITECTURA_FRONTEND.md`,
 
 ## Decisiones de diseño
 
-- **Una sola pantalla**, como la maqueta: tabla de finalistas a la izquierda; a la derecha, «Registrar entrega física» (del finalista seleccionado) y «Nuevo aviso o comunicado». Se ve como `ADMINISTRADOR_DUBSS` bajo `_authenticated/_admin/` con entrada «Finalistas» en el sidebar *(decisión del equipo: la maqueta la ubica bajo «Adjudicación», que todavía no existe)*.
+Todo el código va en `projects/frontend/comedoruagrm/src/` (en estas fichas, `F/`).
+
+- **Ruta:** como las rutas del administrador de hoy (`lista-priorizada.tsx`) viven en `routes/_authenticated/`, la pantalla va en `routes/_authenticated/finalistas.tsx`, no bajo un `_admin/` que todavía no existe. *(Ajuste a lo escrito más abajo.)*
+
+- **Una sola pantalla**, como la maqueta: tabla de finalistas a la izquierda; a la derecha, «Registrar entrega física» (del finalista seleccionado) y «Nuevo aviso o comunicado». Solo la ve el `ADMINISTRADOR_DUBSS` (`exigirRol` en la ruta) con entrada «Finalistas» en el sidebar *(decisión del equipo: la maqueta la ubica bajo «Adjudicación», que todavía no existe)*.
 - **Features:** `features/finalistas/` (api, schemas, tabla, paneles y la pantalla) y `features/comunicados/` (api, schema y formulario con vista previa), usados por la pantalla a través de su barrel. La convocatoria se elige con el hook de `features/priorizacion` (CU-06), importado por su barrel.
 - **Lo de la maqueta que el CU no pide** (checklist de documentos recibidos, «Guardar borrador», «Publicación: Inmediata») **no se construye**; el campo de observaciones sí.
 - **Formularios** con TanStack Form + Zod, errores inline solo en campos tocados; el plazo debe ser posterior a hoy y la fecha de recepción no puede ser futura. La confirmación del envío y de la publicación usa `AlertDialog`.
@@ -40,7 +44,7 @@ Leer [`.claude/rules/`](../../../../.claude/rules/): `ARQUITECTURA_FRONTEND.md`,
 - **03:** diálogo con plazo (fecha), lugar y horario y documentos; resumen de a cuántos se enviará; muestra el resultado (enviados y fallidos) y deja reseleccionar a los fallidos (A2).
 - **04:** panel del finalista seleccionado: fecha de recepción (hoy por defecto) y observaciones; muestra la fecha ya registrada si existe y avisa que corregirla deja la anterior en la bitácora (A5).
 - **05:** título, contenido y «Dirigido a» (Todos los postulantes / Finalistas); vista previa, confirmación y mensaje de a cuántos llegó.
-- **06:** `routes/_authenticated/_admin/finalistas.tsx`, `FinalistasScreen`, entrada en `adminNavItems.ts`, estados de carga y de error, y selección de convocatoria.
+- **06:** `routes/_authenticated/finalistas.tsx`, `FinalistasScreen`, entrada en `adminNavItems.ts`, estados de carga y de error, y selección de convocatoria.
 - **07:** hook `useNotificaciones` con TanStack Query (paginación de a 10, contador aparte, marcar leída, leer todo, eliminar todas) montado en ambos layouts; se retira el mock de `pruebas_layout`.
 
 ## Cobertura del caso de uso

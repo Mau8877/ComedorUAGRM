@@ -23,7 +23,7 @@ La base tiene las tablas `notificacion` y `dispositivo_fcm`, y el backend tiene 
 
 ## Alcance
 
-- Migración `V20261106100000__crear_tablas_notificaciones.sql`:
+- Migración `V20261106100100__crear_tablas_notificaciones.sql` (renombrada desde `V20261106100000`, que chocaba con la de CU06 al integrar las ramas):
   - Enum de PostgreSQL `tipo_notificacion` (`SUCCESS`, `INFO`, `WARNING`, `ERROR`; confirmar contra el diseño de grado).
   - `notificacion`: `id`, `codigo_notificacion` (UUID único), `usuario_id` (FK a `usuario`), `titulo` varchar(150), `mensaje` text, `tipo`, `leida` boolean `DEFAULT false`, `enviada_en` timestamptz nulo, más `creado_en`, `actualizado_en` y `eliminado_en`. Índice `(usuario_id, creado_en DESC)` parcial `WHERE eliminado_en IS NULL`. **Sin** `comunicado_id` ni `postulacion_id` (ver README).
   - `dispositivo_fcm`: `id`, `codigo_dispositivo_fcm`, `usuario_id` (FK), `token` varchar(512), `plataforma` varchar(20), columnas comunes. Índice único parcial sobre `token` `WHERE eliminado_en IS NULL` e índice por `usuario_id`.

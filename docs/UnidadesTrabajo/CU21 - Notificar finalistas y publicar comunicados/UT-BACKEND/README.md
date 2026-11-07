@@ -21,7 +21,13 @@ Leer [`.claude/rules/`](../../../../.claude/rules/) — `ARQUITECTURA_BACKEND.md
 - **Estado de la notificación del finalista** (`SIN_ENVIAR/ENVIADA/FALLIDA`) se deriva del último `notificacion` con ese `postulacion_id` (y sin `comunicado_id`): `enviada_en` nulo = fallida.
 - **Roles:** `@PreAuthorize("hasRole('ADMINISTRADOR_DUBSS')")` en los `service` de finalistas y comunicados. La bandeja exige sesión y devuelve solo las del usuario del token.
 - **Bandeja del usuario (UT 09):** implementa el contrato ya escrito en [`NOTIFICACIONES_WEB.md`](../../../pendientes/NOTIFICACIONES_WEB.md); **no se redefine acá**. *(Decisión propuesta: entra en este CU porque sin ella el Postulante no puede consultar sus avisos; si se prefiere, se separa como CU-EXTRA-02.)*
-- **Errores propuestos** (prefijos `FIN` y `COM`, documentar en `docs/errors/`): `ERR_FIN_01` finalista no existe (404), `ERR_FIN_02` convocatoria no existe (404), `ERR_FIN_03` fecha de recepción futura (400), `ERR_FIN_04` plazo no posterior a hoy (400), `ERR_COM_01` destinatarios no soportados o sin destinatarios (400), `ERR_COM_02` `FINALISTAS` sin convocatoria (400). Los campos vacíos caen en `ERR_SYS_01`.
+- **Errores** (prefijos `FIN`, `COM` y `NOT`, documentar en `docs/errors/`): `ERR_FIN_01` finalista no existe (404), `ERR_FIN_02` convocatoria no existe (404), `ERR_FIN_03` fecha de recepción futura (400), `ERR_FIN_04` plazo no posterior a hoy (400), `ERR_FIN_05` `filter`/`sort` no soportado (400), `ERR_COM_01` destinatarios no soportados o sin destinatarios (400), `ERR_COM_02` `FINALISTAS` sin convocatoria (400), `ERR_NOT_01` aviso inexistente o ajeno (404), `ERR_NOT_02` `sort` de la bandeja no soportado (400). Los campos vacíos caen en `ERR_SYS_01`.
+- **Decisión sobre el `tipo` del aviso (contradicción abierta del CU):** se mantiene `SUCCESS/INFO/WARNING/ERROR` (lo ya implementado en CU-EXTRA-01 y lo que consume la campanita); el enum `CAMBIO_ESTADO/FINALISTA/COMUNICADO/RESULTADO` del diseño lógico **no** se adopta en este CU. Los dos avisos nuevos son `INFO` y se distinguen por su contexto (`postulacion_id` / `comunicado_id`).
+- **Decisión sobre la bandeja:** entra en este CU (UT 09), porque sin ella el Postulante no puede consultar sus avisos (flujo D). Sigue siendo reutilizable por cualquier otro CU.
+- **Resultado de la notificación:** `enviados` son los avisos registrados en la bandeja y `fallidos` los que no se pudieron registrar; el despacho de push y correo es asíncrono y no se espera. Por eso el estado «Fallida» de un finalista se deriva del aviso sin `enviada_en` y, justo después de enviar, puede verse «Fallida» unos segundos hasta que el despacho termina (la pantalla vuelve a consultar).
+- **Fechas:** `plazoEntrega` y `documentacionRecibidaEn` se exponen como fecha (`LocalDate`, día en `America/La_Paz`); `notificadoEn` como instante.
+- **Envío masivo:** el comunicado guarda los avisos por lotes de 500 en la misma transacción; el despacho usa el ejecutor de CU-EXTRA-01 (cola acotada). Si la cola se llena, el push se descarta (el aviso queda en la bandeja): límite conocido de CU-EXTRA-01, no se cambia acá.
+- **Datos de ejemplo:** UT 04 (finalistas) y UT 12 (avisos, comunicado y un postulante con sesión), solo con perfil `dev`, sobre la convocatoria `[PRUEBA]` y el administrador `admin@dubss.com` del CU06.
 - **Bitácora:** `NOTIFICACION_FINALISTAS`, `ENTREGA_DOCUMENTACION_REGISTRADA` (con valor anterior en el detalle si es corrección) y `COMUNICADO_PUBLICADO`, con `@Auditar` donde el resultado sea `Auditable`.
 
 ## Contrato de datos / recurso HTTP
@@ -52,8 +58,9 @@ Leer [`.claude/rules/`](../../../../.claude/rules/) — `ARQUITECTURA_BACKEND.md
 | UT-CU21-BE-09 | Bandeja de avisos del usuario (contrato de `NOTIFICACIONES_WEB.md`) | — |
 | UT-CU21-BE-10 | Endpoints de finalistas y comunicados | 05, 06, 07, 08 |
 | UT-CU21-BE-11 | Pruebas de integración con base real | 04, 09, 10 |
+| UT-CU21-BE-12 | Datos de ejemplo: avisos, comunicado y postulante con sesión | 04, 09 |
 
-**Cadena:** `01 → 02 → 04`; `03` independiente; `02, 03 → 05, 06, 07, 08 → 10`; `09` independiente; `04, 09, 10 → 11`.
+**Cadena:** `01 → 02 → 04`; `03` independiente; `02, 03 → 05, 06, 07, 08 → 10`; `09` independiente; `04, 09, 10 → 11`; `04, 09 → 12`.
 
 ## Alcance de cada UT
 
@@ -68,6 +75,7 @@ Leer [`.claude/rules/`](../../../../.claude/rules/) — `ARQUITECTURA_BACKEND.md
 - **09:** endpoints de la bandeja del usuario según su documento contrato (listar, contador de no leídas, marcar leída, leer todo, eliminar todas).
 - **10:** controllers delgados con `ApiResponse` y sus tests de contrato (`MockMvc`).
 - **11:** pruebas con Postgres real: flujo A con un finalista sin teléfono, reenvío a fallidos, corrección de fecha, comunicado a un grupo, aislamiento de la bandeja, `401`/`403`/`404`, y que ninguna postulación cambia de estado.
+- **12:** `DatosPruebaFinalistas` (dev): un postulante finalista con sesión, avisos de ejemplo (uno «Fallida»), un comunicado de prueba y su documentación en `docs/README.md`.
 
 ## Cobertura del caso de uso
 
@@ -80,7 +88,7 @@ Leer [`.claude/rules/`](../../../../.claude/rules/) — `ARQUITECTURA_BACKEND.md
 | Paso 17 | Bandeja del Postulante | 09 |
 | A9, A10, A11, A12 | `404`, vacío, `401`, `403` | 05, 10, 11 |
 | A13 | Fallo de Firebase o correo | 06, 08 (lo resuelve CU-EXTRA-01) |
-| CA01–CA20 | — | 05–11 |
+| CA01–CA20 | — | 05–11 (datos para verlo: 04 y 12) |
 
 ## Follow-ups (no se implementan en estas UT)
 

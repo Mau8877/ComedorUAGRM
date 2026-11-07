@@ -2,7 +2,7 @@
 
 | Id   | Nombre                                                                              | Módulo                       | Prioridad | Estado    |
 | ---- | ----------------------------------------------------------------------------------- | ---------------------------- | --------- | --------- |
-| CU21 | Notificar finalistas, registrar entrega de documentación física y publicar comunicados | P4. Auditoría y adjudicación | Alta      | Pendiente |
+| CU21 | Notificar finalistas, registrar entrega de documentación física y publicar comunicados | P4. Auditoría y adjudicación | Alta      | Hecho     |
 
 **Actor principal:** Administrador DUBSS
 **Actores secundarios:** Postulante (receptor de los avisos); Firebase Cloud Messaging y servicio de correo (entregan los avisos, a través del servicio de [CU-EXTRA-01](CU-EXTRA-01%20-%20Notificaciones%20push.md))

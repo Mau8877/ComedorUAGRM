@@ -2,6 +2,8 @@
 
 ## Estado actual
 
+> **Actualización (CU21):** la bandeja ya está implementada en el backend (`BandejaNotificacionesService`, endpoints `GET /me`, `GET /me/resumen`, `POST /{codigo}/leer`, `POST /leer-todo` y `DELETE /`; errores `ERR_NOT_01` y `ERR_NOT_02`) y en la web (`features/notificaciones`, `useNotificaciones`, que usan `AdminLayout` y `EstudianteLayout`). El texto de abajo conserva el contrato original; donde dice `id` de la notificación, es su `codigo` público.
+
 El componente de UI **ya está construido y funcionando en el frontend**,
 pero corriendo 100% sobre datos mock -- no existe todavía ningún endpoint
 de `notificaciones` en el backend (no hay `features/notificaciones/` en

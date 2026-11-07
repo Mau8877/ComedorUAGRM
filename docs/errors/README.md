@@ -83,3 +83,21 @@ docs/errors/
   GUIA_ERRORES_BACKEND.md para el detalle exacto de qué hacer al agregar
   un código nuevo.
 -->
+
+### Finalistas (`FIN`)
+
+- [`ERR_FIN_01`](finalistas/ERRORES_FINALISTAS.md#err_fin_01) — El finalista no existe (404)
+- [`ERR_FIN_02`](finalistas/ERRORES_FINALISTAS.md#err_fin_02) — La convocatoria no existe (404)
+- [`ERR_FIN_03`](finalistas/ERRORES_FINALISTAS.md#err_fin_03) — La fecha de recepción es futura (400)
+- [`ERR_FIN_04`](finalistas/ERRORES_FINALISTAS.md#err_fin_04) — El plazo de entrega no es posterior a hoy (400)
+- [`ERR_FIN_05`](finalistas/ERRORES_FINALISTAS.md#err_fin_05) — `sort` o `filter` no soportado en finalistas (400)
+
+### Comunicados (`COM`)
+
+- [`ERR_COM_01`](comunicados/ERRORES_COMUNICADOS.md#err_com_01) — Destinatarios no soportados o sin destinatarios (400)
+- [`ERR_COM_02`](comunicados/ERRORES_COMUNICADOS.md#err_com_02) — `FINALISTAS` sin convocatoria (400)
+
+### Notificaciones (`NOT`)
+
+- [`ERR_NOT_01`](notificaciones/ERRORES_NOTIFICACIONES.md#err_not_01) — El aviso no existe o no es del usuario (404)
+- [`ERR_NOT_02`](notificaciones/ERRORES_NOTIFICACIONES.md#err_not_02) — `sort` no soportado en la bandeja (400)
