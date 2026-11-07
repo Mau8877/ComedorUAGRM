@@ -25,6 +25,8 @@ const FINALISTA: Finalista = {
   ci: '9001',
   puntaje: 94,
   estadoNotificacion: 'ENVIADA',
+  resultadoAuditoria: 'SIN_AUDITAR',
+  puntajeTotal: null,
   plazoEntrega: null,
   notificadoEn: null,
   documentacionRecibidaEn: null,

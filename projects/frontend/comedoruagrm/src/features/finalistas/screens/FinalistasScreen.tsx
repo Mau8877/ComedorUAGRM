@@ -20,6 +20,8 @@ export interface FinalistasScreenProps {
   activeHref: string
   /** El usuario conectado (el Administrador DUBSS). */
   usuarioActual: Usuario
+  /** Abre el expediente del finalista para auditarlo (CU07); sin él, la tabla no ofrece «Auditar». */
+  onAuditar?: (finalista: Finalista) => void
 }
 
 /**
@@ -28,7 +30,7 @@ export interface FinalistasScreenProps {
  * entrega física del finalista elegido y el formulario de un nuevo comunicado. No cambia el estado de
  * ninguna postulación.
  */
-export function FinalistasScreen({ titulo, activeHref, usuarioActual }: FinalistasScreenProps) {
+export function FinalistasScreen({ titulo, activeHref, usuarioActual, onAuditar }: FinalistasScreenProps) {
   const cerrarSesion = useCerrarSesion()
   const accionesDeCuenta = useAccionesDeCuenta()
 
@@ -148,6 +150,7 @@ export function FinalistasScreen({ titulo, activeHref, usuarioActual }: Finalist
                 onSeleccionChange={setSeleccionados}
                 activoCodigo={activo?.codigo}
                 onElegirEntrega={setActivo}
+                onAuditar={onAuditar}
                 onConvocatoriaInexistente={() => convocatoriaInexistente(convocatoriaId)}
               />
             </div>

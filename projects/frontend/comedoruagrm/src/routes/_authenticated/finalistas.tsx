@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 
 import { exigirRol } from '@/features/auth'
 import { FinalistasScreen } from '@/features/finalistas'
@@ -11,11 +11,13 @@ export const Route = createFileRoute('/_authenticated/finalistas')({
 
 function FinalistasPage() {
   const { usuario } = Route.useRouteContext()
+  const navigate = useNavigate()
   return (
     <FinalistasScreen
       titulo="Finalistas: notificación y documentación física"
       activeHref="/finalistas"
       usuarioActual={usuario}
+      onAuditar={(finalista) => void navigate({ to: '/finalistas/$codigo', params: { codigo: finalista.codigo } })}
     />
   )
 }

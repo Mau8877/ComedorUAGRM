@@ -63,6 +63,8 @@ function finalista(n: number, extra: Partial<Finalista> = {}): Finalista {
     ci: `${9000 + n}`,
     puntaje: 95 - n,
     estadoNotificacion: 'SIN_ENVIAR',
+    resultadoAuditoria: 'SIN_AUDITAR',
+    puntajeTotal: null,
     plazoEntrega: null,
     notificadoEn: null,
     documentacionRecibidaEn: null,
@@ -85,11 +87,11 @@ function responder(filas: Finalista[], convocatorias = CONVOCATORIAS) {
   })
 }
 
-function montar() {
+function montar(onAuditar?: (finalista: Finalista) => void) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   render(
     <QueryClientProvider client={queryClient}>
-      <FinalistasScreen titulo="Finalistas" activeHref="/finalistas" usuarioActual={yo} />
+      <FinalistasScreen titulo="Finalistas" activeHref="/finalistas" usuarioActual={yo} onAuditar={onAuditar} />
     </QueryClientProvider>,
   )
   return userEvent.setup()
@@ -123,6 +125,39 @@ describe('FinalistasScreen', () => {
     expect(screen.getAllByText('Recibida').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Pendiente').length).toBeGreaterThan(0)
     expect(screen.getAllByText('94.00').length).toBeGreaterThan(0)
+  })
+
+  it('muestra el resultado de la auditoría y el total junto al puntaje (CU07)', async () => {
+    responder([
+      finalista(1, { resultadoAuditoria: 'VALIDADO', puntajeTotal: 80.5 }),
+      finalista(2, { resultadoAuditoria: 'OBSERVADO' }),
+      finalista(3),
+    ])
+    montar()
+
+    expect(await screen.findAllByText('Validado')).not.toHaveLength(0)
+    expect(screen.getAllByText('Observado').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Sin auditar').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Total 80.50').length).toBeGreaterThan(0)
+  })
+
+  it('«Auditar» abre el expediente del finalista elegido (CU07)', async () => {
+    responder([finalista(1), finalista(2)])
+    const onAuditar = vi.fn()
+    const user = montar(onAuditar)
+
+    await screen.findAllByText('Nombre1 Apellido1')
+    await user.click(screen.getAllByRole('button', { name: 'Auditar' })[0])
+
+    expect(onAuditar).toHaveBeenCalledWith(expect.objectContaining({ posicion: 1 }))
+  })
+
+  it('sin la acción de auditar la tabla no ofrece el botón', async () => {
+    responder([finalista(1)])
+    montar()
+
+    await screen.findAllByText('Nombre1 Apellido1')
+    expect(screen.queryByRole('button', { name: 'Auditar' })).not.toBeInTheDocument()
   })
 
   it('no manda sort ni otros filtros', async () => {

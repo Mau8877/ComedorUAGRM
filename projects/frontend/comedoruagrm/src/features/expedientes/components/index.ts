@@ -1,0 +1,7 @@
+export * from './DocumentosDigitales'
+export * from './ExpedienteResumen'
+export * from './formatos'
+export * from './HistorialAuditorias'
+export * from './PuntajePanel'
+export * from './AuditoriaForm'
+export * from './motivoBloqueoAuditoria'

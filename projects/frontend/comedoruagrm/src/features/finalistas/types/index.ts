@@ -3,6 +3,9 @@
 
 export type EstadoNotificacion = 'SIN_ENVIAR' | 'ENVIADA' | 'FALLIDA'
 
+/** Resultado de la última auditoría del expediente (CU07); `SIN_AUDITAR` si todavía no hay ninguna. */
+export type ResultadoAuditoriaFinalista = 'SIN_AUDITAR' | 'VALIDADO' | 'OBSERVADO' | 'NO_VALIDO'
+
 export interface Finalista {
   /** Código público del finalista. */
   codigo: string
@@ -18,6 +21,10 @@ export interface Finalista {
   notificadoEn: string | null
   /** Fecha (sin hora) en que entregó la documentación, `YYYY-MM-DD`; con valor = «Recibida». */
   documentacionRecibidaEn: string | null
+  /** Resultado de la última auditoría del expediente (CU07). */
+  resultadoAuditoria: ResultadoAuditoriaFinalista
+  /** IA + puntaje académico de la última auditoría; nulo mientras falte alguno de los dos. */
+  puntajeTotal: number | null
 }
 
 export interface FinalistasParams {

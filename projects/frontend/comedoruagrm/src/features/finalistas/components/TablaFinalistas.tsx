@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ClipboardCheckIcon, RefreshCwIcon, TriangleAlertIcon } from 'lucide-react'
+import { ClipboardCheckIcon, FileSearchIcon, RefreshCwIcon, TriangleAlertIcon } from 'lucide-react'
 import type { Row } from '@tanstack/react-table'
 
 import { Button } from '@/components/ui/button'
@@ -29,6 +29,8 @@ interface TablaFinalistasProps {
   /** Finalista elegido para registrar su entrega (se resalta la fila). */
   activoCodigo?: string
   onElegirEntrega: (finalista: Finalista) => void
+  /** Abre el expediente del finalista para auditarlo (CU07). */
+  onAuditar?: (finalista: Finalista) => void
   /** El backend dijo que la convocatoria ya no existe (A9): la pantalla vuelve al selector. */
   onConvocatoriaInexistente?: () => void
 }
@@ -44,6 +46,7 @@ export function TablaFinalistas({
   onSeleccionChange,
   activoCodigo,
   onElegirEntrega,
+  onAuditar,
   onConvocatoriaInexistente,
 }: TablaFinalistasProps) {
   const [busqueda, setBusqueda] = useState('')
@@ -112,11 +115,16 @@ export function TablaFinalistas({
   const sinDatos = lista.isError && !lista.data
 
   const renderAcciones = (fila: Row<Finalista>) => (
-    <RowActionButton
-      icon={<ClipboardCheckIcon />}
-      label={activoCodigo === fila.original.codigo ? 'Entrega en edición' : 'Registrar entrega'}
-      onClick={() => onElegirEntrega(fila.original)}
-    />
+    <>
+      <RowActionButton
+        icon={<ClipboardCheckIcon />}
+        label={activoCodigo === fila.original.codigo ? 'Entrega en edición' : 'Registrar entrega'}
+        onClick={() => onElegirEntrega(fila.original)}
+      />
+      {onAuditar && (
+        <RowActionButton icon={<FileSearchIcon />} label="Auditar" onClick={() => onAuditar(fila.original)} />
+      )}
+    </>
   )
 
   if (sinFinalistas) {

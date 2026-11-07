@@ -1,0 +1,35 @@
+import { apiClient } from '@/store'
+
+import type { AccesoDocumento, Expediente, RegistrarAuditoriaRequest, ResultadoRegistroAuditoria } from '../types'
+
+// * Funciones sin hook: las usan los hooks de este mismo directorio. Todas van por el apiClient
+// * compartido, que ya desempaqueta el sobre del backend. El expediente cuelga del finalista:
+// * `/finalistas/{codigo}/...`.
+
+export async function obtenerExpedienteApi(finalista: string): Promise<Expediente> {
+  const respuesta = await apiClient.get<Expediente>(`/finalistas/${finalista}/expediente`)
+  return respuesta.data
+}
+
+/**
+ * `claveIdempotencia` va en el header `Idempotency-Key`: repetir el envío con la misma clave (doble clic,
+ * respuesta perdida) devuelve la auditoría ya guardada en vez de crear otra.
+ */
+export async function registrarAuditoriaApi(
+  finalista: string,
+  pedido: RegistrarAuditoriaRequest,
+  claveIdempotencia?: string,
+): Promise<ResultadoRegistroAuditoria> {
+  const respuesta = await apiClient.post<ResultadoRegistroAuditoria>(
+    `/finalistas/${finalista}/auditorias`,
+    pedido,
+    claveIdempotencia ? { headers: { 'Idempotency-Key': claveIdempotencia } } : undefined,
+  )
+  return respuesta.data
+}
+
+/** Pide la URL temporal para abrir un documento; la ruta guardada nunca llega al cliente. */
+export async function accesoDocumentoApi(finalista: string, documento: string): Promise<AccesoDocumento> {
+  const respuesta = await apiClient.get<AccesoDocumento>(`/finalistas/${finalista}/documentos/${documento}/acceso`)
+  return respuesta.data
+}

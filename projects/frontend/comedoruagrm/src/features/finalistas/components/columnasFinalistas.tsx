@@ -2,8 +2,8 @@ import type { ColumnDef } from '@tanstack/react-table'
 
 import { Checkbox } from '@/components/ui/checkbox'
 
-import type { EstadoNotificacion, Finalista } from '../types'
-import { EntregaBadge, EstadoNotificacionBadge } from './EstadoBadges'
+import type { EstadoNotificacion, Finalista, ResultadoAuditoriaFinalista } from '../types'
+import { AuditoriaBadge, EntregaBadge, EstadoNotificacionBadge } from './EstadoBadges'
 import { formatearPuntaje } from './formatos'
 
 export interface OpcionesColumnas {
@@ -71,8 +71,15 @@ export function crearColumnasFinalistas({
       accessorKey: 'puntaje',
       header: 'Puntaje',
       enableSorting: false,
-      cell: (ctx) => formatearPuntaje(ctx.getValue<number | null>()),
-      meta: { cardOrder: 1, width: 'w-24' },
+      cell: ({ row }) => (
+        <div className="flex flex-col">
+          <span>{formatearPuntaje(row.original.puntaje)}</span>
+          {row.original.puntajeTotal !== null && (
+            <span className="text-xs text-muted-foreground">Total {formatearPuntaje(row.original.puntajeTotal)}</span>
+          )}
+        </div>
+      ),
+      meta: { cardOrder: 1, width: 'w-28' },
     },
     {
       accessorKey: 'estadoNotificacion',
@@ -88,6 +95,13 @@ export function crearColumnasFinalistas({
       enableSorting: false,
       cell: ({ row }) => <EntregaBadge recibida={Boolean(row.original.documentacionRecibidaEn)} />,
       meta: { cardOrder: 3, width: 'w-32' },
+    },
+    {
+      accessorKey: 'resultadoAuditoria',
+      header: 'Auditoría',
+      enableSorting: false,
+      cell: (ctx) => <AuditoriaBadge resultado={ctx.getValue<ResultadoAuditoriaFinalista>()} />,
+      meta: { cardOrder: 4, width: 'w-32' },
     },
   ]
 }

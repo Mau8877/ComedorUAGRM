@@ -1,4 +1,4 @@
-import type { EstadoNotificacion } from '../types'
+import type { EstadoNotificacion, ResultadoAuditoriaFinalista } from '../types'
 
 const ETIQUETAS_NOTIFICACION: Record<EstadoNotificacion, string> = {
   SIN_ENVIAR: 'Sin enviar',
@@ -28,6 +28,29 @@ export function EntregaBadge({ recibida }: { recibida: boolean }) {
       className={`rounded-full px-2 py-0.5 text-xs font-medium ${recibida ? 'bg-success/15 text-success' : 'bg-warning/15 text-warning'}`}
     >
       {recibida ? 'Recibida' : 'Pendiente'}
+    </span>
+  )
+}
+
+const ETIQUETAS_AUDITORIA: Record<ResultadoAuditoriaFinalista, string> = {
+  SIN_AUDITAR: 'Sin auditar',
+  VALIDADO: 'Validado',
+  OBSERVADO: 'Observado',
+  NO_VALIDO: 'No válido',
+}
+
+const CLASES_AUDITORIA: Record<ResultadoAuditoriaFinalista, string> = {
+  SIN_AUDITAR: 'bg-muted text-muted-foreground',
+  VALIDADO: 'bg-success/15 text-success',
+  OBSERVADO: 'bg-warning/15 text-warning',
+  NO_VALIDO: 'bg-destructive/15 text-destructive',
+}
+
+/** Resultado de la última auditoría del expediente (CU07): «Sin auditar», «Validado», «Observado» o «No válido». */
+export function AuditoriaBadge({ resultado }: { resultado: ResultadoAuditoriaFinalista }) {
+  return (
+    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${CLASES_AUDITORIA[resultado]}`}>
+      {ETIQUETAS_AUDITORIA[resultado]}
     </span>
   )
 }
