@@ -69,6 +69,27 @@ class NotificacionRepositoryTest {
         assertThat(notificacionRepository.countByUsuarioId(beto.getId())).isEqualTo(1);
     }
 
+    @Test
+    void bandeja_leerTodoYEliminarOperanSoloSobreElUsuarioIndicado() {
+        Usuario ana = usuario("1", "ana@uagrm.edu.bo");
+        Usuario beto = usuario("2", "beto@uagrm.edu.bo");
+        Notificacion propia = notificacionRepository.saveAndFlush(new Notificacion(ana, "a", "m", TipoNotificacion.INFO));
+        notificacionRepository.saveAndFlush(new Notificacion(ana, "b", "m", TipoNotificacion.INFO));
+        notificacionRepository.saveAndFlush(new Notificacion(beto, "c", "m", TipoNotificacion.INFO));
+
+        assertThat(notificacionRepository.countByUsuarioIdAndLeidaFalse(ana.getId())).isEqualTo(2);
+        assertThat(notificacionRepository.findByCodigoAndUsuarioId(propia.getCodigo(), beto.getId())).isEmpty();
+        assertThat(notificacionRepository.findByCodigoAndUsuarioId(propia.getCodigo(), ana.getId())).isPresent();
+
+        assertThat(notificacionRepository.marcarTodasLeidas(ana.getId())).isEqualTo(2);
+        assertThat(notificacionRepository.countByUsuarioIdAndLeidaFalse(ana.getId())).isZero();
+        assertThat(notificacionRepository.countByUsuarioIdAndLeidaFalse(beto.getId())).isEqualTo(1);
+
+        assertThat(notificacionRepository.eliminarTodas(ana.getId())).isEqualTo(2);
+        assertThat(notificacionRepository.countByUsuarioId(ana.getId())).isZero();
+        assertThat(notificacionRepository.countByUsuarioId(beto.getId())).isEqualTo(1);
+    }
+
     private Usuario usuario(String ci, String correo) {
         return usuarioRepository.saveAndFlush(new Usuario(
                 rolRepository.findByNombre(RolNombres.POSTULANTE).orElseThrow(), ci, correo,

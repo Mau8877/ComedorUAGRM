@@ -38,13 +38,16 @@ class NotificacionServiceTest {
     @Mock
     private UsuarioService usuarioService;
 
+    @Mock
+    private jakarta.persistence.EntityManager entityManager;
+
     private NotificacionService service;
     private Usuario ana;
 
     @BeforeEach
     void preparar() {
         service = new NotificacionService(notificacionRepository, new PlantillaNotificacion(), publicador,
-                usuarioService);
+                usuarioService, entityManager);
         ana = new Usuario(null, "1234567", "ana@uagrm.edu.bo", "hash", "Ana", "Perez");
         ReflectionTestUtils.setField(ana, "id", 7L);
         ReflectionTestUtils.setField(ana, "codigo", UUID.randomUUID());
@@ -81,6 +84,66 @@ class NotificacionServiceTest {
 
         verify(notificacionRepository, never()).save(any(Notificacion.class));
         verify(publicador, never()).publishEvent(any(Object.class));
+    }
+
+    @Test
+    void notificar_conContexto_guardaLaPostulacionYDevuelveTrue() {
+        when(notificacionRepository.save(any(Notificacion.class))).thenAnswer(i -> {
+            Notificacion n = i.getArgument(0);
+            ReflectionTestUtils.setField(n, "id", 5L);
+            ReflectionTestUtils.setField(n, "codigo", UUID.randomUUID());
+            return n;
+        });
+
+        boolean registrada = service.notificar(ana, EventoNotificacion.PRUEBA, Map.of("nombres", "Ana"), 42L, null);
+
+        assertThat(registrada).isTrue();
+        ArgumentCaptor<Notificacion> guardada = ArgumentCaptor.forClass(Notificacion.class);
+        verify(notificacionRepository).save(guardada.capture());
+        assertThat(guardada.getValue().getPostulacionId()).isEqualTo(42L);
+        assertThat(guardada.getValue().getComunicadoId()).isNull();
+    }
+
+    @Test
+    void notificar_conUnDatoQueFalta_devuelveFalse() {
+        assertThat(service.notificar(ana, EventoNotificacion.PRUEBA, Map.of())).isFalse();
+    }
+
+    @Test
+    void notificarUsuarios_guardaUnAvisoPorUsuarioLigadoAlComunicadoSinCorreo() {
+        when(entityManager.getReference(Usuario.class, 7L)).thenReturn(ana);
+        when(entityManager.getReference(Usuario.class, 8L)).thenReturn(ana);
+        when(notificacionRepository.save(any(Notificacion.class))).thenAnswer(i -> {
+            Notificacion n = i.getArgument(0);
+            ReflectionTestUtils.setField(n, "id", 1L);
+            ReflectionTestUtils.setField(n, "codigo", UUID.randomUUID());
+            return n;
+        });
+
+        int guardados = service.notificarUsuarios(java.util.List.of(7L, 8L), EventoNotificacion.COMUNICADO,
+                Map.of("titulo", "Hola a todos", "contenido", "Texto del comunicado"), 9L);
+
+        assertThat(guardados).isEqualTo(2);
+        ArgumentCaptor<Notificacion> guardada = ArgumentCaptor.forClass(Notificacion.class);
+        verify(notificacionRepository, org.mockito.Mockito.times(2)).save(guardada.capture());
+        assertThat(guardada.getAllValues()).allSatisfy(n -> {
+            assertThat(n.getComunicadoId()).isEqualTo(9L);
+            assertThat(n.getTitulo()).isEqualTo("Hola a todos");
+            assertThat(n.getMensaje()).isEqualTo("Texto del comunicado");
+        });
+        ArgumentCaptor<NotificacionGuardada> evento = ArgumentCaptor.forClass(NotificacionGuardada.class);
+        verify(publicador, org.mockito.Mockito.times(2)).publishEvent(evento.capture());
+        assertThat(evento.getAllValues()).allSatisfy(e -> {
+            assertThat(e.correo()).isNull();
+            assertThat(e.evento().enviaCorreo()).isFalse();
+        });
+    }
+
+    @Test
+    void notificarUsuarios_conUnEventoConCorreo_seRechaza() {
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> service.notificarUsuarios(
+                java.util.List.of(7L), EventoNotificacion.PRUEBA, Map.of("nombres", "x"), null))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

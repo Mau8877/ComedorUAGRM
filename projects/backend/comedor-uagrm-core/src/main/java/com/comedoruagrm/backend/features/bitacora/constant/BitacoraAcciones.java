@@ -24,6 +24,11 @@ public final class BitacoraAcciones {
     // Lista priorizada (CU06): solo se anota la exportacion a PDF (saca datos personales del sistema).
     public static final String EXPORTACION_LISTA_PRIORIZADA = "EXPORTACION_LISTA_PRIORIZADA";
 
+    // CU21: el actor es el administrador; el detalle nunca lleva nombres, CI, correos ni tokens.
+    public static final String NOTIFICACION_FINALISTAS = "NOTIFICACION_FINALISTAS";
+    public static final String ENTREGA_DOCUMENTACION_REGISTRADA = "ENTREGA_DOCUMENTACION_REGISTRADA";
+    public static final String COMUNICADO_PUBLICADO = "COMUNICADO_PUBLICADO";
+
     private BitacoraAcciones() {
     }
 }

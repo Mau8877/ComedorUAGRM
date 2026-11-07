@@ -43,6 +43,25 @@ class PlantillaNotificacionTest {
         assertThat(aviso.mensaje()).contains("Hola Ana $1 \\ {nombres},");
     }
 
+    @Test
+    void finalistaNotificado_incluyePlazoLugarYDocumentos_yEnviaCorreo() {
+        NotificacionRenderizada aviso = plantilla.renderizar(EventoNotificacion.FINALISTA_NOTIFICADO, Map.of(
+                "nombres", "Ana", "plazo", "20/11/2026", "lugar", "DUBSS oficina 3", "documentos", "CI y certificado"));
+
+        assertThat(aviso.mensaje()).contains("Ana", "20/11/2026", "DUBSS oficina 3", "CI y certificado");
+        assertThat(EventoNotificacion.FINALISTA_NOTIFICADO.enviaCorreo()).isTrue();
+    }
+
+    @Test
+    void comunicado_usaElTituloYElContenidoTalCual_ySinCorreo() {
+        NotificacionRenderizada aviso = plantilla.renderizar(EventoNotificacion.COMUNICADO,
+                Map.of("titulo", "Cambio de horario", "contenido", "Desde el lunes {no se toca}"));
+
+        assertThat(aviso.titulo()).isEqualTo("Cambio de horario");
+        assertThat(aviso.mensaje()).isEqualTo("Desde el lunes {no se toca}");
+        assertThat(EventoNotificacion.COMUNICADO.enviaCorreo()).isFalse();
+    }
+
     @ParameterizedTest
     @EnumSource(EventoNotificacion.class)
     void todoEvento_tieneTituloQueCabeEnLaColumnaYMensajeNoVacio(EventoNotificacion evento) {

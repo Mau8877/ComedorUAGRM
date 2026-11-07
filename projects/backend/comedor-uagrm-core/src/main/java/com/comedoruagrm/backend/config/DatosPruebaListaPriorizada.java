@@ -108,6 +108,37 @@ public class DatosPruebaListaPriorizada implements CommandLineRunner {
         int pocas = Math.min(10, postulantes.size());
         crearPostulaciones(convocatoriaAbierta, postulantes, pocas, base.plus(200, ChronoUnit.DAYS),
                 modeloViejo, modeloNuevo, azar, false);
+        crearFinalistas(convocatoriaGrande);
+    }
+
+    /**
+     * Los 10 primeros puestos de la lista priorizada de la convocatoria pasan a ser finalistas (CU21,
+     * mientras el CU05 no los elija de verdad). Tres ya fueron notificados (con su plazo) y de ellos uno ya
+     * entrego su documentacion; los otros siete estan sin notificar. No cambia el estado de ninguna postulacion.
+     */
+    private void crearFinalistas(long convocatoria) {
+        List<long[]> primeros = new ArrayList<>();
+        jdbc.query("""
+                SELECT po.id, ROW_NUMBER() OVER (ORDER BY pu.puntaje_total DESC, po.fecha_envio ASC NULLS LAST,
+                                                 po.id ASC) AS posicion
+                FROM postulacion po
+                JOIN puntaje_postulacion pu ON pu.postulacion_id = po.id AND pu.vigente AND pu.eliminado_en IS NULL
+                WHERE po.convocatoria_id = ? AND po.estado = 'calificada' AND po.eliminado_en IS NULL
+                ORDER BY posicion LIMIT 10
+                """, rs -> {
+                    primeros.add(new long[] {rs.getLong("id"), rs.getLong("posicion")});
+                }, convocatoria);
+        for (long[] fila : primeros) {
+            boolean notificado = fila[1] <= 3;
+            boolean recibida = fila[1] == 1;
+            jdbc.update("""
+                    INSERT INTO finalista (postulacion_id, posicion, plazo_entrega, notificado_en,
+                                           documentacion_recibida_en)
+                    VALUES (?, ?, CASE WHEN ? THEN current_date + 7 END,
+                            CASE WHEN ? THEN now() - interval '2 days' END,
+                            CASE WHEN ? THEN now() - interval '1 day' END)
+                    """, fila[0], (int) fila[1], notificado, notificado, recibida);
+        }
     }
 
     private long insertarGestion(String etiqueta, String desde, String hasta) {

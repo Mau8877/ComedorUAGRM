@@ -27,8 +27,9 @@ import lombok.Setter;
  * Aviso de la bandeja de un usuario. Una fila por aviso, se envie por la via que se envie.
  *
  * * `leida` y `enviadaEn` tienen setter: los cambia la bandeja y el despacho.
- * ! Sin comunicado_id ni postulacion_id todavia: las tablas a las que apuntan no existen
- * ! (ver la migracion V20261106100000).
+ * * `postulacionId` y `comunicadoId` son el contexto opcional del aviso (CU21): el aviso a un
+ * * finalista lleva su postulacion y el comunicado publicado lleva el suyo. Son ids simples y no
+ * * relaciones: este modulo no depende de las entidades de postulaciones ni de comunicados.
  */
 @Getter
 @Entity
@@ -60,10 +61,23 @@ public class Notificacion extends BaseModel {
     @Column(name = "enviada_en")
     private Instant enviadaEn;
 
+    @Column(name = "postulacion_id")
+    private Long postulacionId;
+
+    @Column(name = "comunicado_id")
+    private Long comunicadoId;
+
     public Notificacion(Usuario usuario, String titulo, String mensaje, TipoNotificacion tipo) {
+        this(usuario, titulo, mensaje, tipo, null, null);
+    }
+
+    public Notificacion(Usuario usuario, String titulo, String mensaje, TipoNotificacion tipo,
+            Long postulacionId, Long comunicadoId) {
         this.usuario = usuario;
         this.titulo = titulo;
         this.mensaje = mensaje;
         this.tipo = tipo;
+        this.postulacionId = postulacionId;
+        this.comunicadoId = comunicadoId;
     }
 }

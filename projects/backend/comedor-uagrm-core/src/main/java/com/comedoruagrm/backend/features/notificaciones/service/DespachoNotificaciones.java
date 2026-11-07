@@ -45,7 +45,8 @@ public class DespachoNotificaciones {
     public void despachar(NotificacionGuardada aviso) {
         try {
             int telefonos = enviarPush(aviso);
-            boolean correo = correoService.enviar(aviso.correo(), aviso.titulo(), aviso.mensaje());
+            boolean correo = aviso.evento().enviaCorreo()
+                    && correoService.enviar(aviso.correo(), aviso.titulo(), aviso.mensaje());
             if (telefonos > 0 || correo) {
                 notificacionService.marcarEnviada(aviso.notificacionId());
             }

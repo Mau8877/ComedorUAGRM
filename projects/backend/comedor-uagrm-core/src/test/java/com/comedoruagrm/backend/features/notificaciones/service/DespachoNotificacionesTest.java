@@ -64,6 +64,20 @@ class DespachoNotificacionesTest {
     }
 
     @Test
+    void despachar_deUnEventoSinCorreo_enviaSoloElPushYNuncaElCorreo() {
+        NotificacionGuardada comunicado = new NotificacionGuardada(100L, UUID.randomUUID(), 7L, null, "Titulo",
+                "Mensaje", EventoNotificacion.COMUNICADO);
+        when(dispositivoService.tokensDe(7L)).thenReturn(List.of("t1"));
+        when(canalPush.enviar(anyList(), any(MensajePush.class)))
+                .thenReturn(new ResultadoPush(1, List.of(), List.of()));
+
+        despacho().despachar(comunicado);
+
+        verify(correoService, never()).enviar(any(), any(), any());
+        verify(notificacionService).marcarEnviada(100L);
+    }
+
+    @Test
     void despachar_sinTelefonos_enviaSoloElCorreo() {
         when(dispositivoService.tokensDe(7L)).thenReturn(List.of());
         when(correoService.enviar("ana@uagrm.edu.bo", "Titulo", "Mensaje")).thenReturn(true);

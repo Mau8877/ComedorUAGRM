@@ -441,6 +441,9 @@ class ListaPriorizadaIntegrationTest {
     private void borrarTodo() {
         jdbc.update("DELETE FROM bitacora");
         jdbc.update("DELETE FROM sesion");
+        jdbc.update("DELETE FROM notificacion");
+        jdbc.update("DELETE FROM finalista");
+        jdbc.update("DELETE FROM comunicado");
         jdbc.update("DELETE FROM puntaje_postulacion");
         jdbc.update("DELETE FROM postulacion");
         jdbc.update("DELETE FROM convocatoria");
