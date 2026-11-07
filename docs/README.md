@@ -126,8 +126,16 @@ llama `comedor-uagrm-core` y es el que usan nginx y Prometheus.
   postulaciones y puntajes y 10 finalistas; `DatosPruebaListaPriorizada`) y,
   para el CU21, avisos de ejemplo, un comunicado `[PRUEBA]` y la cuenta de
   postulante finalista `postulante.finalista@prueba.local` / `123123123`
-  (`DatosPruebaFinalistas`). Se apagan con `SEED_ADMIN_ENABLED=false`,
-  `SEED_PRIORIZACION_ENABLED=false` y `SEED_FINALISTAS_ENABLED=false`;
+  (`DatosPruebaFinalistas`). Para el CU07 deja un expediente de ejemplo en cada
+  uno de los 10 finalistas (`DatosPruebaExpedientes`): respuestas
+  socioeconómicas, documentos (con un PDF pequeño subido a MinIO; si MinIO no
+  está disponible solo avisa con un `WARN` y las filas quedan igual) y
+  auditorías variadas: el 1 validado, el 2 observado (sin certificado de
+  notas), el 3 con entrega y sin auditar, el 4 observado y luego validado, el
+  5 no válido y del 6 al 10 con la entrega pendiente. Se ven en
+  `GET /api/v1/finalistas/{codigo}/expediente`. Se apagan con
+  `SEED_ADMIN_ENABLED=false`, `SEED_PRIORIZACION_ENABLED=false`,
+  `SEED_FINALISTAS_ENABLED=false` y `SEED_EXPEDIENTES_ENABLED=false`;
   `SEED_PRIORIZACION_POSTULACIONES=20000` sirve para medir el rendimiento.
   **Nunca corren fuera del perfil `dev`.**
 - **Volúmenes**:
@@ -215,6 +223,16 @@ llama `comedor-uagrm-core` y es el que usan nginx y Prometheus.
      bucket de **lectura pública** (para servir imágenes/archivos sin
      necesitar autenticación en el `GET`, típico para avatares/fotos de un
      comedor universitario). La escritura sigue requiriendo credenciales.
+- **Documentos del expediente (CU07)**: el backend los abre con una URL
+  temporal de **5 minutos**, firmada (`AlmacenamientoService`). La firma usa
+  el host `MINIO_PUBLIC_URL` (por defecto `http://localhost:9000`), no
+  `MINIO_URL`: dentro de Docker `MINIO_URL` es
+  `http://comedor-uagrm-minio:9000` y el navegador no lo ve. Si el portal se
+  sirve desde otro dominio, `MINIO_PUBLIC_URL` es la dirección pública de
+  MinIO. **Ojo:** mientras el bucket siga con lectura anónima
+  (`mc anonymous set download`), quien conozca la ruta de un objeto lo puede
+  abrir sin la firma; la URL temporal solo es una garantía real cuando el
+  bucket deja de ser público (pendiente de decidir antes de producción).
 
 ### 2.7 `prometheus` — recolección de métricas
 

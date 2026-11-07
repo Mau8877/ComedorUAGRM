@@ -97,6 +97,16 @@ docs/errors/
 - [`ERR_COM_01`](comunicados/ERRORES_COMUNICADOS.md#err_com_01) — Destinatarios no soportados o sin destinatarios (400)
 - [`ERR_COM_02`](comunicados/ERRORES_COMUNICADOS.md#err_com_02) — `FINALISTAS` sin convocatoria (400)
 
+### Expedientes (`EXP`)
+
+- [`ERR_EXP_01`](expedientes/ERRORES_EXPEDIENTES.md#err_exp_01) — La entrega de la documentación física no está registrada (409)
+- [`ERR_EXP_02`](expedientes/ERRORES_EXPEDIENTES.md#err_exp_02) — La postulación ya no está «calificada» (409)
+- [`ERR_EXP_03`](expedientes/ERRORES_EXPEDIENTES.md#err_exp_03) — Observaciones obligatorias si es «Observado» o «No válido» (400)
+- [`ERR_EXP_04`](expedientes/ERRORES_EXPEDIENTES.md#err_exp_04) — Puntaje académico obligatorio en «Validado» o fuera de 0–30 (400)
+- [`ERR_EXP_05`](expedientes/ERRORES_EXPEDIENTES.md#err_exp_05) — El documento no existe o no es del finalista (404)
+- [`ERR_EXP_06`](expedientes/ERRORES_EXPEDIENTES.md#err_exp_06) — La clave de idempotencia ya se usó para otra auditoría (409)
+- [`ERR_EXP_07`](expedientes/ERRORES_EXPEDIENTES.md#err_exp_07) — La clave de idempotencia no es un UUID (400)
+
 ### Notificaciones (`NOT`)
 
 - [`ERR_NOT_01`](notificaciones/ERRORES_NOTIFICACIONES.md#err_not_01) — El aviso no existe o no es del usuario (404)

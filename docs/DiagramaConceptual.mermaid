@@ -256,7 +256,7 @@ erDiagram
     uuid codigo_puntaje_postulacion UK
     bigint modelo_id FK
     bigint postulacion_id FK
-    numeric puntaje_total "(5,2)"
+    numeric puntaje_total "(5,2) CHECK 0-70, la IA califica hasta 70"
     jsonb detalle
     timestamptz fecha_calculo
     boolean vigente
@@ -299,8 +299,9 @@ erDiagram
     bigint finalista_id FK
     bigint auditor_id FK
     timestamptz fecha_auditoria
-    varchar resultado
-    text observaciones
+    resultado_auditoria resultado
+    varchar observaciones "(500)"
+    numeric puntaje_academico "(5,2) CHECK 0-30, lo escribe el auditor"
     timestamptz creado_en
     timestamptz actualizado_en
     timestamptz eliminado_en
