@@ -127,6 +127,8 @@ services:
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
       - SPRING_DATA_REDIS_HOST=comedor-uagrm-redis
       - MINIO_URL=http://comedor-uagrm-minio:9000
+      # Direccion de MinIO que ve el navegador (URL temporales de los documentos, CU07)
+      - MINIO_PUBLIC_URL=${MINIO_PUBLIC_URL:-http://localhost:9000}
       # Secreto con el que el backend firma los JWT (HS256, mínimo 32 caracteres)
       - JWT_SECRET=${JWT_SECRET}
       # Cookies de sesión del cliente web: true solo detrás de HTTPS
