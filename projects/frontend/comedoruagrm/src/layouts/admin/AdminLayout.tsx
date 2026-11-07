@@ -1,4 +1,5 @@
 import { AppShell } from '@/components/layout'
+import { useNotificaciones } from '@/features/notificaciones'
 
 import { adminNavItems } from './adminNavItems'
 import type { AdminLayoutProps } from './adminTypes'
@@ -13,6 +14,8 @@ export function AdminLayout({
   activeHref,
   children,
 }: AdminLayoutProps) {
+  // La campanita usa la bandeja real salvo que quien arma el layout pase su propio controlador (pantallas de prueba).
+  const bandeja = useNotificaciones({ enabled: !notifications })
   return (
     <AppShell
       appName="ComedorU Admin"
@@ -20,7 +23,7 @@ export function AdminLayout({
       navItems={adminNavItems}
       activeHref={activeHref}
       user={user}
-      notifications={notifications}
+      notifications={notifications ?? bandeja}
       onCerrarSesion={onCerrarSesion}
       onPerfil={onPerfil}
       onCambiarContrasena={onCambiarContrasena}

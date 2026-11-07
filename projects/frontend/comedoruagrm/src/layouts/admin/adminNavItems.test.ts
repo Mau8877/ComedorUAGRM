@@ -17,4 +17,8 @@ describe('adminNavItems', () => {
     expect(etiquetas).not.toContain('Usuarios')
     expect(etiquetas).toEqual(expect.arrayContaining(['Dashboard', 'Menús', 'Pedidos']))
   })
+
+  it('tiene la entrada «Finalistas» que lleva a su pantalla (CU21)', () => {
+    expect(adminNavItems).toContainEqual(expect.objectContaining({ label: 'Finalistas', href: '/finalistas' }))
+  })
 })
