@@ -16,6 +16,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
 import com.comedoruagrm.backend.features.finalistas.dto.FinalistaResponse;
+import com.comedoruagrm.backend.support.ExpedienteFixtures;
 import com.comedoruagrm.backend.support.PostgresTestDatabase;
 
 /**
@@ -147,5 +148,61 @@ class FinalistaConsultaRepositoryTest {
 
         List<FinalistaResponse> segunda = consulta.buscar(codigo, null, 1, 1);
         assertThat(segunda).extracting(FinalistaResponse::posicion).containsExactly(2);
+    }
+
+    // ---- Auditoria del expediente (CU07) ----
+
+    private FinalistaResponse fila(UUID convocatoria, int posicion) {
+        return consulta.buscar(convocatoria, null, 50, 0).stream()
+                .filter(f -> f.posicion() == posicion).findFirst().orElseThrow();
+    }
+
+    private long idFinalista(long postulacion) {
+        return jdbc.queryForObject("SELECT id FROM finalista WHERE postulacion_id = ?", Long.class, postulacion);
+    }
+
+    @Test
+    void auditoria_sinAuditoriaEsSinAuditar_yElTotalEsNulo() {
+        long conv = convocatoria();
+        long postulacion = finalista(conv, 1, "9100041", "Ana", "Uno");
+        new ExpedienteFixtures(jdbc).puntajeIa(postulacion, "55.00", "{}");
+
+        FinalistaResponse f = fila(codigoConvocatoria(conv), 1);
+
+        assertThat(f.resultadoAuditoria()).isEqualTo("SIN_AUDITAR");
+        assertThat(f.puntaje()).isEqualByComparingTo("55.00");
+        assertThat(f.puntajeTotal()).isNull();
+    }
+
+    @Test
+    void auditoria_tomaLaUltimaYSumaIaMasAcademico() {
+        ExpedienteFixtures fx = new ExpedienteFixtures(jdbc);
+        long conv = convocatoria();
+        long postulacion = finalista(conv, 1, "9100051", "Ana", "Uno");
+        fx.puntajeIa(postulacion, "55.00", "{}");
+        long finalista = idFinalista(postulacion);
+        long auditor = fx.usuario("9100059", "ADMINISTRADOR_DUBSS");
+        fx.auditoria(finalista, auditor, "VALIDADO", null, "10.00", "2026-11-05T10:00:00Z");
+        fx.auditoria(finalista, auditor, "VALIDADO", null, "25.50", "2026-11-06T10:00:00Z");
+
+        FinalistaResponse f = fila(codigoConvocatoria(conv), 1);
+
+        assertThat(f.resultadoAuditoria()).isEqualTo("VALIDADO");
+        assertThat(f.puntajeTotal()).isEqualByComparingTo("80.50");
+    }
+
+    @Test
+    void auditoria_ultimaObservadaSinPuntaje_tieneResultadoPeroNoTotal() {
+        ExpedienteFixtures fx = new ExpedienteFixtures(jdbc);
+        long conv = convocatoria();
+        long postulacion = finalista(conv, 1, "9100061", "Ana", "Uno");
+        fx.puntajeIa(postulacion, "55.00", "{}");
+        long auditor = fx.usuario("9100069", "ADMINISTRADOR_DUBSS");
+        fx.auditoria(idFinalista(postulacion), auditor, "OBSERVADO", "Falta carnet", null, "2026-11-06T10:00:00Z");
+
+        FinalistaResponse f = fila(codigoConvocatoria(conv), 1);
+
+        assertThat(f.resultadoAuditoria()).isEqualTo("OBSERVADO");
+        assertThat(f.puntajeTotal()).isNull();
     }
 }

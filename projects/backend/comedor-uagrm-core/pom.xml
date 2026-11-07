@@ -35,6 +35,9 @@
 		<!-- JasperReports (PDF de la lista priorizada, CU06). Desde la 7.x el exportador a PDF
 		     (jasperreports-pdf) y el compilador (jasperreports-jdt) son artefactos aparte. -->
 		<jasperreports.version>7.1.0</jasperreports.version>
+		<!-- Cliente de MinIO (archivos del expediente, CU07). Se fija en la ultima 8.x que publica la
+		     documentacion oficial de MinIO: la 9.0 refactoriza todo el cliente y no se ha probado aca. -->
+		<minio.version>8.5.17</minio.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -89,6 +92,11 @@
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 			<version>2.8.5</version>
+		</dependency>
+		<dependency>
+			<groupId>io.minio</groupId>
+			<artifactId>minio</artifactId>
+			<version>${minio.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.bucket4j</groupId>

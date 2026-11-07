@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 /**
  * Consultas de solo lectura de los finalistas (CU21), con el estado de su aviso y de su entrega.
  *
+ * * `resultadoAuditoria` y `puntajeTotal` salen de la ULTIMA auditoria del finalista (CU07).
  * * El estado de la notificacion se deriva del ULTIMO aviso de la postulacion que no es un comunicado:
  * * sin aviso es SIN_ENVIAR, con `enviada_en` es ENVIADA y sin el es FALLIDA.
  * * Se usa JDBC (como la lista priorizada del CU06) porque cruza finalista, postulacion, usuario,
@@ -37,7 +38,10 @@ public class FinalistaConsultaRepository {
 
     private static final String SELECT = """
             SELECT f.codigo_finalista AS codigo, f.posicion, u.nombres, u.apellidos, u.ci,
-                   pu.puntaje_total AS puntaje, f.plazo_entrega, f.notificado_en, f.documentacion_recibida_en,
+                   pu.puntaje_total AS puntaje, COALESCE(au.resultado, 'SIN_AUDITAR') AS resultado_auditoria,
+                   CASE WHEN pu.puntaje_total IS NULL OR au.puntaje_academico IS NULL THEN NULL
+                        ELSE pu.puntaje_total + au.puntaje_academico END AS puntaje_total,
+                   f.plazo_entrega, f.notificado_en, f.documentacion_recibida_en,
                    CASE WHEN n.id IS NULL THEN 'SIN_ENVIAR'
                         WHEN n.enviada_en IS NOT NULL THEN 'ENVIADA'
                         ELSE 'FALLIDA' END AS estado_notificacion
@@ -51,6 +55,11 @@ public class FinalistaConsultaRepository {
                 SELECT x.id, x.enviada_en FROM notificacion x
                 WHERE x.postulacion_id = po.id AND x.comunicado_id IS NULL AND x.eliminado_en IS NULL
                 ORDER BY x.creado_en DESC, x.id DESC LIMIT 1) n ON true
+            LEFT JOIN LATERAL (
+                SELECT CAST(a.resultado AS text) AS resultado, a.puntaje_academico
+                FROM auditoria_expediente a
+                WHERE a.finalista_id = f.id AND a.eliminado_en IS NULL
+                ORDER BY a.fecha_auditoria DESC, a.id DESC LIMIT 1) au ON true
             WHERE f.eliminado_en IS NULL
             """;
 
@@ -130,6 +139,8 @@ public class FinalistaConsultaRepository {
                 rs.getString("estado_notificacion"),
                 rs.getObject("plazo_entrega", LocalDate.class),
                 notificadoEn,
-                recibida == null ? null : recibida.toInstant().atZone(ZONA).toLocalDate());
+                recibida == null ? null : recibida.toInstant().atZone(ZONA).toLocalDate(),
+                rs.getString("resultado_auditoria"),
+                rs.getBigDecimal("puntaje_total"));
     }
 }

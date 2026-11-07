@@ -29,7 +29,26 @@ public enum EventoNotificacion {
             true),
 
     /** Comunicado de la DUBSS (CU21). Solo bandeja y push: sin correo, para no mandar correo masivo. */
-    COMUNICADO(TipoNotificacion.INFO, "{titulo}", "{contenido}", false);
+    COMUNICADO(TipoNotificacion.INFO, "{titulo}", "{contenido}", false),
+
+    /** Aviso al postulante de que su expediente fue validado (CU07). Solo bandeja y push. */
+    AUDITORIA_VALIDADA(TipoNotificacion.SUCCESS,
+            "Expediente validado - Beca Comedor",
+            "Hola {nombres}, la DUBSS validó tu expediente. Quedas habilitado para la decisión de "
+                    + "adjudicación de la Beca Comedor.",
+            false),
+
+    /** Aviso al postulante de que su expediente fue observado (CU07); las observaciones dicen que corregir. */
+    AUDITORIA_OBSERVADA(TipoNotificacion.WARNING,
+            "Tu expediente fue observado - Beca Comedor",
+            "Hola {nombres}, la DUBSS observó tu expediente. Observaciones: {observaciones}",
+            false),
+
+    /** Aviso al postulante de que su expediente no fue valido (CU07); las observaciones dicen el motivo. */
+    AUDITORIA_NO_VALIDA(TipoNotificacion.ERROR,
+            "Tu expediente no fue válido - Beca Comedor",
+            "Hola {nombres}, la DUBSS no validó tu expediente. Motivo: {observaciones}",
+            false);
 
     private final TipoNotificacion tipo;
     private final String titulo;

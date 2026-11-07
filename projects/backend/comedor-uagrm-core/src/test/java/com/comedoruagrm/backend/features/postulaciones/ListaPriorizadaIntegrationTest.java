@@ -101,20 +101,21 @@ class ListaPriorizadaIntegrationTest {
         convocatoriaVacia = jdbc.queryForObject("SELECT codigo_convocatoria FROM convocatoria WHERE id = ?",
                 UUID.class, vacia);
 
-        // Orden esperado: Ana 95.0 (1), Bruno 90.0 (2), Carla 90.0 (3, empate con Bruno pero enviada
-        // despues), Diego 85.0 (4, con un puntaje anterior de 99.0 no vigente), Elena 80.0 (5).
-        postulacion(conv, "Ana", "Rojas", "1000001", carreras.get(0), "calificada", "2026-08-01T10:00:00Z", 95.0);
-        postulacion(conv, "Bruno", "Mamani", "1000002", carreras.get(1), "calificada", "2026-08-01T10:01:00Z", 90.0);
-        postulacion(conv, "Carla", "Peña", "1000003", carreras.get(0), "calificada", "2026-08-01T10:02:00Z", 90.0);
+        // Orden esperado: Ana 66.5 (1), Bruno 63.0 (2), Carla 63.0 (3, empate con Bruno pero enviada
+        // despues), Diego 59.5 (4, con un puntaje anterior de 69.3 no vigente), Elena 56.0 (5).
+        // La IA califica de 0 a 70 (CU07): son los puntajes de antes por 0.7.
+        postulacion(conv, "Ana", "Rojas", "1000001", carreras.get(0), "calificada", "2026-08-01T10:00:00Z", 66.5);
+        postulacion(conv, "Bruno", "Mamani", "1000002", carreras.get(1), "calificada", "2026-08-01T10:01:00Z", 63.0);
+        postulacion(conv, "Carla", "Peña", "1000003", carreras.get(0), "calificada", "2026-08-01T10:02:00Z", 63.0);
         long diego = postulacion(conv, "Diego", "Suárez", "1000004", carreras.get(0), "calificada",
-                "2026-08-01T10:03:00Z", 85.0);
+                "2026-08-01T10:03:00Z", 59.5);
         jdbc.update("""
                 INSERT INTO puntaje_postulacion (modelo_id, postulacion_id, puntaje_total, fecha_calculo, vigente)
-                VALUES (?, ?, 99.0, now() - interval '30 days', false)""", modelo, diego);
-        postulacion(conv, "Elena", "Flores", "1000005", carreras.get(0), "calificada", "2026-08-01T10:04:00Z", 80.0);
+                VALUES (?, ?, 69.3, now() - interval '30 days', false)""", modelo, diego);
+        postulacion(conv, "Elena", "Flores", "1000005", carreras.get(0), "calificada", "2026-08-01T10:04:00Z", 56.0);
         // Fuera de la lista: pendiente (sin puntaje) y devuelta (con puntaje alto).
         postulacion(conv, "Fabio", "Vaca", "1000006", carreras.get(0), "pendiente", "2026-08-01T10:05:00Z", null);
-        postulacion(conv, "Gina", "Egüez", "1000007", carreras.get(0), "devuelta", "2026-08-01T10:06:00Z", 100.0);
+        postulacion(conv, "Gina", "Egüez", "1000007", carreras.get(0), "devuelta", "2026-08-01T10:06:00Z", 70.0);
 
         this.admin = bearer(login("admin@dubss.test", "secreta1"));
     }
@@ -132,8 +133,8 @@ class ListaPriorizadaIntegrationTest {
 
         assertThat(nombres(datos)).containsExactly("Ana", "Bruno", "Carla", "Diego", "Elena");
         assertThat(posiciones(datos)).containsExactly(1L, 2L, 3L, 4L, 5L);
-        // Diego aparece una sola vez y con su puntaje vigente (85), no con el anterior (99).
-        assertThat(datos.get(3).get("puntaje").decimalValue()).isEqualByComparingTo("85.00");
+        // Diego aparece una sola vez y con su puntaje vigente (59.5), no con el anterior (69.3).
+        assertThat(datos.get(3).get("puntaje").decimalValue()).isEqualByComparingTo("59.50");
         assertThat(datos.get(0).get("carrera").get("codigo").asText()).isEqualTo(carreraA.toString());
         assertThat(datos.get(0).has("passwordHash")).isFalse();
     }
@@ -174,7 +175,7 @@ class ListaPriorizadaIntegrationTest {
         jdbc.update("UPDATE puntaje_postulacion SET vigente = false WHERE postulacion_id = ?", elena);
         jdbc.update("""
                 INSERT INTO puntaje_postulacion (modelo_id, postulacion_id, puntaje_total, fecha_calculo, vigente)
-                VALUES (?, ?, 97.5, now(), true)""", modelo, elena);
+                VALUES (?, ?, 68.25, now(), true)""", modelo, elena);
 
         JsonNode datos = listar("filter[convocatoriaId]=" + convocatoria).get("data");
 

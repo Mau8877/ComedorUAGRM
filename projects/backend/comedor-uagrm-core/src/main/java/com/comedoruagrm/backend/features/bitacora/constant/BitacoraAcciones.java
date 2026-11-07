@@ -29,6 +29,10 @@ public final class BitacoraAcciones {
     public static final String ENTREGA_DOCUMENTACION_REGISTRADA = "ENTREGA_DOCUMENTACION_REGISTRADA";
     public static final String COMUNICADO_PUBLICADO = "COMUNICADO_PUBLICADO";
 
+    // CU07: el actor es el auditor; el detalle lleva codigos, resultado y puntaje academico, nunca observaciones,
+    // nombres ni CI.
+    public static final String AUDITORIA_EXPEDIENTE = "AUDITORIA_EXPEDIENTE";
+
     private BitacoraAcciones() {
     }
 }

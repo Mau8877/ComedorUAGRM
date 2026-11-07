@@ -125,10 +125,10 @@ class FinalistasComunicadosIntegrationTest {
                 UUID.class, conv);
 
         // Ana y Beto tienen telefono registrado; Carla NO (sin push, solo correo y bandeja).
-        long ana = postulante(conv, "Ana", "Rojas", "1000001", "ana@uagrm.test", 95.0, "calificada");
-        long beto = postulante(conv, "Beto", "Mamani", "1000002", "beto@uagrm.test", 90.0, "calificada");
-        long carla = postulante(conv, "Carla", "Peña", "1000003", "carla@uagrm.test", 85.0, "calificada");
-        postulante(conv, "Diego", "Suárez", "1000004", "diego@uagrm.test", 80.0, "calificada");
+        long ana = postulante(conv, "Ana", "Rojas", "1000001", "ana@uagrm.test", 66.5, "calificada");
+        long beto = postulante(conv, "Beto", "Mamani", "1000002", "beto@uagrm.test", 63.0, "calificada");
+        long carla = postulante(conv, "Carla", "Peña", "1000003", "carla@uagrm.test", 59.5, "calificada");
+        postulante(conv, "Diego", "Suárez", "1000004", "diego@uagrm.test", 56.0, "calificada");
         postulante(conv, "Elena", "Flores", "1000005", "elena@uagrm.test", null, "pendiente");
         telefono("ana@uagrm.test", "token-ana");
         telefono("beto@uagrm.test", "token-beto");
@@ -152,7 +152,7 @@ class FinalistasComunicadosIntegrationTest {
 
         assertThat(datos.findValuesAsText("nombres")).containsExactly("Ana", "Beto", "Carla");
         assertThat(datos.findValuesAsText("estadoNotificacion")).containsOnly("SIN_ENVIAR");
-        assertThat(datos.get(0).get("puntaje").decimalValue()).isEqualByComparingTo("95.00");
+        assertThat(datos.get(0).get("puntaje").decimalValue()).isEqualByComparingTo("66.50");
         assertThat(datos.get(0).get("documentacionRecibidaEn").isNull()).isTrue();
         assertThat(datos.get(0).has("id")).isFalse();
     }

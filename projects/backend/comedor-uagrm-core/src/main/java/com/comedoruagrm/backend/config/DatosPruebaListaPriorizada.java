@@ -244,8 +244,8 @@ public class DatosPruebaListaPriorizada implements CommandLineRunner {
         List<Object[]> puntajes = new ArrayList<>();
         for (int i = 0; i < conPuntaje.size(); i++) {
             long postulacion = conPuntaje.get(i)[0];
-            // Un decimal y saltos de 0.5: asi hay muchos empates a proposito.
-            double valor = Math.round((40 + azar.nextDouble() * 55) * 2) / 2.0;
+            // Un decimal y saltos de 0.5: asi hay muchos empates a proposito. La IA califica de 0 a 70 (CU07).
+            double valor = Math.round((28 + azar.nextDouble() * 39) * 2) / 2.0;
             if (i % 5 == 0) {
                 // Un puntaje anterior (no vigente) y el nuevo, de otro modelo: el reproceso.
                 puntajes.add(new Object[] {modeloViejo, postulacion, Math.max(0, valor - 7.5),
