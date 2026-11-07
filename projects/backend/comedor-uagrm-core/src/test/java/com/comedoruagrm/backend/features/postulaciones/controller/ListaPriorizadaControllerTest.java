@@ -86,7 +86,7 @@ class ListaPriorizadaControllerTest {
         PostulacionPriorizadaResponse fila = new PostulacionPriorizadaResponse(UUID.randomUUID(), 1, "Ana", "Rojas",
                 "9802041", new CarreraPriorizadaResponse(UUID.randomUUID(), "Ing. Sistemas"),
                 new BigDecimal("95.0"), Instant.parse("2026-09-01T10:00:00Z"), "calificada");
-        when(listaService.listar(eq(convocatoria), any(), any(), eq(1), eq(20), any()))
+        when(listaService.listarPriorizados(eq(convocatoria), any(), any(), eq(1), eq(20), any()))
                 .thenReturn(new PaginaListaPriorizada(List.of(fila), new PageMeta(1, 20, 1, 1)));
 
         mockMvc.perform(get(RUTA + "?filter[convocatoriaId]=" + convocatoria).with(sesion()))
@@ -114,7 +114,7 @@ class ListaPriorizadaControllerTest {
 
     @Test
     void listar_conUnaConvocatoriaInexistente_da404ErrPri01() throws Exception {
-        when(listaService.listar(eq(convocatoria), any(), any(), eq(1), eq(20), any()))
+        when(listaService.listarPriorizados(eq(convocatoria), any(), any(), eq(1), eq(20), any()))
                 .thenThrow(new NotFoundException("ERR_PRI_01", "La convocatoria no existe"));
 
         mockMvc.perform(get(RUTA + "?filter[convocatoriaId]=" + convocatoria).with(sesion()))

@@ -63,7 +63,7 @@ public class ListaPriorizadaController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<PostulacionPriorizadaResponse>>> listar(
+    public ResponseEntity<ApiResponse<List<PostulacionPriorizadaResponse>>> listarPriorizados(
             @RequestParam(name = "filter[convocatoriaId]") UUID convocatoriaId,
             @RequestParam(name = "filter[carreraId]", required = false) UUID carreraId,
             @RequestParam(required = false) String search,
@@ -72,8 +72,8 @@ public class ListaPriorizadaController {
             @RequestParam(required = false) String sort,
             HttpServletRequest request) {
         validarFiltros(request);
-        PaginaListaPriorizada pagina = listaPriorizadaService.listar(
-                convocatoriaId, carreraId, search, page, pageSize, sort);
+        PaginaListaPriorizada pagina = listaPriorizadaService.listarPriorizados(
+                convocatoriaId, search, carreraId, page, pageSize, sort);
         return ResponseEntity.ok(
                 ApiResponse.successList(pagina.datos(), "Lista priorizada obtenida correctamente", pagina.meta()));
     }

@@ -52,7 +52,7 @@ class ListaPriorizadaServiceTest {
         when(repository.contar(convocatoria, null, null)).thenReturn(45L);
         when(repository.buscar(convocatoria, null, null, 20, 20L)).thenReturn(List.of(fila(21), fila(22)));
 
-        PaginaListaPriorizada pagina = service.listar(convocatoria, null, null, 2, 20, null);
+        PaginaListaPriorizada pagina = service.listarPriorizados(convocatoria, null, null, 2, 20, null);
 
         assertThat(pagina.datos()).extracting(PostulacionPriorizadaResponse::posicion).containsExactly(21L, 22L);
         assertThat(pagina.meta().page()).isEqualTo(2);
@@ -66,7 +66,7 @@ class ListaPriorizadaServiceTest {
         existeLaConvocatoria();
         when(repository.contar(convocatoria, null, null)).thenReturn(5L);
 
-        PaginaListaPriorizada pagina = service.listar(convocatoria, null, null, 3, 20, null);
+        PaginaListaPriorizada pagina = service.listarPriorizados(convocatoria, null, null, 3, 20, null);
 
         assertThat(pagina.datos()).isEmpty();
         verify(repository, never()).buscar(any(), any(), any(), anyInt(), anyLong());
@@ -77,7 +77,7 @@ class ListaPriorizadaServiceTest {
         existeLaConvocatoria();
         when(repository.contar(convocatoria, null, null)).thenReturn(0L);
 
-        PaginaListaPriorizada pagina = service.listar(convocatoria, null, null, 1, 20, null);
+        PaginaListaPriorizada pagina = service.listarPriorizados(convocatoria, null, null, 1, 20, null);
 
         assertThat(pagina.datos()).isEmpty();
         assertThat(pagina.meta().totalItems()).isZero();
@@ -90,7 +90,7 @@ class ListaPriorizadaServiceTest {
         UUID carrera = UUID.randomUUID();
         when(repository.contar(eq(convocatoria), eq(carrera), any())).thenReturn(1L);
 
-        service.listar(convocatoria, carrera, "  Ana_% ", 1, 20, null);
+        service.listarPriorizados(convocatoria, "  Ana_% ", carrera, 1, 20, null);
 
         verify(repository).contar(convocatoria, carrera, "%ana\\_\\%%");
         verify(repository).buscar(convocatoria, carrera, "%ana\\_\\%%", 20, 0L);
@@ -98,16 +98,16 @@ class ListaPriorizadaServiceTest {
 
     @Test
     void listar_conUnSort_da400ErrPri02() {
-        assertThatThrownBy(() -> service.listar(convocatoria, null, null, 1, 20, "-puntaje"))
+        assertThatThrownBy(() -> service.listarPriorizados(convocatoria, null, null, 1, 20, "-puntaje"))
                 .isInstanceOf(ValidationException.class)
                 .extracting("errorCode").isEqualTo("ERR_PRI_02");
     }
 
     @Test
     void listar_conPaginaOTamanoInvalidos_da400ErrSys01() {
-        assertThatThrownBy(() -> service.listar(convocatoria, null, null, 0, 20, null))
+        assertThatThrownBy(() -> service.listarPriorizados(convocatoria, null, null, 0, 20, null))
                 .isInstanceOf(ValidationException.class).extracting("errorCode").isEqualTo("ERR_SYS_01");
-        assertThatThrownBy(() -> service.listar(convocatoria, null, null, 1, 0, null))
+        assertThatThrownBy(() -> service.listarPriorizados(convocatoria, null, null, 1, 0, null))
                 .isInstanceOf(ValidationException.class).extracting("errorCode").isEqualTo("ERR_SYS_01");
     }
 
@@ -115,7 +115,7 @@ class ListaPriorizadaServiceTest {
     void listar_conUnaConvocatoriaInexistente_da404ErrPri01() {
         when(repository.buscarConvocatoria(convocatoria)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.listar(convocatoria, null, null, 1, 20, null))
+        assertThatThrownBy(() -> service.listarPriorizados(convocatoria, null, null, 1, 20, null))
                 .isInstanceOf(NotFoundException.class).extracting("errorCode").isEqualTo("ERR_PRI_01");
     }
 

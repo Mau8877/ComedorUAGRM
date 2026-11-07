@@ -52,11 +52,14 @@ public class ListaPriorizadaService {
                 repository.contarPendientes(convocatoriaCodigo));
     }
 
-    /** `page` es 1-indexed. `carreraCodigo` y `search` son opcionales. */
+    /** `page` es 1-indexed. `search` y `carreraCodigo` son opcionales.
+     *
+     * * Mismo nombre y orden de parametros que el diagrama de secuencia del CU06:
+     * * listarPriorizados(convocatoriaId, busqueda, carrera). */
     @PreAuthorize("hasRole('ADMINISTRADOR_DUBSS')")
     @Transactional(readOnly = true)
-    public PaginaListaPriorizada listar(UUID convocatoriaCodigo, UUID carreraCodigo, String search, int page,
-            int pageSize, String sort) {
+    public PaginaListaPriorizada listarPriorizados(UUID convocatoriaCodigo, String search, UUID carreraCodigo,
+            int page, int pageSize, String sort) {
         if (page < 1 || pageSize < 1) {
             throw new ValidationException("ERR_SYS_01", "La página y el tamaño de página deben ser mayores a cero");
         }
