@@ -18,7 +18,7 @@ El administrador ve a los mejor puntuados primero, con su posición real, y pued
 
 ## Objetivo
 
-`ListaPriorizadaService.listar(...)` devuelve una página de la lista con la posición calculada sobre toda la convocatoria, en menos de 3 segundos con 20 000 postulaciones.
+`ListaPriorizadaService.listarPriorizados(...)` devuelve una página de la lista con la posición calculada sobre toda la convocatoria, en menos de 3 segundos con 20 000 postulaciones.
 
 ## Alcance
 
@@ -27,7 +27,7 @@ El administrador ve a los mejor puntuados primero, con su posición real, y pued
   2. **Filtros después de numerar:** por carrera (`carrera.codigo_carrera`) y por búsqueda (nombres y apellidos o CI, sin distinguir mayúsculas, con el mismo patrón de `UsuarioPersonalService`).
   3. Pagina con `LIMIT/OFFSET` y tiene su propio `count`. Une `usuario`, `postulante` y `carrera` en esa misma consulta (solo lectura; ver la decisión de dependencia del README).
   - Una proyección (interface o record) con los campos de `PostulacionPriorizadaResponse`.
-- `ListaPriorizadaService.listar(UUID convocatoriaCodigo, UUID carreraCodigo, String search, int page, int pageSize, String sort)`, `@Transactional(readOnly = true)` y `@PreAuthorize("hasRole('ADMINISTRADOR_DUBSS')")`:
+- `ListaPriorizadaService.listarPriorizados(UUID convocatoriaCodigo, String search, UUID carreraCodigo, int page, int pageSize, String sort)`, `@Transactional(readOnly = true)` y `@PreAuthorize("hasRole('ADMINISTRADOR_DUBSS')")`:
   - `page` y `pageSize` menores a 1 → `ValidationException` `ERR_SYS_01`; `sort` recibido → `ValidationException` `ERR_PRI_02`.
   - Convocatoria inexistente o eliminada → `NotFoundException` `ERR_PRI_01`.
   - Devuelve `PaginaListaPriorizada(List<PostulacionPriorizadaResponse>, PageMeta)`.

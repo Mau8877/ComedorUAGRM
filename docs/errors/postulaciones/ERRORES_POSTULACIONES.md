@@ -20,7 +20,7 @@ donde está la lista.
 - **Significado:** Se mandó un `sort` o un `filter[...]` que la lista no
   soporta. La lista siempre va ordenada por puntaje vigente de mayor a menor
   y solo acepta `filter[convocatoriaId]` y `filter[carreraId]`.
-- **Dónde se lanza:** `ListaPriorizadaService.listar()` (`sort`) y
+- **Dónde se lanza:** `ListaPriorizadaService.listarPriorizados()` (`sort`) y
   `ListaPriorizadaController.validarFiltros()` (`filter[...]`)
 
 ## `ERR_PRI_03`
