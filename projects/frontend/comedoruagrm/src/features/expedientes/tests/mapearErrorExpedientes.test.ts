@@ -20,6 +20,13 @@ describe('mapearErrorExpedientes', () => {
     expect(mapearErrorExpedientes(new ApiError('ERR_EXP_07', 'x')).mensaje).toContain('Inténtalo de nuevo')
   })
 
+  it('traduce los códigos del CU19', () => {
+    expect(mapearErrorExpedientes(new ApiError('ERR_DEV_01', 'x')).mensaje).toContain('ya no está calificada')
+    expect(mapearErrorExpedientes(new ApiError('ERR_DEV_02', 'x')).mensaje).toBe(
+      'Primero registra la auditoría del expediente.',
+    )
+  })
+
   it('marca el finalista inexistente para volver a la lista', () => {
     expect(mapearErrorExpedientes(new ApiError('ERR_FIN_01', 'x')).finalistaInexistente).toBe(true)
   })

@@ -115,4 +115,44 @@ describe('ExpedienteScreen', () => {
 
     expect(await screen.findByText('Luis Pérez')).toBeInTheDocument()
   })
+
+  it('con la postulación calificada y una auditoría el botón «Devolver para corrección» está habilitado (CU19)', async () => {
+    cliente.get.mockResolvedValue({ data: expediente() })
+    montar()
+
+    expect(await screen.findByRole('button', { name: 'Devolver para corrección' })).toBeEnabled()
+  })
+
+  it('sin auditorías deshabilita la devolución y explica por qué (CU19)', async () => {
+    cliente.get.mockResolvedValue({ data: expediente({ auditorias: [] }) })
+    montar()
+
+    expect(await screen.findByRole('button', { name: 'Devolver para corrección' })).toBeDisabled()
+    expect(screen.getAllByText('Primero registra la auditoría del expediente.').length).toBeGreaterThan(0)
+  })
+
+  it('con la postulación devuelta deshabilita la devolución y muestra la insignia «Devuelta» (CU19)', async () => {
+    cliente.get.mockResolvedValue({ data: expediente({ estadoPostulacion: 'devuelta' }) })
+    montar()
+
+    expect(await screen.findByRole('button', { name: 'Devolver para corrección' })).toBeDisabled()
+    expect(screen.getByText('La postulación ya está devuelta.')).toBeInTheDocument()
+    expect(screen.getByText('Devuelta')).toBeInTheDocument()
+  })
+
+  it('devolver abre el diálogo, manda el motivo y refresca el expediente (CU19)', async () => {
+    cliente.get.mockResolvedValue({ data: expediente() })
+    cliente.post.mockResolvedValue({
+      data: { postulacion: 'p-1', estado: 'devuelta', motivo: 'Falta la luz', fecha: 't', devueltaPor: 'Admin' },
+    })
+    const usuario = userEvent.setup()
+    montar()
+
+    await usuario.click(await screen.findByRole('button', { name: 'Devolver para corrección' }))
+    await usuario.type(await screen.findByLabelText('Motivo'), 'Falta la luz')
+    await usuario.click(screen.getByRole('button', { name: 'Devolver' }))
+
+    await waitFor(() => expect(cliente.post).toHaveBeenCalledWith('/finalistas/f-1/devolver', { motivo: 'Falta la luz' }))
+    await waitFor(() => expect(cliente.get.mock.calls.length).toBeGreaterThan(1))
+  })
 })

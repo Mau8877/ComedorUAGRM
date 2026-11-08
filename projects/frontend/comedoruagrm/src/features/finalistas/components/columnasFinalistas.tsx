@@ -3,7 +3,7 @@ import type { ColumnDef } from '@tanstack/react-table'
 import { Checkbox } from '@/components/ui/checkbox'
 
 import type { EstadoNotificacion, Finalista, ResultadoAuditoriaFinalista } from '../types'
-import { AuditoriaBadge, EntregaBadge, EstadoNotificacionBadge } from './EstadoBadges'
+import { AuditoriaBadge, DevueltaBadge, EntregaBadge, EstadoNotificacionBadge } from './EstadoBadges'
 import { formatearPuntaje } from './formatos'
 
 export interface OpcionesColumnas {
@@ -100,7 +100,12 @@ export function crearColumnasFinalistas({
       accessorKey: 'resultadoAuditoria',
       header: 'Auditoría',
       enableSorting: false,
-      cell: (ctx) => <AuditoriaBadge resultado={ctx.getValue<ResultadoAuditoriaFinalista>()} />,
+      cell: (ctx) =>
+        ctx.row.original.estadoPostulacion === 'devuelta' ? (
+          <DevueltaBadge />
+        ) : (
+          <AuditoriaBadge resultado={ctx.getValue<ResultadoAuditoriaFinalista>()} />
+        ),
       meta: { cardOrder: 4, width: 'w-32' },
     },
   ]

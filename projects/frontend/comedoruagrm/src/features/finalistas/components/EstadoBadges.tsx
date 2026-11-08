@@ -32,6 +32,11 @@ export function EntregaBadge({ recibida }: { recibida: boolean }) {
   )
 }
 
+/** La postulación fue devuelta para corrección (CU19): no se audita hasta que el postulante la reenvíe. */
+export function DevueltaBadge() {
+  return <span className="rounded-full bg-warning/15 px-2 py-0.5 text-xs font-medium text-warning">Devuelta</span>
+}
+
 const ETIQUETAS_AUDITORIA: Record<ResultadoAuditoriaFinalista, string> = {
   SIN_AUDITAR: 'Sin auditar',
   VALIDADO: 'Validado',

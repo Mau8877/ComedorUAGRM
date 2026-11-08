@@ -24,6 +24,10 @@ export function mapearErrorExpedientes(error: unknown): ErrorExpedientes {
         return { mensaje: 'Esa auditoría ya se registró con otros datos. Revisa el historial.' }
       case 'ERR_EXP_07':
         return { mensaje: 'No se pudo identificar el envío. Inténtalo de nuevo.' }
+      case 'ERR_DEV_01':
+        return { mensaje: 'La postulación ya no está calificada: otra persona pudo devolverla antes.' }
+      case 'ERR_DEV_02':
+        return { mensaje: 'Primero registra la auditoría del expediente.' }
       case 'ERR_FIN_01':
         return { mensaje: 'El finalista ya no existe.', finalistaInexistente: true }
       default:

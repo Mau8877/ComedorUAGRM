@@ -86,3 +86,21 @@ export interface AccesoDocumento {
   url: string
   expiraEn: string
 }
+
+// Contrato del backend de CU19 (DevolverPostulacionRequest, DevolucionResponse).
+
+export interface DevolverPostulacionRequest {
+  /** Observaciones para el postulante: obligatorias, de hasta 500 caracteres. */
+  motivo: string
+}
+
+export interface DevolucionResultado {
+  /** Código público de la postulación. */
+  postulacion: string
+  estado: string
+  motivo: string
+  /** Instante ISO de la devolución. */
+  fecha: string
+  /** Nombre completo de quien la devolvió. */
+  devueltaPor: string
+}

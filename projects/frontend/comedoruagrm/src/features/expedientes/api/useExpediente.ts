@@ -2,8 +2,13 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { finalistasKeys } from '@/features/finalistas'
 
-import type { RegistrarAuditoriaRequest } from '../types'
-import { accesoDocumentoApi, obtenerExpedienteApi, registrarAuditoriaApi } from './expedientesApi'
+import type { DevolverPostulacionRequest, RegistrarAuditoriaRequest } from '../types'
+import {
+  accesoDocumentoApi,
+  devolverPostulacionApi,
+  obtenerExpedienteApi,
+  registrarAuditoriaApi,
+} from './expedientesApi'
 import { expedientesKeys } from './keys'
 
 /** El expediente del finalista; no consulta mientras no haya código. */
@@ -40,5 +45,22 @@ export function useAccesoDocumento() {
   return useMutation({
     mutationFn: ({ finalista, documento }: { finalista: string; documento: string }) =>
       accesoDocumentoApi(finalista, documento),
+  })
+}
+
+/**
+ * Devuelve la postulación para corrección (CU19) y refresca el expediente y la lista de finalistas
+ * (columna «Auditoría»). No lleva clave de idempotencia: el botón se deshabilita mientras se envía y una
+ * segunda petición recibe `ERR_DEV_01`.
+ */
+export function useDevolverPostulacion() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ codigo, pedido }: { codigo: string; pedido: DevolverPostulacionRequest }) =>
+      devolverPostulacionApi(codigo, pedido),
+    onSuccess: (_resultado, { codigo }) => {
+      void queryClient.invalidateQueries({ queryKey: expedientesKeys.detail(codigo) })
+      void queryClient.invalidateQueries({ queryKey: finalistasKeys.lists() })
+    },
   })
 }
