@@ -33,6 +33,9 @@ public final class BitacoraAcciones {
     // nombres ni CI.
     public static final String AUDITORIA_EXPEDIENTE = "AUDITORIA_EXPEDIENTE";
 
+    // CU19: el actor es el administrador; el detalle lleva codigos y estados, nunca el motivo, nombres ni CI.
+    public static final String DEVOLUCION_POSTULACION = "DEVOLUCION_POSTULACION";
+
     private BitacoraAcciones() {
     }
 }

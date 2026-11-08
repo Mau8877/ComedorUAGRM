@@ -25,8 +25,8 @@ import lombok.NoArgsConstructor;
 /**
  * Postulacion de un Postulante a una convocatoria.
  *
- * * Solo lectura por ahora: la lista priorizada (CU06) no cambia su estado. El CU que la crea
- * * (CU02) agrega el constructor y los setters que necesite.
+ * * La lista priorizada (CU06) no cambia su estado. El CU19 solo la puede devolver (`devolver()`); el
+ * * CU que la crea (CU02) agrega el constructor y los setters que necesite.
  */
 @Getter
 @Entity
@@ -53,4 +53,15 @@ public class Postulacion extends BaseModel {
 
     @Column(name = "numero_envios", nullable = false)
     private short numeroEnvios;
+
+    /**
+     * Pasa la postulacion de «calificada» a «devuelta» (CU19). La regla de negocio con su codigo de
+     * error es del `service`; esto es solo la red de seguridad del Model.
+     */
+    public void devolver() {
+        if (estado != EstadoPostulacion.calificada) {
+            throw new IllegalStateException("Solo se puede devolver una postulacion calificada");
+        }
+        this.estado = EstadoPostulacion.devuelta;
+    }
 }

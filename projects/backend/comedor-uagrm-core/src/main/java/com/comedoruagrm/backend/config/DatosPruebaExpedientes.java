@@ -30,9 +30,12 @@ import lombok.RequiredArgsConstructor;
  * * la convocatoria, no hace nada.
  * * Deja a los 10 finalistas con su respuesta socioeconomica, sus documentos y situaciones variadas
  * * (validado, observado, no valido, con dos auditorias, sin auditar, con la entrega pendiente).
+ * * El finalista 6 queda con la postulacion «devuelta» (CU19): una auditoria observada, la fila del
+ * * historial y el aviso al postulante; los demas siguen «calificada» (el 3 sin auditoria, para probar
+ * * que no se puede devolver).
  * * Sube a MinIO un PDF pequeno por documento; si MinIO no esta disponible deja un WARN y guarda igual las
  * * filas, para poder probar el error al abrir un documento.
- * * No cambia el estado de ninguna postulacion ni el puntaje de la IA.
+ * * Solo cambia el estado de la postulacion del finalista 6 (a «devuelta»); no toca el puntaje de la IA.
  * ! NUNCA en produccion.
  */
 @Component
@@ -126,8 +129,8 @@ public class DatosPruebaExpedientes implements CommandLineRunner {
             for (long tipo : documentosDe(posicion, carnet, ingresos, notas, luz)) {
                 subidas.add(documento(postulacion, tipo, tipos.get(tipo)));
             }
-            // La entrega fisica: del 1 al 5 ya llego (el 1 la trae del cargador del CU06).
-            if (posicion >= 2 && posicion <= 5) {
+            // La entrega fisica: del 1 al 6 ya llego (el 1 la trae del cargador del CU06).
+            if (posicion >= 2 && posicion <= 6) {
                 jdbc.update("""
                         UPDATE finalista SET documentacion_recibida_en = now() - interval '1 day'
                         WHERE id = ? AND documentacion_recibida_en IS NULL""", finalista);
@@ -135,6 +138,9 @@ public class DatosPruebaExpedientes implements CommandLineRunner {
             auditorias(finalista, posicion, auditor);
             if (posicion == 2) {
                 avisoObservado(postulacion, postulante);
+            }
+            if (posicion == 6) {
+                devolver(postulacion, postulante, auditor);
             }
         }
         return subidas;
@@ -159,6 +165,7 @@ public class DatosPruebaExpedientes implements CommandLineRunner {
             }
             case 5 -> auditoria(finalista, auditor, "NO_VALIDO",
                     "El carnet de identidad no coincide con el del postulante.", null, 24);
+            case 6 -> auditoria(finalista, auditor, "OBSERVADO", "Falta la fotocopia de luz.", null, 72);
             default -> {
                 // Sin auditoria: el 3 ya entrego y el resto tiene la entrega pendiente.
             }
@@ -173,6 +180,24 @@ public class DatosPruebaExpedientes implements CommandLineRunner {
                 VALUES (?, ?, CAST(? AS resultado_auditoria), ?, CAST(? AS numeric),
                         now() - (? * interval '1 hour'))
                 """, finalista, auditor, resultado, observaciones, puntajeAcademico, horasAtras);
+    }
+
+    /** La devolucion del CU19 ya hecha: estado, fila del historial (despues de la auditoria) y aviso. */
+    private void devolver(long postulacion, long postulante, long auditor) {
+        jdbc.update("UPDATE postulacion SET estado = CAST('devuelta' AS estado_postulacion) WHERE id = ?",
+                postulacion);
+        jdbc.update("""
+                INSERT INTO postulacion_historial (postulacion_id, usuario_id, estado_anterior, estado_nuevo,
+                                                   motivo, creado_en)
+                VALUES (?, ?, CAST('calificada' AS estado_postulacion), CAST('devuelta' AS estado_postulacion),
+                        'Falta la fotocopia de luz.', now() - interval '48 hours')
+                """, postulacion, auditor);
+        jdbc.update("""
+                INSERT INTO notificacion (usuario_id, postulacion_id, titulo, mensaje, tipo, leida, enviada_en)
+                VALUES (?, ?, 'Tu postulación fue devuelta - Beca Comedor',
+                        'Hola, la DUBSS devolvió tu postulación para que la corrijas. Observaciones: Falta la fotocopia de luz.',
+                        CAST('WARNING' AS tipo_notificacion), false, now() - interval '48 hours')
+                """, postulante, postulacion);
     }
 
     private void avisoObservado(long postulacion, long postulante) {

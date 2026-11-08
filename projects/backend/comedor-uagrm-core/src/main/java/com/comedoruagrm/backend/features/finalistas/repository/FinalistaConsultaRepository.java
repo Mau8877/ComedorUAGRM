@@ -42,6 +42,7 @@ public class FinalistaConsultaRepository {
                    CASE WHEN pu.puntaje_total IS NULL OR au.puntaje_academico IS NULL THEN NULL
                         ELSE pu.puntaje_total + au.puntaje_academico END AS puntaje_total,
                    f.plazo_entrega, f.notificado_en, f.documentacion_recibida_en,
+                   CAST(po.estado AS text) AS estado_postulacion,
                    CASE WHEN n.id IS NULL THEN 'SIN_ENVIAR'
                         WHEN n.enviada_en IS NOT NULL THEN 'ENVIADA'
                         ELSE 'FALLIDA' END AS estado_notificacion
@@ -141,6 +142,7 @@ public class FinalistaConsultaRepository {
                 notificadoEn,
                 recibida == null ? null : recibida.toInstant().atZone(ZONA).toLocalDate(),
                 rs.getString("resultado_auditoria"),
-                rs.getBigDecimal("puntaje_total"));
+                rs.getBigDecimal("puntaje_total"),
+                rs.getString("estado_postulacion"));
     }
 }

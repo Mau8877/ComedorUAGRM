@@ -446,6 +446,7 @@ class ListaPriorizadaIntegrationTest {
         jdbc.update("DELETE FROM finalista");
         jdbc.update("DELETE FROM comunicado");
         jdbc.update("DELETE FROM puntaje_postulacion");
+        jdbc.update("DELETE FROM postulacion_historial");
         jdbc.update("DELETE FROM postulacion");
         jdbc.update("DELETE FROM convocatoria");
         jdbc.update("DELETE FROM modelo_preseleccion");

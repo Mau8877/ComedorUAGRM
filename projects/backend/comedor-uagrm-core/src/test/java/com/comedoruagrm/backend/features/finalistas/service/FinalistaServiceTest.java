@@ -184,7 +184,7 @@ class FinalistaServiceTest {
         when(usuarioService.obtenerPorCodigo(admin.getCodigo())).thenReturn(admin);
         when(finalistaRepository.findByCodigo(finalistaCodigo)).thenReturn(Optional.of(finalista));
         when(consulta.buscarUno(finalistaCodigo)).thenReturn(Optional.of(new FinalistaResponse(finalistaCodigo, 1,
-                "Ana", "Perez", "123", null, "ENVIADA", null, null, HOY, "SIN_AUDITAR", null)));
+                "Ana", "Perez", "123", null, "ENVIADA", null, null, HOY, "SIN_AUDITAR", null, "calificada")));
     }
 
     @Test

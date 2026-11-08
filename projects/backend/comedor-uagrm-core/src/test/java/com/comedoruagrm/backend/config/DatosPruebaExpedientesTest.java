@@ -105,12 +105,12 @@ class DatosPruebaExpedientesTest {
         assertThat(contar("respuesta_socioeconomica")).isEqualTo(10);
         assertThat(contar("documento_adjunto")).isEqualTo(34);
         assertThat(contar("convocatoria_documento")).isEqualTo(4);
-        assertThat(contar("auditoria_expediente")).isEqualTo(5);
+        assertThat(contar("auditoria_expediente")).isEqualTo(6);
         assertThat(ultimoResultadoPorPosicion()).containsExactly("1:VALIDADO", "2:OBSERVADO", "3:SIN",
-                "4:VALIDADO", "5:NO_VALIDO", "6:SIN", "7:SIN", "8:SIN", "9:SIN", "10:SIN");
+                "4:VALIDADO", "5:NO_VALIDO", "6:OBSERVADO", "7:SIN", "8:SIN", "9:SIN", "10:SIN");
         assertThat(jdbc.queryForList("""
                 SELECT posicion FROM finalista WHERE documentacion_recibida_en IS NOT NULL ORDER BY posicion""",
-                Integer.class)).containsExactly(1, 2, 3, 4, 5);
+                Integer.class)).containsExactly(1, 2, 3, 4, 5, 6);
         assertThat(jdbc.queryForObject("""
                 SELECT count(*) FROM documento_adjunto d JOIN tipo_documento t ON t.id = d.tipo_documento_id
                 JOIN postulacion po ON po.id = d.postulacion_id
@@ -124,7 +124,17 @@ class DatosPruebaExpedientesTest {
                 JOIN finalista f ON f.postulacion_id = po.id
                 WHERE f.posicion = 2 AND n.tipo = CAST('WARNING' AS tipo_notificacion)""", Long.class)).isEqualTo(1);
         verify(almacenamiento, times(34)).subir(any(), any(), eq("application/pdf"));
-        assertThat(estados()).isEqualTo(estadosAntes);
+        assertThat(estados()).isNotEqualTo(estadosAntes);
+        assertThat(jdbc.queryForList("""
+                SELECT f.posicion FROM finalista f JOIN postulacion po ON po.id = f.postulacion_id
+                WHERE po.estado = CAST('devuelta' AS estado_postulacion)""", Integer.class)).containsExactly(6);
+        assertThat(jdbc.queryForObject("""
+                SELECT count(*) FROM postulacion_historial h JOIN finalista f ON f.postulacion_id = h.postulacion_id
+                WHERE f.posicion = 6 AND h.estado_nuevo = CAST('devuelta' AS estado_postulacion)
+                  AND h.motivo IS NOT NULL""", Long.class)).isEqualTo(1);
+        assertThat(jdbc.queryForObject("""
+                SELECT count(*) FROM notificacion WHERE titulo LIKE 'Tu postulación fue devuelta%'""",
+                Long.class)).isEqualTo(1);
     }
 
     @Test
@@ -134,7 +144,7 @@ class DatosPruebaExpedientesTest {
 
         assertThat(contar("respuesta_socioeconomica")).isEqualTo(10);
         assertThat(contar("documento_adjunto")).isEqualTo(34);
-        assertThat(contar("auditoria_expediente")).isEqualTo(5);
+        assertThat(contar("auditoria_expediente")).isEqualTo(6);
         verify(almacenamiento, times(34)).subir(any(), any(), any());
     }
 
@@ -145,7 +155,7 @@ class DatosPruebaExpedientesTest {
         cargador().run();
 
         assertThat(contar("documento_adjunto")).isEqualTo(34);
-        assertThat(contar("auditoria_expediente")).isEqualTo(5);
+        assertThat(contar("auditoria_expediente")).isEqualTo(6);
         verify(almacenamiento, times(1)).subir(any(), any(), any());
     }
 
@@ -175,6 +185,7 @@ class DatosPruebaExpedientesTest {
 
     // Deja la base vacia al terminar: los demas tests de integracion no deben ver estos datos.
     private void borrarTodo() {
+        jdbc.update("DELETE FROM postulacion_historial");
         jdbc.update("DELETE FROM auditoria_expediente");
         jdbc.update("DELETE FROM documento_adjunto");
         jdbc.update("DELETE FROM respuesta_socioeconomica");
