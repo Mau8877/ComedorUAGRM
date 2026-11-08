@@ -76,6 +76,11 @@ docs/errors/
 - [`ERR_PRI_03`](postulaciones/ERRORES_POSTULACIONES.md#err_pri_03) — No hay postulaciones para exportar (400)
 - [`ERR_US_13`](usuarios/ERRORES_USUARIOS.md#err_us_13) — Solo el Postulante tiene teléfono (400)
 
+### Devolución de postulaciones (`DEV`)
+
+- [`ERR_DEV_01`](postulaciones/ERRORES_POSTULACIONES.md#err_dev_01) — La postulación ya no está calificada (409)
+- [`ERR_DEV_02`](postulaciones/ERRORES_POSTULACIONES.md#err_dev_02) — El finalista no tiene una auditoría posterior a su última devolución (409)
+
 <!--
   A medida que se agregan módulos de negocio (platos, menú, usuarios...),
   cada uno suma acá su propia sección "### Nombre (PREFIJO)" con la lista
