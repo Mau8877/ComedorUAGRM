@@ -1,5 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
+import { DevueltaBadge } from '@/features/finalistas'
+
 import type { Expediente } from '../types'
 import { formatearPuntos } from './formatos'
 
@@ -38,6 +40,14 @@ export function ExpedienteResumen({ expediente }: { expediente: Expediente }) {
           <Dato etiqueta="Convocatoria" valor={convocatoria.nombre} />
           <Dato etiqueta="Posición" valor={String(finalista.posicion)} />
           <Dato etiqueta="Estado de la postulación" valor={expediente.estadoPostulacion} />
+          {expediente.estadoPostulacion === 'devuelta' && (
+            <div className="flex flex-col">
+              <dt className="text-xs text-muted-foreground">Devolución</dt>
+              <dd>
+                <DevueltaBadge />
+              </dd>
+            </div>
+          )}
           <Dato
             etiqueta="Documentación física"
             valor={

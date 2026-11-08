@@ -205,4 +205,16 @@ class FinalistaConsultaRepositoryTest {
         assertThat(f.resultadoAuditoria()).isEqualTo("OBSERVADO");
         assertThat(f.puntajeTotal()).isNull();
     }
+
+    @Test
+    void estadoPostulacion_muestraCalificadaYDevuelta() {
+        long conv = convocatoria();
+        finalista(conv, 1, "9100071", "Ana", "Uno");
+        long devuelta = finalista(conv, 2, "9100072", "Beto", "Dos");
+        jdbc.update("UPDATE postulacion SET estado = CAST('devuelta' AS estado_postulacion) WHERE id = ?",
+                devuelta);
+
+        assertThat(fila(codigoConvocatoria(conv), 1).estadoPostulacion()).isEqualTo("calificada");
+        assertThat(fila(codigoConvocatoria(conv), 2).estadoPostulacion()).isEqualTo("devuelta");
+    }
 }

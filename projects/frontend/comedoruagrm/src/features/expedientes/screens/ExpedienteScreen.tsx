@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
-import { ArrowLeftIcon, BellRingIcon } from 'lucide-react'
+import { ArrowLeftIcon, BellRingIcon, UndoIcon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { toastError } from '@/components/ui/toast'
@@ -15,10 +15,12 @@ import { AdminLayout } from '@/layouts'
 import { expedientesKeys, mapearErrorExpedientes, useExpediente } from '../api'
 import {
   AuditoriaForm,
+  DevolverPostulacionDialog,
   DocumentosDigitales,
   ExpedienteResumen,
   HistorialAuditorias,
   motivoBloqueoAuditoria,
+  motivoBloqueoDevolucion,
   PuntajePanel,
 } from '../components'
 import type { Expediente } from '../types'
@@ -49,6 +51,7 @@ function comoFinalista(expediente: Expediente): Finalista {
     plazoEntrega: finalista.plazoEntrega,
     notificadoEn: null,
     documentacionRecibidaEn: finalista.entrega.fecha,
+    estadoPostulacion: expediente.estadoPostulacion,
     resultadoAuditoria: 'SIN_AUDITAR',
     puntajeTotal: expediente.puntajeTotal,
   }
@@ -70,6 +73,7 @@ export function ExpedienteScreen({
   const accionesDeCuenta = useAccionesDeCuenta()
   const queryClient = useQueryClient()
   const [notificando, setNotificando] = useState(false)
+  const [devolviendo, setDevolviendo] = useState(false)
 
   const consulta = useExpediente(codigo)
   const expediente = consulta.data
@@ -92,6 +96,8 @@ export function ExpedienteScreen({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inexistente])
 
+  const bloqueoDevolucion = expediente ? motivoBloqueoDevolucion(expediente) : null
+
   const refrescar = () => {
     void queryClient.invalidateQueries({ queryKey: expedientesKeys.detail(codigo) })
   }
@@ -110,12 +116,29 @@ export function ExpedienteScreen({
           Volver a finalistas
         </Link>
         {expediente && (
-          <Button variant="outline" size="sm" onClick={() => setNotificando(true)}>
-            <BellRingIcon data-icon="inline-start" />
-            Notificar
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => setNotificando(true)}>
+              <BellRingIcon data-icon="inline-start" />
+              Notificar
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={bloqueoDevolucion !== null}
+              onClick={() => setDevolviendo(true)}
+            >
+              <UndoIcon data-icon="inline-start" />
+              Devolver para corrección
+            </Button>
+          </div>
         )}
       </div>
+
+      {bloqueoDevolucion && (
+        <p role="note" className="mb-4 text-right text-xs text-muted-foreground">
+          {bloqueoDevolucion}
+        </p>
+      )}
 
       {consulta.isLoading && <p className="py-8 text-center text-sm text-muted-foreground">Cargando expediente…</p>}
 
@@ -166,6 +189,16 @@ export function ExpedienteScreen({
           }}
           finalistas={[codigo]}
           onNotificados={refrescar}
+        />
+      )}
+
+      {/* Se monta solo mientras está abierto: al cerrar se descarta lo escrito. */}
+      {devolviendo && expediente && (
+        <DevolverPostulacionDialog
+          open
+          onOpenChange={setDevolviendo}
+          finalista={codigo}
+          onFinalistaInexistente={finalistaInexistente}
         />
       )}
     </AdminLayout>

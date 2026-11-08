@@ -2,7 +2,12 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { apiClient } from '@/store'
 
-import { accesoDocumentoApi, obtenerExpedienteApi, registrarAuditoriaApi } from '../api/expedientesApi'
+import {
+  accesoDocumentoApi,
+  devolverPostulacionApi,
+  obtenerExpedienteApi,
+  registrarAuditoriaApi,
+} from '../api/expedientesApi'
 
 describe('expedientesApi', () => {
   afterEach(() => vi.restoreAllMocks())
@@ -38,5 +43,12 @@ describe('expedientesApi', () => {
 
     expect(await accesoDocumentoApi('f-1', 'd-1')).toEqual({ url: 'http://x/firmada', expiraEn: 't' })
     expect(get).toHaveBeenCalledWith('/finalistas/f-1/documentos/d-1/acceso')
+  })
+
+  it('devolverPostulacionApi hace POST /finalistas/{codigo}/devolver con el motivo y sin cabecera de idempotencia', async () => {
+    const post = vi.spyOn(apiClient, 'post').mockResolvedValue({ data: { estado: 'devuelta' } })
+
+    expect(await devolverPostulacionApi('f-1', { motivo: 'Falta el carnet' })).toEqual({ estado: 'devuelta' })
+    expect(post).toHaveBeenCalledWith('/finalistas/f-1/devolver', { motivo: 'Falta el carnet' })
   })
 })

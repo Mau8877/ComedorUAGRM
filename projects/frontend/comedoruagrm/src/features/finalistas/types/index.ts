@@ -21,6 +21,8 @@ export interface Finalista {
   notificadoEn: string | null
   /** Fecha (sin hora) en que entregó la documentación, `YYYY-MM-DD`; con valor = «Recibida». */
   documentacionRecibidaEn: string | null
+  /** Estado de la postulación (`calificada`, `devuelta`...); «Devuelta» ya no se puede auditar (CU19). */
+  estadoPostulacion: string
   /** Resultado de la última auditoría del expediente (CU07). */
   resultadoAuditoria: ResultadoAuditoriaFinalista
   /** IA + puntaje académico de la última auditoría; nulo mientras falte alguno de los dos. */

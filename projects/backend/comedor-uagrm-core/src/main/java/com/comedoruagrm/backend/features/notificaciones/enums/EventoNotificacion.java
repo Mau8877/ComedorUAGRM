@@ -48,7 +48,16 @@ public enum EventoNotificacion {
     AUDITORIA_NO_VALIDA(TipoNotificacion.ERROR,
             "Tu expediente no fue válido - Beca Comedor",
             "Hola {nombres}, la DUBSS no validó tu expediente. Motivo: {observaciones}",
-            false);
+            false),
+
+    /**
+     * Aviso al postulante de que su postulacion fue devuelta para corregir (CU19); el motivo dice que
+     * corregir. Bandeja, push y correo.
+     */
+    POSTULACION_DEVUELTA(TipoNotificacion.WARNING,
+            "Tu postulación fue devuelta - Beca Comedor",
+            "Hola {nombres}, la DUBSS devolvió tu postulación para que la corrijas. Observaciones: {observaciones}",
+            true);
 
     private final TipoNotificacion tipo;
     private final String titulo;

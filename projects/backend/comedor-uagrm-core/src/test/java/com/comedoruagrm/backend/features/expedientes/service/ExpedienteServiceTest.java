@@ -173,10 +173,10 @@ class ExpedienteServiceTest {
     void registrarAuditoria_observadoSinObservaciones_lanzaErrExp03() {
         preparar("calificada", RECIBIDA);
 
-        assertCodigo(() -> service.registrarAuditoria(actorCodigo, codigo,
+        assertCodigo(() -> service.registrarAuditoria(actorCodigo, codigo, null,
                 new RegistrarAuditoriaRequest(ResultadoAuditoria.OBSERVADO, "   ", null)),
                 ExpedienteErrorCodes.ERR_EXP_03);
-        assertCodigo(() -> service.registrarAuditoria(actorCodigo, codigo,
+        assertCodigo(() -> service.registrarAuditoria(actorCodigo, codigo, null,
                 new RegistrarAuditoriaRequest(ResultadoAuditoria.NO_VALIDO, null, null)),
                 ExpedienteErrorCodes.ERR_EXP_03);
         verify(auditorias, never()).saveAndFlush(any());
@@ -200,7 +200,7 @@ class ExpedienteServiceTest {
     void registrarAuditoria_observadoConPuntajeFueraDeRango_tambienLanzaErrExp04() {
         preparar("calificada", RECIBIDA);
 
-        assertCodigo(() -> service.registrarAuditoria(actorCodigo, codigo,
+        assertCodigo(() -> service.registrarAuditoria(actorCodigo, codigo, null,
                 new RegistrarAuditoriaRequest(ResultadoAuditoria.OBSERVADO, "Falta carnet",
                         new BigDecimal("31"))), ExpedienteErrorCodes.ERR_EXP_04);
     }
@@ -225,7 +225,7 @@ class ExpedienteServiceTest {
     void registrarAuditoria_validada_guardaConElAuditorDelTokenYAvisaSinObservaciones() {
         preparar("calificada", RECIBIDA);
 
-        ResultadoAuditado<ResultadoAuditoriaResponse> r = service.registrarAuditoria(actorCodigo, codigo,
+        ResultadoAuditado<ResultadoAuditoriaResponse> r = service.registrarAuditoria(actorCodigo, codigo, null,
                 validado("25.50"));
 
         assertThat(r.datos().creada()).isTrue();
@@ -251,9 +251,9 @@ class ExpedienteServiceTest {
     void registrarAuditoria_observadaYNoValida_eligenSuEventoYLlevanObservaciones() {
         preparar("calificada", RECIBIDA);
 
-        service.registrarAuditoria(actorCodigo, codigo,
+        service.registrarAuditoria(actorCodigo, codigo, null,
                 new RegistrarAuditoriaRequest(ResultadoAuditoria.OBSERVADO, " Falta el carnet ", null));
-        service.registrarAuditoria(actorCodigo, codigo,
+        service.registrarAuditoria(actorCodigo, codigo, null,
                 new RegistrarAuditoriaRequest(ResultadoAuditoria.NO_VALIDO, "Documento falso", null));
 
         @SuppressWarnings("unchecked")

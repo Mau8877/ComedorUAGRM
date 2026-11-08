@@ -31,3 +31,21 @@ donde está la lista.
   postulaciones calificadas, o la búsqueda y el filtro no devuelven ninguna):
   no hay nada que exportar y no se genera el PDF.
 - **Dónde se lanza:** `ListaPriorizadaPdfService.exportar()`
+
+## `ERR_DEV_01`
+
+- **HTTP:** 409
+- **Excepción:** `ConflictException`
+- **Significado:** La postulación del finalista ya no está «calificada» (ya fue
+  devuelta, archivada, rechazada o adjudicada, por ejemplo por otro administrador
+  o por una segunda petición del mismo clic); no se puede devolver.
+- **Dónde se lanza:** `DevolucionService.devolver()`
+
+## `ERR_DEV_02`
+
+- **HTTP:** 409
+- **Excepción:** `ConflictException`
+- **Significado:** El finalista no tiene ninguna auditoría registrada después de
+  su última devolución (nunca se auditó, o se devolvió, el postulante reenvió y
+  todavía no se volvió a auditar); siempre debe haber una auditoría antes de devolver.
+- **Dónde se lanza:** `DevolucionService.devolver()`

@@ -1,6 +1,13 @@
 import { apiClient } from '@/store'
 
-import type { AccesoDocumento, Expediente, RegistrarAuditoriaRequest, ResultadoRegistroAuditoria } from '../types'
+import type {
+  AccesoDocumento,
+  DevolucionResultado,
+  DevolverPostulacionRequest,
+  Expediente,
+  RegistrarAuditoriaRequest,
+  ResultadoRegistroAuditoria,
+} from '../types'
 
 // * Funciones sin hook: las usan los hooks de este mismo directorio. Todas van por el apiClient
 // * compartido, que ya desempaqueta el sobre del backend. El expediente cuelga del finalista:
@@ -31,5 +38,14 @@ export async function registrarAuditoriaApi(
 /** Pide la URL temporal para abrir un documento; la ruta guardada nunca llega al cliente. */
 export async function accesoDocumentoApi(finalista: string, documento: string): Promise<AccesoDocumento> {
   const respuesta = await apiClient.get<AccesoDocumento>(`/finalistas/${finalista}/documentos/${documento}/acceso`)
+  return respuesta.data
+}
+
+/** Devuelve la postulación del finalista para que la corrija (CU19); avisa al postulante el backend. */
+export async function devolverPostulacionApi(
+  finalista: string,
+  pedido: DevolverPostulacionRequest,
+): Promise<DevolucionResultado> {
+  const respuesta = await apiClient.post<DevolucionResultado>(`/finalistas/${finalista}/devolver`, pedido)
   return respuesta.data
 }

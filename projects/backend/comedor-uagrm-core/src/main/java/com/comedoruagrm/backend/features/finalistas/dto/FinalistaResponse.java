@@ -12,7 +12,7 @@ import java.util.UUID;
  *
  * * `puntaje` es el de la IA (0 a 70). `resultadoAuditoria` (CU07) es SIN_AUDITAR, VALIDADO, OBSERVADO o
  * * NO_VALIDO, el de la ultima auditoria; `puntajeTotal` = IA + puntaje academico de esa auditoria, null si
- * * falta alguno de los dos.
+ * * falta alguno de los dos. `estadoPostulacion` (CU19) es el estado de su postulacion (`calificada`, `devuelta`...).
  */
 public record FinalistaResponse(
         UUID codigo,
@@ -26,5 +26,6 @@ public record FinalistaResponse(
         Instant notificadoEn,
         LocalDate documentacionRecibidaEn,
         String resultadoAuditoria,
-        BigDecimal puntajeTotal) {
+        BigDecimal puntajeTotal,
+        String estadoPostulacion) {
 }

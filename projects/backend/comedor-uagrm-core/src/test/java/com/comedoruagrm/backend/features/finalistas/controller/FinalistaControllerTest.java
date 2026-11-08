@@ -69,7 +69,7 @@ class FinalistaControllerTest {
 
     private FinalistaResponse fila() {
         return new FinalistaResponse(finalista, 1, "Ana", "Rojas", "9802041", new BigDecimal("95.0"), "SIN_ENVIAR",
-                null, null, null, "SIN_AUDITAR", null);
+                null, null, null, "SIN_AUDITAR", null, "calificada");
     }
 
     @Test

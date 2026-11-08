@@ -63,6 +63,7 @@ function finalista(n: number, extra: Partial<Finalista> = {}): Finalista {
     ci: `${9000 + n}`,
     puntaje: 95 - n,
     estadoNotificacion: 'SIN_ENVIAR',
+    estadoPostulacion: 'calificada',
     resultadoAuditoria: 'SIN_AUDITAR',
     puntajeTotal: null,
     plazoEntrega: null,
@@ -139,6 +140,15 @@ describe('FinalistasScreen', () => {
     expect(screen.getAllByText('Observado').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Sin auditar').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Total 80.50').length).toBeGreaterThan(0)
+  })
+
+  it('una postulación devuelta muestra la insignia «Devuelta» en la columna Auditoría (CU19)', async () => {
+    responder([finalista(1, { estadoPostulacion: 'devuelta', resultadoAuditoria: 'OBSERVADO' }), finalista(2)])
+    montar()
+
+    expect((await screen.findAllByText('Devuelta')).length).toBeGreaterThan(0)
+    expect(screen.queryAllByText('Observado')).toHaveLength(0)
+    expect(screen.getAllByText('Sin auditar').length).toBeGreaterThan(0)
   })
 
   it('«Auditar» abre el expediente del finalista elegido (CU07)', async () => {
