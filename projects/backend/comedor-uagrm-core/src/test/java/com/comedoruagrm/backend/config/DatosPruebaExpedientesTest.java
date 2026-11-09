@@ -128,6 +128,22 @@ class DatosPruebaExpedientesTest {
         assertThat(jdbc.queryForList("""
                 SELECT f.posicion FROM finalista f JOIN postulacion po ON po.id = f.postulacion_id
                 WHERE po.estado = CAST('devuelta' AS estado_postulacion)""", Integer.class)).containsExactly(6);
+        // CU20: el finalista 9 archivado y el 10 no adjudicado, cada uno con su historial y su aviso.
+        assertThat(jdbc.queryForList("""
+                SELECT f.posicion || ':' || po.estado::text FROM finalista f JOIN postulacion po ON po.id = f.postulacion_id
+                WHERE po.estado IN (CAST('archivada' AS estado_postulacion), CAST('no_adjudicada' AS estado_postulacion))
+                ORDER BY f.posicion""", String.class)).containsExactly("9:archivada", "10:no_adjudicada");
+        assertThat(jdbc.queryForList("""
+                SELECT f.posicion || ':' || h.estado_anterior::text || '>' || h.estado_nuevo::text
+                FROM postulacion_historial h JOIN finalista f ON f.postulacion_id = h.postulacion_id
+                WHERE f.posicion IN (9, 10) AND h.motivo IS NOT NULL ORDER BY f.posicion""", String.class))
+                .containsExactly("9:calificada>archivada", "10:calificada>no_adjudicada");
+        assertThat(jdbc.queryForObject("""
+                SELECT count(*) FROM notificacion WHERE titulo LIKE 'Tu postulación fue archivada%'
+                   OR titulo LIKE 'Tu postulación no fue adjudicada%'""", Long.class)).isEqualTo(2);
+        assertThat(jdbc.queryForObject("""
+                SELECT count(*) FROM finalista f JOIN postulacion po ON po.id = f.postulacion_id
+                WHERE po.estado = CAST('calificada' AS estado_postulacion)""", Long.class)).isEqualTo(7);
         assertThat(jdbc.queryForObject("""
                 SELECT count(*) FROM postulacion_historial h JOIN finalista f ON f.postulacion_id = h.postulacion_id
                 WHERE f.posicion = 6 AND h.estado_nuevo = CAST('devuelta' AS estado_postulacion)

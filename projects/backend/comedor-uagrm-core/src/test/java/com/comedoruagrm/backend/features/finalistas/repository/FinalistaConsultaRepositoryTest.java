@@ -217,4 +217,20 @@ class FinalistaConsultaRepositoryTest {
         assertThat(fila(codigoConvocatoria(conv), 1).estadoPostulacion()).isEqualTo("calificada");
         assertThat(fila(codigoConvocatoria(conv), 2).estadoPostulacion()).isEqualTo("devuelta");
     }
+
+    @Test
+    void estadoPostulacion_muestraArchivadaYNoAdjudicada_yElFinalistaSigueEnLaLista() {
+        long conv = convocatoria();
+        finalista(conv, 1, "9100081", "Ana", "Uno");
+        long archivada = finalista(conv, 2, "9100082", "Beto", "Dos");
+        long noAdjudicada = finalista(conv, 3, "9100083", "Carla", "Tres");
+        jdbc.update("UPDATE postulacion SET estado = CAST('archivada' AS estado_postulacion) WHERE id = ?",
+                archivada);
+        jdbc.update("UPDATE postulacion SET estado = CAST('no_adjudicada' AS estado_postulacion) WHERE id = ?",
+                noAdjudicada);
+
+        assertThat(fila(codigoConvocatoria(conv), 1).estadoPostulacion()).isEqualTo("calificada");
+        assertThat(fila(codigoConvocatoria(conv), 2).estadoPostulacion()).isEqualTo("archivada");
+        assertThat(fila(codigoConvocatoria(conv), 3).estadoPostulacion()).isEqualTo("no_adjudicada");
+    }
 }

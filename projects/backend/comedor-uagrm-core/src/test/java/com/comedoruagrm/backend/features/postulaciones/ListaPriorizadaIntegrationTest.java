@@ -116,6 +116,9 @@ class ListaPriorizadaIntegrationTest {
         // Fuera de la lista: pendiente (sin puntaje) y devuelta (con puntaje alto).
         postulacion(conv, "Fabio", "Vaca", "1000006", carreras.get(0), "pendiente", "2026-08-01T10:05:00Z", null);
         postulacion(conv, "Gina", "Egüez", "1000007", carreras.get(0), "devuelta", "2026-08-01T10:06:00Z", 70.0);
+        // CU20: tampoco aparecen una postulacion archivada ni una no adjudicada (con puntaje alto).
+        postulacion(conv, "Hugo", "Arce", "1000008", carreras.get(0), "archivada", "2026-08-01T10:07:00Z", 69.0);
+        postulacion(conv, "Inés", "Bravo", "1000009", carreras.get(0), "no_adjudicada", "2026-08-01T10:08:00Z", 68.0);
 
         this.admin = bearer(login("admin@dubss.test", "secreta1"));
     }

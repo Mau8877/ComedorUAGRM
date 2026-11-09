@@ -57,6 +57,18 @@ public enum EventoNotificacion {
     POSTULACION_DEVUELTA(TipoNotificacion.WARNING,
             "Tu postulación fue devuelta - Beca Comedor",
             "Hola {nombres}, la DUBSS devolvió tu postulación para que la corrijas. Observaciones: {observaciones}",
+            true),
+
+    /** Aviso al postulante de que su postulacion fue archivada (CU20); lleva el motivo. Bandeja, push y correo. */
+    POSTULACION_ARCHIVADA(TipoNotificacion.INFO,
+            "Tu postulación fue archivada - Beca Comedor",
+            "Hola {nombres}, la DUBSS archivó tu postulación. Motivo: {motivo}",
+            true),
+
+    /** Aviso al postulante de que su postulacion fue rechazada (CU20); lleva el motivo. Bandeja, push y correo. */
+    POSTULACION_RECHAZADA(TipoNotificacion.ERROR,
+            "Tu postulación no fue adjudicada - Beca Comedor",
+            "Hola {nombres}, la DUBSS no pudo adjudicarte la beca con esta postulación. Motivo: {motivo}",
             true);
 
     private final TipoNotificacion tipo;

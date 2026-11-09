@@ -35,7 +35,10 @@ import lombok.RequiredArgsConstructor;
  * * que no se puede devolver).
  * * Sube a MinIO un PDF pequeno por documento; si MinIO no esta disponible deja un WARN y guarda igual las
  * * filas, para poder probar el error al abrir un documento.
- * * Solo cambia el estado de la postulacion del finalista 6 (a «devuelta»); no toca el puntaje de la IA.
+ * * Los finalistas 9 y 10 (sin auditoria) quedan con la postulacion «archivada» y «no adjudicada» (CU20),
+ * * cada uno con la fila del historial y el aviso; el 3 sin auditoria y los demas «calificada» sirven para
+ * * archivar o rechazar.
+ * * Solo cambia el estado de la postulacion de los finalistas 6, 9 y 10; no toca el puntaje de la IA.
  * ! NUNCA en produccion.
  */
 @Component
@@ -142,6 +145,15 @@ public class DatosPruebaExpedientes implements CommandLineRunner {
             if (posicion == 6) {
                 devolver(postulacion, postulante, auditor);
             }
+            if (posicion == 9) {
+                cerrar(postulacion, postulante, auditor, "archivada", "Tu postulación fue archivada - Beca Comedor",
+                        "INFO", "No entregó su documentación física en el plazo.");
+            }
+            if (posicion == 10) {
+                cerrar(postulacion, postulante, auditor, "no_adjudicada",
+                        "Tu postulación no fue adjudicada - Beca Comedor", "ERROR",
+                        "Los documentos presentados no corresponden al postulante.");
+            }
         }
         return subidas;
     }
@@ -198,6 +210,23 @@ public class DatosPruebaExpedientes implements CommandLineRunner {
                         'Hola, la DUBSS devolvió tu postulación para que la corrijas. Observaciones: Falta la fotocopia de luz.',
                         CAST('WARNING' AS tipo_notificacion), false, now() - interval '48 hours')
                 """, postulante, postulacion);
+    }
+
+    /** El cierre del CU20 ya hecho: estado, fila del historial (anterior «calificada») y aviso. */
+    private void cerrar(long postulacion, long postulante, long administrador, String estadoNuevo, String titulo,
+            String tipo, String motivo) {
+        jdbc.update("UPDATE postulacion SET estado = CAST(? AS estado_postulacion) WHERE id = ?", estadoNuevo,
+                postulacion);
+        jdbc.update("""
+                INSERT INTO postulacion_historial (postulacion_id, usuario_id, estado_anterior, estado_nuevo,
+                                                   motivo, creado_en)
+                VALUES (?, ?, CAST('calificada' AS estado_postulacion), CAST(? AS estado_postulacion),
+                        ?, now() - interval '24 hours')
+                """, postulacion, administrador, estadoNuevo, motivo);
+        jdbc.update("""
+                INSERT INTO notificacion (usuario_id, postulacion_id, titulo, mensaje, tipo, leida, enviada_en)
+                VALUES (?, ?, ?, ?, CAST(? AS tipo_notificacion), false, now() - interval '24 hours')
+                """, postulante, postulacion, titulo, "Hola, la DUBSS cerró tu postulación. Motivo: " + motivo, tipo);
     }
 
     private void avisoObservado(long postulacion, long postulante) {

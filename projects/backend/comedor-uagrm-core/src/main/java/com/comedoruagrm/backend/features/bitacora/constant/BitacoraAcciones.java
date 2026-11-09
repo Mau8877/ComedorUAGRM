@@ -36,6 +36,10 @@ public final class BitacoraAcciones {
     // CU19: el actor es el administrador; el detalle lleva codigos y estados, nunca el motivo, nombres ni CI.
     public static final String DEVOLUCION_POSTULACION = "DEVOLUCION_POSTULACION";
 
+    // CU20: igual que el CU19; el detalle lleva codigos y estados, nunca el motivo, nombres, CI, rutas ni tokens.
+    public static final String ARCHIVO_POSTULACION = "ARCHIVO_POSTULACION";
+    public static final String RECHAZO_POSTULACION = "RECHAZO_POSTULACION";
+
     private BitacoraAcciones() {
     }
 }

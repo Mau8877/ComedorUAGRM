@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
 /**
  * Postulacion de un Postulante a una convocatoria.
  *
- * * La lista priorizada (CU06) no cambia su estado. El CU19 solo la puede devolver (`devolver()`); el
+ * * La lista priorizada (CU06) no cambia su estado. El CU19 la puede devolver (`devolver()`) y el CU20 archivar o rechazar (`archivar()`/`rechazar()`); el
  * * CU que la crea (CU02) agrega el constructor y los setters que necesite.
  */
 @Getter
@@ -63,5 +63,25 @@ public class Postulacion extends BaseModel {
             throw new IllegalStateException("Solo se puede devolver una postulacion calificada");
         }
         this.estado = EstadoPostulacion.devuelta;
+    }
+
+    /**
+     * Pasa la postulacion de «calificada» a «archivada» (CU20). Estado final: no hay vuelta atras. La regla
+     * de negocio con su codigo de error es del `service`; esto es solo la red de seguridad del Model.
+     */
+    public void archivar() {
+        cerrar(EstadoPostulacion.archivada);
+    }
+
+    /** Pasa la postulacion de «calificada» a «no adjudicada» (CU20, rechazo). Estado final. */
+    public void rechazar() {
+        cerrar(EstadoPostulacion.no_adjudicada);
+    }
+
+    private void cerrar(EstadoPostulacion nuevo) {
+        if (estado != EstadoPostulacion.calificada) {
+            throw new IllegalStateException("Solo se puede cerrar una postulacion calificada");
+        }
+        this.estado = nuevo;
     }
 }
