@@ -2,6 +2,8 @@ import { apiClient } from '@/store'
 
 import type {
   AccesoDocumento,
+  CerrarPostulacionRequest,
+  CierrePostulacionResultado,
   DevolucionResultado,
   DevolverPostulacionRequest,
   Expediente,
@@ -47,5 +49,23 @@ export async function devolverPostulacionApi(
   pedido: DevolverPostulacionRequest,
 ): Promise<DevolucionResultado> {
   const respuesta = await apiClient.post<DevolucionResultado>(`/finalistas/${finalista}/devolver`, pedido)
+  return respuesta.data
+}
+
+/** Archiva la postulación calificada del finalista (CU20); avisa al postulante el backend. Sin idempotencia. */
+export async function archivarPostulacionApi(
+  finalista: string,
+  pedido: CerrarPostulacionRequest,
+): Promise<CierrePostulacionResultado> {
+  const respuesta = await apiClient.post<CierrePostulacionResultado>(`/finalistas/${finalista}/archivar`, pedido)
+  return respuesta.data
+}
+
+/** Rechaza la postulación calificada del finalista (CU20): queda «no adjudicada». Sin idempotencia. */
+export async function rechazarPostulacionApi(
+  finalista: string,
+  pedido: CerrarPostulacionRequest,
+): Promise<CierrePostulacionResultado> {
+  const respuesta = await apiClient.post<CierrePostulacionResultado>(`/finalistas/${finalista}/rechazar`, pedido)
   return respuesta.data
 }

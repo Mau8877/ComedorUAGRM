@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
-import { DevueltaBadge } from '@/features/finalistas'
+import { ArchivadaBadge, DevueltaBadge, NoAdjudicadaBadge } from '@/features/finalistas'
 
 import type { Expediente } from '../types'
 import { formatearPuntos } from './formatos'
@@ -46,6 +46,12 @@ export function ExpedienteResumen({ expediente }: { expediente: Expediente }) {
               <dd>
                 <DevueltaBadge />
               </dd>
+            </div>
+          )}
+          {(expediente.estadoPostulacion === 'archivada' || expediente.estadoPostulacion === 'no_adjudicada') && (
+            <div className="flex flex-col">
+              <dt className="text-xs text-muted-foreground">Cierre</dt>
+              <dd>{expediente.estadoPostulacion === 'archivada' ? <ArchivadaBadge /> : <NoAdjudicadaBadge />}</dd>
             </div>
           )}
           <Dato

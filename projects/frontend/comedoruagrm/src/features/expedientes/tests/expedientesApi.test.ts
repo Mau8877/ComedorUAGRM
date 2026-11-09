@@ -4,8 +4,10 @@ import { apiClient } from '@/store'
 
 import {
   accesoDocumentoApi,
+  archivarPostulacionApi,
   devolverPostulacionApi,
   obtenerExpedienteApi,
+  rechazarPostulacionApi,
   registrarAuditoriaApi,
 } from '../api/expedientesApi'
 
@@ -50,5 +52,19 @@ describe('expedientesApi', () => {
 
     expect(await devolverPostulacionApi('f-1', { motivo: 'Falta el carnet' })).toEqual({ estado: 'devuelta' })
     expect(post).toHaveBeenCalledWith('/finalistas/f-1/devolver', { motivo: 'Falta el carnet' })
+  })
+
+  it('archivarPostulacionApi hace POST /finalistas/{codigo}/archivar con el motivo y sin cabecera de idempotencia', async () => {
+    const post = vi.spyOn(apiClient, 'post').mockResolvedValue({ data: { estado: 'archivada' } })
+
+    expect(await archivarPostulacionApi('f-1', { motivo: 'No entregó' })).toEqual({ estado: 'archivada' })
+    expect(post).toHaveBeenCalledWith('/finalistas/f-1/archivar', { motivo: 'No entregó' })
+  })
+
+  it('rechazarPostulacionApi hace POST /finalistas/{codigo}/rechazar con el motivo y sin cabecera de idempotencia', async () => {
+    const post = vi.spyOn(apiClient, 'post').mockResolvedValue({ data: { estado: 'no_adjudicada' } })
+
+    expect(await rechazarPostulacionApi('f-1', { motivo: 'Documentos falsos' })).toEqual({ estado: 'no_adjudicada' })
+    expect(post).toHaveBeenCalledWith('/finalistas/f-1/rechazar', { motivo: 'Documentos falsos' })
   })
 })

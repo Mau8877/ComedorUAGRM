@@ -3,7 +3,14 @@ import type { ColumnDef } from '@tanstack/react-table'
 import { Checkbox } from '@/components/ui/checkbox'
 
 import type { EstadoNotificacion, Finalista, ResultadoAuditoriaFinalista } from '../types'
-import { AuditoriaBadge, DevueltaBadge, EntregaBadge, EstadoNotificacionBadge } from './EstadoBadges'
+import {
+  ArchivadaBadge,
+  AuditoriaBadge,
+  DevueltaBadge,
+  EntregaBadge,
+  EstadoNotificacionBadge,
+  NoAdjudicadaBadge,
+} from './EstadoBadges'
 import { formatearPuntaje } from './formatos'
 
 export interface OpcionesColumnas {
@@ -100,12 +107,19 @@ export function crearColumnasFinalistas({
       accessorKey: 'resultadoAuditoria',
       header: 'Auditoría',
       enableSorting: false,
-      cell: (ctx) =>
-        ctx.row.original.estadoPostulacion === 'devuelta' ? (
-          <DevueltaBadge />
-        ) : (
-          <AuditoriaBadge resultado={ctx.getValue<ResultadoAuditoriaFinalista>()} />
-        ),
+      cell: (ctx) => {
+        // Una postulación devuelta, archivada o no adjudicada no se audita: la insignia reemplaza al resultado.
+        switch (ctx.row.original.estadoPostulacion) {
+          case 'devuelta':
+            return <DevueltaBadge />
+          case 'archivada':
+            return <ArchivadaBadge />
+          case 'no_adjudicada':
+            return <NoAdjudicadaBadge />
+          default:
+            return <AuditoriaBadge resultado={ctx.getValue<ResultadoAuditoriaFinalista>()} />
+        }
+      },
       meta: { cardOrder: 4, width: 'w-32' },
     },
   ]

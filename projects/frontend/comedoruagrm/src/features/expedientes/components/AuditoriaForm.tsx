@@ -153,7 +153,6 @@ export function AuditoriaForm({ finalista, bloqueo, onRegistrada, onFinalistaIne
                     <RadioGroupItem
                       id={`auditoria-resultado-${r}`}
                       value={r}
-                      aria-label={ETIQUETA_RESULTADO[r]}
                       onBlur={field.handleBlur}
                     />
                     {ETIQUETA_RESULTADO[r]}

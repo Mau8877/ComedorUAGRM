@@ -37,6 +37,20 @@ export function DevueltaBadge() {
   return <span className="rounded-full bg-warning/15 px-2 py-0.5 text-xs font-medium text-warning">Devuelta</span>
 }
 
+/** La postulación fue archivada (CU20): estado final, no se audita. */
+export function ArchivadaBadge() {
+  return <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">Archivada</span>
+}
+
+/** La postulación quedó no adjudicada (CU20, rechazo): estado final, no se audita. */
+export function NoAdjudicadaBadge() {
+  return (
+    <span className="rounded-full bg-destructive/15 px-2 py-0.5 text-xs font-medium text-destructive">
+      No adjudicada
+    </span>
+  )
+}
+
 const ETIQUETAS_AUDITORIA: Record<ResultadoAuditoriaFinalista, string> = {
   SIN_AUDITAR: 'Sin auditar',
   VALIDADO: 'Validado',

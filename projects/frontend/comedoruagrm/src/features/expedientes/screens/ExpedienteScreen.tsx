@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
-import { ArrowLeftIcon, BellRingIcon, UndoIcon } from 'lucide-react'
+import { ArchiveIcon, ArrowLeftIcon, BanIcon, BellRingIcon, UndoIcon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { toastError } from '@/components/ui/toast'
@@ -15,15 +15,17 @@ import { AdminLayout } from '@/layouts'
 import { expedientesKeys, mapearErrorExpedientes, useExpediente } from '../api'
 import {
   AuditoriaForm,
+  CerrarPostulacionDialog,
   DevolverPostulacionDialog,
   DocumentosDigitales,
   ExpedienteResumen,
   HistorialAuditorias,
   motivoBloqueoAuditoria,
+  motivoBloqueoCierre,
   motivoBloqueoDevolucion,
   PuntajePanel,
 } from '../components'
-import type { Expediente } from '../types'
+import type { AccionCierre, Expediente } from '../types'
 
 export interface ExpedienteScreenProps {
   titulo: string
@@ -74,6 +76,7 @@ export function ExpedienteScreen({
   const queryClient = useQueryClient()
   const [notificando, setNotificando] = useState(false)
   const [devolviendo, setDevolviendo] = useState(false)
+  const [cerrando, setCerrando] = useState<AccionCierre | null>(null)
 
   const consulta = useExpediente(codigo)
   const expediente = consulta.data
@@ -97,6 +100,11 @@ export function ExpedienteScreen({
   }, [inexistente])
 
   const bloqueoDevolucion = expediente ? motivoBloqueoDevolucion(expediente) : null
+  const bloqueoCierre = expediente ? motivoBloqueoCierre(expediente) : null
+  // Los avisos de por qué están deshabilitadas las acciones, sin repetir: el genérico se omite si hay uno más específico.
+  const GENERICO = 'La postulación ya no está calificada.'
+  const avisos = [...new Set([bloqueoCierre, bloqueoDevolucion].filter((m): m is string => m !== null))]
+  const notasBloqueo = avisos.length > 1 ? avisos.filter((m) => m !== GENERICO) : avisos
 
   const refrescar = () => {
     void queryClient.invalidateQueries({ queryKey: expedientesKeys.detail(codigo) })
@@ -130,15 +138,33 @@ export function ExpedienteScreen({
               <UndoIcon data-icon="inline-start" />
               Devolver para corrección
             </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={bloqueoCierre !== null}
+              onClick={() => setCerrando('archivar')}
+            >
+              <ArchiveIcon data-icon="inline-start" />
+              Archivar
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={bloqueoCierre !== null}
+              onClick={() => setCerrando('rechazar')}
+            >
+              <BanIcon data-icon="inline-start" />
+              Rechazar
+            </Button>
           </div>
         )}
       </div>
 
-      {bloqueoDevolucion && (
-        <p role="note" className="mb-4 text-right text-xs text-muted-foreground">
-          {bloqueoDevolucion}
+      {notasBloqueo.map((nota) => (
+        <p key={nota} role="note" className="mb-4 text-right text-xs text-muted-foreground">
+          {nota}
         </p>
-      )}
+      ))}
 
       {consulta.isLoading && <p className="py-8 text-center text-sm text-muted-foreground">Cargando expediente…</p>}
 
@@ -198,6 +224,22 @@ export function ExpedienteScreen({
           open
           onOpenChange={setDevolviendo}
           finalista={codigo}
+          onFinalistaInexistente={finalistaInexistente}
+        />
+      )}
+
+      {/* Se monta solo mientras está abierto: al cerrar se descarta lo escrito. */}
+      {cerrando && expediente && (
+        <CerrarPostulacionDialog
+          open
+          onOpenChange={(abierto) => {
+            if (!abierto) setCerrando(null)
+          }}
+          accion={cerrando}
+          finalista={codigo}
+          postulante={`${expediente.postulante.nombres} ${expediente.postulante.apellidos}`}
+          convocatoria={expediente.convocatoria.nombre}
+          onDesactualizado={refrescar}
           onFinalistaInexistente={finalistaInexistente}
         />
       )}

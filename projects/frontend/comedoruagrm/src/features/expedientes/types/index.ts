@@ -104,3 +104,25 @@ export interface DevolucionResultado {
   /** Nombre completo de quien la devolvió. */
   devueltaPor: string
 }
+
+// Contrato del backend de CU20 (CierrePostulacionRequest, CierrePostulacionResponse).
+
+export interface CerrarPostulacionRequest {
+  /** Motivo del cierre: obligatorio, de hasta 500 caracteres. */
+  motivo: string
+}
+
+/** Qué se hace con la postulación calificada: archivarla («archivada») o rechazarla («no adjudicada»). */
+export type AccionCierre = 'archivar' | 'rechazar'
+
+export interface CierrePostulacionResultado {
+  /** Código público de la postulación. */
+  postulacion: string
+  /** `archivada` o `no_adjudicada`. */
+  estado: string
+  motivo: string
+  /** Instante ISO de la decisión. */
+  fecha: string
+  /** Nombre completo de quien decidió. */
+  decididaPor: string
+}

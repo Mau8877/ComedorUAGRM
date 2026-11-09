@@ -4,6 +4,8 @@ import { mapearErrorFinalistas, type ErrorFinalistas } from '@/features/finalist
 export interface ErrorExpedientes extends ErrorFinalistas {
   /** El finalista ya no existe: hay que volver a la lista (A11). */
   finalistaInexistente?: boolean
+  /** El expediente quedó desactualizado (CU20, ERR_ARC_01): conviene volver a pedirlo. */
+  refrescar?: boolean
 }
 
 /** Traduce un error de la API del expediente a lo que ve el Administrador (CU07). */
@@ -28,6 +30,11 @@ export function mapearErrorExpedientes(error: unknown): ErrorExpedientes {
         return { mensaje: 'La postulación ya no está calificada: otra persona pudo devolverla antes.' }
       case 'ERR_DEV_02':
         return { mensaje: 'Primero registra la auditoría del expediente.' }
+      case 'ERR_ARC_01':
+        return {
+          mensaje: 'La postulación ya no está calificada o los resultados ya se publicaron; se actualizó el expediente.',
+          refrescar: true,
+        }
       case 'ERR_FIN_01':
         return { mensaje: 'El finalista ya no existe.', finalistaInexistente: true }
       default:

@@ -27,6 +27,15 @@ describe('mapearErrorExpedientes', () => {
     )
   })
 
+  it('traduce ERR_ARC_01 del CU20 y marca que hay que refrescar el expediente', () => {
+    const mapeado = mapearErrorExpedientes(new ApiError('ERR_ARC_01', 'x'))
+
+    expect(mapeado.mensaje).toBe(
+      'La postulación ya no está calificada o los resultados ya se publicaron; se actualizó el expediente.',
+    )
+    expect(mapeado.refrescar).toBe(true)
+  })
+
   it('marca el finalista inexistente para volver a la lista', () => {
     expect(mapearErrorExpedientes(new ApiError('ERR_FIN_01', 'x')).finalistaInexistente).toBe(true)
   })
