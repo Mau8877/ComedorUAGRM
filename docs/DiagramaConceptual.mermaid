@@ -221,7 +221,7 @@ erDiagram
     bigint usuario_id FK
     estado_postulacion estado_anterior
     estado_postulacion estado_nuevo
-    text motivo
+    text motivo "máx. 500 caracteres, lo valida el servicio"
     timestamptz creado_en
     timestamptz actualizado_en
     timestamptz eliminado_en

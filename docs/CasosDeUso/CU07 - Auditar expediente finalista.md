@@ -2,7 +2,7 @@
 
 | Id   | Nombre                       | Módulo                       | Prioridad | Estado    |
 | ---- | ---------------------------- | ---------------------------- | --------- | --------- |
-| CU07 | Auditar expediente finalista | P4. Auditoría y adjudicación | Alta      | Pendiente |
+| CU07 | Auditar expediente finalista | P4. Auditoría y adjudicación | Alta      | Hecho     |
 
 **Actor principal:** Administrador DUBSS
 **Actores secundarios:** Postulante (recibe el aviso del resultado, a través del servicio de [CU-EXTRA-01](CU-EXTRA-01%20-%20Notificaciones%20push.md))

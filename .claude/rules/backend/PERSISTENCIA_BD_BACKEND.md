@@ -157,7 +157,7 @@ una decisión deliberada para evitar conflictos de merge, no un descuido.
   `@Enumerated(EnumType.STRING)` (nunca `ORDINAL`) y se mapean al tipo
   nativo de PostgreSQL (`@JdbcType(PostgreSQLEnumJdbcType.class)` o
   equivalente). Los valores exactos están en `diseno_base_de_datos.md` §4.
-- **Archivos**: los binarios viven en **Firebase Storage**; la base solo
+- **Archivos**: los binarios viven en **MinIO** (almacenamiento de objetos compatible con S3); la base solo
   guarda la ruta (`storage_path`), el tipo (`mime_type`) y el tamaño
   (`tamano_bytes`). Nunca se guarda un binario en PostgreSQL.
 - **Contraseñas**: solo existe su hash BCrypt (`usuario.password_hash`),

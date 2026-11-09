@@ -130,8 +130,8 @@ Cada paquete de análisis es el punto de partida para agrupar los `features/`:
 - El nombre de cada carpeta `features/{modulo}/` se fija al crear el primer
   módulo; los paquetes son una guía de agrupación, no un requisito de que
   haya exactamente seis carpetas.
-- **Integraciones externas** que el backend consume: Firebase (FCM
-  para push y Storage para archivos; la autenticación NO es de Firebase) y el **módulo de IA en Python**
+- **Integraciones externas** que el backend consume: Firebase (solo FCM
+  para push; la autenticación NO es de Firebase), **MinIO** (almacenamiento de archivos) y el **módulo de IA en Python**
   (consumido por API para calcular el puntaje de vulnerabilidad). La
   estructura de código de esas integraciones se define al implementar la
   primera; mientras tanto, regla de dependencia: el `service` de un módulo
