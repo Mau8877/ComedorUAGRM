@@ -81,6 +81,10 @@ docs/errors/
 - [`ERR_DEV_01`](postulaciones/ERRORES_POSTULACIONES.md#err_dev_01) — La postulación ya no está calificada (409)
 - [`ERR_DEV_02`](postulaciones/ERRORES_POSTULACIONES.md#err_dev_02) — El finalista no tiene una auditoría posterior a su última devolución (409)
 
+### Archivo y rechazo de postulaciones (`ARC`)
+
+- [`ERR_ARC_01`](postulaciones/ERRORES_POSTULACIONES.md#err_arc_01) — La postulación ya no está calificada o los resultados ya se publicaron (409)
+
 <!--
   A medida que se agregan módulos de negocio (platos, menú, usuarios...),
   cada uno suma acá su propia sección "### Nombre (PREFIJO)" con la lista

@@ -2,7 +2,7 @@
 
 | Id   | Nombre                           | Módulo                       | Prioridad | Estado    |
 | ---- | -------------------------------- | ---------------------------- | --------- | --------- |
-| CU20 | Archivar o rechazar postulación  | P4. Auditoría y adjudicación | Alta      | Pendiente |
+| CU20 | Archivar o rechazar postulación  | P4. Auditoría y adjudicación | Alta      | Hecho     |
 
 **Actor principal:** Administrador DUBSS
 **Actores secundarios:** Postulante (recibe el aviso con el motivo, a través del servicio de [CU-EXTRA-01](CU-EXTRA-01%20-%20Notificaciones%20push.md))

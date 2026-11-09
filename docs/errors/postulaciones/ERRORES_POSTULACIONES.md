@@ -49,3 +49,15 @@ donde está la lista.
   su última devolución (nunca se auditó, o se devolvió, el postulante reenvió y
   todavía no se volvió a auditar); siempre debe haber una auditoría antes de devolver.
 - **Dónde se lanza:** `DevolucionService.devolver()`
+
+## `ERR_ARC_01`
+
+- **HTTP:** 409
+- **Excepción:** `ConflictException`
+- **Significado:** La postulación del finalista ya no está «calificada» (ya fue
+  devuelta, archivada, no adjudicada o adjudicada, por ejemplo por otro
+  administrador o por una segunda petición del mismo clic) o los resultados de
+  la convocatoria ya fueron publicados; no se puede archivar ni rechazar. El
+  mensaje trae el estado actual cuando es el primer caso.
+- **Dónde se lanza:** `CierrePostulacionService.archivar()` y
+  `CierrePostulacionService.rechazar()` (método privado `cerrar()`)
