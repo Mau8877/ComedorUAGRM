@@ -233,4 +233,21 @@ class FinalistaConsultaRepositoryTest {
         assertThat(fila(codigoConvocatoria(conv), 2).estadoPostulacion()).isEqualTo("archivada");
         assertThat(fila(codigoConvocatoria(conv), 3).estadoPostulacion()).isEqualTo("no_adjudicada");
     }
+
+    // CU05: una postulacion decidida (adjudicada o no adjudicada por decision final) sigue en la lista de finalistas.
+    @Test
+    void estadoPostulacion_muestraAdjudicadaYNoAdjudicadaPorDecisionFinal_yElFinalistaSigueEnLaLista() {
+        long conv = convocatoria();
+        finalista(conv, 1, "9100091", "Ana", "Uno");
+        long adjudicada = finalista(conv, 2, "9100092", "Beto", "Dos");
+        long noAdjudicada = finalista(conv, 3, "9100093", "Carla", "Tres");
+        jdbc.update("UPDATE postulacion SET estado = CAST('adjudicada' AS estado_postulacion) WHERE id = ?",
+                adjudicada);
+        jdbc.update("UPDATE postulacion SET estado = CAST('no_adjudicada' AS estado_postulacion) WHERE id = ?",
+                noAdjudicada);
+
+        assertThat(fila(codigoConvocatoria(conv), 1).estadoPostulacion()).isEqualTo("calificada");
+        assertThat(fila(codigoConvocatoria(conv), 2).estadoPostulacion()).isEqualTo("adjudicada");
+        assertThat(fila(codigoConvocatoria(conv), 3).estadoPostulacion()).isEqualTo("no_adjudicada");
+    }
 }

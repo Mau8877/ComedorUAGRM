@@ -47,6 +47,34 @@ public final class ExpedienteFixtures {
                         CAST('CERRADA' AS estado_convocatoria)) RETURNING id""", Long.class, gestion, "Conv " + etiqueta);
     }
 
+    /** Una convocatoria cerrada con cupos, puntaje minimo y cantidad de finalistas (CU05); cualquiera puede ser nulo. */
+    public long convocatoriaConCupos(String etiqueta, Integer cupos, String puntajeMinimo, Integer cantidadFinalistas) {
+        long id = convocatoria(etiqueta);
+        jdbc.update("UPDATE convocatoria SET cupos = ?, puntaje_minimo = ?, cantidad_finalistas = ? WHERE id = ?",
+                cupos, puntajeMinimo == null ? null : new BigDecimal(puntajeMinimo), cantidadFinalistas, id);
+        return id;
+    }
+
+    /** Cambia el estado de una convocatoria (`ABIERTA`, `CERRADA`, `BORRADOR`). */
+    public void estadoConvocatoria(long convocatoria, String estado) {
+        jdbc.update("UPDATE convocatoria SET estado = CAST(? AS estado_convocatoria) WHERE id = ?", estado,
+                convocatoria);
+    }
+
+    /** Fija la fecha de envio de una postulacion (desempate de la lista priorizada). */
+    public void fechaEnvio(long postulacion, String instanteIso) {
+        jdbc.update("UPDATE postulacion SET fecha_envio = CAST(? AS timestamptz) WHERE id = ?", instanteIso,
+                postulacion);
+    }
+
+    /** Una decision de adjudicacion ya registrada (`ADJUDICADA` o `NO_ADJUDICADA`). */
+    public long adjudicacion(long postulacion, String resultado, String puntajeFinal, long decididoPor) {
+        return jdbc.queryForObject("""
+                INSERT INTO adjudicacion (postulacion_id, resultado, puntaje_final, decidido_por)
+                VALUES (?, CAST(? AS resultado_adjudicacion), ?, ?) RETURNING id""", Long.class, postulacion,
+                resultado, puntajeFinal == null ? null : new BigDecimal(puntajeFinal), decididoPor);
+    }
+
     /** Una postulacion en el estado dado (`calificada`, `devuelta`...). */
     public long postulacion(long convocatoria, long postulanteUsuario, String estado) {
         return jdbc.queryForObject("""

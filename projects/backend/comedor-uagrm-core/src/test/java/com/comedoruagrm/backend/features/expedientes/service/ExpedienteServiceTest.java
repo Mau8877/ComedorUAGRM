@@ -213,6 +213,17 @@ class ExpedienteServiceTest {
                 ExpedienteErrorCodes.ERR_EXP_02);
     }
 
+    // CU05: un finalista ya decidido (adjudicado o no adjudicado) deja de ser auditable.
+    @Test
+    void registrarAuditoria_conPostulacionAdjudicadaONoAdjudicada_lanzaErrExp02() {
+        for (String estado : new String[] {"adjudicada", "no_adjudicada"}) {
+            preparar(estado, RECIBIDA);
+
+            assertCodigo(() -> service.registrarAuditoria(actorCodigo, codigo, null, validado("20")),
+                    ExpedienteErrorCodes.ERR_EXP_02);
+        }
+    }
+
     @Test
     void registrarAuditoria_sinEntregaFisica_lanzaErrExp01() {
         preparar("calificada", null);

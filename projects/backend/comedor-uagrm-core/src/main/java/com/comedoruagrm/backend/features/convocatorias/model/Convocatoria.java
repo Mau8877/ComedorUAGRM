@@ -57,6 +57,11 @@ public class Convocatoria extends BaseModel {
     @Column(name = "puntaje_minimo", precision = 5, scale = 2)
     private BigDecimal puntajeMinimo;
 
+    // Cuantos finalistas se eligen en el CU05 (propuesta por defecto). Solo la ve el Administrador y la
+    // escribe el CU13; por eso solo tiene getter.
+    @Column(name = "cantidad_finalistas")
+    private Integer cantidadFinalistas;
+
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "estado", nullable = false)

@@ -40,6 +40,11 @@ public final class BitacoraAcciones {
     public static final String ARCHIVO_POSTULACION = "ARCHIVO_POSTULACION";
     public static final String RECHAZO_POSTULACION = "RECHAZO_POSTULACION";
 
+    // CU05: el actor es el administrador; el detalle lleva codigos y estados, nunca el motivo, nombres, CI, rutas ni tokens.
+    public static final String SELECCION_FINALISTAS = "SELECCION_FINALISTAS";
+    public static final String ADJUDICACION_BECA = "ADJUDICACION_BECA";
+    public static final String NO_ADJUDICACION_BECA = "NO_ADJUDICACION_BECA";
+
     private BitacoraAcciones() {
     }
 }

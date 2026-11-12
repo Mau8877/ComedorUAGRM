@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
 /**
  * Postulacion de un Postulante a una convocatoria.
  *
- * * La lista priorizada (CU06) no cambia su estado. El CU19 la puede devolver (`devolver()`) y el CU20 archivar o rechazar (`archivar()`/`rechazar()`); el
+ * * La lista priorizada (CU06) no cambia su estado. El CU19 la puede devolver (`devolver()`) y el CU20 archivar o rechazar (`archivar()`/`rechazar()`) y el CU05 adjudicarla o no adjudicarla (`adjudicar()`/`noAdjudicar()`); el
  * * CU que la crea (CU02) agrega el constructor y los setters que necesite.
  */
 @Getter
@@ -76,6 +76,23 @@ public class Postulacion extends BaseModel {
     /** Pasa la postulacion de «calificada» a «no adjudicada» (CU20, rechazo). Estado final. */
     public void rechazar() {
         cerrar(EstadoPostulacion.no_adjudicada);
+    }
+
+    /** Pasa la postulacion de «calificada» a «adjudicada» (CU05). Estado final. */
+    public void adjudicar() {
+        decidir(EstadoPostulacion.adjudicada);
+    }
+
+    /** Pasa la postulacion de «calificada» a «no adjudicada» por decision final (CU05). Estado final. */
+    public void noAdjudicar() {
+        decidir(EstadoPostulacion.no_adjudicada);
+    }
+
+    private void decidir(EstadoPostulacion nuevo) {
+        if (estado != EstadoPostulacion.calificada) {
+            throw new IllegalStateException("Solo se puede decidir una postulacion calificada");
+        }
+        this.estado = nuevo;
     }
 
     private void cerrar(EstadoPostulacion nuevo) {
