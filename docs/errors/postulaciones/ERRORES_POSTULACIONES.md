@@ -61,3 +61,56 @@ donde está la lista.
   mensaje trae el estado actual cuando es el primer caso.
 - **Dónde se lanza:** `CierrePostulacionService.archivar()` y
   `CierrePostulacionService.rechazar()` (método privado `cerrar()`)
+
+## `ERR_ADJ_01`
+
+- **HTTP:** 409
+- **Excepción:** `ConflictException`
+- **Significado:** La postulación del finalista ya no está «calificada» (ya fue
+  devuelta, archivada, adjudicada o no adjudicada, por ejemplo por otro
+  administrador o por una segunda petición del mismo clic) o los resultados de
+  la convocatoria ya fueron publicados; no se puede adjudicar ni no adjudicar.
+  El mensaje trae el estado actual cuando es el primer caso. También se lanza
+  al seleccionar finalistas si los resultados ya fueron publicados.
+- **Dónde se lanza:** `AdjudicacionService.adjudicar()` y
+  `AdjudicacionService.noAdjudicar()` (método privado `decidir()`);
+  `SeleccionFinalistasService.seleccionar()`
+
+## `ERR_ADJ_02`
+
+- **HTTP:** 409
+- **Excepción:** `ConflictException`
+- **Significado:** El expediente del finalista no tiene ninguna auditoría
+  (aplica a adjudicar y a no adjudicar) o, al adjudicar, la última auditoría no
+  es «Validado» (hay que auditar de nuevo o usar «No adjudicar»).
+- **Dónde se lanza:** `AdjudicacionService.adjudicar()` y
+  `AdjudicacionService.noAdjudicar()` (método privado `decidir()`)
+
+## `ERR_ADJ_03`
+
+- **HTTP:** 409
+- **Excepción:** `ConflictException`
+- **Significado:** Al adjudicar, el puntaje total del finalista (puntaje de la
+  IA vigente más puntaje académico de la última auditoría) es menor que el
+  puntaje mínimo de la convocatoria, o el puntaje de la IA no está disponible.
+- **Dónde se lanza:** `AdjudicacionService.adjudicar()` (método privado
+  `decidir()`)
+
+## `ERR_ADJ_04`
+
+- **HTTP:** 409
+- **Excepción:** `ConflictException`
+- **Significado:** Al adjudicar, los cupos de la convocatoria ya están agotados
+  (las adjudicaciones igualan a los cupos).
+- **Dónde se lanza:** `AdjudicacionService.adjudicar()` (método privado
+  `decidir()`)
+
+## `ERR_ADJ_05`
+
+- **HTTP:** 409
+- **Excepción:** `ConflictException`
+- **Significado:** La convocatoria no está cerrada, o no tiene cupos o puntaje
+  mínimo definidos; no se pueden seleccionar finalistas ni decidir.
+- **Dónde se lanza:** `SeleccionFinalistasService.seleccionar()`;
+  `AdjudicacionService.adjudicar()` y `AdjudicacionService.noAdjudicar()`
+  (método privado `decidir()`)

@@ -85,6 +85,14 @@ docs/errors/
 
 - [`ERR_ARC_01`](postulaciones/ERRORES_POSTULACIONES.md#err_arc_01) — La postulación ya no está calificada o los resultados ya se publicaron (409)
 
+### Adjudicación (`ADJ`)
+
+- [`ERR_ADJ_01`](postulaciones/ERRORES_POSTULACIONES.md#err_adj_01) — La postulación ya no está calificada o los resultados ya se publicaron (409)
+- [`ERR_ADJ_02`](postulaciones/ERRORES_POSTULACIONES.md#err_adj_02) — Sin auditoría, o la última no es «Validado» al adjudicar (409)
+- [`ERR_ADJ_03`](postulaciones/ERRORES_POSTULACIONES.md#err_adj_03) — El puntaje total no alcanza el mínimo de la convocatoria (409)
+- [`ERR_ADJ_04`](postulaciones/ERRORES_POSTULACIONES.md#err_adj_04) — Los cupos de la convocatoria están agotados (409)
+- [`ERR_ADJ_05`](postulaciones/ERRORES_POSTULACIONES.md#err_adj_05) — La convocatoria no está cerrada o no tiene cupos o puntaje mínimo (409)
+
 <!--
   A medida que se agregan módulos de negocio (platos, menú, usuarios...),
   cada uno suma acá su propia sección "### Nombre (PREFIJO)" con la lista

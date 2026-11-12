@@ -133,9 +133,16 @@ llama `comedor-uagrm-core` y es el que usan nginx y Prometheus.
   auditorías variadas: el 1 validado, el 2 observado (sin certificado de
   notas), el 3 con entrega y sin auditar, el 4 observado y luego validado, el
   5 no válido y del 6 al 10 con la entrega pendiente. Se ven en
-  `GET /api/v1/finalistas/{codigo}/expediente`. Se apagan con
+  `GET /api/v1/finalistas/{codigo}/expediente`. Para el CU05 deja la convocatoria
+  `[PRUEBA]` cerrada con cupos (5), puntaje mínimo (70) y cantidad de finalistas
+  (15) de **ejemplo** (los reales los define la DUBSS), cuatro finalistas más (uno
+  validado con puntaje bajo el mínimo, uno validado suficiente, uno ya adjudicado
+  y uno ya no adjudicado por decisión final) y dos convocatorias de casos límite
+  (un cupo libre con varios finalistas validados, y sin cupos ni mínimo definidos;
+  `DatosPruebaAdjudicacion`). Se apagan con
   `SEED_ADMIN_ENABLED=false`, `SEED_PRIORIZACION_ENABLED=false`,
-  `SEED_FINALISTAS_ENABLED=false` y `SEED_EXPEDIENTES_ENABLED=false`;
+  `SEED_FINALISTAS_ENABLED=false`, `SEED_EXPEDIENTES_ENABLED=false` y
+  `SEED_ADJUDICACION_ENABLED=false`;
   `SEED_PRIORIZACION_POSTULACIONES=20000` sirve para medir el rendimiento.
   **Nunca corren fuera del perfil `dev`.**
 - **Volúmenes**:
