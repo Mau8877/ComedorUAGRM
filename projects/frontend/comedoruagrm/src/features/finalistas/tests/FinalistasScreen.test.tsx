@@ -169,6 +169,21 @@ describe('FinalistasScreen', () => {
     expect(screen.getAllByRole('button', { name: 'Auditar' }).length).toBeGreaterThanOrEqual(4)
   })
 
+  it('una postulación adjudicada muestra la insignia «Adjudicada» en vez del resultado y «Auditar» sigue (CU05)', async () => {
+    responder([
+      finalista(1, { estadoPostulacion: 'adjudicada', resultadoAuditoria: 'VALIDADO' }),
+      finalista(2, { estadoPostulacion: 'no_adjudicada', resultadoAuditoria: 'OBSERVADO' }),
+      finalista(3, { estadoPostulacion: 'calificada', resultadoAuditoria: 'VALIDADO' }),
+    ])
+    montar(vi.fn())
+
+    expect((await screen.findAllByText('Adjudicada')).length).toBeGreaterThan(0)
+    // «No adjudicada» no cambia (rechazo o decisión final se ven igual); «calificada» sigue mostrando su resultado.
+    expect(screen.getAllByText('No adjudicada').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Validado').length).toBeGreaterThan(0)
+    expect(screen.getAllByRole('button', { name: 'Auditar' }).length).toBeGreaterThanOrEqual(3)
+  })
+
   it('«Auditar» abre el expediente del finalista elegido (CU07)', async () => {
     responder([finalista(1), finalista(2)])
     const onAuditar = vi.fn()

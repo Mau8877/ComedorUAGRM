@@ -21,4 +21,10 @@ describe('adminNavItems', () => {
   it('tiene la entrada «Finalistas» que lleva a su pantalla (CU21)', () => {
     expect(adminNavItems).toContainEqual(expect.objectContaining({ label: 'Finalistas', href: '/finalistas' }))
   })
+
+  it('tiene la entrada «Auditoría y adjudicación» que lleva a su pantalla (CU05)', () => {
+    expect(adminNavItems).toContainEqual(
+      expect.objectContaining({ label: 'Auditoría y adjudicación', href: '/adjudicacion' }),
+    )
+  })
 })

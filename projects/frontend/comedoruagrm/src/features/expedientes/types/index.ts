@@ -126,3 +126,32 @@ export interface CierrePostulacionResultado {
   /** Nombre completo de quien decidió. */
   decididaPor: string
 }
+
+// Contrato del backend de CU05 (NoAdjudicarRequest, DecisionAdjudicacionResponse). Adjudicar no lleva cuerpo.
+
+export interface NoAdjudicarRequest {
+  /** Motivo de «No adjudicar»: obligatorio, de hasta 500 caracteres. */
+  motivo: string
+}
+
+/** Qué se decide sobre el finalista auditado: adjudicar la beca o no adjudicarla. */
+export type AccionDecision = 'adjudicar' | 'no-adjudicar'
+
+export interface DecisionAdjudicacionResultado {
+  /** Código público del finalista. */
+  finalista: string
+  /** Código público de la postulación. */
+  postulacion: string
+  /** `ADJUDICADA` o `NO_ADJUDICADA`. */
+  resultado: string
+  /** `adjudicada` o `no_adjudicada`. */
+  estado: string
+  /** IA + puntaje académico calculado al decidir; nulo si no se pudo calcular (solo al no adjudicar). */
+  puntajeFinal: number | null
+  /** Instante ISO de la decisión. */
+  fechaAdjudicacion: string
+  /** Nombre completo de quien decidió. */
+  decididaPor: string
+  /** Cupos disponibles ya actualizados; nulo si la convocatoria no tiene cupos definidos. */
+  cuposDisponibles: number | null
+}

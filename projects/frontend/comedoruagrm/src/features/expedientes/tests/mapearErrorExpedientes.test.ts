@@ -36,6 +36,37 @@ describe('mapearErrorExpedientes', () => {
     expect(mapeado.refrescar).toBe(true)
   })
 
+  it('traduce ERR_ADJ_01 del CU05 y marca que hay que refrescar el expediente', () => {
+    const mapeado = mapearErrorExpedientes(new ApiError('ERR_ADJ_01', 'x'))
+
+    expect(mapeado.mensaje).toBe(
+      'La postulación ya no está calificada o los resultados ya se publicaron; se actualizó el expediente.',
+    )
+    expect(mapeado.refrescar).toBe(true)
+  })
+
+  it('traduce ERR_ADJ_02 según haya o no auditoría', () => {
+    expect(mapearErrorExpedientes(new ApiError('ERR_ADJ_02', 'El expediente del finalista todavía no fue auditado')).mensaje)
+      .toBe('Primero hay que auditar el expediente.')
+    expect(
+      mapearErrorExpedientes(
+        new ApiError('ERR_ADJ_02', 'La última auditoría no es «Validado»: hay que auditar de nuevo o usar «No adjudicar»'),
+      ).mensaje,
+    ).toBe('El expediente debe estar auditado y validado para adjudicar. Puede auditarlo de nuevo o usar “No adjudicar”.')
+  })
+
+  it('traduce ERR_ADJ_03, ERR_ADJ_04 (refrescar) y ERR_ADJ_05', () => {
+    expect(mapearErrorExpedientes(new ApiError('ERR_ADJ_03', 'x')).mensaje).toBe(
+      'El puntaje total no alcanza el puntaje mínimo de la convocatoria.',
+    )
+    const cupos = mapearErrorExpedientes(new ApiError('ERR_ADJ_04', 'x'))
+    expect(cupos.mensaje).toBe('Ya no quedan cupos disponibles. Solo se admite “No adjudicar”.')
+    expect(cupos.refrescar).toBe(true)
+    expect(mapearErrorExpedientes(new ApiError('ERR_ADJ_05', 'x')).mensaje).toBe(
+      'La convocatoria debe estar cerrada y tener cupos y puntaje mínimo definidos.',
+    )
+  })
+
   it('marca el finalista inexistente para volver a la lista', () => {
     expect(mapearErrorExpedientes(new ApiError('ERR_FIN_01', 'x')).finalistaInexistente).toBe(true)
   })

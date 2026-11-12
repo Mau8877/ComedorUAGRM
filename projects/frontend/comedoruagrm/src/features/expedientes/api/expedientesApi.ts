@@ -4,9 +4,11 @@ import type {
   AccesoDocumento,
   CerrarPostulacionRequest,
   CierrePostulacionResultado,
+  DecisionAdjudicacionResultado,
   DevolucionResultado,
   DevolverPostulacionRequest,
   Expediente,
+  NoAdjudicarRequest,
   RegistrarAuditoriaRequest,
   ResultadoRegistroAuditoria,
 } from '../types'
@@ -67,5 +69,23 @@ export async function rechazarPostulacionApi(
   pedido: CerrarPostulacionRequest,
 ): Promise<CierrePostulacionResultado> {
   const respuesta = await apiClient.post<CierrePostulacionResultado>(`/finalistas/${finalista}/rechazar`, pedido)
+  return respuesta.data
+}
+
+/** Adjudica la beca al finalista auditado (CU05). Sin cuerpo y sin idempotencia: el backend rechaza la repetición. */
+export async function adjudicarFinalistaApi(finalista: string): Promise<DecisionAdjudicacionResultado> {
+  const respuesta = await apiClient.post<DecisionAdjudicacionResultado>(`/finalistas/${finalista}/adjudicar`)
+  return respuesta.data
+}
+
+/** Decide no adjudicar la beca al finalista (CU05): queda «no adjudicada», con motivo. Sin idempotencia. */
+export async function noAdjudicarFinalistaApi(
+  finalista: string,
+  pedido: NoAdjudicarRequest,
+): Promise<DecisionAdjudicacionResultado> {
+  const respuesta = await apiClient.post<DecisionAdjudicacionResultado>(
+    `/finalistas/${finalista}/no-adjudicar`,
+    pedido,
+  )
   return respuesta.data
 }

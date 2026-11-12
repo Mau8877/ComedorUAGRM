@@ -4,6 +4,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 
 import type { EstadoNotificacion, Finalista, ResultadoAuditoriaFinalista } from '../types'
 import {
+  AdjudicadaBadge,
   ArchivadaBadge,
   AuditoriaBadge,
   DevueltaBadge,
@@ -108,10 +109,12 @@ export function crearColumnasFinalistas({
       header: 'Auditoría',
       enableSorting: false,
       cell: (ctx) => {
-        // Una postulación devuelta, archivada o no adjudicada no se audita: la insignia reemplaza al resultado.
+        // Una postulación devuelta, archivada, adjudicada o no adjudicada no se audita: la insignia reemplaza al resultado.
         switch (ctx.row.original.estadoPostulacion) {
           case 'devuelta':
             return <DevueltaBadge />
+          case 'adjudicada':
+            return <AdjudicadaBadge />
           case 'archivada':
             return <ArchivadaBadge />
           case 'no_adjudicada':

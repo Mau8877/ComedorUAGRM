@@ -42,6 +42,11 @@ export function ArchivadaBadge() {
   return <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">Archivada</span>
 }
 
+/** La beca fue adjudicada (CU05): estado final, no se audita ni se decide otra vez. */
+export function AdjudicadaBadge() {
+  return <span className="rounded-full bg-success/15 px-2 py-0.5 text-xs font-medium text-success">Adjudicada</span>
+}
+
 /** La postulación quedó no adjudicada (CU20, rechazo): estado final, no se audita. */
 export function NoAdjudicadaBadge() {
   return (

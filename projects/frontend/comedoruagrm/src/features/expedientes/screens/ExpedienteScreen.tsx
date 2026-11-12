@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
-import { ArchiveIcon, ArrowLeftIcon, BanIcon, BellRingIcon, UndoIcon } from 'lucide-react'
+import { ArchiveIcon, ArrowLeftIcon, AwardIcon, BanIcon, BellRingIcon, UndoIcon, XCircleIcon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { toastError } from '@/components/ui/toast'
+import { adjudicacionKeys, usePanelAdjudicacion } from '@/features/adjudicacion'
 import { etiquetaRol, useCerrarSesion } from '@/features/auth'
 import type { Usuario } from '@/features/auth'
 import { finalistasKeys, NotificarFinalistasDialog, RegistrarEntregaPanel } from '@/features/finalistas'
@@ -16,16 +17,18 @@ import { expedientesKeys, mapearErrorExpedientes, useExpediente } from '../api'
 import {
   AuditoriaForm,
   CerrarPostulacionDialog,
+  DecidirAdjudicacionDialog,
   DevolverPostulacionDialog,
   DocumentosDigitales,
   ExpedienteResumen,
   HistorialAuditorias,
+  motivoBloqueoAdjudicacion,
   motivoBloqueoAuditoria,
   motivoBloqueoCierre,
   motivoBloqueoDevolucion,
   PuntajePanel,
 } from '../components'
-import type { AccionCierre, Expediente } from '../types'
+import type { AccionCierre, AccionDecision, Expediente } from '../types'
 
 export interface ExpedienteScreenProps {
   titulo: string
@@ -77,10 +80,13 @@ export function ExpedienteScreen({
   const [notificando, setNotificando] = useState(false)
   const [devolviendo, setDevolviendo] = useState(false)
   const [cerrando, setCerrando] = useState<AccionCierre | null>(null)
+  const [decidiendo, setDecidiendo] = useState<AccionDecision | null>(null)
 
   const consulta = useExpediente(codigo)
   const expediente = consulta.data
   const error = consulta.error ? mapearErrorExpedientes(consulta.error) : null
+  // Los cupos y el puntaje mínimo salen del panel de la convocatoria del expediente (CU05).
+  const panel = usePanelAdjudicacion(expediente?.convocatoria.codigo).data
 
   // A11: el finalista desapareció (al abrir el expediente o al registrar la auditoría). Se avisa una sola vez,
   // se refresca la lista (ya no debe mostrarlo) y se vuelve a ella.
@@ -101,13 +107,24 @@ export function ExpedienteScreen({
 
   const bloqueoDevolucion = expediente ? motivoBloqueoDevolucion(expediente) : null
   const bloqueoCierre = expediente ? motivoBloqueoCierre(expediente) : null
-  // Los avisos de por qué están deshabilitadas las acciones, sin repetir: el genérico se omite si hay uno más específico.
+  const bloqueoAdjudicar = expediente ? motivoBloqueoAdjudicacion(expediente, panel, 'adjudicar') : null
+  const bloqueoNoAdjudicar = expediente ? motivoBloqueoAdjudicacion(expediente, panel, 'no-adjudicar') : null
+  // Los avisos de por qué están deshabilitadas las acciones, sin repetir: el genérico se omite si hay uno más
+  // específico, y «cargando» no es un aviso (los botones solo esperan).
   const GENERICO = 'La postulación ya no está calificada.'
-  const avisos = [...new Set([bloqueoCierre, bloqueoDevolucion].filter((m): m is string => m !== null))]
+  const CARGANDO = 'Cargando los cupos de la convocatoria…'
+  const avisos = [
+    ...new Set(
+      [bloqueoCierre, bloqueoDevolucion, bloqueoAdjudicar, bloqueoNoAdjudicar].filter(
+        (m): m is string => m !== null && m !== CARGANDO,
+      ),
+    ),
+  ]
   const notasBloqueo = avisos.length > 1 ? avisos.filter((m) => m !== GENERICO) : avisos
 
   const refrescar = () => {
     void queryClient.invalidateQueries({ queryKey: expedientesKeys.detail(codigo) })
+    void queryClient.invalidateQueries({ queryKey: adjudicacionKeys.panels() })
   }
 
   return (
@@ -155,6 +172,24 @@ export function ExpedienteScreen({
             >
               <BanIcon data-icon="inline-start" />
               Rechazar
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={bloqueoAdjudicar !== null}
+              onClick={() => setDecidiendo('adjudicar')}
+            >
+              <AwardIcon data-icon="inline-start" />
+              Adjudicar
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={bloqueoNoAdjudicar !== null}
+              onClick={() => setDecidiendo('no-adjudicar')}
+            >
+              <XCircleIcon data-icon="inline-start" />
+              No adjudicar
             </Button>
           </div>
         )}
@@ -239,6 +274,21 @@ export function ExpedienteScreen({
           finalista={codigo}
           postulante={`${expediente.postulante.nombres} ${expediente.postulante.apellidos}`}
           convocatoria={expediente.convocatoria.nombre}
+          onDesactualizado={refrescar}
+          onFinalistaInexistente={finalistaInexistente}
+        />
+      )}
+
+      {/* Se monta solo mientras está abierto: al cerrar se descarta lo escrito. */}
+      {decidiendo && expediente && (
+        <DecidirAdjudicacionDialog
+          open
+          onOpenChange={(abierto) => {
+            if (!abierto) setDecidiendo(null)
+          }}
+          accion={decidiendo}
+          expediente={expediente}
+          panel={panel}
           onDesactualizado={refrescar}
           onFinalistaInexistente={finalistaInexistente}
         />

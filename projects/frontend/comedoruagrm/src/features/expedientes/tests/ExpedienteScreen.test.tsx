@@ -39,10 +39,12 @@ vi.mock('@tanstack/react-router', () => ({
 }))
 
 import { toastError } from '@/components/ui/toast'
+import type { PanelAdjudicacion } from '@/features/adjudicacion'
 import { ApiError } from '@/store'
 
 import { cliente } from '../../finalistas/tests/clienteSimulado'
 import { ExpedienteScreen } from '../screens/ExpedienteScreen'
+import type { Expediente } from '../types'
 import { auditoria, expediente } from './fixtures'
 
 const yo = { codigo: 'yo', nombres: 'Admin', apellidos: 'Principal', correo: 'admin@dubss.com', rol: 'ADMINISTRADOR_DUBSS' }
@@ -239,5 +241,186 @@ describe('ExpedienteScreen', () => {
 
     await waitFor(() => expect(cliente.get.mock.calls.length).toBeGreaterThan(1))
     expect(await screen.findByRole('dialog')).toHaveTextContent('ya no está calificada')
+  })
+
+  // ---- CU05: adjudicar y no adjudicar ----
+
+  function panel(extra: Partial<PanelAdjudicacion> = {}): PanelAdjudicacion {
+    return {
+      convocatoria: { codigo: 'c-1', nombre: 'Beca Comedor 2026', estado: 'CERRADA' },
+      cupos: 10,
+      puntajeMinimo: 60,
+      adjudicados: 2,
+      noAdjudicados: 0,
+      cuposDisponibles: 8,
+      cantidadFinalistas: 15,
+      totalFinalistas: 12,
+      calificadasSinSeleccionar: 30,
+      resultadosPublicados: false,
+      decisionesHabilitadas: true,
+      ...extra,
+    }
+  }
+
+  /** Responde el expediente y el panel de la convocatoria por su ruta (el panel puede quedar pendiente). */
+  function responder(e: Expediente, p: PanelAdjudicacion | 'pendiente' = panel()) {
+    cliente.get.mockImplementation((ruta: string) => {
+      if (ruta === '/finalistas/f-1/expediente') return Promise.resolve({ data: e })
+      if (ruta === '/convocatorias/c-1/adjudicacion') {
+        return p === 'pendiente' ? new Promise(() => undefined) : Promise.resolve({ data: p })
+      }
+      return Promise.reject(new Error(`ruta sin simular: ${ruta}`))
+    })
+  }
+
+  function decision(resultado: string) {
+    return {
+      finalista: 'f-1',
+      postulacion: 'p-1',
+      resultado,
+      estado: resultado === 'ADJUDICADA' ? 'adjudicada' : 'no_adjudicada',
+      puntajeFinal: 80.5,
+      fechaAdjudicacion: 't',
+      decididaPor: 'Admin',
+      cuposDisponibles: 7,
+    }
+  }
+
+  it('con todo en regla habilita «Adjudicar» y «No adjudicar» (CU05)', async () => {
+    responder(expediente())
+    montar()
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Adjudicar' })).toBeEnabled())
+    expect(screen.getByRole('button', { name: 'No adjudicar' })).toBeEnabled()
+  })
+
+  it('mientras el panel no cargó los botones esperan: no se asumen habilitados (CU05)', async () => {
+    responder(expediente(), 'pendiente')
+    montar()
+
+    expect(await screen.findByRole('button', { name: 'Adjudicar' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'No adjudicar' })).toBeDisabled()
+  })
+
+  it('con puntaje bajo el mínimo deshabilita «Adjudicar» con el motivo, y «No adjudicar» sigue habilitado (CU05)', async () => {
+    responder(expediente({ puntajeTotal: 45 }))
+    montar()
+
+    expect(await screen.findByText('El puntaje total (45.00) no alcanza el mínimo (60.00).')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Adjudicar' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'No adjudicar' })).toBeEnabled()
+  })
+
+  it('con los cupos agotados deshabilita «Adjudicar» con el motivo, y «No adjudicar» sigue habilitado (CU05)', async () => {
+    responder(expediente(), panel({ cuposDisponibles: 0 }))
+    montar()
+
+    expect(await screen.findByText('Ya no quedan cupos disponibles.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Adjudicar' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'No adjudicar' })).toBeEnabled()
+  })
+
+  it('con la última auditoría observada solo permite «No adjudicar» (CU05)', async () => {
+    responder(expediente({ auditorias: [auditoria({ resultado: 'OBSERVADO', puntajeAcademico: null })] }))
+    montar()
+
+    expect(await screen.findByText(/La última auditoría no es “Validado”/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Adjudicar' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'No adjudicar' })).toBeEnabled()
+  })
+
+  it('sin auditorías deshabilita las dos decisiones y pide auditar primero (CU05)', async () => {
+    responder(expediente({ auditorias: [] }))
+    montar()
+
+    await waitFor(() => expect(screen.getAllByText('Primero hay que auditar el expediente.').length).toBeGreaterThan(0))
+    expect(screen.getByRole('button', { name: 'Adjudicar' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'No adjudicar' })).toBeDisabled()
+  })
+
+  it('con la convocatoria no lista o los resultados publicados deshabilita las dos decisiones (CU05)', async () => {
+    responder(expediente(), panel({ decisionesHabilitadas: false, resultadosPublicados: true }))
+    montar()
+
+    expect(await screen.findByText('Los resultados ya se publicaron.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Adjudicar' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'No adjudicar' })).toBeDisabled()
+  })
+
+  it('con la postulación adjudicada muestra la insignia, deshabilita todo y bloquea la auditoría (CU05)', async () => {
+    responder(expediente({ estadoPostulacion: 'adjudicada' }))
+    montar()
+
+    expect(await screen.findByText('La postulación ya está adjudicada.')).toBeInTheDocument()
+    expect(screen.getAllByText('Adjudicada').length).toBeGreaterThan(0)
+    expect(screen.getByRole('button', { name: 'Adjudicar' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'No adjudicar' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Archivar' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Registrar auditoría' })).toBeDisabled()
+  })
+
+  it('«Adjudicar» abre la ventana con el postulante, los cupos y el puntaje, confirma y refresca el expediente y el panel (CU05)', async () => {
+    responder(expediente())
+    cliente.post.mockResolvedValue({ data: decision('ADJUDICADA') })
+    const usuario = userEvent.setup()
+    montar()
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Adjudicar' })).toBeEnabled())
+    await usuario.click(screen.getByRole('button', { name: 'Adjudicar' }))
+    const ventana = await screen.findByRole('dialog')
+    expect(within(ventana).getByText('Luis Pérez')).toBeInTheDocument()
+    expect(within(ventana).getByText('80.50')).toBeInTheDocument()
+    expect(within(ventana).getByText('8')).toBeInTheDocument()
+    const antes = cliente.get.mock.calls.length
+    await usuario.click(within(ventana).getByRole('button', { name: 'Adjudicar' }))
+
+    await waitFor(() => expect(cliente.post).toHaveBeenCalledWith('/finalistas/f-1/adjudicar'))
+    await waitFor(() => expect(cliente.get.mock.calls.length).toBeGreaterThan(antes))
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+  })
+
+  it('«No adjudicar» pide el motivo, lo manda y refresca (CU05)', async () => {
+    responder(expediente())
+    cliente.post.mockResolvedValue({ data: decision('NO_ADJUDICADA') })
+    const usuario = userEvent.setup()
+    montar()
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'No adjudicar' })).toBeEnabled())
+    await usuario.click(screen.getByRole('button', { name: 'No adjudicar' }))
+    await usuario.type(await screen.findByLabelText('Motivo'), 'No cumple')
+    await usuario.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'No adjudicar' }))
+
+    await waitFor(() =>
+      expect(cliente.post).toHaveBeenCalledWith('/finalistas/f-1/no-adjudicar', { motivo: 'No cumple' }),
+    )
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+  })
+
+  it('cancelar la ventana de la decisión no cambia nada (CU05)', async () => {
+    responder(expediente())
+    const usuario = userEvent.setup()
+    montar()
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Adjudicar' })).toBeEnabled())
+    await usuario.click(screen.getByRole('button', { name: 'Adjudicar' }))
+    await usuario.click(await screen.findByRole('button', { name: 'Cancelar' }))
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    expect(cliente.post).not.toHaveBeenCalled()
+  })
+
+  it('si al adjudicar el backend dice que ya no hay cupos, refresca y muestra el mensaje en la ventana (CU05)', async () => {
+    responder(expediente())
+    cliente.post.mockRejectedValue(new ApiError('ERR_ADJ_04', 'x'))
+    const usuario = userEvent.setup()
+    montar()
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Adjudicar' })).toBeEnabled())
+    await usuario.click(screen.getByRole('button', { name: 'Adjudicar' }))
+    const antes = cliente.get.mock.calls.length
+    await usuario.click(within(await screen.findByRole('dialog')).getByRole('button', { name: 'Adjudicar' }))
+
+    await waitFor(() => expect(cliente.get.mock.calls.length).toBeGreaterThan(antes))
+    expect(await screen.findByRole('dialog')).toHaveTextContent('Ya no quedan cupos disponibles')
   })
 })

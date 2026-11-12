@@ -4,8 +4,10 @@ import { apiClient } from '@/store'
 
 import {
   accesoDocumentoApi,
+  adjudicarFinalistaApi,
   archivarPostulacionApi,
   devolverPostulacionApi,
+  noAdjudicarFinalistaApi,
   obtenerExpedienteApi,
   rechazarPostulacionApi,
   registrarAuditoriaApi,
@@ -66,5 +68,19 @@ describe('expedientesApi', () => {
 
     expect(await rechazarPostulacionApi('f-1', { motivo: 'Documentos falsos' })).toEqual({ estado: 'no_adjudicada' })
     expect(post).toHaveBeenCalledWith('/finalistas/f-1/rechazar', { motivo: 'Documentos falsos' })
+  })
+
+  it('adjudicarFinalistaApi hace POST /finalistas/{codigo}/adjudicar sin cuerpo ni cabecera de idempotencia', async () => {
+    const post = vi.spyOn(apiClient, 'post').mockResolvedValue({ data: { resultado: 'ADJUDICADA' } })
+
+    expect(await adjudicarFinalistaApi('f-1')).toEqual({ resultado: 'ADJUDICADA' })
+    expect(post).toHaveBeenCalledWith('/finalistas/f-1/adjudicar')
+  })
+
+  it('noAdjudicarFinalistaApi hace POST /finalistas/{codigo}/no-adjudicar con el motivo y sin cabecera de idempotencia', async () => {
+    const post = vi.spyOn(apiClient, 'post').mockResolvedValue({ data: { resultado: 'NO_ADJUDICADA' } })
+
+    expect(await noAdjudicarFinalistaApi('f-1', { motivo: 'No cumple' })).toEqual({ resultado: 'NO_ADJUDICADA' })
+    expect(post).toHaveBeenCalledWith('/finalistas/f-1/no-adjudicar', { motivo: 'No cumple' })
   })
 })
