@@ -76,8 +76,11 @@ public class NotificacionService {
         Notificacion guardada = notificacionRepository.save(
                 new Notificacion(destinatario, aviso.titulo(), aviso.mensaje(), aviso.tipo(),
                         postulacionId, comunicadoId));
+        UUID postulacionCodigo = postulacionId == null ? null
+                : notificacionRepository.codigoDePostulacion(postulacionId).orElse(null);
         publicador.publishEvent(new NotificacionGuardada(guardada.getId(), guardada.getCodigo(),
-                destinatario.getId(), destinatario.getCorreo(), aviso.titulo(), aviso.mensaje(), evento));
+                destinatario.getId(), destinatario.getCorreo(), aviso.titulo(), aviso.mensaje(), evento,
+                postulacionCodigo));
         return true;
     }
 
@@ -100,7 +103,7 @@ public class NotificacionService {
             Notificacion guardada = notificacionRepository.save(
                     new Notificacion(referencia, aviso.titulo(), aviso.mensaje(), aviso.tipo(), null, comunicadoId));
             publicador.publishEvent(new NotificacionGuardada(guardada.getId(), guardada.getCodigo(), usuarioId,
-                    null, aviso.titulo(), aviso.mensaje(), evento));
+                    null, aviso.titulo(), aviso.mensaje(), evento, null));
             if (++guardados % LOTE == 0) {
                 entityManager.flush();
             }

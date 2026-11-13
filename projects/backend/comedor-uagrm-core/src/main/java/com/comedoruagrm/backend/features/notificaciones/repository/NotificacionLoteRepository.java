@@ -2,6 +2,9 @@ package com.comedoruagrm.backend.features.notificaciones.repository;
 
 import java.sql.Types;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Collection;
 import java.util.UUID;
 
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -32,6 +35,20 @@ public class NotificacionLoteRepository {
 
     /** El aviso ya guardado. */
     public record AvisoGuardado(long id, UUID codigo, long usuarioId) {
+    }
+
+    /** Los codigos publicos de varias postulaciones en una sola consulta (para el `data` del push). */
+    public Map<Long, UUID> codigosDePostulaciones(Collection<Long> ids) {
+        if (ids.isEmpty()) {
+            return Map.of();
+        }
+        Map<Long, UUID> codigos = new HashMap<>();
+        jdbc.query("SELECT id, codigo_postulacion FROM postulacion WHERE id IN (:ids) AND eliminado_en IS NULL",
+                new MapSqlParameterSource("ids", ids),
+                rs -> {
+                    codigos.put(rs.getLong("id"), rs.getObject("codigo_postulacion", UUID.class));
+                });
+        return codigos;
     }
 
     /** Inserta todos los avisos con una sola sentencia; el llamador parte la lista en lotes. */

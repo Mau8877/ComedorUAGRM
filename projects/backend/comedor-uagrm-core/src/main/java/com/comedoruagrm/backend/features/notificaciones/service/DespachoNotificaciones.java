@@ -2,6 +2,7 @@ package com.comedoruagrm.backend.features.notificaciones.service;
 
 import static net.logstash.logback.argument.StructuredArguments.kv;
 
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -72,9 +73,14 @@ public class DespachoNotificaciones {
         if (pendientes.isEmpty()) {
             return 0;
         }
-        MensajePush mensaje = new MensajePush(aviso.titulo(), aviso.mensaje(), Map.of(
-                "codigoNotificacion", aviso.notificacionCodigo().toString(),
-                "evento", aviso.evento().name()));
+        Map<String, String> datos = new LinkedHashMap<>();
+        datos.put("codigoNotificacion", aviso.notificacionCodigo().toString());
+        datos.put("evento", aviso.evento().name());
+        if (aviso.postulacionCodigo() != null) {
+            // Para que la app abra el detalle de la postulacion al tocar el aviso (CU04).
+            datos.put("postulacionCodigo", aviso.postulacionCodigo().toString());
+        }
+        MensajePush mensaje = new MensajePush(aviso.titulo(), aviso.mensaje(), datos);
         int entregados = 0;
         Set<String> invalidos = new LinkedHashSet<>();
         try {

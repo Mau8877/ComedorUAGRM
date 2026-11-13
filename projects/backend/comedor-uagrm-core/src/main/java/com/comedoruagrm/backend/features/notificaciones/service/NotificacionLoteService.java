@@ -2,6 +2,9 @@ package com.comedoruagrm.backend.features.notificaciones.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.UUID;
+import java.util.Objects;
 import java.util.Map;
 
 import org.springframework.context.ApplicationEventPublisher;
@@ -58,12 +61,15 @@ public class NotificacionLoteService {
                         a.postulacionId()));
             }
             List<AvisoGuardado> filas = loteRepository.insertar(nuevos);
+            Map<Long, UUID> postulaciones = loteRepository.codigosDePostulaciones(tramo.stream()
+                    .map(AvisoParaUsuario::postulacionId).filter(Objects::nonNull).collect(Collectors.toSet()));
             List<NotificacionGuardada> paraDespachar = new ArrayList<>(tramo.size());
             for (int i = 0; i < tramo.size(); i++) {
                 AvisoParaUsuario a = tramo.get(i);
                 AvisoGuardado fila = filas.get(i);
                 paraDespachar.add(new NotificacionGuardada(fila.id(), fila.codigo(), a.usuarioId(), a.correo(),
-                        textos.get(i).titulo(), textos.get(i).mensaje(), a.evento()));
+                        textos.get(i).titulo(), textos.get(i).mensaje(), a.evento(),
+                        a.postulacionId() == null ? null : postulaciones.get(a.postulacionId())));
             }
             publicador.publishEvent(new LoteNotificacionesGuardadas(paraDespachar));
             guardados += tramo.size();

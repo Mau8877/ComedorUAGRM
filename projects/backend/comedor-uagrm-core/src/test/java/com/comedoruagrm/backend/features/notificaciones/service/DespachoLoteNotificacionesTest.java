@@ -50,7 +50,7 @@ class DespachoLoteNotificacionesTest {
 
     private static NotificacionGuardada aviso(long id, long usuarioId) {
         return new NotificacionGuardada(id, UUID.randomUUID(), usuarioId, "u" + usuarioId + "@x.test", "Titulo",
-                "Mensaje " + usuarioId, EventoNotificacion.BECA_ADJUDICADA);
+                "Mensaje " + usuarioId, EventoNotificacion.BECA_ADJUDICADA, null);
     }
 
     @Test

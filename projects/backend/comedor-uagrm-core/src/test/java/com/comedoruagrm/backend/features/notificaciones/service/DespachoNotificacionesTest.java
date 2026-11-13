@@ -26,7 +26,7 @@ import com.comedoruagrm.backend.features.notificaciones.enums.EventoNotificacion
 class DespachoNotificacionesTest {
 
     private static final NotificacionGuardada AVISO = new NotificacionGuardada(99L, UUID.randomUUID(), 7L,
-            "ana@uagrm.edu.bo", "Titulo", "Mensaje", EventoNotificacion.PRUEBA);
+            "ana@uagrm.edu.bo", "Titulo", "Mensaje", EventoNotificacion.PRUEBA, null);
 
     @Mock
     private CanalPush canalPush;
@@ -66,7 +66,7 @@ class DespachoNotificacionesTest {
     @Test
     void despachar_deUnEventoSinCorreo_enviaSoloElPushYNuncaElCorreo() {
         NotificacionGuardada comunicado = new NotificacionGuardada(100L, UUID.randomUUID(), 7L, null, "Titulo",
-                "Mensaje", EventoNotificacion.COMUNICADO);
+                "Mensaje", EventoNotificacion.COMUNICADO, null);
         when(dispositivoService.tokensDe(7L)).thenReturn(List.of("t1"));
         when(canalPush.enviar(anyList(), any(MensajePush.class)))
                 .thenReturn(new ResultadoPush(1, List.of(), List.of()));

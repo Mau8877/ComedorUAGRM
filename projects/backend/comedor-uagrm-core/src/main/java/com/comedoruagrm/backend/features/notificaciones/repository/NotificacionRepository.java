@@ -1,5 +1,6 @@
 package com.comedoruagrm.backend.features.notificaciones.repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -23,6 +24,24 @@ public interface NotificacionRepository extends JpaRepository<Notificacion, Long
     long countByUsuarioIdAndLeidaFalse(Long usuarioId);
 
     Page<Notificacion> findByUsuarioId(Long usuarioId, Pageable pageable);
+
+    /** Un id interno de postulacion y su codigo publico (consulta propia: este modulo no lee `postulaciones`). */
+    interface CodigoDePostulacion {
+
+        Long getId();
+
+        UUID getCodigo();
+    }
+
+    /** El codigo publico de la postulacion de un aviso, o vacio si ya no existe. */
+    @Query(value = "select p.codigo_postulacion from postulacion p where p.id = :id and p.eliminado_en is null",
+            nativeQuery = true)
+    Optional<UUID> codigoDePostulacion(@Param("id") Long id);
+
+    /** Los codigos publicos de varias postulaciones en una sola consulta (la bandeja no hace N+1). */
+    @Query(value = "select p.id as id, p.codigo_postulacion as codigo from postulacion p "
+            + "where p.id in (:ids) and p.eliminado_en is null", nativeQuery = true)
+    List<CodigoDePostulacion> codigosDePostulaciones(@Param("ids") java.util.Collection<Long> ids);
 
     /** Marca como leidas todas las del usuario (no solo las cargadas en pantalla); devuelve cuantas cambio. */
     @Modifying(clearAutomatically = true, flushAutomatically = true)

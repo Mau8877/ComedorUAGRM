@@ -72,7 +72,7 @@ class BandejaNotificacionesControllerTest {
     @Test
     void listar_devuelveLosAvisosConMeta_aCualquierRolConSesion() throws Exception {
         NotificacionResponse aviso = new NotificacionResponse(UUID.randomUUID(), TipoNotificacion.INFO, "Titulo",
-                "Detalle", Instant.parse("2026-11-06T10:00:00Z"), false);
+                "Detalle", Instant.parse("2026-11-06T10:00:00Z"), false, null);
         when(bandeja.listar(usuario, 1, 10, "-fecha"))
                 .thenReturn(new PaginaNotificaciones(List.of(aviso), new PageMeta(1, 10, 1, 1)));
 

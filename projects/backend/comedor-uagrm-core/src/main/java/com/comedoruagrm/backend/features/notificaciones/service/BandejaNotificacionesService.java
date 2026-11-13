@@ -1,7 +1,11 @@
 package com.comedoruagrm.backend.features.notificaciones.service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,6 +21,7 @@ import com.comedoruagrm.backend.features.notificaciones.dto.ResumenNotificacione
 import com.comedoruagrm.backend.features.notificaciones.exception.NotificacionErrorCodes;
 import com.comedoruagrm.backend.features.notificaciones.model.Notificacion;
 import com.comedoruagrm.backend.features.notificaciones.repository.NotificacionRepository;
+import com.comedoruagrm.backend.features.notificaciones.repository.NotificacionRepository.CodigoDePostulacion;
 import com.comedoruagrm.backend.features.usuarios.service.UsuarioService;
 
 import lombok.RequiredArgsConstructor;
@@ -48,8 +53,11 @@ public class BandejaNotificacionesService {
         Long usuarioId = usuarioService.obtenerPorCodigo(usuarioCodigo).getId();
         Page<Notificacion> pagina = notificacionRepository.findByUsuarioId(usuarioId,
                 PageRequest.of(page - 1, pageSize, Sort.by(direccion, "creadoEn").and(Sort.by(direccion, "id"))));
+        Map<Long, UUID> postulaciones = codigosDePostulaciones(pagina.getContent());
         List<NotificacionResponse> datos = pagina.getContent().stream()
-                .map(BandejaNotificacionesService::aRespuesta).toList();
+                .map(aviso -> aRespuesta(aviso, aviso.getPostulacionId() == null ? null
+                        : postulaciones.get(aviso.getPostulacionId())))
+                .toList();
         return new PaginaNotificaciones(datos,
                 new PageMeta(page, pageSize, pagina.getTotalElements(), pagina.getTotalPages()));
     }
@@ -94,8 +102,19 @@ public class BandejaNotificacionesService {
                 "La bandeja solo se puede ordenar por «fecha» (o «-fecha»)");
     }
 
-    private static NotificacionResponse aRespuesta(Notificacion aviso) {
+    /** Los codigos publicos de las postulaciones de los avisos de la pagina, en una sola consulta (sin N+1). */
+    private Map<Long, UUID> codigosDePostulaciones(List<Notificacion> avisos) {
+        Set<Long> ids = avisos.stream().map(Notificacion::getPostulacionId).filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        if (ids.isEmpty()) {
+            return Map.of();
+        }
+        return notificacionRepository.codigosDePostulaciones(ids).stream()
+                .collect(Collectors.toMap(CodigoDePostulacion::getId, CodigoDePostulacion::getCodigo));
+    }
+
+    private static NotificacionResponse aRespuesta(Notificacion aviso, UUID postulacionCodigo) {
         return new NotificacionResponse(aviso.getCodigo(), aviso.getTipo(), aviso.getTitulo(), aviso.getMensaje(),
-                aviso.getCreadoEn(), aviso.isLeida());
+                aviso.getCreadoEn(), aviso.isLeida(), postulacionCodigo);
     }
 }
