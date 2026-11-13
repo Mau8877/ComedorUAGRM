@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.comedoruagrm.backend.common.response.ApiResponse;
+import com.comedoruagrm.backend.common.util.ParametrosListado;
 import com.comedoruagrm.backend.features.resultados.dto.AdjudicadoPublicoResponse;
 import com.comedoruagrm.backend.features.resultados.dto.ConvocatoriaPublicadaResponse;
 import com.comedoruagrm.backend.features.resultados.dto.MiResultadoResponse;

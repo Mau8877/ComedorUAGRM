@@ -49,6 +49,11 @@ public final class BitacoraAcciones {
     // nombres, CI, correos ni tokens.
     public static final String PUBLICACION_RESULTADOS = "PUBLICACION_RESULTADOS";
 
+    // CU08: el actor es el administrador; el detalle lleva codigos, numero y cantidades, nunca nombres, CI, rutas ni
+    // direcciones firmadas.
+    public static final String GENERACION_ACTA = "GENERACION_ACTA";
+    public static final String DESCARGA_ACTA = "DESCARGA_ACTA";
+
     private BitacoraAcciones() {
     }
 }

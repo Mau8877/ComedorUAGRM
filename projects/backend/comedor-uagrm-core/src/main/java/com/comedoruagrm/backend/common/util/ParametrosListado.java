@@ -1,4 +1,4 @@
-package com.comedoruagrm.backend.features.resultados.controller;
+package com.comedoruagrm.backend.common.util;
 
 import java.util.Set;
 
@@ -11,19 +11,19 @@ import com.comedoruagrm.backend.common.exception.ValidationException;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
- * Lectura de los query params de listado de los controllers de resultados (CU22): `page` (1-indexed),
+ * Lectura de los query params de listado de los controllers (CU22 y CU08): `page` (1-indexed),
  * `pageSize`, `sort` (un solo campo, `campo` o `-campo`) y los `filter[...]` permitidos.
  *
  * * Solo traduce el contrato de ENDPOINTS_BACKEND.md a un `Pageable`; que campo de `sort` es valido lo decide
  * * la consulta de cada lista. Un valor mal formado o un `filter` no soportado es `ERR_SYS_05` (400), no se
  * * ignora en silencio.
  */
-final class ParametrosListado {
+public final class ParametrosListado {
 
     private ParametrosListado() {
     }
 
-    static Pageable pageable(int page, int pageSize, String sort) {
+    public static Pageable pageable(int page, int pageSize, String sort) {
         if (page < 1 || pageSize < 1) {
             throw new ValidationException("ERR_SYS_01", "La página y el tamaño de página deben ser mayores a cero");
         }
@@ -44,13 +44,14 @@ final class ParametrosListado {
     }
 
     /** Rechaza cualquier `filter[...]` que no este en la lista. */
-    static void validarFiltros(HttpServletRequest request, Set<String> soportados) {
+    public static void validarFiltros(HttpServletRequest request, Set<String> soportados) {
         request.getParameterMap().keySet().stream()
                 .filter(nombre -> nombre.startsWith("filter[") && !soportados.contains(nombre))
                 .findFirst()
                 .ifPresent(nombre -> {
-                    throw new ValidationException("ERR_SYS_05", "El filtro «" + nombre
-                            + "» no está soportado. Filtros válidos: " + String.join(", ", soportados));
+                    throw new ValidationException("ERR_SYS_05", "El filtro «" + nombre + "» no está soportado. "
+                            + (soportados.isEmpty() ? "Esta lista no admite filtros"
+                                    : "Filtros válidos: " + String.join(", ", soportados)));
                 });
     }
 }
