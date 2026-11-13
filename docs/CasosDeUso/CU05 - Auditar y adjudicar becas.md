@@ -1,8 +1,8 @@
 # Caso de uso
 
-| Id   | Nombre                    | Módulo                       | Prioridad | Estado    |
-| ---- | ------------------------- | ---------------------------- | --------- | --------- |
-| CU05 | Auditar y adjudicar becas | P4. Auditoría y adjudicación | Alta      | Pendiente |
+| Id   | Nombre                    | Módulo                       | Prioridad | Estado |
+| ---- | ------------------------- | ---------------------------- | --------- | ------ |
+| CU05 | Auditar y adjudicar becas | P4. Auditoría y adjudicación | Alta      | Hecho  |
 
 **Actor principal:** Administrador DUBSS
 **Actores secundarios:** ninguno en este CU. El postulante **no** recibe aviso al decidir: se entera al publicar los resultados ([CU-22](CU22%20-%20Publicar%20resultados%20de%20adjudicación.md), decisión 3).
@@ -17,7 +17,7 @@ Para **adjudicar**, el sistema exige tres cosas: que la última auditoría del f
 
 Lo extienden el [CU-08](CU08%20-%20Generar%20acta%20de%20adjudicación.md) (acta de adjudicación) y el [CU-22](CU22%20-%20Publicar%20resultados%20de%20adjudicación.md) (publicar resultados), que se ejecutan cuando las decisiones están tomadas. Alimenta el [CU-23](CU23%20-%20Gestionar%20padrón%20de%20becados.md): los adjudicados son el punto de partida del padrón de becados.
 
-**Cómo se distingue de «rechazar» (CU-20).** Ambos dejan la postulación en «no adjudicada», pero son decisiones distintas: **rechazar** ([CU-20](CU20%20-%20Archivar%20o%20rechazar%20postulación.md)) descarta un expediente que *no procede* (documentación no válida, no entregó en plazo) y **no crea** una adjudicación; **no adjudicar** (este CU) es la *decisión final* sobre un finalista cuyo expediente sí se evaluó (por ejemplo, validado pero sin cupo o sin puntaje suficiente) y **sí crea** una fila en `adjudicacion` con resultado `NO_ADJUDICADA`. Ver [Distinción con el CU-20](#distinción-con-el-cu-20-rechazar).
+**Cómo se distingue de «rechazar» (CU-20).** Ambos dejan la postulación en «no adjudicada», pero son decisiones distintas: **rechazar** ([CU-20](CU20%20-%20Archivar%20o%20rechazar%20postulación.md)) descarta un expediente que _no procede_ (documentación no válida, no entregó en plazo) y **no crea** una adjudicación; **no adjudicar** (este CU) es la _decisión final_ sobre un finalista cuyo expediente sí se evaluó (por ejemplo, validado pero sin cupo o sin puntaje suficiente) y **sí crea** una fila en `adjudicacion` con resultado `NO_ADJUDICADA`. Ver [Distinción con el CU-20](#distinción-con-el-cu-20-rechazar).
 
 ---
 
@@ -66,20 +66,20 @@ Lo extienden el [CU-08](CU08%20-%20Generar%20acta%20de%20adjudicación.md) (acta
 ## Reglas de negocio
 
 - **Solo el Administrador DUBSS** ejecuta este CU (RF-04). El Directivo ve los resultados agregados en el CU-12; el Postulante no interviene.
-- **Dos momentos, una entrada.** *Seleccionar finalistas* se hace a nivel de **convocatoria**; *adjudicar / no adjudicar* se hace a nivel de **finalista**, desde su expediente (CU-07), igual que devolver (CU-19) y archivar o rechazar (CU-20): la lista de finalistas es la única entrada para decidir. *(Decisión del equipo, para no tener tres pantallas distintas de acciones sobre el mismo expediente.)*
-- **Cantidad de finalistas (decisión 1):** es un dato de la convocatoria que el Administrador define al crearla o configurarla ([CU-13](CU13%20-%20Gestionar%20convocatoria.md)) y que **solo el Administrador DUBSS ve**: ni el postulante ni el público lo reciben en las consultas de convocatorias. Al seleccionar, el sistema la propone y el Administrador **puede cambiarla** para esa selección (la cantidad configurada no se modifica). Debe ser un entero positivo, no mayor que las postulaciones calificadas que aún no son finalistas. Puede ser mayor que los cupos (suplentes). *(Detalle de la edición al seleccionar: propuesta del equipo, por revisar.)*
+- **Dos momentos, una entrada.** _Seleccionar finalistas_ se hace a nivel de **convocatoria**; _adjudicar / no adjudicar_ se hace a nivel de **finalista**, desde su expediente (CU-07), igual que devolver (CU-19) y archivar o rechazar (CU-20): la lista de finalistas es la única entrada para decidir. _(Decisión del equipo, para no tener tres pantallas distintas de acciones sobre el mismo expediente.)_
+- **Cantidad de finalistas (decisión 1):** es un dato de la convocatoria que el Administrador define al crearla o configurarla ([CU-13](CU13%20-%20Gestionar%20convocatoria.md)) y que **solo el Administrador DUBSS ve**: ni el postulante ni el público lo reciben en las consultas de convocatorias. Al seleccionar, el sistema la propone y el Administrador **puede cambiarla** para esa selección (la cantidad configurada no se modifica). Debe ser un entero positivo, no mayor que las postulaciones calificadas que aún no son finalistas. Puede ser mayor que los cupos (suplentes). _(Detalle de la edición al seleccionar: propuesta del equipo, por revisar.)_
 - **Selección de finalistas:** toma las postulaciones «calificadas» de la convocatoria **en orden de la lista priorizada** (CU-06: puntaje vigente, desempate por fecha de envío) que todavía no son finalistas, y guarda en `finalista.posicion` el lugar que ocupan en la lista **completa** de la convocatoria (no en la página). Puede repetirse para sumar finalistas (por ejemplo, para cubrir los que se archivaron) sin repetir a los ya seleccionados. Una postulación es finalista una sola vez (índice único existente); si fue devuelta y reenviada, **conserva su fila** y su posición (decisión 5).
 - **Qué significa «auditado».** El finalista tiene al menos una auditoría registrada (CU-07). La que vale es siempre la **última**. Solo una última auditoría «Validado» habilita adjudicar.
 - **Puntaje total** (CU-07): puntaje vigente de la IA (hasta 70) + puntaje académico de la última auditoría (hasta 30). No se guarda: se calcula al decidir y se copia a `adjudicacion.puntaje_final`, que queda **inmutable** aunque un reprocesamiento posterior (CU-26) cambie el puntaje.
-- **Puntaje mínimo:** se compara contra el puntaje **total**. Es un valor de la convocatoria (`convocatoria.puntaje_minimo`) y no está definido: queda «por definir con la DUBSS». *(No se inventa un valor.)*
+- **Puntaje mínimo:** se compara contra el puntaje **total**. Es un valor de la convocatoria (`convocatoria.puntaje_minimo`) y no está definido: queda «por definir con la DUBSS». _(No se inventa un valor.)_
 - **Cupos:** `convocatoria.cupos`. Cupos disponibles = cupos − adjudicaciones con resultado `ADJUDICADA` de esa convocatoria; **se calcula, no se guarda**. Solo cuentan las «adjudicadas», no las «no adjudicadas». Para que dos decisiones simultáneas no superen los cupos, la verificación y el registro se hacen bloqueando la convocatoria durante la operación.
 - **Motivo:** obligatorio **solo** al no adjudicar, máximo **500 caracteres** (mismo límite que el CU-19 y el CU-20). Se guarda en `postulacion_historial.motivo`. Al adjudicar no hay motivo.
 - **Qué se guarda:** una fila en `adjudicacion` (una por postulación, resultado `ADJUDICADA` o `NO_ADJUDICADA`, puntaje final, quién decidió y fecha de adjudicación) y una fila nueva en `postulacion_historial` (append-only) con estado anterior «calificada» y estado nuevo «adjudicada» o «no adjudicada».
 - **Las decisiones son finales.** «Adjudicada» y «no adjudicada» son estados finales (ciclo de vida del diseño lógico): no se vuelve a «calificada» ni se cambia una decisión (decisión 6). Antes de la publicación el Administrador puede equivocarse, así que la ventana de confirmación muestra el nombre, el puntaje y el resultado.
 - **No se tocan** documentos, respuestas, puntaje de la IA, auditorías ni la fila de `finalista`.
 - **Resultados publicados:** tras publicar (CU-22) no se registran ni modifican decisiones.
-- **Aviso al postulante:** este CU **no avisa** por sí mismo; la adjudicación se comunica al **publicar los resultados** (CU-22), de modo que nadie se entere antes de la publicación oficial (decisión 3). *(Decisión propuesta, por revisar con la DUBSS.)*
-- **Bitácora:** cada decisión queda anotada (quién, cuándo, códigos de postulación, finalista y convocatoria, resultado y estados anterior y nuevo, **sin** el motivo, nombres, CI, rutas ni tokens). Seleccionar finalistas también se anota (quién, cuándo, convocatoria y cantidad). *(Decisión propuesta, por revisar.)*
+- **Aviso al postulante:** este CU **no avisa** por sí mismo; la adjudicación se comunica al **publicar los resultados** (CU-22), de modo que nadie se entere antes de la publicación oficial (decisión 3). _(Decisión propuesta, por revisar con la DUBSS.)_
+- **Bitácora:** cada decisión queda anotada (quién, cuándo, códigos de postulación, finalista y convocatoria, resultado y estados anterior y nuevo, **sin** el motivo, nombres, CI, rutas ni tokens). Seleccionar finalistas también se anota (quién, cuándo, convocatoria y cantidad). _(Decisión propuesta, por revisar.)_
 - **Lista de finalistas (CU-21):** ya muestra el estado de la postulación; pasa a mostrar «Adjudicada» / «No adjudicada» para que no se intente auditar ni decidir otra vez.
 - **Lista priorizada (CU-06):** al dejar de estar «calificada», la postulación sale de la lista.
 - **Fuera de este CU:** acta de adjudicación (CU-08), publicar resultados y avisar a los postulantes (CU-22), padrón de becados (CU-23), bajas y reemplazos, apelación del postulante, reparto de cupos por carrera y lista de espera de suplentes.
@@ -87,15 +87,15 @@ Lo extienden el [CU-08](CU08%20-%20Generar%20acta%20de%20adjudicación.md) (acta
 
 ### Distinción con el CU-20 (rechazar)
 
-| | **Rechazar** (CU-20) | **No adjudicar** (CU-05) |
-| --- | --- | --- |
-| Cuándo | El expediente *no procede* (documentación no válida, no entregó en plazo) | El expediente se evaluó; la decisión final es no dar la beca (sin cupo, sin puntaje suficiente, otro motivo) |
-| Estado resultante | `no_adjudicada` | `no_adjudicada` |
-| Fila en `adjudicacion` | **No** | **Sí** (`NO_ADJUDICADA`, con `puntaje_final`) |
-| Requiere auditoría | No | Sí, de cualquier resultado |
-| Motivo | Obligatorio | Obligatorio |
-| Aviso al postulante | Inmediato (bandeja, push, correo) | Al publicar resultados (CU-22) |
-| Cuenta contra los cupos | No | No |
+|                         | **Rechazar** (CU-20)                                                      | **No adjudicar** (CU-05)                                                                                     |
+| ----------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Cuándo                  | El expediente _no procede_ (documentación no válida, no entregó en plazo) | El expediente se evaluó; la decisión final es no dar la beca (sin cupo, sin puntaje suficiente, otro motivo) |
+| Estado resultante       | `no_adjudicada`                                                           | `no_adjudicada`                                                                                              |
+| Fila en `adjudicacion`  | **No**                                                                    | **Sí** (`NO_ADJUDICADA`, con `puntaje_final`)                                                                |
+| Requiere auditoría      | No                                                                        | Sí, de cualquier resultado                                                                                   |
+| Motivo                  | Obligatorio                                                               | Obligatorio                                                                                                  |
+| Aviso al postulante     | Inmediato (bandeja, push, correo)                                         | Al publicar resultados (CU-22)                                                                               |
+| Cuenta contra los cupos | No                                                                        | No                                                                                                           |
 
 Para reportes (CU-12) la distinción **no necesita columna nueva**: «no adjudicada por decisión final» = postulación `no_adjudicada` **con** fila en `adjudicacion`; «rechazada» = `no_adjudicada` **sin** esa fila (ambas con su motivo en el historial). Ver decisión 8.
 
@@ -134,7 +134,7 @@ Para reportes (CU-12) la distinción **no necesita columna nueva**: «no adjudic
 
 - **Tabla `adjudicacion`** (nueva; el diseño la define pero no existe en la base): `id`, `codigo_adjudicacion`, `postulacion_id` FK (único entre las no eliminadas), `resultado` (`ADJUDICADA` / `NO_ADJUDICADA`), `puntaje_final` `numeric(5,2)`, `decidido_por` FK→`usuario`, `fecha_adjudicacion` `timestamptz` y las columnas comunes de toda tabla. Índice por `postulacion_id`. Sin columnas extra respecto al diseño de grado (no lleva motivo ni clave de idempotencia).
 - **Tabla `convocatoria` (columna nueva, decisión 1):** `cantidad_finalistas` `int` opcional, `CHECK (cantidad_finalistas IS NULL OR cantidad_finalistas > 0)`. **No está en el diseño de grado**: hay que agregarla primero al diseño lógico (`diseno_base_de_datos.md`, imagen 091 y `docs/DiagramaConceptual.mermaid`) y luego crear una migración nueva (la tabla ya existe). Solo se devuelve en los endpoints del Administrador; los de consulta del postulante o públicos no la incluyen.
-- **Impacto en el CU-13:** el formulario de crear y editar convocatoria gana el campo «Cantidad de finalistas» (visible solo para el Administrador DUBSS), con las mismas reglas que los cupos; el CU-13 debe validar que sea positiva y, *(propuesta)*, que no sea menor que los cupos cuando ambos existan, porque con menos finalistas que cupos no se podrían cubrir. Se actualiza el CU-13 y el RF-08 del documento de taller.
+- **Impacto en el CU-13:** el formulario de crear y editar convocatoria gana el campo «Cantidad de finalistas» (visible solo para el Administrador DUBSS), con las mismas reglas que los cupos; el CU-13 debe validar que sea positiva y, _(propuesta)_, que no sea menor que los cupos cuando ambos existan, porque con menos finalistas que cupos no se podrían cubrir. Se actualiza el CU-13 y el RF-08 del documento de taller.
 - **Tabla `finalista`:** sin columnas nuevas; este CU solo **crea filas** (hoy las crea el cargador de datos de prueba) y escribe `posicion`.
 - **Tabla `postulacion_historial`:** sin cambios; se reutiliza. Se aclara que `motivo` es obligatorio también al **no adjudicar** (en el diseño solo figura al devolver, archivar o rechazar).
 - **Cupos disponibles:** se calculan, no hay columna.
@@ -145,7 +145,7 @@ Para reportes (CU-12) la distinción **no necesita columna nueva**: «no adjudic
 
 Confirmadas por Mau (Administrador del proyecto) el 2026-11-09. Aún no se validaron con la DUBSS.
 
-1. **Cantidad de finalistas.** Se define al iniciar o configurar la convocatoria (CU-13), la ve solo el Administrador, y se usa al seleccionar finalistas. Puede ser mayor que los cupos (suplentes). *(Reemplaza la propuesta de escribirla en cada selección; el documento de taller la deja «por definir».)*
+1. **Cantidad de finalistas.** Se define al iniciar o configurar la convocatoria (CU-13), la ve solo el Administrador, y se usa al seleccionar finalistas. Puede ser mayor que los cupos (suplentes). _(Reemplaza la propuesta de escribirla en cada selección; el documento de taller la deja «por definir».)_
 2. **Idempotencia.** Una petición duplicada recibe `409` (`ERR_ADJ_01`), como en el CU-19 y el CU-20, sin clave de idempotencia. El texto de A7 del taller debe ajustarse.
 3. **Aviso al postulante.** No se avisa al decidir; se avisa al publicar los resultados (CU-22). El CU-04 muestra «adjudicada» o «no adjudicada» (por decisión final) solo después de la publicación; antes sigue viendo «calificada». El rechazo del CU-20 se ve de inmediato.
 4. **Cupos y puntaje mínimo.** Si falta alguno, o la convocatoria no está cerrada, no se puede seleccionar ni decidir (`ERR_ADJ_05`); se configuran en el CU-13.
@@ -164,4 +164,4 @@ Confirmadas por Mau (Administrador del proyecto) el 2026-11-09. Aún no se valid
 
 ## Desarrollador
 
-Mauro Gutierrez *(por confirmar)*
+Mauro Gutierrez _(por confirmar)_
