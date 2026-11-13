@@ -2,7 +2,7 @@
 
 | Id   | Nombre                                 | Módulo                         | Prioridad | Estado    |
 | ---- | -------------------------------------- | ------------------------------ | --------- | --------- |
-| CU12 | Visualizar dashboard de indicadores BI | P6. Reportes y trazabilidad    | Alta      | En progreso |
+| CU12 | Visualizar dashboard de indicadores BI | P6. Reportes y trazabilidad    | Alta      | Hecho |
 
 **Actor principal:** Directivo
 **Actores secundarios:** —
