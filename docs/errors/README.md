@@ -78,7 +78,7 @@ docs/errors/
 
 ### Devolución de postulaciones (`DEV`)
 
-- [`ERR_DEV_01`](postulaciones/ERRORES_POSTULACIONES.md#err_dev_01) — La postulación ya no está calificada (409)
+- [`ERR_DEV_01`](postulaciones/ERRORES_POSTULACIONES.md#err_dev_01) — La postulación ya no está calificada o los resultados ya se publicaron (409)
 - [`ERR_DEV_02`](postulaciones/ERRORES_POSTULACIONES.md#err_dev_02) — El finalista no tiene una auditoría posterior a su última devolución (409)
 
 ### Archivo y rechazo de postulaciones (`ARC`)
@@ -111,8 +111,15 @@ docs/errors/
 
 ### Comunicados (`COM`)
 
-- [`ERR_COM_01`](comunicados/ERRORES_COMUNICADOS.md#err_com_01) — Destinatarios no soportados o sin destinatarios (400)
-- [`ERR_COM_02`](comunicados/ERRORES_COMUNICADOS.md#err_com_02) — `FINALISTAS` sin convocatoria (400)
+- [`ERR_COM_01`](comunicados/ERRORES_COMUNICADOS.md#err_com_01) — El grupo de destinatarios no tiene a nadie (400)
+- [`ERR_COM_02`](comunicados/ERRORES_COMUNICADOS.md#err_com_02) — `FINALISTAS` o `ADJUDICADOS` sin convocatoria (400)
+
+### Publicación de resultados (`PUB`)
+
+- [`ERR_PUB_01`](resultados/ERRORES_RESULTADOS.md#err_pub_01) — Quedan finalistas en «calificada» (409)
+- [`ERR_PUB_02`](resultados/ERRORES_RESULTADOS.md#err_pub_02) — Los resultados ya estaban publicados (409)
+- [`ERR_PUB_03`](resultados/ERRORES_RESULTADOS.md#err_pub_03) — La convocatoria no está cerrada (409)
+- [`ERR_PUB_04`](resultados/ERRORES_RESULTADOS.md#err_pub_04) — Los resultados todavía no están publicados (404)
 
 ### Expedientes (`EXP`)
 

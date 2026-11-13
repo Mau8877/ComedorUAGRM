@@ -38,7 +38,8 @@ donde está la lista.
 - **Excepción:** `ConflictException`
 - **Significado:** La postulación del finalista ya no está «calificada» (ya fue
   devuelta, archivada, rechazada o adjudicada, por ejemplo por otro administrador
-  o por una segunda petición del mismo clic); no se puede devolver.
+  o por una segunda petición del mismo clic) o los resultados de la convocatoria ya
+  fueron publicados; no se puede devolver.
 - **Dónde se lanza:** `DevolucionService.devolver()`
 
 ## `ERR_DEV_02`
