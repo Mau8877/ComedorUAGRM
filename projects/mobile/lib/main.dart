@@ -6,7 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/routing/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/notificaciones/models/mensaje_push.dart';
+import 'features/notificaciones/destino_aviso.dart';
 import 'features/notificaciones/providers/avisos_push_provider.dart';
+import 'features/notificaciones/providers/avisos_tocados_provider.dart';
 import 'features/notificaciones/providers/push_registro_provider.dart';
 import 'features/notificaciones/widgets/aviso_push.dart';
 
@@ -30,10 +32,18 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Mantiene registrado el teléfono mientras haya sesión (CU-EXTRA-01).
     ref.watch(pushRegistroProvider);
+    // Tocar un aviso de una postulación abre su detalle (CU04, A6), pasando por el `redirect` global.
+    ref.watch(navegacionDeAvisosProvider);
     // Avisos que llegan con la app abierta.
     ref.listen<AsyncValue<MensajePush>>(avisosPushProvider, (_, siguiente) {
       final mensaje = siguiente.valueOrNull;
-      if (mensaje != null) mostrarAvisoPush(ref.read(scaffoldMessengerKeyProvider), mensaje);
+      if (mensaje == null) return;
+      final ruta = rutaDeAviso(mensaje);
+      mostrarAvisoPush(
+        ref.read(scaffoldMessengerKeyProvider),
+        mensaje,
+        alVer: ruta == null ? null : () => ref.read(navegarARutaProvider)(ruta),
+      );
     });
     return MaterialApp.router(
       title: 'ComedorUAGRM',

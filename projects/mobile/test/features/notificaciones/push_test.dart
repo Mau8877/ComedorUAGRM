@@ -43,6 +43,11 @@ class PushFalso implements PushService {
 
   @override
   Stream<MensajePush> get mensajes => avisos.stream;
+
+  final tocados = StreamController<MensajePush>.broadcast();
+
+  @override
+  Stream<MensajePush> get avisosTocados => tocados.stream;
 }
 
 Future<void> asentar() async {

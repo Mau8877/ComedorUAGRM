@@ -19,4 +19,8 @@ abstract class PushService {
 
   /// Avisos que llegan con la app en primer plano (en segundo plano los muestra el sistema).
   Stream<MensajePush> get mensajes;
+
+  /// Avisos que la persona tocó en la bandeja del sistema: con la app en segundo plano o, al abrirla desde un
+  /// aviso, estando cerrada (el primero que emite). Sin Firebase, no emite nada.
+  Stream<MensajePush> get avisosTocados;
 }

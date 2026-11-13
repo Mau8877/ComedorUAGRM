@@ -12,6 +12,7 @@ import '../../features/auth/screens/registro_screen.dart';
 import '../../features/auth/screens/sin_modulo_screen.dart';
 import '../../features/health/screens/health_check_screen.dart';
 import '../../features/perfil/screens/perfil_screen.dart';
+import '../../features/postulaciones/screens/detalle_postulacion_screen.dart';
 import '../../features/pruebas_layout/screens/demo_home_screen.dart';
 import '../../features/pruebas_layout/screens/ingredientes_screen.dart';
 import '../../layouts/admin/admin_shell.dart';
@@ -68,6 +69,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/sin-modulo', builder: (context, state) => const SinModuloScreen()),
       GoRoute(path: '/admin', builder: (context, state) => const AdminShell()),
       GoRoute(path: '/estudiante', builder: (context, state) => const EstudianteShell()),
+      // Detalle de una postulación (CU04): la lista vive dentro del shell del Estudiante. El `redirect` global
+      // ya exige sesión: sin ella, primero el login.
+      GoRoute(
+        path: '/mis-postulaciones/:codigo',
+        builder: (context, state) => DetallePostulacionScreen(codigo: state.pathParameters['codigo']!),
+      ),
       GoRoute(path: '/ingredientes', builder: (context, state) => const IngredientesScreen()),
       GoRoute(path: '/diagnostico', builder: (context, state) => const HealthCheckScreen()),
     ],
