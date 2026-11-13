@@ -27,4 +27,10 @@ describe('adminNavItems', () => {
       expect.objectContaining({ label: 'Auditoría y adjudicación', href: '/adjudicacion' }),
     )
   })
+
+  it('tiene la entrada «Publicar resultados» que lleva a su pantalla (CU22)', () => {
+    expect(adminNavItems).toContainEqual(
+      expect.objectContaining({ label: 'Publicar resultados', href: '/publicar-resultados' }),
+    )
+  })
 })

@@ -11,7 +11,7 @@ export function mapearErrorComunicados(error: unknown): string {
       case 'ERR_COM_01':
         return 'No hay destinatarios para ese comunicado. No se publicó nada.'
       case 'ERR_COM_02':
-        return 'Para avisar a los finalistas hay que elegir una convocatoria.'
+        return 'Para avisar a los finalistas o a los adjudicados hay que elegir una convocatoria.'
       case 'ERR_FIN_02':
         return 'La convocatoria ya no existe. Elige otra.'
       case 'ERR_AUTH_07':

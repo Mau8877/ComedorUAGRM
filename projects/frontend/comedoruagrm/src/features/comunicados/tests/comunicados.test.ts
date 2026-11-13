@@ -5,25 +5,39 @@ import { ApiError, apiClient } from '@/store'
 
 import { listarComunicadosApi, publicarComunicadoApi } from '../api/comunicadosApi'
 import { mapearErrorComunicados } from '../api/mapearErrorComunicados'
-import { aPublicarRequest, comunicadoSchema } from '../schemas'
+import { aPublicarRequest, comunicadoSchema, requiereConvocatoria } from '../schemas'
 
 describe('comunicadoSchema', () => {
   const valido = { titulo: 'Nuevo horario', contenido: 'El comedor abre a las 11', destinatarios: 'TODOS' as const }
 
-  it('acepta un comunicado completo para TODOS o FINALISTAS', () => {
+  it('acepta un comunicado completo para TODOS, FINALISTAS o ADJUDICADOS', () => {
     expect(comunicadoSchema.safeParse(valido).success).toBe(true)
     expect(comunicadoSchema.safeParse({ ...valido, destinatarios: 'FINALISTAS' }).success).toBe(true)
+    expect(comunicadoSchema.safeParse({ ...valido, destinatarios: 'ADJUDICADOS' }).success).toBe(true)
   })
 
-  it('pide título y contenido (sin aceptar solo espacios) y no acepta ADJUDICADOS todavía', () => {
+  it('FINALISTAS y ADJUDICADOS requieren convocatoria; TODOS no', () => {
+    expect(requiereConvocatoria('FINALISTAS')).toBe(true)
+    expect(requiereConvocatoria('ADJUDICADOS')).toBe(true)
+    expect(requiereConvocatoria('TODOS')).toBe(false)
+  })
+
+  it('pide título y contenido (sin aceptar solo espacios) y rechaza un destinatario desconocido', () => {
     const vacio = comunicadoSchema.safeParse({ ...valido, titulo: '  ', contenido: '' })
     expect(vacio.error?.issues.map((i) => i.message)).toEqual(['El título es obligatorio', 'El contenido es obligatorio'])
-    expect(comunicadoSchema.safeParse({ ...valido, destinatarios: 'ADJUDICADOS' }).success).toBe(false)
+    expect(comunicadoSchema.safeParse({ ...valido, destinatarios: 'NADIE' }).success).toBe(false)
   })
 
   it('limita el largo del título a 150 y del contenido a 5000 como el backend', () => {
     expect(comunicadoSchema.safeParse({ ...valido, titulo: 'x'.repeat(151) }).success).toBe(false)
     expect(comunicadoSchema.safeParse({ ...valido, contenido: 'x'.repeat(5001) }).success).toBe(false)
+  })
+
+  it('aPublicarRequest manda ADJUDICADOS con la convocatoria', () => {
+    expect(aPublicarRequest({ ...valido, destinatarios: 'ADJUDICADOS' }, 'conv-1')).toMatchObject({
+      destinatarios: 'ADJUDICADOS',
+      convocatoriaId: 'conv-1',
+    })
   })
 
   it('aPublicarRequest recorta los textos y manda la convocatoria solo si hay', () => {
@@ -60,7 +74,7 @@ describe('comunicadosApi', () => {
 describe('mapearErrorComunicados', () => {
   it('traduce los códigos de comunicados y oculta lo inesperado', () => {
     expect(mapearErrorComunicados(new ApiError('ERR_COM_01', 'x'))).toContain('No hay destinatarios')
-    expect(mapearErrorComunicados(new ApiError('ERR_COM_02', 'x'))).toContain('elegir una convocatoria')
+    expect(mapearErrorComunicados(new ApiError('ERR_COM_02', 'x'))).toContain('a los adjudicados hay que elegir una convocatoria')
     expect(mapearErrorComunicados(new ApiError('ERR_SYS_01', 'Falta el título'))).toBe('Falta el título')
     expect(mapearErrorComunicados(new ApiError('ERR_SYS_00', 'técnico'))).toBe(
       'Ocurrió un error inesperado. Inténtalo de nuevo.',

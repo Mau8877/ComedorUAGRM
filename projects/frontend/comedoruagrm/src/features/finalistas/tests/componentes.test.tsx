@@ -145,4 +145,53 @@ describe('ComunicadoForm', () => {
     })
     expect(await screen.findByText('Se envió a 7 destinatarios.')).toBeInTheDocument()
   })
+
+  async function elegirDestinatarios(user: ReturnType<typeof userEvent.setup>, opcion: string) {
+    await user.click(screen.getByRole('combobox', { name: 'Dirigido a' }))
+    await user.click(await screen.findByRole('option', { name: opcion }))
+  }
+
+  it('el selector ofrece «Adjudicados» junto a «Todos» y «Finalistas»', async () => {
+    const user = userEvent.setup()
+    conCliente(<ComunicadoForm convocatoriaId="conv-2" />)
+
+    await user.click(screen.getByRole('combobox', { name: 'Dirigido a' }))
+
+    expect(await screen.findByRole('option', { name: 'Todos los postulantes' })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'Finalistas' })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'Adjudicados' })).toBeInTheDocument()
+  })
+
+  it('«Adjudicados» sin convocatoria marca el error y no deja publicar', async () => {
+    const user = userEvent.setup()
+    conCliente(<ComunicadoForm />)
+    await user.type(screen.getByLabelText('Título'), 'Aviso')
+    await user.type(screen.getByLabelText('Contenido'), 'Texto del aviso')
+
+    await elegirDestinatarios(user, 'Adjudicados')
+
+    expect(screen.getByText('Elige una convocatoria para avisar a los adjudicados.')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Revisar y publicar' }))
+    expect(screen.queryByRole('button', { name: 'Confirmar publicación' })).not.toBeInTheDocument()
+    expect(cliente.post).not.toHaveBeenCalled()
+  })
+
+  it('«Adjudicados» con convocatoria manda destinatarios ADJUDICADOS y la convocatoria', async () => {
+    cliente.post.mockResolvedValue({ data: { codigo: 'c-2', totalDestinatarios: 3 } })
+    const user = userEvent.setup()
+    conCliente(<ComunicadoForm convocatoriaId="conv-2" />)
+    await user.type(screen.getByLabelText('Título'), 'Aviso')
+    await user.type(screen.getByLabelText('Contenido'), 'Texto del aviso')
+    await elegirDestinatarios(user, 'Adjudicados')
+
+    await user.click(screen.getByRole('button', { name: 'Revisar y publicar' }))
+    await user.click(await screen.findByRole('button', { name: 'Confirmar publicación' }))
+
+    await waitFor(() => expect(cliente.post).toHaveBeenCalledTimes(1))
+    expect(cliente.post.mock.calls[0][1]).toMatchObject({
+      titulo: 'Aviso',
+      destinatarios: 'ADJUDICADOS',
+      convocatoriaId: 'conv-2',
+    })
+  })
 })

@@ -18,12 +18,12 @@ import { toastSuccess } from '@/components/ui/toast'
 import { AlertaError } from '@/features/auth'
 import { mapearErrorComunicados } from '../api/mapearErrorComunicados'
 import { usePublicarComunicado } from '../api/useComunicados'
-import { aPublicarRequest, comunicadoSchema, ETIQUETAS_DESTINATARIOS } from '../schemas'
+import { aPublicarRequest, comunicadoSchema, ETIQUETAS_DESTINATARIOS, requiereConvocatoria } from '../schemas'
 import type { ComunicadoValues } from '../schemas'
 import type { DestinatariosComunicado } from '../types'
 
 interface ComunicadoFormProps {
-  /** Convocatoria elegida en la pantalla: obligatoria para dirigirlo a los finalistas y acota a «Todos». */
+  /** Convocatoria elegida en la pantalla: obligatoria para dirigirlo a los finalistas o a los adjudicados y acota a «Todos». */
   convocatoriaId?: string
 }
 
@@ -46,6 +46,8 @@ export function ComunicadoForm({ convocatoriaId }: ComunicadoFormProps) {
     onSubmit: ({ value }) => {
       setError(null)
       setEnviadoA(null)
+      // Sin convocatoria no se sabe a quién avisar: se corta acá, igual que lo haría el backend (ERR_COM_02).
+      if (requiereConvocatoria(value.destinatarios) && !convocatoriaId) return
       setPendiente(value)
     },
   })
@@ -146,8 +148,10 @@ export function ComunicadoForm({ convocatoriaId }: ComunicadoFormProps) {
                   ))}
                 </SelectContent>
               </Select>
-              {field.state.value === 'FINALISTAS' && !convocatoriaId && (
-                <span className="text-xs text-destructive">Elige una convocatoria para avisar a los finalistas.</span>
+              {requiereConvocatoria(field.state.value) && !convocatoriaId && (
+                <span className="text-xs text-destructive">
+                  Elige una convocatoria para avisar a los {field.state.value === 'ADJUDICADOS' ? 'adjudicados' : 'finalistas'}.
+                </span>
               )}
             </div>
           )}
