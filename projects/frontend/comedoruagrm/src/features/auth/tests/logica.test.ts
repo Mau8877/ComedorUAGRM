@@ -8,10 +8,14 @@ import { etiquetaRol } from '../roles'
 import { rutaInicioPorRol } from '../rutaInicioPorRol'
 
 describe('rutaInicioPorRol', () => {
-  it('manda a /panel a los 4 roles del backend', () => {
-    for (const rol of ['POSTULANTE', 'ADMINISTRADOR_DUBSS', 'DIRECTIVO', 'PERSONAL_COMEDOR']) {
+  it('manda a /panel a los roles que todavía no tienen módulo propio', () => {
+    for (const rol of ['POSTULANTE', 'ADMINISTRADOR_DUBSS', 'PERSONAL_COMEDOR']) {
       expect(rutaInicioPorRol(rol)).toBe('/panel')
     }
+  })
+
+  it('manda al Directivo a su dashboard (CU12)', () => {
+    expect(rutaInicioPorRol('DIRECTIVO')).toBe('/dashboard')
   })
 
   it('manda a /login a un rol desconocido', () => {
