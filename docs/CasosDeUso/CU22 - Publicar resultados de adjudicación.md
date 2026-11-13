@@ -23,7 +23,7 @@ Hasta aquí el CU-05 no avisó a nadie: el aviso de «adjudicada» o «no adjudi
 - La convocatoria está **cerrada** y tiene finalistas.
 - **Ningún finalista de la convocatoria está en «calificada»**: cada uno está adjudicado, no adjudicado, archivado o devuelto. *(Decisión 7 del CU-05.)*
 - Los resultados de la convocatoria **no** se han publicado antes.
-- **No se exige el acta** (CU-08): mientras el CU-08 no exista, publicar no depende de ella. *(Decisión de Mau.)*
+- **No se exige el acta** ([CU-08](CU08%20-%20Generar%20acta%20de%20adjudicación.md)): publicar no depende de ella; al revés, el acta se genera **después** de publicar. *(Decisión de Mau.)*
 
 ## Flujo principal
 
@@ -65,7 +65,7 @@ Hasta aquí el CU-05 no avisó a nadie: el aviso de «adjudicada» o «no adjudi
 - **Después de publicar:** no se registran ni modifican decisiones (CU-05, CU-19, CU-20 responden `409`). La convocatoria queda «publicada» y nada más cambia de estado: las postulaciones **no** cambian de estado al publicar.
 - **Bitácora:** la publicación queda anotada (quién, cuándo, código de convocatoria, cantidad de adjudicados y no adjudicados), **sin** nombres, CI, correos ni tokens.
 - **Comunicados:** al publicar se habilita el destinatario `ADJUDICADOS` en los comunicados del CU-21. *(Pendiente del CU-05, decisión 10.)*
-- **Acta (CU-08):** por ahora publicar no la exige; cuando el CU-08 exista se definirá si pasa a ser precondición.
+- **Acta (CU-08):** publicar no la exige y nunca la exigirá: el CU-08 exige que los resultados estén publicados para generar el acta (decisión de Mau, 2026-11-13).
 - **Fuera de este CU:** acta de adjudicación (CU-08), padrón de becados (CU-23), apelación del postulante, lista de espera de suplentes y reportes.
 - Todos los mensajes están en español y no exponen detalles técnicos.
 
@@ -133,7 +133,7 @@ Hasta aquí el CU-05 no avisó a nadie: el aviso de «adjudicada» o «no adjudi
 3. **Textos de los avisos:** los de las reglas de negocio.
 4. **Despublicar** no existe.
 5. **Sin adjudicados** se publica igualmente.
-6. **Acta (CU-08):** no se exige por ahora; se retomará cuando el CU-08 exista.
+6. **Acta (CU-08):** no se exige para publicar; el acta se genera después de publicar (CU-08).
 7. **Avisos:** siempre por lotes, sin N+1.
 
 ## Desarrollador

@@ -18,7 +18,7 @@ Todas las decisiones de abajo están confirmadas por Mau.
 - **Una sola tabla nueva:** `publicacion_resultado` (una fila por convocatoria, `convocatoria_id` único). Ya está en el diseño lógico (`diseno_base_de_datos.md`); se actualiza el diseño **antes** que la migración, como exige `PERSISTENCIA_BD_BACKEND.md`. No se tocan `adjudicacion` ni `finalista`.
 - **Módulo nuevo `features/resultados/`**, dueño de `publicacion_resultado`. Lee decisiones, finalistas, postulantes y convocatorias con consultas JDBC propias; ningún módulo lee el repository del otro. El aviso se envía a través del `service` de notificaciones.
 - **Marca de publicación = la fila de `publicacion_resultado`.** Los CU-05, CU-19 y CU-20 hoy tienen un método `resultadosPublicados` que devuelve siempre `false` con un `TODO`: la UT-09 lo conecta a esta fila con el cambio mínimo. El estado de la convocatoria pasa a «publicada» *(solo ese cambio de estado, decisión 11 del CU; si el enum aún no tiene el valor, lo agrega la migración)*; ninguna postulación cambia de estado.
-- **Precondición de publicar:** convocatoria cerrada y **ningún finalista «calificada»** (decisión 7 del CU-05). **No se exige el acta** (CU-08) hasta que exista.
+- **Precondición de publicar:** convocatoria cerrada y **ningún finalista «calificada»** (decisión 7 del CU-05). **No se exige el acta** (CU-08): el acta se genera después de publicar.
 - **Sin idempotencia por clave**, igual que el CU-05, 19 y 20: se bloquea la fila de la convocatoria (`FOR UPDATE`); la segunda petición recibe `409` `ERR_PUB_02`. La unicidad de `convocatoria_id` es la segunda red de seguridad.
 - **Cuatro códigos de error propios**, prefijo `PUB`: `ERR_PUB_01` (`409`, quedan finalistas en «calificada»), `ERR_PUB_02` (`409`, ya publicada), `ERR_PUB_03` (`409`, convocatoria no cerrada) y `ERR_PUB_04` (`404`, los resultados aún no están publicados). Convocatoria inexistente reutiliza `ERR_PRI_01`; `sort` o `filter` no soportado, `ERR_SYS_05`.
 - **Aviso:** dos eventos nuevos, `BECA_ADJUDICADA` (`SUCCESS`) y `BECA_NO_ADJUDICADA` (`INFO`), con `{nombres}` y `{convocatoria}`, por **bandeja, push y correo**. Se avisa a cada finalista con adjudicación (adjudicado o no adjudicado); archivados, rechazados y devueltos no. Las filas de `notificacion` se crean por lotes de 500 **en la misma transacción** de la publicación y el despacho es el asíncrono de CU-EXTRA-01; un fallo de envío nunca deshace la publicación *(textos, por revisar)*.
@@ -95,7 +95,7 @@ Todos los identificadores son códigos públicos (UUID).
 ## Follow-ups (no se implementan en estas UT)
 
 - Que el CU-04 muestre al postulante «adjudicada» o «no adjudicada» solo después de publicar, leyendo este módulo.
-- Cuando el CU-08 exista, definir si el acta pasa a ser precondición de publicar (por ahora no se exige).
+- (Resuelto) El acta del CU-08 no es precondición de publicar: se genera después de publicar.
 - Padrón de becados (CU-23) a partir de los adjudicados.
 
 ## Qué NO incluyen estas UT

@@ -15,7 +15,7 @@ Es el caso de uso que gobierna el proceso de adjudicación de una convocatoria *
 
 Para **adjudicar**, el sistema exige tres cosas: que la última auditoría del finalista sea «Validado», que su puntaje total alcance el puntaje mínimo de la convocatoria y que queden cupos. Para **no adjudicar** no pide ninguna de las tres condiciones de puntaje o cupo, pero sí un **motivo** y que el expediente haya sido auditado. Cuando los cupos se agotan, solo se admite «no adjudicar».
 
-Lo extienden el [CU-08](CU08%20-%20Generar%20acta%20de%20adjudicación.md) (acta de adjudicación) y el [CU-22](CU22%20-%20Publicar%20resultados%20de%20adjudicación.md) (publicar resultados), que se ejecutan cuando las decisiones están tomadas. Alimenta el [CU-23](CU23%20-%20Gestionar%20padrón%20de%20becados.md): los adjudicados son el punto de partida del padrón de becados.
+Lo extienden el [CU-08](CU08%20-%20Generar%20acta%20de%20adjudicación.md) (acta de adjudicación) y el [CU-22](CU22%20-%20Publicar%20resultados%20de%20adjudicación.md) (publicar resultados), que se ejecutan cuando las decisiones están tomadas: primero se publican los resultados y, una vez publicados, se genera el acta. Alimenta el [CU-23](CU23%20-%20Gestionar%20padrón%20de%20becados.md): los adjudicados son el punto de partida del padrón de becados.
 
 **Cómo se distingue de «rechazar» (CU-20).** Ambos dejan la postulación en «no adjudicada», pero son decisiones distintas: **rechazar** ([CU-20](CU20%20-%20Archivar%20o%20rechazar%20postulación.md)) descarta un expediente que _no procede_ (documentación no válida, no entregó en plazo) y **no crea** una adjudicación; **no adjudicar** (este CU) es la _decisión final_ sobre un finalista cuyo expediente sí se evaluó (por ejemplo, validado pero sin cupo o sin puntaje suficiente) y **sí crea** una fila en `adjudicacion` con resultado `NO_ADJUDICADA`. Ver [Distinción con el CU-20](#distinción-con-el-cu-20-rechazar).
 
@@ -44,7 +44,7 @@ Lo extienden el [CU-08](CU08%20-%20Generar%20acta%20de%20adjudicación.md) (acta
 11. El sistema registra la adjudicación (resultado, puntaje final, usuario que decide y fecha de adjudicación), cambia el estado de la postulación a «adjudicada» o «no adjudicada», lo anota en el historial de la postulación (estado anterior, estado nuevo, usuario, fecha y, si no adjudica, el motivo) y en la bitácora, y actualiza los cupos disponibles, todo en una misma operación (A9).
 12. El sistema confirma la decisión y el expediente pasa a mostrar la postulación como «Adjudicada» o «No adjudicada», sin permitir más acciones.
 13. Los pasos 7 a 12 se repiten hasta decidir sobre todos los finalistas.
-14. Con las decisiones tomadas, el Administrador puede generar el acta (CU-08) y publicar los resultados (CU-22) (A8).
+14. Con las decisiones tomadas, el Administrador puede publicar los resultados (CU-22) y, una vez publicados, generar el acta (CU-08) (A8).
 
 ## Flujos alternativos y excepciones
 
