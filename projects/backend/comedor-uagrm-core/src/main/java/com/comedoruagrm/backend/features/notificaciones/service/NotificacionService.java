@@ -124,4 +124,12 @@ public class NotificacionService {
             notificacionRepository.save(notificacion);
         });
     }
+
+    /** Deja constancia de que varios avisos se entregaron por al menos una via (despacho por lotes). */
+    @Transactional
+    public void marcarEnviadas(java.util.Collection<Long> notificacionIds) {
+        if (!notificacionIds.isEmpty()) {
+            notificacionRepository.marcarEnviadas(notificacionIds, Instant.now());
+        }
+    }
 }

@@ -72,12 +72,13 @@ public class CierrePostulacionConsultaRepository {
     }
 
     /**
-     * Si la convocatoria ya tiene sus resultados publicados.
-     *
-     * TODO: el CU22 (publicar resultados) todavia no existe y no hay donde leer la marca de publicacion;
-     * TODO: hasta entonces devuelve siempre `false`. Al implementar el CU22, leerla aqui.
+     * Si la convocatoria ya tiene sus resultados publicados: existe su fila en `publicacion_resultado` (CU22).
+     * Es la unica marca de publicacion; el CU05, el CU19 y el CU20 la leen por aqui.
      */
     public boolean resultadosPublicados(long convocatoriaId) {
-        return false;
+        return Boolean.TRUE.equals(jdbc.queryForObject("""
+                SELECT EXISTS (SELECT 1 FROM publicacion_resultado
+                               WHERE convocatoria_id = :convocatoria AND eliminado_en IS NULL)
+                """, new MapSqlParameterSource("convocatoria", convocatoriaId), Boolean.class));
     }
 }

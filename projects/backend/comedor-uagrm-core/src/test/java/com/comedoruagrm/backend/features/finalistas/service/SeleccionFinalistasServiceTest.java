@@ -119,6 +119,17 @@ class SeleccionFinalistasServiceTest {
     }
 
     @Test
+    void seleccionar_conLaConvocatoriaYaPublicada_lanzaErrAdj01EnVezDeErrAdj05() {
+        // Publicada deja de ser «cerrada»: el error correcto sigue siendo ERR_ADJ_01.
+        escenario(convocatoria(null), 10, candidatas(10, 1));
+        when(adjudicacion.decisionesPosibles(any())).thenReturn(false);
+        when(adjudicacion.resultadosPublicados(9L)).thenReturn(true);
+
+        falla(() -> service.seleccionar(actorCodigo, convocatoriaCodigo, new SeleccionarFinalistasRequest(3)),
+                ConflictException.class, AdjudicacionErrorCodes.ERR_ADJ_01);
+    }
+
+    @Test
     void seleccionar_laCantidadDelRequestPrevaleceSobreLaConfigurada() {
         escenario(convocatoria(8), 10, candidatas(10, 1));
 

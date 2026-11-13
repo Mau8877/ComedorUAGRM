@@ -20,6 +20,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.comedoruagrm.backend.common.auditoria.ResultadoAuditado;
 import com.comedoruagrm.backend.common.exception.BusinessException;
+import com.comedoruagrm.backend.common.exception.ConflictException;
 import com.comedoruagrm.backend.common.exception.NotFoundException;
 import com.comedoruagrm.backend.features.finalistas.exception.FinalistaErrorCodes;
 import com.comedoruagrm.backend.features.notificaciones.enums.EventoNotificacion;
@@ -154,6 +155,19 @@ class DevolucionServiceTest {
         when(consulta.estadoActual(3L)).thenReturn("devuelta");
 
         assertThatThrownBy(() -> service.devolver(actorCodigo, finalistaCodigo, new DevolverPostulacionRequest("x")))
+                .extracting(e -> ((BusinessException) e).getErrorCode()).isEqualTo(DevolucionErrorCodes.ERR_DEV_01);
+        verify(historial, never()).saveAndFlush(any());
+        verify(notificaciones, never()).notificar(any(), any(), any(), anyLong(), any());
+        assertThat(postulacion.getEstado()).isEqualTo(EstadoPostulacion.calificada);
+    }
+
+    @Test
+    void devolver_conLosResultadosPublicados_lanzaConflictErrDev01SinEscribirNada() {
+        camino_feliz();
+        when(consulta.resultadosPublicadosDe(3L)).thenReturn(true);
+
+        assertThatThrownBy(() -> service.devolver(actorCodigo, finalistaCodigo, new DevolverPostulacionRequest("x")))
+                .isInstanceOf(ConflictException.class).hasMessageContaining("publicados")
                 .extracting(e -> ((BusinessException) e).getErrorCode()).isEqualTo(DevolucionErrorCodes.ERR_DEV_01);
         verify(historial, never()).saveAndFlush(any());
         verify(notificaciones, never()).notificar(any(), any(), any(), anyLong(), any());

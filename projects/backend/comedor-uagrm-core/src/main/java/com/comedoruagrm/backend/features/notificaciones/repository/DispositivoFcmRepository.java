@@ -15,5 +15,8 @@ public interface DispositivoFcmRepository extends JpaRepository<DispositivoFcm, 
 
     List<DispositivoFcm> findAllByUsuarioId(Long usuarioId);
 
+    /** Los telefonos de varios usuarios en una sola consulta (envio por lotes, CU22). */
+    List<DispositivoFcm> findAllByUsuarioIdIn(Collection<Long> usuarioIds);
+
     List<DispositivoFcm> findAllByTokenIn(Collection<String> tokens);
 }

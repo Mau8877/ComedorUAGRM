@@ -339,6 +339,32 @@ class AdjudicacionServiceTest {
     }
 
     @Test
+    void decidir_conLaConvocatoriaYaPublicada_lanzaErrAdj01EnVezDeErrAdj05() {
+        // Al publicar, la convocatoria pasa a PUBLICADA (ya no es «cerrada»): el error correcto sigue siendo ERR_ADJ_01.
+        escenario(convocatoria("PUBLICADA", 5, "60", 10), "45", new UltimaAuditoria("VALIDADO", new BigDecimal("20")),
+                2);
+        when(consulta.resultadosPublicados(9L)).thenReturn(true);
+
+        falla(() -> service.adjudicar(actorCodigo, finalistaCodigo), ConflictException.class,
+                AdjudicacionErrorCodes.ERR_ADJ_01);
+        falla(() -> service.noAdjudicar(actorCodigo, finalistaCodigo, motivo("No cumple")),
+                ConflictException.class, AdjudicacionErrorCodes.ERR_ADJ_01);
+        sinCambios();
+    }
+
+    @Test
+    void panel_conLaConvocatoriaPublicada_noHabilitaLasDecisiones() {
+        when(consulta.convocatoria(convocatoriaCodigo))
+                .thenReturn(Optional.of(convocatoria("PUBLICADA", 5, "60", 10)));
+        when(consulta.resultadosPublicados(9L)).thenReturn(true);
+
+        var p = service.panel(convocatoriaCodigo);
+
+        assertThat(p.resultadosPublicados()).isTrue();
+        assertThat(p.decisionesHabilitadas()).isFalse();
+    }
+
+    @Test
     void decidir_sinNingunaAuditoria_lanzaErrAdj02EnLasDosDecisiones() {
         escenario(convocatoria("CERRADA", 5, "60", null), "45", null, 0);
 

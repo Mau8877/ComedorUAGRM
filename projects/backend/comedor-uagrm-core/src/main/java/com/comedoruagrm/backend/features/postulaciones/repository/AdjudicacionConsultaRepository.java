@@ -206,8 +206,8 @@ public class AdjudicacionConsultaRepository {
     }
 
     /**
-     * Si la convocatoria ya tiene sus resultados publicados. Reutiliza el criterio del CU20 (hoy siempre
-     * `false`; el CU22 conectara la marca real ahi, una sola vez).
+     * Si la convocatoria ya tiene sus resultados publicados. Reutiliza el criterio del CU20, que lee la marca
+     * real del CU22 (la fila de `publicacion_resultado`), una sola vez.
      */
     public boolean resultadosPublicados(long convocatoriaId) {
         return cierreConsulta.resultadosPublicados(convocatoriaId);

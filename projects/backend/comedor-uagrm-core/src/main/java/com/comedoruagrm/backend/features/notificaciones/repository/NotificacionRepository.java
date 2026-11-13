@@ -29,6 +29,11 @@ public interface NotificacionRepository extends JpaRepository<Notificacion, Long
     @Query("update Notificacion n set n.leida = true where n.usuario.id = :usuarioId and n.leida = false")
     int marcarTodasLeidas(@Param("usuarioId") Long usuarioId);
 
+    /** Marca varios avisos como enviados con una sola sentencia (despacho por lotes, CU22). */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("update Notificacion n set n.enviadaEn = :cuando where n.id in :ids")
+    int marcarEnviadas(@Param("ids") java.util.Collection<Long> ids, @Param("cuando") java.time.Instant cuando);
+
     /** Borrado fisico de todas las del usuario (la bandeja no tiene papelera). Devuelve cuantas borro. */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("delete from Notificacion n where n.usuario.id = :usuarioId")

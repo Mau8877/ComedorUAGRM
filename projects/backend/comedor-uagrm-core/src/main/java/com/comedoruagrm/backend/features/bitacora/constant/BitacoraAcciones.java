@@ -45,6 +45,10 @@ public final class BitacoraAcciones {
     public static final String ADJUDICACION_BECA = "ADJUDICACION_BECA";
     public static final String NO_ADJUDICACION_BECA = "NO_ADJUDICACION_BECA";
 
+    // CU22: el actor es el administrador; el detalle lleva el codigo de la convocatoria y cantidades, nunca
+    // nombres, CI, correos ni tokens.
+    public static final String PUBLICACION_RESULTADOS = "PUBLICACION_RESULTADOS";
+
     private BitacoraAcciones() {
     }
 }

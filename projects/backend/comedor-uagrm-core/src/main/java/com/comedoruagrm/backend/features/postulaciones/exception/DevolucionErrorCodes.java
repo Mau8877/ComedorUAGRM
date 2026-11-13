@@ -7,7 +7,7 @@ package com.comedoruagrm.backend.features.postulaciones.exception;
  */
 public final class DevolucionErrorCodes {
 
-    /** 409 - La postulacion ya no esta «calificada» (ya devuelta, archivada, rechazada o adjudicada). */
+    /** 409 - La postulacion ya no esta «calificada» (ya devuelta, archivada, rechazada o adjudicada) o los resultados ya se publicaron. */
     public static final String ERR_DEV_01 = "ERR_DEV_01";
 
     /** 409 - El finalista no tiene una auditoria registrada despues de su ultima devolucion. */

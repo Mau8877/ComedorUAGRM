@@ -339,7 +339,7 @@ class FinalistasComunicadosIntegrationTest {
                 .andExpect(status().isBadRequest()).andExpect(jsonPath("$.error").value("ERR_SYS_01"));
         mockMvc.perform(post(COMUNICADOS).with(admin).contentType(MediaType.APPLICATION_JSON).content(
                 "{\"titulo\":\"a\",\"contenido\":\"b\",\"destinatarios\":\"ADJUDICADOS\"}"))
-                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.error").value("ERR_COM_01"));
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.error").value("ERR_COM_02"));
         mockMvc.perform(post(COMUNICADOS).with(admin).contentType(MediaType.APPLICATION_JSON).content(
                 "{\"titulo\":\"a\",\"contenido\":\"b\",\"destinatarios\":\"FINALISTAS\"}"))
                 .andExpect(status().isBadRequest()).andExpect(jsonPath("$.error").value("ERR_COM_02"));

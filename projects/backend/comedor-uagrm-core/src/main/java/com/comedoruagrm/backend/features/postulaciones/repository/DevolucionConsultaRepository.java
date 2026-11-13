@@ -74,6 +74,16 @@ public class DevolucionConsultaRepository {
      * Si el finalista tiene al menos una auditoria y, cuando la postulacion ya se devolvio antes, alguna
      * es posterior a la fecha de la ultima devolucion.
      */
+    /** Si la convocatoria de la postulacion ya tiene sus resultados publicados (fila de `publicacion_resultado`, CU22). */
+    public boolean resultadosPublicadosDe(long postulacionId) {
+        return Boolean.TRUE.equals(jdbc.queryForObject("""
+                SELECT EXISTS (SELECT 1 FROM postulacion po
+                               JOIN publicacion_resultado pr ON pr.convocatoria_id = po.convocatoria_id
+                                    AND pr.eliminado_en IS NULL
+                               WHERE po.id = :id)
+                """, new MapSqlParameterSource("id", postulacionId), Boolean.class));
+    }
+
     public boolean hayAuditoriaPosteriorALaUltimaDevolucion(long finalistaId, long postulacionId) {
         Boolean hay = jdbc.queryForObject("""
                 SELECT EXISTS (

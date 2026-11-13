@@ -59,9 +59,16 @@ public class DespachoNotificaciones {
         }
     }
 
-    /** Devuelve a cuantos telefonos llego el push. */
     private int enviarPush(NotificacionGuardada aviso) {
-        List<String> pendientes = dispositivoService.tokensDe(aviso.usuarioId());
+        return enviarPush(aviso, dispositivoService.tokensDe(aviso.usuarioId()));
+    }
+
+    /**
+     * Envia el push del aviso a esos telefonos y devuelve a cuantos llego. Lo usa tambien el despacho por
+     * lotes ({@link DespachoLoteNotificaciones}), que ya resolvio los telefonos de todos en una consulta.
+     */
+    public int enviarPush(NotificacionGuardada aviso, List<String> tokens) {
+        List<String> pendientes = tokens;
         if (pendientes.isEmpty()) {
             return 0;
         }

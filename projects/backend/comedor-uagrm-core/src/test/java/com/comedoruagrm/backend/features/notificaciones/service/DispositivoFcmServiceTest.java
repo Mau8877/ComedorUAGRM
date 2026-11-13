@@ -2,6 +2,7 @@ package com.comedoruagrm.backend.features.notificaciones.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -126,6 +127,28 @@ class DispositivoFcmServiceTest {
                 new DispositivoFcm(ana, "t2", PlataformaDispositivo.ANDROID)));
 
         assertThat(service.tokensDe(1L)).containsExactly("t1", "t2");
+    }
+
+    @Test
+    void tokensDe_conVariosUsuarios_agrupaPorUsuarioConUnaSolaConsulta() {
+        when(dispositivoRepository.findAllByUsuarioIdIn(List.of(1L, 2L, 3L))).thenReturn(List.of(
+                new DispositivoFcm(ana, "a1", PlataformaDispositivo.ANDROID),
+                new DispositivoFcm(ana, "a2", PlataformaDispositivo.ANDROID),
+                new DispositivoFcm(beto, "b1", PlataformaDispositivo.ANDROID)));
+
+        java.util.Map<Long, List<String>> tokens = service.tokensDe(List.of(1L, 2L, 3L));
+
+        assertThat(tokens).containsOnlyKeys(1L, 2L);
+        assertThat(tokens.get(1L)).containsExactly("a1", "a2");
+        assertThat(tokens.get(2L)).containsExactly("b1");
+        verify(dispositivoRepository, org.mockito.Mockito.times(1)).findAllByUsuarioIdIn(anyCollection());
+    }
+
+    @Test
+    void tokensDe_conUnaColeccionVacia_noConsultaNada() {
+        assertThat(service.tokensDe(List.<Long>of())).isEmpty();
+
+        verify(dispositivoRepository, never()).findAllByUsuarioIdIn(anyCollection());
     }
 
     @Test

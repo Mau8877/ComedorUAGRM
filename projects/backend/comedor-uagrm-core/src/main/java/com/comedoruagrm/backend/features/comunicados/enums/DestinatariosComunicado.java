@@ -3,8 +3,8 @@ package com.comedoruagrm.backend.features.comunicados.enums;
 /**
  * A quien va dirigido un comunicado; en la base es el enum de PostgreSQL `destinatarios_comunicado`.
  *
- * * Hoy se publican `TODOS` y `FINALISTAS`; `ADJUDICADOS` existe en el diseno logico pero se habilita
- * * cuando existan las adjudicaciones (CU05 / CU22).
+ * * `ADJUDICADOS` (finalistas con adjudicacion `ADJUDICADA` de una convocatoria) se habilito con el CU22;
+ * * como `FINALISTAS`, necesita la convocatoria.
  */
 public enum DestinatariosComunicado {
     TODOS,

@@ -5,7 +5,9 @@ import static net.logstash.logback.argument.StructuredArguments.kv;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,6 +82,17 @@ public class DispositivoFcmService {
         return dispositivoRepository.findAllByUsuarioId(usuarioId).stream()
                 .map(DispositivoFcm::getToken)
                 .toList();
+    }
+
+    /** Tokens activos de varios usuarios en una sola consulta; los usuarios sin telefono no aparecen en el mapa. */
+    @Transactional(readOnly = true)
+    public Map<Long, List<String>> tokensDe(Collection<Long> usuarioIds) {
+        if (usuarioIds.isEmpty()) {
+            return Map.of();
+        }
+        return dispositivoRepository.findAllByUsuarioIdIn(usuarioIds).stream()
+                .collect(Collectors.groupingBy(d -> d.getUsuario().getId(),
+                        Collectors.mapping(DispositivoFcm::getToken, Collectors.toList())));
     }
 
     /** Elimina los tokens que Firebase declaro invalidos (app desinstalada o token vencido). */

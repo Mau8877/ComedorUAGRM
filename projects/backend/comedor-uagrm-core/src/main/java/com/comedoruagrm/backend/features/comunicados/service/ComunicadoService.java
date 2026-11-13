@@ -65,13 +65,11 @@ public class ComunicadoService {
     public ResultadoAuditado<ComunicadoResponse> publicar(UUID actorCodigo, PublicarComunicadoRequest request) {
         Usuario actor = usuarioService.obtenerPorCodigo(actorCodigo);
         DestinatariosComunicado tipo = request.destinatarios();
-        if (tipo == DestinatariosComunicado.ADJUDICADOS) {
-            throw new ValidationException(ComunicadoErrorCodes.ERR_COM_01,
-                    "Por ahora los comunicados solo pueden dirigirse a todos los postulantes o a los finalistas");
-        }
-        if (tipo == DestinatariosComunicado.FINALISTAS && request.convocatoriaId() == null) {
+        boolean porConvocatoria = tipo == DestinatariosComunicado.FINALISTAS
+                || tipo == DestinatariosComunicado.ADJUDICADOS;
+        if (porConvocatoria && request.convocatoriaId() == null) {
             throw new ValidationException(ComunicadoErrorCodes.ERR_COM_02,
-                    "Para avisar a los finalistas indica la convocatoria");
+                    "Para avisar a los finalistas o a los adjudicados indica la convocatoria");
         }
         Long convocatoriaId = request.convocatoriaId() == null ? null
                 : consulta.buscarConvocatoriaId(request.convocatoriaId())

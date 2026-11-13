@@ -6,10 +6,10 @@ package com.comedoruagrm.backend.features.comunicados.exception;
  */
 public final class ComunicadoErrorCodes {
 
-    /** 400 - Los destinatarios no estan soportados (`ADJUDICADOS`) o el grupo no tiene a nadie. */
+    /** 400 - El grupo de destinatarios elegido no tiene a nadie. */
     public static final String ERR_COM_01 = "ERR_COM_01";
 
-    /** 400 - Un comunicado a `FINALISTAS` necesita la convocatoria. */
+    /** 400 - Un comunicado a `FINALISTAS` o a `ADJUDICADOS` necesita la convocatoria. */
     public static final String ERR_COM_02 = "ERR_COM_02";
 
     private ComunicadoErrorCodes() {

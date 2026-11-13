@@ -149,6 +149,11 @@ public class AdjudicacionService {
         DatosConvocatoria convocatoria = consulta.convocatoria(c.convocatoriaCodigo()).orElseThrow(
                 () -> new NotFoundException(PriorizacionErrorCodes.ERR_PRI_01, "La convocatoria no existe"));
 
+        // Publicada va primero: al publicar la convocatoria deja de estar «cerrada» y el error correcto es ERR_ADJ_01.
+        if (consulta.resultadosPublicados(c.convocatoriaId())) {
+            throw new ConflictException(AdjudicacionErrorCodes.ERR_ADJ_01,
+                    "Los resultados de la convocatoria ya fueron publicados");
+        }
         if (!decisionesPosibles(convocatoria)) {
             throw new ConflictException(AdjudicacionErrorCodes.ERR_ADJ_05,
                     "La convocatoria debe estar cerrada y tener cupos y puntaje mínimo definidos para decidir");
@@ -158,10 +163,6 @@ public class AdjudicacionService {
         if (!EstadoPostulacion.calificada.name().equals(estadoActual)) {
             throw new ConflictException(AdjudicacionErrorCodes.ERR_ADJ_01,
                     "La postulación ya no está calificada (estado actual: " + estadoActual + ")");
-        }
-        if (consulta.resultadosPublicados(c.convocatoriaId())) {
-            throw new ConflictException(AdjudicacionErrorCodes.ERR_ADJ_01,
-                    "Los resultados de la convocatoria ya fueron publicados");
         }
         UltimaAuditoria auditoria = consulta.ultimaAuditoria(c.finalistaId()).orElseThrow(
                 () -> new ConflictException(AdjudicacionErrorCodes.ERR_ADJ_02,

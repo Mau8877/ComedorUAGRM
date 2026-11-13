@@ -69,6 +69,24 @@ public enum EventoNotificacion {
     POSTULACION_RECHAZADA(TipoNotificacion.ERROR,
             "Tu postulación no fue adjudicada - Beca Comedor",
             "Hola {nombres}, la DUBSS no pudo adjudicarte la beca con esta postulación. Motivo: {motivo}",
+            true),
+
+    /**
+     * Aviso al finalista adjudicado al publicar los resultados (CU22), con {nombres} y {convocatoria}.
+     * Bandeja, push y correo. No lleva puntaje ni datos personales.
+     */
+    BECA_ADJUDICADA(TipoNotificacion.SUCCESS,
+            "Beca Comedor: resultado de tu postulación",
+            "{nombres}, ¡felicidades! Tu postulación en {convocatoria} fue adjudicada: obtuviste la Beca Comedor.",
+            true),
+
+    /**
+     * Aviso al finalista no adjudicado al publicar los resultados (CU22), con {nombres} y {convocatoria}.
+     * Bandeja, push y correo. No lleva el motivo: ese lo ve solo el Administrador.
+     */
+    BECA_NO_ADJUDICADA(TipoNotificacion.INFO,
+            "Beca Comedor: resultado de tu postulación",
+            "{nombres}, tu postulación en {convocatoria} no fue adjudicada. Gracias por participar.",
             true);
 
     private final TipoNotificacion tipo;

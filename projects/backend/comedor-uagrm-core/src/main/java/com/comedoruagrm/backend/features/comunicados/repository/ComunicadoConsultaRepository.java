@@ -40,7 +40,8 @@ public class ComunicadoConsultaRepository {
     /**
      * `id` de los usuarios activos que reciben el comunicado. `TODOS`: las cuentas de Postulante (si hay
      * convocatoria, solo quienes tienen una postulacion enviada en ella). `FINALISTAS`: los finalistas de
-     * la convocatoria (que no puede ser null). `ADJUDICADOS` no esta soportado: devuelve vacio.
+     * la convocatoria (que no puede ser null). `ADJUDICADOS`: los finalistas con adjudicacion `ADJUDICADA` de la
+     * convocatoria (que tampoco puede ser null); existen desde que se decide, no hace falta que se haya publicado.
      */
     public List<Long> destinatarios(DestinatariosComunicado tipo, Long convocatoriaId) {
         MapSqlParameterSource parametros = new MapSqlParameterSource().addValue("convocatoria", convocatoriaId);
@@ -63,7 +64,15 @@ public class ComunicadoConsultaRepository {
                     WHERE f.eliminado_en IS NULL AND po.convocatoria_id = :convocatoria
                     ORDER BY u.id
                     """, parametros, Long.class);
-            case ADJUDICADOS -> List.of();
+            case ADJUDICADOS -> jdbc.queryForList("""
+                    SELECT DISTINCT u.id FROM finalista f
+                    JOIN postulacion po ON po.id = f.postulacion_id AND po.eliminado_en IS NULL
+                    JOIN adjudicacion a ON a.postulacion_id = po.id AND a.eliminado_en IS NULL
+                         AND a.resultado = 'ADJUDICADA'
+                    JOIN usuario u ON u.id = po.postulante_id AND u.activo AND u.eliminado_en IS NULL
+                    WHERE f.eliminado_en IS NULL AND po.convocatoria_id = :convocatoria
+                    ORDER BY u.id
+                    """, parametros, Long.class);
         };
     }
 

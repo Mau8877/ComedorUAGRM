@@ -74,6 +74,10 @@ public class DevolucionService {
             throw new ConflictException(DevolucionErrorCodes.ERR_DEV_01,
                     "Solo se puede devolver una postulación calificada");
         }
+        if (consulta.resultadosPublicadosDe(c.postulacionId())) {
+            throw new ConflictException(DevolucionErrorCodes.ERR_DEV_01,
+                    "Los resultados de la convocatoria ya fueron publicados");
+        }
         if (!consulta.hayAuditoriaPosteriorALaUltimaDevolucion(c.finalistaId(), c.postulacionId())) {
             throw new ConflictException(DevolucionErrorCodes.ERR_DEV_02,
                     "Primero se debe registrar la auditoría del expediente");

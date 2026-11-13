@@ -122,8 +122,36 @@ class ComunicadoServiceTest {
     }
 
     @Test
-    void publicar_adjudicados_lanzaErrCom01() {
+    void publicar_aAdjudicados_resuelveLaConvocatoriaYSusAdjudicados() {
         when(usuarioService.obtenerPorCodigo(admin.getCodigo())).thenReturn(admin);
+        when(consulta.buscarConvocatoriaId(convocatoria)).thenReturn(Optional.of(5L));
+        when(consulta.destinatarios(DestinatariosComunicado.ADJUDICADOS, 5L)).thenReturn(List.of(7L, 8L));
+        guardaComunicado();
+        when(notificacionService.notificarUsuarios(anyList(), any(), any(), any())).thenReturn(2);
+
+        ResultadoAuditado<ComunicadoResponse> resultado =
+                service.publicar(admin.getCodigo(), pedido(DestinatariosComunicado.ADJUDICADOS, convocatoria));
+
+        assertThat(resultado.datos().destinatarios()).isEqualTo(DestinatariosComunicado.ADJUDICADOS);
+        assertThat(resultado.datos().convocatoriaId()).isEqualTo(convocatoria);
+        assertThat(resultado.datos().totalDestinatarios()).isEqualTo(2);
+        verify(notificacionService).notificarUsuarios(eq(List.of(7L, 8L)), eq(EventoNotificacion.COMUNICADO), any(),
+                eq(9L));
+    }
+
+    @Test
+    void publicar_adjudicadosSinConvocatoria_lanzaErrCom02() {
+        when(usuarioService.obtenerPorCodigo(admin.getCodigo())).thenReturn(admin);
+
+        assertError(() -> service.publicar(admin.getCodigo(), pedido(DestinatariosComunicado.ADJUDICADOS, null)),
+                "ERR_COM_02");
+    }
+
+    @Test
+    void publicar_adjudicadosSinNadie_lanzaErrCom01() {
+        when(usuarioService.obtenerPorCodigo(admin.getCodigo())).thenReturn(admin);
+        when(consulta.buscarConvocatoriaId(convocatoria)).thenReturn(Optional.of(5L));
+        when(consulta.destinatarios(DestinatariosComunicado.ADJUDICADOS, 5L)).thenReturn(List.of());
 
         assertError(() -> service.publicar(admin.getCodigo(),
                 pedido(DestinatariosComunicado.ADJUDICADOS, convocatoria)), "ERR_COM_01");

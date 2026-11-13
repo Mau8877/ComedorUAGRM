@@ -30,7 +30,7 @@ import lombok.RequiredArgsConstructor;
  * * calificadas sin seleccionar para probar la seleccion.
  * * Agrega dos convocatorias de casos limite: una cerrada con un solo cupo libre y varios finalistas validados
  * * compitiendo por el, y una cerrada sin cupos ni puntaje minimo definidos (`ERR_ADJ_05`). La convocatoria con
- * * resultados ya publicados no se carga: la marca la define el CU22.
+ * * resultados ya publicados la carga `DatosPruebaResultados` (CU22), que corre despues de este cargador.
  * ! NUNCA en produccion: crea decisiones de adjudicacion ficticias.
  */
 @Component

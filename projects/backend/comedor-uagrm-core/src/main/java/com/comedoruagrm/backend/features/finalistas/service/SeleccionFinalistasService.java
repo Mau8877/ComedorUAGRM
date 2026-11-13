@@ -62,13 +62,14 @@ public class SeleccionFinalistasService {
         Usuario actor = usuarioService.obtenerPorCodigo(actorCodigo);
         DatosConvocatoria convocatoria = adjudicacionService.convocatoriaBloqueada(convocatoriaCodigo);
 
-        if (!adjudicacionService.decisionesPosibles(convocatoria)) {
-            throw new ConflictException(AdjudicacionErrorCodes.ERR_ADJ_05,
-                    "La convocatoria debe estar cerrada y tener cupos y puntaje mínimo definidos para elegir finalistas");
-        }
+        // Publicada va primero: al publicar la convocatoria deja de estar «cerrada» y el error correcto es ERR_ADJ_01.
         if (adjudicacionService.resultadosPublicados(convocatoria.id())) {
             throw new ConflictException(AdjudicacionErrorCodes.ERR_ADJ_01,
                     "Los resultados de la convocatoria ya fueron publicados");
+        }
+        if (!adjudicacionService.decisionesPosibles(convocatoria)) {
+            throw new ConflictException(AdjudicacionErrorCodes.ERR_ADJ_05,
+                    "La convocatoria debe estar cerrada y tener cupos y puntaje mínimo definidos para elegir finalistas");
         }
 
         long disponibles = adjudicacionService.contarCalificadasSinFinalista(convocatoria.id());
