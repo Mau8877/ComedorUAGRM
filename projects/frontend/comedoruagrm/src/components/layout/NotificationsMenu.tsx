@@ -49,15 +49,28 @@ const TYPE_CONFIG: Record<NotificationType, { icon: LucideIcon; className: strin
 // * no en el footer fijo).
 const LIST_MAX_HEIGHT = 'max-h-[380px]'
 
-function NotificationRow({ item, onMarkAsRead }: { item: NotificationItem; onMarkAsRead: (id: string) => void }) {
+function NotificationRow({
+  item,
+  onMarkAsRead,
+  onSelect,
+}: {
+  item: NotificationItem
+  onMarkAsRead: (id: string) => void
+  onSelect?: (item: NotificationItem) => void
+}) {
   const { icon: Icon, className: iconClassName } = TYPE_CONFIG[item.tipo]
+  // Un aviso con destino se puede tocar aunque ya esté leído (abre la postulación); uno sin destino no.
+  const navegable = Boolean(onSelect && item.postulacionCodigo)
 
   return (
     <li>
       <button
         type="button"
-        disabled={item.leida}
-        onClick={() => onMarkAsRead(item.id)}
+        disabled={item.leida && !navegable}
+        onClick={() => {
+          if (!item.leida) onMarkAsRead(item.id)
+          if (navegable) onSelect?.(item)
+        }}
         className={cn(
           'flex w-full items-start gap-2.5 px-4 py-3 text-left transition-colors',
           item.leida ? 'bg-popover hover:bg-muted/40' : 'bg-muted hover:bg-muted/70',
@@ -88,6 +101,7 @@ export function NotificationsMenu({ notifications, triggerClassName }: Notificat
     onOpenChange,
     onLoadMore,
     onMarkAsRead,
+    onSelect,
     onMarkAllAsRead,
     onDeleteAll,
   } = notifications
@@ -139,7 +153,7 @@ export function NotificationsMenu({ notifications, triggerClassName }: Notificat
           ) : hasItems ? (
             <ul className={cn('divide-y divide-border/60 overflow-y-auto', LIST_MAX_HEIGHT)}>
               {items.map((item) => (
-                <NotificationRow key={item.id} item={item} onMarkAsRead={onMarkAsRead} />
+                <NotificationRow key={item.id} item={item} onMarkAsRead={onMarkAsRead} onSelect={onSelect} />
               ))}
               {hasMore && (
                 <li className="p-2">

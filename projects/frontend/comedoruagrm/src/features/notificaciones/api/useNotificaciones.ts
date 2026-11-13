@@ -25,6 +25,7 @@ export function aNotificationItem(aviso: NotificacionApi): NotificationItem {
     detalle: aviso.detalle ?? undefined,
     fecha: aviso.fecha,
     leida: aviso.leida,
+    postulacionCodigo: aviso.postulacionCodigo ?? undefined,
   }
 }
 

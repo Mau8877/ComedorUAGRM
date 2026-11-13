@@ -1,4 +1,7 @@
+import { useNavigate } from '@tanstack/react-router'
+
 import { AppShell } from '@/components/layout'
+import type { NotificationItem } from '@/components/layout'
 import { useNotificaciones } from '@/features/notificaciones'
 
 import { estudianteNavItems } from './estudianteNavItems'
@@ -16,6 +19,16 @@ export function EstudianteLayout({
 }: EstudianteLayoutProps) {
   // La campanita usa la bandeja real salvo que quien arma el layout pase su propio controlador (pantallas de prueba).
   const bandeja = useNotificaciones({ enabled: !notifications })
+  const navigate = useNavigate()
+  // Un aviso que apunta a una postulación (CU04) abre su detalle; sin código se comporta como siempre.
+  const bandejaConDestino = {
+    ...bandeja,
+    onSelect: (item: NotificationItem) => {
+      if (item.postulacionCodigo) {
+        void navigate({ to: '/mis-postulaciones/$codigo', params: { codigo: item.postulacionCodigo } })
+      }
+    },
+  }
   return (
     <AppShell
       appName="ComedorU"
@@ -23,7 +36,7 @@ export function EstudianteLayout({
       navItems={estudianteNavItems}
       activeHref={activeHref}
       user={user}
-      notifications={notifications ?? bandeja}
+      notifications={notifications ?? bandejaConDestino}
       onCerrarSesion={onCerrarSesion}
       onPerfil={onPerfil}
       onCambiarContrasena={onCambiarContrasena}

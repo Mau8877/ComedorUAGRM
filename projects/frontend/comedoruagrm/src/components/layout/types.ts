@@ -34,6 +34,8 @@ export interface NotificationItem {
   fecha: string
   /** Al marcar como leída NO desaparece de la lista -- solo cambia el fondo de gris a blanco (ver NotificationsMenu). */
   leida: boolean
+  /** Código público de la postulación a la que apunta el aviso (CU04): tocarlo abre su detalle. Sin él, no navega. */
+  postulacionCodigo?: string
 }
 
 export interface NotificationsPageMeta {
@@ -67,6 +69,11 @@ export interface NotificationsController {
   onLoadMore: () => void
   /** Marca una notificación como leída -- sigue en la lista (ver NotificationItem.leida). */
   onMarkAsRead: (id: string) => void
+  /**
+   * Se llama al tocar un aviso que apunta a algo (hoy, uno con `postulacionCodigo`, CU04): quien arma el controlador
+   * decide a dónde navegar. Opcional: sin él, o en un aviso sin destino, tocar el aviso solo lo marca como leído.
+   */
+  onSelect?: (item: NotificationItem) => void
   onMarkAllAsRead: () => void
   /** Hard delete de todas las notificaciones (no solo "marcar como leídas"). */
   onDeleteAll: () => void

@@ -8,6 +8,8 @@ export interface NotificacionApi {
   detalle: string | null
   fecha: string
   leida: boolean
+  /** Código público de la postulación a la que apunta el aviso (CU04); `null` en los avisos sin postulación. */
+  postulacionCodigo?: string | null
 }
 
 export interface PaginaNotificaciones {
