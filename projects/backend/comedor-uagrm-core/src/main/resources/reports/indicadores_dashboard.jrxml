@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Dashboard de indicadores BI del Directivo (CU12). Formato JRXML de JasperReports 7 (elementos con `kind`,
+     sin namespace XML). Los datos llegan ya formateados (texto) desde IndicadoresPdfService; la plantilla
+     solo los coloca. Sin datos personales. -->
+<jasperReport name="indicadores_dashboard" language="java" columnCount="1" pageWidth="595" pageHeight="842"
+              columnWidth="555" leftMargin="20" rightMargin="20" topMargin="30" bottomMargin="30"
+              whenNoDataType="AllSectionsNoDetail">
+	<style name="base" default="true" fontName="SansSerif" fontSize="9"
+	       pdfFontName="Helvetica" pdfEncoding="Cp1252" pdfEmbedded="false"/>
+	<parameter name="GESTION" class="java.lang.String"/>
+	<parameter name="CONVOCATORIA" class="java.lang.String"/>
+	<parameter name="ACTUALIZADO_EN" class="java.lang.String"/>
+	<parameter name="TOTAL_POSTULACIONES" class="java.lang.String"/>
+	<parameter name="TOTAL_FINALISTAS" class="java.lang.String"/>
+	<parameter name="TOTAL_ADJUDICADAS" class="java.lang.String"/>
+	<parameter name="TOTAL_ASISTENCIA" class="java.lang.String"/>
+	<parameter name="GENERADO_EN" class="java.lang.String"/>
+	<parameter name="GENERADO_POR" class="java.lang.String"/>
+	<field name="mes" class="java.lang.String"/>
+	<field name="postulaciones" class="java.lang.String"/>
+	<field name="finalistas" class="java.lang.String"/>
+	<field name="adjudicadas" class="java.lang.String"/>
+	<field name="asistencia" class="java.lang.String"/>
+	<title height="120">
+		<element kind="staticText" x="0" y="0" width="555" height="22" fontSize="15.0" bold="true"
+		         pdfFontName="Helvetica-Bold">
+			<text><![CDATA[Dashboard de indicadores — Beca Comedor]]></text>
+		</element>
+		<element kind="textField" x="0" y="26" width="555" height="14" fontSize="10.0" bold="true"
+		         pdfFontName="Helvetica-Bold">
+			<expression><![CDATA["Gestión: " + $P{GESTION}]]></expression>
+		</element>
+		<element kind="textField" x="0" y="42" width="555" height="12">
+			<expression><![CDATA["Convocatoria: " + $P{CONVOCATORIA}]]></expression>
+		</element>
+		<element kind="textField" x="0" y="54" width="555" height="12">
+			<expression><![CDATA["Última actualización de los datos: " + $P{ACTUALIZADO_EN}]]></expression>
+		</element>
+		<element kind="staticText" x="0" y="74" width="555" height="14" fontSize="10.0" bold="true"
+		         pdfFontName="Helvetica-Bold">
+			<text><![CDATA[Totales]]></text>
+		</element>
+		<element kind="textField" x="0" y="90" width="275" height="12">
+			<expression><![CDATA["Postulaciones recibidas: " + $P{TOTAL_POSTULACIONES}]]></expression>
+		</element>
+		<element kind="textField" x="280" y="90" width="275" height="12">
+			<expression><![CDATA["Finalistas: " + $P{TOTAL_FINALISTAS}]]></expression>
+		</element>
+		<element kind="textField" x="0" y="103" width="275" height="12">
+			<expression><![CDATA["Becas adjudicadas: " + $P{TOTAL_ADJUDICADAS}]]></expression>
+		</element>
+		<element kind="textField" x="280" y="103" width="275" height="12">
+			<expression><![CDATA["Asistencia promedio: " + $P{TOTAL_ASISTENCIA}]]></expression>
+		</element>
+	</title>
+	<columnHeader height="20">
+		<element kind="staticText" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="0" y="0" width="115"
+		         height="20" bold="true" pdfFontName="Helvetica-Bold" vTextAlign="Middle">
+			<box leftPadding="3"/>
+			<text><![CDATA[Mes]]></text>
+		</element>
+		<element kind="staticText" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="115" y="0" width="110"
+		         height="20" bold="true" pdfFontName="Helvetica-Bold" vTextAlign="Middle">
+			<box leftPadding="3"/>
+			<text><![CDATA[Postulaciones]]></text>
+		</element>
+		<element kind="staticText" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="225" y="0" width="110"
+		         height="20" bold="true" pdfFontName="Helvetica-Bold" vTextAlign="Middle">
+			<box leftPadding="3"/>
+			<text><![CDATA[Finalistas]]></text>
+		</element>
+		<element kind="staticText" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="335" y="0" width="110"
+		         height="20" bold="true" pdfFontName="Helvetica-Bold" vTextAlign="Middle">
+			<box leftPadding="3"/>
+			<text><![CDATA[Adjudicadas]]></text>
+		</element>
+		<element kind="staticText" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="445" y="0" width="110"
+		         height="20" bold="true" pdfFontName="Helvetica-Bold" vTextAlign="Middle">
+			<box leftPadding="3"/>
+			<text><![CDATA[Asistencia]]></text>
+		</element>
+	</columnHeader>
+	<detail>
+		<band height="16">
+			<element kind="textField" x="0" y="0" width="115" height="16">
+				<box leftPadding="3"/>
+				<expression><![CDATA[$F{mes}]]></expression>
+			</element>
+			<element kind="textField" x="115" y="0" width="110" height="16">
+				<box leftPadding="3"/>
+				<expression><![CDATA[$F{postulaciones}]]></expression>
+			</element>
+			<element kind="textField" x="225" y="0" width="110" height="16">
+				<box leftPadding="3"/>
+				<expression><![CDATA[$F{finalistas}]]></expression>
+			</element>
+			<element kind="textField" x="335" y="0" width="110" height="16">
+				<box leftPadding="3"/>
+				<expression><![CDATA[$F{adjudicadas}]]></expression>
+			</element>
+			<element kind="textField" x="445" y="0" width="110" height="16">
+				<box leftPadding="3"/>
+				<expression><![CDATA[$F{asistencia}]]></expression>
+			</element>
+		</band>
+	</detail>
+	<pageFooter height="28">
+		<element kind="textField" x="0" y="2" width="555" height="12" fontSize="8.0">
+			<expression><![CDATA["Generado el " + $P{GENERADO_EN} + " por " + $P{GENERADO_POR}]]></expression>
+		</element>
+		<element kind="textField" x="0" y="14" width="515" height="12" fontSize="8.0" hTextAlign="Right">
+			<expression><![CDATA["Página " + $V{PAGE_NUMBER}]]></expression>
+		</element>
+		<element kind="textField" evaluationTime="Report" x="515" y="14" width="40" height="12" fontSize="8.0"
+		         hTextAlign="Left">
+			<expression><![CDATA[" de " + $V{PAGE_NUMBER}]]></expression>
+		</element>
+	</pageFooter>
+</jasperReport>
