@@ -93,6 +93,10 @@ docs/errors/
 - [`ERR_ADJ_04`](postulaciones/ERRORES_POSTULACIONES.md#err_adj_04) — Los cupos de la convocatoria están agotados (409)
 - [`ERR_ADJ_05`](postulaciones/ERRORES_POSTULACIONES.md#err_adj_05) — La convocatoria no está cerrada o no tiene cupos o puntaje mínimo (409)
 
+### Mis postulaciones (`POS`)
+
+- [`ERR_POS_01`](postulaciones/ERRORES_POSTULACIONES.md#err_pos_01) — La postulación no existe o es de otra persona (404)
+
 <!--
   A medida que se agregan módulos de negocio (platos, menú, usuarios...),
   cada uno suma acá su propia sección "### Nombre (PREFIJO)" con la lista

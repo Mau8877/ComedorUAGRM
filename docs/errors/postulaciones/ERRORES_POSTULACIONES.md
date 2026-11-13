@@ -115,3 +115,12 @@ donde está la lista.
 - **Dónde se lanza:** `SeleccionFinalistasService.seleccionar()`;
   `AdjudicacionService.adjudicar()` y `AdjudicacionService.noAdjudicar()`
   (método privado `decidir()`)
+
+## `ERR_POS_01`
+
+- **HTTP:** 404
+- **Excepción:** `NotFoundException`
+- **Significado:** La postulación pedida en «Mis postulaciones» (CU04) no existe,
+  es de otra persona o todavía es un borrador. Los tres casos responden igual
+  para no revelar si la postulación existe.
+- **Dónde se lanza:** `MisPostulacionesService.detalle()`

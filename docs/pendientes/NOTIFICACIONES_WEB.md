@@ -100,7 +100,8 @@ Response:
       "titulo": "Stock bajo: Cebolla",
       "detalle": "Quedan 8 kg, por debajo del mínimo (10 kg).",
       "fecha": "2026-09-03T14:32:10Z",
-      "leida": false
+      "leida": false,
+      "postulacionCodigo": null
     }
   ],
   "message": "Listado obtenido correctamente",
@@ -117,6 +118,7 @@ Response:
 | `detalle` | string \| `null` | Opcional -- no toda notificación tiene texto secundario |
 | `fecha` | string, ISO-8601 UTC | Momento en que se generó el evento, no en que se consultó |
 | `leida` | boolean | |
+| `postulacionCodigo` | string (UUID) \| `null` | Código público de la postulación a la que apunta el aviso (CU04: tocarlo abre el detalle de esa postulación). `null` en los avisos sin postulación, como un comunicado general. En el push (FCM) viaja igual en el `data`, solo si el aviso tiene postulación |
 
 ### 2. `GET /api/v1/notificaciones/me/resumen` -- conteo de no leídas
 
