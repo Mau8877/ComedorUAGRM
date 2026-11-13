@@ -2,7 +2,7 @@
 
 | Id   | Nombre                          | Módulo                        | Prioridad | Estado    |
 | ---- | ------------------------------- | ----------------------------- | --------- | --------- |
-| CU04 | Consultar estado de postulación | P2. Convocatoria y postulación | Alta      | En progreso |
+| CU04 | Consultar estado de postulación | P2. Convocatoria y postulación | Alta      | Hecho |
 
 **Actor principal:** Postulante
 **Actores secundarios:** —
