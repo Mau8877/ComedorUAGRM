@@ -46,8 +46,8 @@ describe('CrearUsuarioModal', () => {
     cliente.get.mockResolvedValue(pagina([usuario(1)]))
     cliente.post.mockResolvedValue({ data: creada, status: 201 })
     vi.mocked(toastInfo).mockClear()
-    window.localStorage.clear()
-    window.sessionStorage.clear()
+    window.localStorage?.clear()
+    window.sessionStorage?.clear()
   })
 
   it('un campo solo muestra su error si ya fue tocado', async () => {

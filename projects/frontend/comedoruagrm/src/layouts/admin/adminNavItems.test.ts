@@ -33,4 +33,11 @@ describe('adminNavItems', () => {
       expect.objectContaining({ label: 'Publicar resultados', href: '/publicar-resultados' }),
     )
   })
+
+  it('tiene la entrada «Actas» que lleva a su pantalla, justo después de «Publicar resultados» (CU08)', () => {
+    const etiquetas = adminNavItems.map((item) => item.label)
+
+    expect(adminNavItems).toContainEqual(expect.objectContaining({ label: 'Actas', href: '/actas' }))
+    expect(etiquetas.indexOf('Actas')).toBe(etiquetas.indexOf('Publicar resultados') + 1)
+  })
 })

@@ -1,5 +1,6 @@
 import {
   AwardIcon,
+  FileTextIcon,
   LayoutDashboardIcon,
   ListOrderedIcon,
   MegaphoneIcon,
@@ -19,6 +20,7 @@ export const adminNavItems: NavItem[] = [
   { label: 'Finalistas', href: '/finalistas', icon: MegaphoneIcon },
   { label: 'Auditoría y adjudicación', href: '/adjudicacion', icon: AwardIcon },
   { label: 'Publicar resultados', href: '/publicar-resultados', icon: TrophyIcon },
+  { label: 'Actas', href: '/actas', icon: FileTextIcon },
   { label: 'Administradores DUBSS', href: '/usuarios/administradores', icon: ShieldCheckIcon },
   { label: 'Directivos', href: '/usuarios/directivos', icon: UserCogIcon },
   { label: 'Personal del Comedor', href: '/usuarios/personal-comedor', icon: UsersIcon },
