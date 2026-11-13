@@ -139,10 +139,13 @@ llama `comedor-uagrm-core` y es el que usan nginx y Prometheus.
   validado con puntaje bajo el mínimo, uno validado suficiente, uno ya adjudicado
   y uno ya no adjudicado por decisión final) y dos convocatorias de casos límite
   (un cupo libre con varios finalistas validados, y sin cupos ni mínimo definidos;
-  `DatosPruebaAdjudicacion`). Se apagan con
+  `DatosPruebaAdjudicacion`). Para el CU12 crea la cuenta de **Directivo** de prueba
+  `directivo@dubss.com` / `123123123` y dos convocatorias `[PRUEBA] Dashboard` (una con
+  resultados publicados y otra sin publicar) con postulaciones en varios meses, y refresca
+  la vista de indicadores (`DatosPruebaDashboard`). Se apagan con
   `SEED_ADMIN_ENABLED=false`, `SEED_PRIORIZACION_ENABLED=false`,
   `SEED_FINALISTAS_ENABLED=false`, `SEED_EXPEDIENTES_ENABLED=false` y
-  `SEED_ADJUDICACION_ENABLED=false`;
+  `SEED_ADJUDICACION_ENABLED=false` y `SEED_DASHBOARD_ENABLED=false`;
   `SEED_PRIORIZACION_POSTULACIONES=20000` sirve para medir el rendimiento.
   **Nunca corren fuera del perfil `dev`.**
 - **Volúmenes**:

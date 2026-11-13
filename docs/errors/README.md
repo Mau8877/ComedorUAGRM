@@ -146,3 +146,8 @@ docs/errors/
 
 - [`ERR_NOT_01`](notificaciones/ERRORES_NOTIFICACIONES.md#err_not_01) — El aviso no existe o no es del usuario (404)
 - [`ERR_NOT_02`](notificaciones/ERRORES_NOTIFICACIONES.md#err_not_02) — `sort` no soportado en la bandeja (400)
+
+### Dashboard (`DAS`)
+
+- [`ERR_DAS_01`](dashboard/ERRORES_DASHBOARD.md#err_das_01) — La gestión o la convocatoria no existe, o no es de la gestión (404)
+- [`ERR_DAS_02`](dashboard/ERRORES_DASHBOARD.md#err_das_02) — No hay datos que exportar a PDF (400)

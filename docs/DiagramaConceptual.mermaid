@@ -469,3 +469,8 @@ erDiagram
     timestamptz actualizado_en
     timestamptz eliminado_en
   }
+
+  %% Vista materializada del dashboard BI (CU12), sin tablas nuevas: mv_indicadores_convocatoria.
+  %% Una fila por (convocatoria_id, mes) con gestion_id, postulaciones_recibidas (sin borradores), finalistas,
+  %% adjudicadas (solo de convocatorias con resultados publicados) y calculado_en. Indice unico (convocatoria_id, mes).
+  %% Se refresca por lote cada noche (02:00, REFRESH ... CONCURRENTLY). Pendiente CU-10: asistencia.
