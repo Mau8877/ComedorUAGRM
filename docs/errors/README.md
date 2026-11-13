@@ -121,6 +121,13 @@ docs/errors/
 - [`ERR_PUB_03`](resultados/ERRORES_RESULTADOS.md#err_pub_03) — La convocatoria no está cerrada (409)
 - [`ERR_PUB_04`](resultados/ERRORES_RESULTADOS.md#err_pub_04) — Los resultados todavía no están publicados (404)
 
+### Actas de adjudicación (`ACT`)
+
+- [`ERR_ACT_01`](actas/ERRORES_ACTAS.md#err_act_01) — Los resultados todavía no están publicados (409)
+- [`ERR_ACT_02`](actas/ERRORES_ACTAS.md#err_act_02) — La convocatoria ya tiene acta (409)
+- [`ERR_ACT_03`](actas/ERRORES_ACTAS.md#err_act_03) — La convocatoria todavía no tiene acta (404)
+- [`ERR_ACT_04`](actas/ERRORES_ACTAS.md#err_act_04) — El archivo del acta no está en el almacenamiento (404)
+
 ### Expedientes (`EXP`)
 
 - [`ERR_EXP_01`](expedientes/ERRORES_EXPEDIENTES.md#err_exp_01) — La entrega de la documentación física no está registrada (409)

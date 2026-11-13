@@ -2,7 +2,7 @@
 
 | Id   | Nombre                         | Módulo                       | Prioridad | Estado    |
 | ---- | ------------------------------ | ---------------------------- | --------- | --------- |
-| CU08 | Generar acta de adjudicación   | P4. Auditoría y adjudicación | Media     | Pendiente |
+| CU08 | Generar acta de adjudicación   | P4. Auditoría y adjudicación | Media     | En progreso |
 
 **Actor principal:** Administrador DUBSS
 **Actores secundarios:** —

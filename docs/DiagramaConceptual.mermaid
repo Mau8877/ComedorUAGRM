@@ -22,7 +22,7 @@ erDiagram
   POSTULACION ||--o| FINALISTA : "puede ser"
   FINALISTA ||--o{ AUDITORIA_EXPEDIENTE : "se audita"
   POSTULACION ||--o| ADJUDICACION : "resulta en"
-  CONVOCATORIA ||--o{ ACTA_ADJUDICACION : genera
+  CONVOCATORIA ||--o| ACTA_ADJUDICACION : genera
   CONVOCATORIA ||--o| PUBLICACION_RESULTADO : publica
   ADJUDICACION ||--o| BECA : origina
   CONVOCATORIA ||--o{ BECA : otorga
@@ -324,7 +324,7 @@ erDiagram
   ACTA_ADJUDICACION {
     bigint id PK
     uuid codigo_acta_adjudicacion UK
-    bigint convocatoria_id FK
+    bigint convocatoria_id FK, UK
     bigint generada_por FK
     varchar numero UK
     varchar storage_path
