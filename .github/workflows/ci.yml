@@ -173,9 +173,14 @@ jobs:
         working-directory: projects/mobile
     steps:
       - uses: actions/checkout@v4
+      # Versión fijada a la que se usa en local: `stable` pasó a Flutter 3.47+,
+      # donde `package:flutter/material.dart` está deprecado en favor de
+      # `package:material_ui` (que exige Flutter >= 3.47). Se migra a
+      # material_ui cuando se suba Flutter también en local.
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: 3.44.8
       - run: flutter pub get
       # pubspec.yaml declara `.env` como asset (ver CONSUMO_API_MOBILE.md) --
       # el archivo real no se commitea (.gitignore), así que sin este paso
