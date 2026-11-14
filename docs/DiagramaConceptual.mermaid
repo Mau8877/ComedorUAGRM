@@ -116,7 +116,7 @@ erDiagram
   GESTION_ACADEMICA {
     bigint id PK
     uuid codigo_gestion_academica UK
-    varchar etiqueta
+    varchar etiqueta "(50)"
     date fecha_inicio
     date fecha_fin
     timestamptz creado_en
@@ -232,7 +232,7 @@ erDiagram
     bigint id PK
     uuid codigo_modelo_preseleccion UK
     bigint creado_por FK
-    varchar version
+    varchar version "(50)"
     varchar descripcion
     boolean activo
     timestamptz creado_en
@@ -303,6 +303,7 @@ erDiagram
     resultado_auditoria resultado
     varchar observaciones "(500)"
     numeric puntaje_academico "(5,2) CHECK 0-30, lo escribe el auditor"
+    uuid clave_idempotencia "nullable, UK parcial con finalista_id (CU-07)"
     timestamptz creado_en
     timestamptz actualizado_en
     timestamptz eliminado_en
@@ -449,8 +450,8 @@ erDiagram
     bigint id PK
     uuid codigo_dispositivo_fcm UK
     bigint usuario_id FK
-    varchar token UK
-    varchar plataforma
+    varchar token UK "(512)"
+    varchar plataforma "(20)"
     timestamptz creado_en
     timestamptz actualizado_en
     timestamptz eliminado_en
