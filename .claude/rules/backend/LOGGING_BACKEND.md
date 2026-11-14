@@ -1,5 +1,5 @@
 ---
-globs: projects/backend/**/*
+globs: projects/backend/comedor-uagrm-core/**/*
 ---
 
 # Logging — Backend
@@ -61,7 +61,8 @@ Un `WARN` recurrente que nadie revisa es indistinguible de no tener logging.
 ## Nunca loguear
 
 - Passwords (ni hasheadas ni en texto plano).
-- Tokens JWT completos (access o refresh) — si hace falta loguear que hubo
+- Tokens completos (token de acceso JWT, refresh token —ni su hash—, tokens FCM de
+  `dispositivo_fcm`) — si hace falta loguear que hubo
   un problema con un token, loguear un identificador corto/hash del token, no
   el token entero.
 - Datos de pago (número de tarjeta, CVV, etc.).

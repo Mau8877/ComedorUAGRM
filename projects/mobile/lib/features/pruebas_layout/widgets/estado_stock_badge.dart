@@ -1,6 +1,6 @@
+import 'package:comedoru_palette/comedoru_palette.dart';
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/app_theme.dart';
 import '../models/ingrediente.dart';
 
 /// Chip de estado -- mismo criterio visual que `StatusBadge` del frontend
@@ -13,9 +13,9 @@ class EstadoStockBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (label, color) = switch (estado) {
-      EstadoStock.disponible => ('Disponible', AppColors.lightSuccess),
-      EstadoStock.bajoStock => ('Bajo stock', AppColors.lightWarning),
-      EstadoStock.agotado => ('Agotado', AppColors.lightError),
+      EstadoStock.disponible => ('Disponible', ComedoruPalette.lightSuccess),
+      EstadoStock.bajoStock => ('Bajo stock', ComedoruPalette.lightWarning),
+      EstadoStock.agotado => ('Agotado', ComedoruPalette.lightDestructive),
     };
 
     return Container(

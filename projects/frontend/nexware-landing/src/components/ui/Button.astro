@@ -1,0 +1,67 @@
+---
+interface Props {
+  variant?: 'primary' | 'secondary'
+  href?: string
+  type?: 'button' | 'submit'
+  size?: 'md' | 'sm'
+  class?: string
+}
+
+const { variant = 'primary', href, type = 'button', size = 'md', class: className } = Astro.props
+const Tag = href ? 'a' : 'button'
+---
+
+<Tag
+  class:list={['btn', `btn--${variant}`, `btn--${size}`, className]}
+  href={href}
+  type={href ? undefined : type}
+>
+  <slot />
+</Tag>
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    font-family: inherit;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      background-color 0.15s ease,
+      border-color 0.15s ease,
+      transform 0.15s ease;
+  }
+  .btn--md {
+    min-height: 48px;
+    padding: 0 24px;
+    font-size: 16px;
+  }
+  .btn--sm {
+    min-height: 44px;
+    padding: 0 20px;
+    font-size: 15px;
+  }
+  .btn--primary {
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+  .btn--primary:hover {
+    background: color-mix(in srgb, var(--accent) 88%, var(--ink));
+  }
+  .btn--secondary {
+    background: var(--surface);
+    color: var(--ink);
+    border-color: var(--border);
+  }
+  .btn--secondary:hover {
+    border-color: var(--accent);
+  }
+  .btn:active {
+    transform: translateY(1px);
+  }
+</style>

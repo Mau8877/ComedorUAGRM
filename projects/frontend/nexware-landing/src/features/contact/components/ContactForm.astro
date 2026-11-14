@@ -1,0 +1,163 @@
+---
+import Button from '@/components/ui/Button.astro'
+import { useTranslations, type Lang } from '@/i18n/utils'
+
+interface Props {
+  lang: Lang
+}
+
+const t = useTranslations(Astro.props.lang)
+---
+
+<!--
+  Esta versión no envía datos a ningún servidor: valida en el navegador y
+  muestra un mensaje de éxito.
+-->
+<form
+  class="form"
+  novalidate
+  data-required={t('contact.errorRequired')}
+  data-email={t('contact.errorEmail')}
+  data-success={t('contact.success')}
+>
+  <div class="field">
+    <label for="nombre">{t('contact.name')}</label>
+    <input
+      id="nombre"
+      name="nombre"
+      type="text"
+      autocomplete="name"
+      required
+      aria-describedby="nombre-error"
+    />
+    <span id="nombre-error" class="error" role="alert"></span>
+  </div>
+  <div class="field">
+    <label for="correo">{t('contact.emailLabel')}</label>
+    <input
+      id="correo"
+      name="correo"
+      type="email"
+      autocomplete="email"
+      required
+      aria-describedby="correo-error"
+    />
+    <span id="correo-error" class="error" role="alert"></span>
+  </div>
+  <div class="field">
+    <label for="mensaje">{t('contact.message')}</label>
+    <textarea
+      id="mensaje"
+      name="mensaje"
+      rows="4"
+      required
+      aria-describedby="mensaje-error"
+    ></textarea>
+    <span id="mensaje-error" class="error" role="alert"></span>
+  </div>
+  <Button type="submit" class="send">
+    {t('contact.send')}
+  </Button>
+  <p class="success" role="status" hidden></p>
+</form>
+
+<script>
+  import { validateField } from '../lib/validate'
+
+  const form = document.querySelector<HTMLFormElement>('.form')
+  const success = form?.querySelector<HTMLElement>('.success')
+
+  function setError(field: HTMLInputElement | HTMLTextAreaElement, message: string) {
+    const output = document.getElementById(`${field.id}-error`)
+    if (output) output.textContent = message
+    field.setAttribute('aria-invalid', message ? 'true' : 'false')
+  }
+
+  form?.addEventListener('submit', (event) => {
+    event.preventDefault()
+    if (!form || !success) return
+    let firstInvalid: HTMLElement | null = null
+
+    form
+      .querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input, textarea')
+      .forEach((field) => {
+        const error = validateField(field.type, field.value)
+        const message =
+          error === 'required' ? form.dataset.required : error === 'email' ? form.dataset.email : ''
+        setError(field, message ?? '')
+        if (error && !firstInvalid) firstInvalid = field
+      })
+
+    if (firstInvalid) {
+      success.hidden = true
+      ;(firstInvalid as HTMLElement).focus()
+      return
+    }
+    success.textContent = form.dataset.success ?? ''
+    success.hidden = false
+    form.reset()
+  })
+</script>
+
+<style>
+  .form {
+    flex: 1 1 360px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  label {
+    font-size: 14px;
+    font-weight: 500;
+  }
+  input,
+  textarea {
+    width: 100%;
+    min-height: 48px;
+    padding: 0 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 16px;
+    transition: border-color 0.15s ease;
+  }
+  input:hover,
+  textarea:hover {
+    border-color: var(--soft);
+  }
+  textarea {
+    padding: 12px 14px;
+    resize: vertical;
+  }
+  input[aria-invalid='true'],
+  textarea[aria-invalid='true'] {
+    border-color: var(--accent);
+    outline: 1px solid var(--accent);
+  }
+  .error {
+    font-size: 14px;
+    color: var(--soft);
+  }
+  .error:not(:empty)::before {
+    content: '⚠ ';
+    color: var(--accent);
+  }
+  .form :global(.send) {
+    align-self: flex-start;
+  }
+  .success {
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    font-size: 15px;
+  }
+</style>

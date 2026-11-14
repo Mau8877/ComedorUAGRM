@@ -1,0 +1,20 @@
+{
+  "services": "Servicios",
+  "stack": "Stack",
+  "process": "Proceso",
+  "portfolio": "Portafolio",
+  "about": "Nosotros",
+  "contact": "Contacto",
+  "cta": "Hablemos",
+  "skip": "Saltar al contenido",
+  "menuLabel": "Navegación principal",
+  "openMenu": "Abrir menú",
+  "closeMenu": "Cerrar menú",
+  "home": "Nexware, ir al inicio",
+  "language": "Idioma",
+  "switchTo": "Cambiar a inglés",
+  "theme": {
+    "toLight": "Cambiar a modo claro",
+    "toDark": "Cambiar a modo oscuro"
+  }
+}

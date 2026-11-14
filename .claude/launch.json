@@ -2,10 +2,17 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "frontend",
+      "name": "comedoruagrm",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "./projects/frontend", "dev"],
+      "runtimeArgs": ["--filter", "./projects/frontend/comedoruagrm", "dev"],
       "port": 5173,
+      "autoPort": true
+    },
+    {
+      "name": "nexware-landing",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "projects/frontend/nexware-landing", "run", "dev"],
+      "port": 4321,
       "autoPort": true
     },
     {

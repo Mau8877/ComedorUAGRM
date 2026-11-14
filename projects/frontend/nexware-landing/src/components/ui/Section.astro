@@ -1,0 +1,31 @@
+---
+// Contenedor de una sección de la landing: padding fluido, ancho máximo de
+// 1200 px y borde superior. `surface` pinta el fondo de las tarjetas.
+interface Props {
+  id: string
+  labelledby?: string
+  surface?: boolean
+}
+
+const { id, labelledby, surface = false } = Astro.props
+---
+
+<section {id} aria-labelledby={labelledby} class:list={['section', { surface }]}>
+  <div class="container">
+    <slot />
+  </div>
+</section>
+
+<style>
+  .section {
+    padding: clamp(56px, 7vw, 96px) clamp(20px, 5vw, 80px);
+    border-top: 1px solid var(--border);
+  }
+  .surface {
+    background: var(--surface);
+  }
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+</style>

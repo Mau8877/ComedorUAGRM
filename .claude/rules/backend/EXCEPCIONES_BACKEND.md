@@ -1,5 +1,5 @@
 ---
-globs: projects/backend/**/*
+globs: projects/backend/comedor-uagrm-core/**/*
 ---
 
 # Excepciones — Backend
@@ -44,7 +44,6 @@ de sumar una excepción más a la lista de 5.
 | `ForbiddenException` | `403` | Autenticado pero sin permiso sobre el recurso/acción |
 | `NotFoundException` | `404` | El recurso solicitado no existe |
 | `ConflictException` | `409` | Conflicto de estado (recurso duplicado, transición de estado inválida, etc.) |
-| `LockedException` | `423` | El recurso está bloqueado temporalmente por una política de seguridad (ej. cuenta de usuario bloqueada tras superar el máximo de intentos fallidos de login) |
 
 > **Nota de nombres:** `UnauthorizedException` → `401` y no `403` a pesar de
 > que en español "no autorizado" suena más a `403`. Se sigue la semántica
@@ -53,25 +52,24 @@ de sumar una excepción más a la lista de 5.
 > "suenen mejor" en español — el nombre sigue el estándar HTTP, no la
 > traducción literal.
 
-> **Este listado de 6 es deliberadamente el completo, no un ejemplo
+> **Este listado de 5 es deliberadamente el completo, no un ejemplo
 > parcial.** Coincide exactamente con los códigos HTTP que
 > [RESPONSES_BACKEND.md](RESPONSES_BACKEND.md#códigos-http) documenta como
-> disparables por una excepción de negocio (`400`/`401`/`403`/`404`/`409`/`423`).
+> disparables por una excepción de negocio (`400`/`401`/`403`/`404`/`409`).
 > `429` y `500` quedan fuera a propósito (ver abajo, y
 > [SEGURIDAD_AUTH_BACKEND.md](SEGURIDAD_AUTH_BACKEND.md#rate-limit) para el
 > primero) — no son un hueco pendiente de llenar. Si en algún momento el
-> dominio necesita de verdad un código HTTP nuevo que ninguna de estas 6
+> dominio necesita de verdad un código HTTP nuevo que ninguna de estas 5
 > cubre (ej. `422`), se agrega una excepción nueva a este mismo listado
 > **antes** de usarla, no se fuerza el caso dentro de una existente que no
 > le corresponde semánticamente.
 >
-> `LockedException` se agregó (2026-09-06) puntualmente para el caso de
-> bloqueo de cuenta por intentos fallidos de login (ver
-> [HU01](../../../docs/HistoriasDeUsuario/HU01.md)) — no se forzó dentro de
-> `ForbiddenException` porque semánticamente son cosas distintas: `403` es
-> "no tenés permiso sobre esto", `423 Locked` es "el recurso existe, tenés
-> permiso en principio, pero está temporalmente bloqueado" (la cuenta se
-> desbloquea sola pasado el tiempo de bloqueo, no es un permiso que falte).
+> No hay `LockedException` (`423`): el bloqueo temporal de una cuenta por
+> intentos fallidos de inicio de sesión lo implementa este backend y responde
+> `403` con `ForbiddenException` (`ERR_AUTH_05`, ver
+> [SEGURIDAD_AUTH_BACKEND.md](SEGURIDAD_AUTH_BACKEND.md)). Si algún día hace
+> falta distinguirlo con otro código HTTP, se agrega la excepción a este
+> listado **antes** de usarla.
 
 `500` no tiene una excepción de negocio propia: es el resultado de **no**
 mapear la excepción — un `Exception`/`RuntimeException` no controlada, o una
@@ -91,6 +89,7 @@ falla de infraestructura (DB caída, etc.), cae en el handler genérico del
   de `@Valid`/Bean Validation → `400`, con el código genérico de validación
   del módulo correspondiente (ej. `ERR_SYS_01` si no aplica a un módulo
   específico).
+- Un `@ExceptionHandler(AccessDeniedException.class)` que **vuelve a lanzar** la excepción: la falta de rol (`@PreAuthorize`) la responde `ApiAccessDeniedHandler` de `security/` (`403` `ERR_AUTH_07`), no este advice. Sin ese handler, el catch-all de abajo la convertiría en un `500`.
 - Un `@ExceptionHandler(Exception.class)` catch-all → `500`, con un código
   genérico (ej. `ERR_SYS_00`), **sin** exponer el mensaje/stacktrace real al
   cliente (el mensaje de negocio es genérico: "Ocurrió un error inesperado"),
@@ -129,7 +128,8 @@ reemplaza ni duplica esa fuente real — si alguna vez quedan
 desincronizados, gana `docs/errors/`.
 
 Cada módulo mantiene su catálogo como constantes (interfaz o `enum` Java,
-ej. `UsuarioErrorCodes`) en su propio paquete de feature, no en un único
+ej. `UsuarioErrorCodes`) en la carpeta `exception/` de su feature
+(`features/{modulo}/exception/`), no en un único
 archivo gigante compartido — así el código y su catálogo viven juntos y es
 fácil ubicar en qué módulo y punto ocurrió un error solo leyendo el prefijo.
 

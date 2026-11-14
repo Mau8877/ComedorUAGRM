@@ -1,0 +1,18 @@
+{
+  "notice": "Sample document from a fictional academic project; it is not legal advice.",
+  "updated": "Updated on",
+  "toc": "On this page",
+  "back": "Back to home",
+  "terms": {
+    "title": "Terms and conditions"
+  },
+  "privacy": {
+    "title": "Privacy policy"
+  },
+  "cookies": {
+    "title": "Cookie policy"
+  },
+  "legalNotice": {
+    "title": "Legal notice"
+  }
+}

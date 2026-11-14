@@ -1,22 +1,69 @@
 # ComedorUAGRM
 
 Sistema de gestión del comedor universitario de la UAGRM. Monorepo con
-pnpm workspaces (`pnpm-workspace.yaml`: `projects/*`) que contiene tres
+pnpm workspaces (`pnpm-workspace.yaml`) que contiene tres grupos de
 proyectos independientes más la infraestructura de desarrollo:
 
-- **`projects/backend`** — API REST en Java 21 + Spring Boot 4.1 (Maven),
-  PostgreSQL + Flyway para persistencia, Redis para caché, MinIO para
-  almacenamiento de archivos.
-- **`projects/frontend`** — Panel web en React 19 + TypeScript + Vite,
-  TanStack (Query/Router/Form/Table), Tailwind CSS 4 + shadcn.
+- **`projects/backend`** — contiene dos proyectos de backend
+  independientes, cada uno con su propio stack:
+  - **`comedor-uagrm-core/`** — API REST en Java 21 + Spring Boot 4.1
+    (Maven), PostgreSQL + Flyway para persistencia, Redis para caché, MinIO
+    para almacenamiento de archivos. Es el backend que consumen el panel web
+    y la app mobile, y al que le aplican las rules de `.claude/rules/backend/`.
+  - **`comedor-uagrm-ia/`** — módulo de IA en Python + FastAPI (el puntaje de
+    vulnerabilidad de la preselección, que consumirá `comedor-uagrm-core` por
+    la red interna). Hoy es un esqueleto vacío que solo expone `/health`; no
+    tiene rules propias todavía (se definen junto con su primer caso de uso).
+- **`projects/frontend`** — contiene dos proyectos de frontend
+  independientes, cada uno con su propio stack:
+  - **`comedoruagrm/`** — panel web en React 19 + TypeScript + Vite,
+    TanStack (Query/Router/Form/Table), Tailwind CSS 4 + shadcn. Es parte
+    del workspace pnpm. Se sirve en `/` detrás del proxy.
+  - **`nexware-landing/`** — landing institucional de Nexware (la empresa
+    ficticia dueña de este proyecto), en Astro + TypeScript, bilingüe
+    (es/en). Proyecto independiente fuera del workspace pnpm (usa npm
+    propio) — ver "Nexware guía de marca y guía técnica.md" en la raíz.
+    Se sirve en `/landing-page` detrás del proxy.
 - **`projects/mobile`** — App en Flutter/Dart, Riverpod para estado,
   `go_router` para navegación, `dio` como cliente HTTP.
 - **`infrastructure/`** — configuración de Docker Compose: nginx (proxy),
-  postgres, redis, minio, prometheus, grafana.
+  postgres, redis, minio, mailpit (SMTP de pruebas), prometheus, grafana.
+
+Cuando una regla o un comando dice «backend» a secas, es
+`projects/backend/comedor-uagrm-core` (el Spring Boot); el módulo de IA se
+nombra siempre como `comedor-uagrm-ia`.
+
+## Fuente de verdad del dominio: documentación de grado
+
+El sistema (**postulación y preselección de la Beca Comedor de la DUBSS,
+con IA y reportes BI**) está especificado en la documentación de grado, que
+vive **fuera de este repositorio**:
+
+`D:\UAGRM\Taller De Grado - Junior\doc-comedor-univesitario\`
+
+Lo que ahí figura —**diseño lógico de la base de datos**
+(`images/091_Diseno_Logico_Base_de_Datos.jpg`), **casos de uso**
+(`casos_de_uso_filtrados.md`, 26 CU), diagramas de **análisis**, de
+**secuencia** y **mockups** (`images/`)— es lo que el proyecto debe
+cumplir. Antes de implementar un caso de uso hay que mirar sus diagramas
+(ver [CASOS_DE_USO.md](rules/CASOS_DE_USO.md)); el modelo de datos tiene su
+transcripción versionada en `docs/DiagramaConceptual.mermaid` (ver
+[PERSISTENCIA_BD_BACKEND.md](rules/backend/PERSISTENCIA_BD_BACKEND.md)). La
+autenticación la resuelve el propio backend con **JWT** (token de acceso +
+refresh token —en cookies `HttpOnly` en la web, `Bearer` en mobile—, contraseñas con BCrypt; ver
+[SEGURIDAD_AUTH_BACKEND.md](rules/backend/SEGURIDAD_AUTH_BACKEND.md)).
+Firebase se reserva para las notificaciones push (FCM) de mobile.
+Si algo en el código contradice esa documentación, se avisa en vez de
+elegir en silencio.
+
+El trabajo se organiza por **casos de uso** (`docs/CasosDeUso/`) y se
+descompone en **unidades de trabajo** (`docs/UnidadesTrabajo/`), ver
+[CASOS_DE_USO.md](rules/CASOS_DE_USO.md) y
+[UNIDADES_DE_TRABAJO.md](rules/UNIDADES_DE_TRABAJO.md).
 
 ## Comandos básicos
 
-### Backend (`projects/backend`)
+### Backend core (`projects/backend/comedor-uagrm-core`)
 
 ```bash
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev   # correr en modo dev
@@ -24,12 +71,34 @@ proyectos independientes más la infraestructura de desarrollo:
 ./mvnw clean package                                     # build
 ```
 
-### Frontend (`projects/frontend`)
+### Backend IA (`projects/backend/comedor-uagrm-ia`)
+
+```bash
+python -m venv .venv                              # entorno virtual (una vez)
+pip install -r requirements-dev.txt               # instalar dependencias
+uvicorn app.main:app --reload                     # correr en modo dev (puerto 8000)
+pytest                                            # tests
+ruff check . ; ruff format --check .              # lint y formato
+```
+
+### Frontend — ComedorUAGRM (`projects/frontend/comedoruagrm`)
 
 ```bash
 pnpm dev       # servidor de desarrollo (Vite, puerto 5173)
 pnpm build     # build de producción
 pnpm lint      # ESLint
+```
+
+### Frontend — Landing de Nexware (`projects/frontend/nexware-landing`)
+
+```bash
+npm install
+npm run dev          # servidor de desarrollo (Astro, puerto 4321)
+npm run build        # build estático de producción
+npm run lint         # ESLint
+npm run typecheck    # astro check
+npm run check:i18n   # es.json y en.json con las mismas claves, por feature
+npm test             # Vitest
 ```
 
 ### Mobile (`projects/mobile`)
@@ -44,17 +113,22 @@ flutter analyze       # análisis estático
 ### Stack completo (Docker Compose)
 
 Desde la raíz del repo, con los `.env` ya creados a partir de sus
-`.env.example` correspondientes (raíz, `projects/backend/`,
-`projects/frontend/`):
+`.env.example` correspondientes (raíz, `projects/backend/comedor-uagrm-core/`,
+`projects/frontend/comedoruagrm/`):
 
 ```bash
 docker compose up
 ```
 
-Levanta proxy (puerto 80), frontend (5173), backend (8080), postgres (5432),
-redis (6379), minio (9000/9001), prometheus (9090) y grafana (3000). Ver
-[docs/README.md](../docs/README.md) para el detalle completo de variables de
-entorno y el checklist de puesta en marcha.
+Levanta proxy (puerto 80), comedoruagrm (5173), nexware-landing (4321),
+core (8080, el backend Spring Boot), ia (8000, FastAPI; no pasa por el
+proxy), postgres (5432), redis (6379), minio (9000/9001), mailpit (8025 bandeja web, 1025 SMTP; correos de desarrollo), prometheus (9090)
+y grafana (3000). El proxy sirve ComedorUAGRM en `/`, la API en `/api/` y la
+landing de Nexware en `/landing-page`. Ver [docs/README.md](../docs/README.md)
+para el detalle completo de variables de entorno y el checklist de puesta
+en marcha. Las credenciales de Firebase para el push (`secrets/firebase-sa.json`
+del backend y `google-services.json` de la app) no se versionan y son opcionales:
+sin ellas todo corre con el push en modo log (ver esa misma guía).
 
 ## Reglas del proyecto (`.claude/rules/`)
 

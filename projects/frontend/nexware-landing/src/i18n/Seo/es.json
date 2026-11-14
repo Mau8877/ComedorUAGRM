@@ -1,0 +1,18 @@
+{
+  "homeTitle": "Nexware: desarrollo web y móvil a medida en Santa Cruz, Bolivia",
+  "homeDescription": "Si no existe, lo programamos. Diseñamos y desarrollamos sitios web y aplicaciones móviles a medida con React, Flutter, Spring Boot y FastAPI.",
+  "siteName": "Nexware",
+  "ogAlt": "Logo de Nexware: una N hecha de píxeles y el eslogan «Si no existe, lo programamos.»",
+  "terms": {
+    "description": "Términos y condiciones de uso de los servicios y del sitio de Nexware (documento de ejemplo)."
+  },
+  "privacy": {
+    "description": "Política de privacidad de Nexware: qué datos recogemos, para qué y qué derechos tienes (documento de ejemplo)."
+  },
+  "cookies": {
+    "description": "Política de cookies de Nexware: solo usamos almacenamiento local esencial (documento de ejemplo)."
+  },
+  "legalNotice": {
+    "description": "Aviso legal de Nexware: titular, domicilio y condiciones del sitio (documento de ejemplo)."
+  }
+}

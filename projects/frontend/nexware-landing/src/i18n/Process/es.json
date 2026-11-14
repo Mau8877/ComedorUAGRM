@@ -1,0 +1,20 @@
+{
+  "eyebrow": "PROCESO",
+  "title": "Cómo trabajamos.",
+  "discovery": {
+    "title": "Descubrimiento",
+    "text": "Escuchamos tu idea, entendemos el problema y definimos el alcance antes de escribir una línea de código."
+  },
+  "design": {
+    "title": "Diseño",
+    "text": "Prototipamos las pantallas y el flujo contigo, para validar la experiencia antes de construirla."
+  },
+  "development": {
+    "title": "Desarrollo",
+    "text": "Construimos en ciclos cortos con entregas frecuentes, para que veas avances reales y puedas ajustar."
+  },
+  "delivery": {
+    "title": "Entrega",
+    "text": "Desplegamos, documentamos y te acompañamos en los primeros pasos con tu producto en producción."
+  }
+}

@@ -38,8 +38,12 @@ dependencies:
   go_router: ^18.0.0
   flutter_riverpod: ^2.6.1
   flutter_dotenv: ^6.0.1
-  flutter_secure_storage: ^11.0.0
+  flutter_secure_storage: ^10.3.1
   google_fonts: ^8.2.1
+  comedoru_palette:
+    path: ../../packages/palette
+  firebase_core: ^5.1.0
+  firebase_messaging: ^17.0.1
 
 dev_dependencies:
   flutter_test:
@@ -68,6 +72,7 @@ flutter:
   # flutter_dotenv no puede bundlear el archivo y falla en runtime.
   assets:
     - .env
+    - assets/images/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

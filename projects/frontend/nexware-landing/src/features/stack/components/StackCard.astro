@@ -1,0 +1,59 @@
+---
+import Eyebrow from '@/components/ui/Eyebrow.astro'
+import TechLogo from '@/components/ui/TechLogo.astro'
+import type { TechId } from '@/config/tech'
+
+interface Props {
+  label: string
+  tech: string
+  text: string
+  logos: TechId[]
+}
+
+const { label, tech, text, logos } = Astro.props
+---
+
+<article class="card reveal">
+  <div class="logos">
+    {logos.map((id) => (
+      <TechLogo tech={id} size={28} />
+    ))}
+  </div>
+  <Eyebrow>{label}</Eyebrow>
+  <h3>{tech}</h3>
+  <p>{text}</p>
+</article>
+
+<style>
+  .card {
+    flex: 1 1 440px;
+    min-width: 0;
+    padding: 28px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: border-color 0.2s ease;
+  }
+  .card:hover {
+    border-color: var(--accent);
+  }
+  .logos {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  h3 {
+    font-size: 26px;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+  }
+  p {
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--soft);
+  }
+</style>

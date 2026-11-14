@@ -1,0 +1,12 @@
+{
+  "eyebrow": "CONTACT",
+  "title": "Tell us your idea.",
+  "text": "Write to us and we'll get back to you soon. No strings attached.",
+  "name": "Name",
+  "emailLabel": "Email",
+  "message": "What do you want to build?",
+  "send": "Send message",
+  "errorRequired": "This field is required.",
+  "errorEmail": "Enter a valid email, for example name@domain.com.",
+  "success": "Thanks, we got your message. (Demo version: nothing was sent to a server.)"
+}

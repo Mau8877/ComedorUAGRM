@@ -2,25 +2,27 @@
 
 ## Estado actual
 
+> **Actualización (CU21):** la bandeja ya está implementada en el backend (`BandejaNotificacionesService`, endpoints `GET /me`, `GET /me/resumen`, `POST /{codigo}/leer`, `POST /leer-todo` y `DELETE /`; errores `ERR_NOT_01` y `ERR_NOT_02`) y en la web (`features/notificaciones`, `useNotificaciones`, que usan `AdminLayout` y `EstudianteLayout`). El texto de abajo conserva el contrato original; donde dice `id` de la notificación, es su `codigo` público.
+
 El componente de UI **ya está construido y funcionando en el frontend**,
 pero corriendo 100% sobre datos mock -- no existe todavía ningún endpoint
 de `notificaciones` en el backend (no hay `features/notificaciones/` en
-`projects/backend/src/main/java/com/comedoruagrm/backend/`). Este
+`projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/`). Este
 documento es el contrato que el backend necesita implementar para que el
 frontend deje de simular y pase a hablar con la API real.
 
 **No implementar nada de esto especulativamente en mobile todavía** -- ese
 apartado queda pendiente aparte, este documento cubre exclusivamente la
-web (`projects/frontend`).
+web (`projects/frontend/comedoruagrm`).
 
 ### Dónde vive la parte de frontend ya hecha
 
 | Pieza | Archivo |
 | --- | --- |
-| Componente visual (campanita + panel) | [`src/components/layout/NotificationsMenu.tsx`](../../projects/frontend/src/components/layout/NotificationsMenu.tsx) |
-| Tipos del contrato que el frontend espera | [`src/components/layout/types.ts`](../../projects/frontend/src/components/layout/types.ts) (`NotificationItem`, `NotificationsPageMeta`, `NotificationsController`) |
-| Simulación actual (a reemplazar por un hook real de `api/`) | [`src/features/pruebas_layout/api/useMockNotifications.ts`](../../projects/frontend/src/features/pruebas_layout/api/useMockNotifications.ts) |
-| Formateo de fecha relativa (ya resuelto, no depende del backend) | [`src/utils/formatRelativeDate.ts`](../../projects/frontend/src/utils/formatRelativeDate.ts) (`dayjs` + locale español) |
+| Componente visual (campanita + panel) | [`src/components/layout/NotificationsMenu.tsx`](../../projects/frontend/comedoruagrm/src/components/layout/NotificationsMenu.tsx) |
+| Tipos del contrato que el frontend espera | [`src/components/layout/types.ts`](../../projects/frontend/comedoruagrm/src/components/layout/types.ts) (`NotificationItem`, `NotificationsPageMeta`, `NotificationsController`) |
+| Simulación actual (a reemplazar por un hook real de `api/`) | [`src/features/pruebas_layout/api/useMockNotifications.ts`](../../projects/frontend/comedoruagrm/src/features/pruebas_layout/api/useMockNotifications.ts) |
+| Formateo de fecha relativa (ya resuelto, no depende del backend) | [`src/utils/formatRelativeDate.ts`](../../projects/frontend/comedoruagrm/src/utils/formatRelativeDate.ts) (`dayjs` + locale español) |
 
 Cuando exista el endpoint real, el trabajo del lado frontend es acotado:
 un hook nuevo en la feature que corresponda (`api/useNotificaciones.ts`,
@@ -54,7 +56,7 @@ este contrato.
 6. Cada notificación tiene un `tipo` (`success`/`info`/`warning`/`error`)
    que el frontend usa para elegir ícono y color -- mismo vocabulario que
    ya usan los toasts de la app (ver
-   [`components/ui/sonner.tsx`](../../projects/frontend/src/components/ui/sonner.tsx)).
+   [`components/ui/sonner.tsx`](../../projects/frontend/comedoruagrm/src/components/ui/sonner.tsx)).
 
 ## Endpoints necesarios
 
@@ -98,7 +100,8 @@ Response:
       "titulo": "Stock bajo: Cebolla",
       "detalle": "Quedan 8 kg, por debajo del mínimo (10 kg).",
       "fecha": "2026-09-03T14:32:10Z",
-      "leida": false
+      "leida": false,
+      "postulacionCodigo": null
     }
   ],
   "message": "Listado obtenido correctamente",
@@ -115,6 +118,7 @@ Response:
 | `detalle` | string \| `null` | Opcional -- no toda notificación tiene texto secundario |
 | `fecha` | string, ISO-8601 UTC | Momento en que se generó el evento, no en que se consultó |
 | `leida` | boolean | |
+| `postulacionCodigo` | string (UUID) \| `null` | Código público de la postulación a la que apunta el aviso (CU04: tocarlo abre el detalle de esa postulación). `null` en los avisos sin postulación, como un comunicado general. En el push (FCM) viaja igual en el `data`, solo si el aviso tiene postulación |
 
 ### 2. `GET /api/v1/notificaciones/me/resumen` -- conteo de no leídas
 

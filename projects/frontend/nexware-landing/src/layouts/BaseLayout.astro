@@ -1,0 +1,100 @@
+---
+import '@fontsource/space-grotesk/400.css'
+import '@fontsource/space-grotesk/500.css'
+import '@fontsource/space-grotesk/600.css'
+import '@fontsource/space-grotesk/700.css'
+import '@fontsource/jetbrains-mono/400.css'
+import '@fontsource/jetbrains-mono/500.css'
+import grotesk400 from '@fontsource/space-grotesk/files/space-grotesk-latin-400-normal.woff2?url'
+import grotesk600 from '@fontsource/space-grotesk/files/space-grotesk-latin-600-normal.woff2?url'
+import '../styles/global.css'
+
+import { Header, Footer } from '@/features/site'
+import { alternatePath, otherLang, withBase, type LegalId } from '@/i18n/routes'
+import { useTranslations, type Lang } from '@/i18n/utils'
+import { absoluteUrl } from '@/lib/seo'
+
+interface Props {
+  lang: Lang
+  title: string
+  description: string
+  legalId?: LegalId
+  jsonLd?: Record<string, unknown>
+}
+
+const { lang, title, description, legalId, jsonLd } = Astro.props
+const t = useTranslations(lang)
+const site = Astro.site ?? new URL(Astro.url.origin)
+
+const canonical = absoluteUrl(Astro.url.pathname, site)
+const esUrl = absoluteUrl(lang === 'es' ? Astro.url.pathname : alternatePath(lang, legalId), site)
+const enUrl = absoluteUrl(lang === 'en' ? Astro.url.pathname : alternatePath(lang, legalId), site)
+const ogImage = absoluteUrl(withBase('/og-image.png'), site)
+const ogLocale = lang === 'es' ? 'es_BO' : 'en_US'
+const ogLocaleAlt = otherLang(lang) === 'es' ? 'es_BO' : 'en_US'
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="es" href={esUrl} />
+    <link rel="alternate" hreflang="en" href={enUrl} />
+    <link rel="alternate" hreflang="x-default" href={esUrl} />
+
+    <link rel="icon" type="image/svg+xml" href={withBase('/favicon.svg')} />
+    <link rel="icon" type="image/png" sizes="32x32" href={withBase('/favicon-32.png')} />
+    <link rel="apple-touch-icon" href={withBase('/apple-touch-icon.png')} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={t('seo.siteName')} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={ogLocale} />
+    <meta property="og:locale:alternate" content={ogLocaleAlt} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={t('seo.ogAlt')} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <link rel="preload" href={grotesk400} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={grotesk600} as="font" type="font/woff2" crossorigin />
+
+    <!-- Pone data-theme antes de pintar para evitar el parpadeo: usa la
+         elección guardada y, si no hay, la preferencia del sistema. -->
+    <script is:inline>
+      ;(function () {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+        let theme = prefersDark ? 'dark' : 'light'
+        try {
+          const saved = localStorage.getItem('theme')
+          if (saved === 'light' || saved === 'dark') theme = saved
+        } catch {
+          // Sin almacenamiento: se queda la preferencia del sistema.
+        }
+        document.documentElement.setAttribute('data-theme', theme)
+      })()
+    </script>
+
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+  </head>
+  <body>
+    <a class="skip-link" href="#main">
+      {t('nav.skip')}
+    </a>
+    <Header {lang} {legalId} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer {lang} />
+  </body>
+</html>

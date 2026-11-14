@@ -1,31 +1,33 @@
 # Infraestructura
 
 Este documento describe **todo** lo que compone la infraestructura de
-ComedorUAGRM: los 9 servicios de `docker-compose.yml`, la carpeta
+ComedorUAGRM: los 10 servicios de `docker-compose.yml`, la carpeta
 `infrastructure/`, las redes, los volúmenes, las variables de entorno, y
-los dos `Dockerfile` de producción. El objetivo es que después de leer esto
+los `Dockerfile` de producción. El objetivo es que después de leer esto
 no quede ninguna duda sobre qué es cada pieza, para qué sirve, y por qué
 está configurada como está.
 
 ## 1. Panorama general
 
 ```
-                    ┌─────────────────────────────────────────┐
-                    │         docker-compose.yml (dev)          │
-                    │                                           │
-  Internet/host ───▶│  proxy (nginx :80)                        │
-                    │    ├── /api/*  ──▶ backend  (:8080)       │
-                    │    └── /*      ──▶ frontend (:5173)       │
-                    │                                           │
-                    │  backend  ──▶ postgres (:5432)            │
-                    │           ──▶ redis    (:6379)            │
-                    │           ──▶ minio    (:9000)            │
-                    │           ──▶ Docker socket (Testcontainers)│
-                    │                                           │
-                    │  minio-init ──▶ minio (crea el bucket)    │
-                    │  prometheus ──▶ scrapea backend (:8080)   │
-                    │  grafana    ──▶ lee de prometheus         │
-                    └─────────────────────────────────────────┘
+                    ┌──────────────────────────────────────────────┐
+                    │           docker-compose.yml (dev)             │
+                    │                                                │
+  Internet/host ───▶│  proxy (nginx :80)                             │
+                    │    ├── /api/*          ──▶ core     (:8080)    │
+                    │    ├── /landing-page/* ──▶ nexware-landing (:4321)│
+                    │    └── /*               ──▶ comedoruagrm (:5173)│
+                    │                                                │
+                    │  core     ──▶ postgres (:5432)                 │
+                    │           ──▶ redis    (:6379)                 │
+                    │           ──▶ minio    (:9000)                 │
+                    │           ──▶ Docker socket (Testcontainers)    │
+                    │  ia (:8000)  (interno, sin pasar por el proxy) │
+                    │                                                │
+                    │  minio-init ──▶ minio (crea el bucket)         │
+                    │  prometheus ──▶ scrapea core    (:8080)        │
+                    │  grafana    ──▶ lee de prometheus              │
+                    └──────────────────────────────────────────────┘
 ```
 
 Todos los servicios viven en **una sola red Docker** (`comedor-uagrm-network`,
@@ -37,15 +39,18 @@ pasar por el proxy.
 | Puerto en tu máquina | Servicio | Para qué |
 | --- | --- | --- |
 | `80` | `proxy` (nginx) | Punto de entrada único, simula cómo se accedería en producción |
-| `5173` | `frontend` (Vite) | Acceso directo al dev server de React, con HMR |
-| `8080` | `backend` (Spring Boot) | Acceso directo a la API, Swagger, `/health`, `/prometheus` |
+| `5173` | `comedoruagrm` (Vite) | Acceso directo al dev server de React, con HMR |
+| `4321` | `nexware-landing` (Astro) | Acceso directo al dev server de la landing de Nexware |
+| `8080` | `core` (Spring Boot) | Acceso directo a la API, Swagger, `/health`, `/prometheus` |
+| `8000` | `ia` (FastAPI) | Acceso directo al módulo de IA y su `/health` (no pasa por el proxy) |
 | `5432` | `postgres` | Conectar un cliente SQL (DBeaver, pgAdmin, etc.) directo |
 | `6379` | `redis` | Conectar un cliente Redis directo |
 | `9000` / `9001` | `minio` | API S3 (`9000`) y consola web de administración (`9001`) |
+| `8025` / `1025` | `mailpit` | Bandeja web de los correos de desarrollo (`8025`) y SMTP (`1025`); no entrega nada a personas reales |
 | `9090` | `prometheus` | UI de Prometheus (ver targets, correr queries PromQL) |
 | `3000` | `grafana` | Dashboards (sin ninguno provisionado todavía, ver sección 7) |
 
-## 2. Los 9 servicios de `docker-compose.yml`
+## 2. Los servicios de `docker-compose.yml`
 
 ### 2.1 `proxy` — reverse proxy (nginx)
 
@@ -55,19 +60,20 @@ pasar por el proxy.
   servicio).
 - **Config**: monta `infrastructure/nginx/nginx.conf` de solo lectura.
 - **Reglas de enrutamiento** (ver [sección 3](#3-nginx-enrutamiento-y-el-fix-de-dns-dinámico)):
-  `/api/*` → `backend:8080`, cualquier otra ruta → `frontend:5173`.
+  `/api/*` → `core:8080`, `/landing-page/*` → `nexware-landing:4321`
+  (sin recortar el prefijo), cualquier otra ruta → `comedoruagrm:5173`.
 - **`restart: unless-stopped`**: si el contenedor muere (ver el bug de DNS
   explicado abajo), Docker lo reintenta solo en vez de quedar caído hasta
   que alguien lo note.
-- **Depende de**: `frontend` y `backend` (orden de arranque, no espera a que
-  estén realmente listos — ver sección 3 para por qué esto ya no es un
-  problema).
+- **Depende de**: `comedoruagrm`, `nexware-landing` y `core` (orden de
+  arranque, no espera a que estén realmente listos — ver sección 3 para
+  por qué esto ya no es un problema).
 
-### 2.2 `frontend` — React + Vite (modo desarrollo)
+### 2.2 `comedoruagrm` — React + Vite (modo desarrollo)
 
 - **Imagen**: `node:22-alpine` (imagen genérica de Node, no una imagen
   propia — el código se monta desde el host).
-- **`working_dir`**: `/app/projects/frontend`.
+- **`working_dir`**: `/app/projects/frontend/comedoruagrm`.
 - **Comando**: `corepack enable pnpm && pnpm install && pnpm run dev --host 0.0.0.0`
   — instala dependencias y arranca Vite en modo dev **cada vez que el
   contenedor arranca** (no hay una imagen pre-buildeada, es intencional
@@ -78,17 +84,70 @@ pasar por el proxy.
   desde un volumen montado en Windows).
 - **Volúmenes** (ver [sección 4](#4-volúmenes) para el detalle del porqué):
   - `.:/app` — todo el repo, bind mount desde el host.
-  - `frontend_node_modules_root` y `frontend_node_modules_pkg` — **aislados**
-    del bind mount de arriba, a propósito.
+  - `frontend_node_modules_root` y `comedoruagrm_node_modules_pkg` —
+    **aislados** del bind mount de arriba, a propósito.
+- **Container name**: `comedor-uagrm-frontend` (se mantiene así, sin
+  renombrar, para no romper nada que ya dependiera de ese nombre — el
+  nombre del *servicio* en `docker-compose.yml` sí es `comedoruagrm`).
 
-### 2.3 `backend` — Spring Boot 4.1 / Java 21 (modo desarrollo)
+### 2.2b `nexware-landing` — Astro (modo desarrollo)
+
+- **Imagen**: `node:22-alpine`.
+- **`working_dir`**: `/app/projects/frontend/nexware-landing`.
+- **Comando**: `npm install && npm run dev` — este proyecto **no** es parte
+  del workspace pnpm (ver `pnpm-workspace.yaml` y "Nexware guía de marca y
+  guía técnica.md" en la raíz del repo), usa npm por su cuenta.
+- **Puerto**: `4321` (default de Astro).
+- **`astro.config.mjs`** declara `base: '/landing-page'` — tiene que
+  coincidir exactamente con el prefijo que `nginx.conf` reenvía sin
+  recortar (ver sección 3), si no los links/assets que genera Astro no
+  van a coincidir con lo que el navegador realmente pide a través del
+  proxy.
+- **Volumen**: `nexware_landing_node_modules`, aislado del bind mount por
+  el mismo motivo que `comedoruagrm_node_modules_pkg` (ver sección 4).
+
+### 2.3 `core` — Spring Boot 4.1 / Java 21 (modo desarrollo)
+
+El servicio corre `projects/backend/comedor-uagrm-core`. Su contenedor se
+llama `comedor-uagrm-core` y es el que usan nginx y Prometheus.
 
 - **Imagen**: `maven:3.9-eclipse-temurin-21-alpine` (Maven + JDK 21, imagen
   genérica).
-- **`working_dir`**: `/app/projects/backend`.
-- **Comando**: `mvn spring-boot:run -Dspring-boot.run.profiles=dev` — corre
-  con Spring Boot DevTools activo (recarga en caliente al cambiar código,
-  ver `pom.xml`).
+- **`working_dir`**: `/app/projects/backend/comedor-uagrm-core`.
+- **Comando**: `sh -c "apk add --no-cache fontconfig ttf-dejavu && mvn spring-boot:run -Dspring-boot.run.profiles=dev"`
+  — corre con Spring Boot DevTools activo (recarga en caliente al cambiar
+  código, ver `pom.xml`). Instala `fontconfig` y una fuente porque
+  JasperReports las necesita para generar el PDF de la lista priorizada
+  (CU06) y la imagen de Maven sobre alpine no las trae.
+- **Datos de desarrollo (perfil `dev`)**: al arrancar crea, una sola vez,
+  una cuenta de **Administrador DUBSS** de prueba (`admin@dubss.com` /
+  `123123123`; `DatosInicialesAdmin`) y datos de prueba para la lista
+  priorizada (3 convocatorias `[PRUEBA]`, 60 postulantes sin acceso con sus
+  postulaciones y puntajes y 10 finalistas; `DatosPruebaListaPriorizada`) y,
+  para el CU21, avisos de ejemplo, un comunicado `[PRUEBA]` y la cuenta de
+  postulante finalista `postulante.finalista@prueba.local` / `123123123`
+  (`DatosPruebaFinalistas`). Para el CU07 deja un expediente de ejemplo en cada
+  uno de los 10 finalistas (`DatosPruebaExpedientes`): respuestas
+  socioeconómicas, documentos (con un PDF pequeño subido a MinIO; si MinIO no
+  está disponible solo avisa con un `WARN` y las filas quedan igual) y
+  auditorías variadas: el 1 validado, el 2 observado (sin certificado de
+  notas), el 3 con entrega y sin auditar, el 4 observado y luego validado, el
+  5 no válido y del 6 al 10 con la entrega pendiente. Se ven en
+  `GET /api/v1/finalistas/{codigo}/expediente`. Para el CU05 deja la convocatoria
+  `[PRUEBA]` cerrada con cupos (5), puntaje mínimo (70) y cantidad de finalistas
+  (15) de **ejemplo** (los reales los define la DUBSS), cuatro finalistas más (uno
+  validado con puntaje bajo el mínimo, uno validado suficiente, uno ya adjudicado
+  y uno ya no adjudicado por decisión final) y dos convocatorias de casos límite
+  (un cupo libre con varios finalistas validados, y sin cupos ni mínimo definidos;
+  `DatosPruebaAdjudicacion`). Para el CU12 crea la cuenta de **Directivo** de prueba
+  `directivo@dubss.com` / `123123123` y dos convocatorias `[PRUEBA] Dashboard` (una con
+  resultados publicados y otra sin publicar) con postulaciones en varios meses, y refresca
+  la vista de indicadores (`DatosPruebaDashboard`). Se apagan con
+  `SEED_ADMIN_ENABLED=false`, `SEED_PRIORIZACION_ENABLED=false`,
+  `SEED_FINALISTAS_ENABLED=false`, `SEED_EXPEDIENTES_ENABLED=false` y
+  `SEED_ADJUDICACION_ENABLED=false` y `SEED_DASHBOARD_ENABLED=false`;
+  `SEED_PRIORIZACION_POSTULACIONES=20000` sirve para medir el rendimiento.
+  **Nunca corren fuera del perfil `dev`.**
 - **Volúmenes**:
   - `.:/app` — todo el repo.
   - `~/.m2:/root/.m2` — el repositorio local de Maven del **host** (tu
@@ -127,7 +186,7 @@ pasar por el proxy.
     la imagen oficial de Postgres). **Hoy está vacía** (`.gitkeep`), no hay
     ningún script de inicialización custom todavía — el esquema real lo
     crea Flyway desde el backend (`V1__init_schema.sql`), no este mecanismo.
-- **Healthcheck**: `pg_isready` cada 10s — es lo que usa `backend` para
+- **Healthcheck**: `pg_isready` cada 10s — es lo que usa `core` para
   saber cuándo arrancar.
 
 ### 2.5 `redis` — caché (Redis 8)
@@ -174,6 +233,16 @@ pasar por el proxy.
      bucket de **lectura pública** (para servir imágenes/archivos sin
      necesitar autenticación en el `GET`, típico para avatares/fotos de un
      comedor universitario). La escritura sigue requiriendo credenciales.
+- **Documentos del expediente (CU07)**: el backend los abre con una URL
+  temporal de **5 minutos**, firmada (`AlmacenamientoService`). La firma usa
+  el host `MINIO_PUBLIC_URL` (por defecto `http://localhost:9000`), no
+  `MINIO_URL`: dentro de Docker `MINIO_URL` es
+  `http://comedor-uagrm-minio:9000` y el navegador no lo ve. Si el portal se
+  sirve desde otro dominio, `MINIO_PUBLIC_URL` es la dirección pública de
+  MinIO. **Ojo:** mientras el bucket siga con lectura anónima
+  (`mc anonymous set download`), quien conozca la ruta de un objeto lo puede
+  abrir sin la firma; la URL temporal solo es una garantía real cuando el
+  bucket deja de ser público (pendiente de decidir antes de producción).
 
 ### 2.7 `prometheus` — recolección de métricas
 
@@ -183,10 +252,10 @@ pasar por el proxy.
   global:
     scrape_interval: 5s
   scrape_configs:
-    - job_name: 'comedor-uagrm-backend'
+    - job_name: 'comedor-uagrm-core'
       metrics_path: '/prometheus'
       static_configs:
-        - targets: ['comedor-uagrm-backend:8080']
+        - targets: ['comedor-uagrm-core:8080']
   ```
   Scrapea el backend cada 5 segundos en `/prometheus` (no `/actuator/prometheus`
   — el backend expone Actuator en la raíz, ver `LOGGING_BACKEND.md`/`SEGURIDAD_AUTH_BACKEND.md`).
@@ -221,18 +290,18 @@ pasar por el proxy.
 
 | Ruta | Va a | Notas |
 | --- | --- | --- |
-| `/api/*` | `comedor-uagrm-backend:8080` | Pasa `X-Real-IP`/`X-Forwarded-For`/`X-Forwarded-Proto` para que el backend sepa la IP real del cliente |
+| `/api/*` | `comedor-uagrm-core:8080` | Pasa `X-Real-IP`/`X-Forwarded-For`/`X-Forwarded-Proto` para que el backend sepa la IP real del cliente |
 | `/*` (todo lo demás) | `comedor-uagrm-frontend:5173` | Incluye soporte de WebSockets (`Upgrade`/`Connection: upgrade`) — **obligatorio** para que el HMR de Vite funcione a través del proxy |
 
 **Detalle importante, no obvio**: la resolución de esos nombres de
-contenedor (`comedor-uagrm-backend`, `comedor-uagrm-frontend`) es
+contenedor (`comedor-uagrm-core`, `comedor-uagrm-frontend`) es
 **dinámica, en tiempo de request**, no fija al arrancar nginx:
 
 ```nginx
 resolver 127.0.0.11 valid=10s;
 
 location /api/ {
-    set $backend_upstream http://comedor-uagrm-backend:8080;
+    set $backend_upstream http://comedor-uagrm-core:8080;
     proxy_pass $backend_upstream;
     ...
 }
@@ -244,7 +313,7 @@ con el hostname fijo) hace que nginx resuelva el nombre **en cada
 request**, no una sola vez al arrancar.
 
 **Por qué importa**: con un `upstream {}` fijo (la config original de este
-proyecto), si `backend`/`frontend` no estaban levantados en el instante
+proyecto), si `core`/`frontend` no estaban levantados en el instante
 exacto en que nginx arrancaba, nginx fallaba con
 `host not found in upstream` y **el proceso moría por completo**, sin
 reintentar — pasó de verdad en esta máquina tras un reinicio de Docker
@@ -262,8 +331,9 @@ la segunda capa de defensa para el mismo problema.
 | `postgres_data` | `comedor-uagrm-postgres_data` | Datos de la base de datos | `docker compose down -v` |
 | `redis_data` | `comedor-uagrm-redis_data` | Persistencia AOF de Redis | `docker compose down -v` |
 | `minio_data` | `comedor-uagrm-minio_data` | Objetos guardados en MinIO | `docker compose down -v` |
-| `frontend_node_modules_root` | `comedor-uagrm-frontend-node_modules-root` | `node_modules` de la raíz del workspace pnpm, **dentro del contenedor** | `docker compose down -v` o `docker compose rm -f -s -v frontend` |
-| `frontend_node_modules_pkg` | `comedor-uagrm-frontend-node_modules-pkg` | `node_modules` de `projects/frontend/`, **dentro del contenedor** | ídem |
+| `frontend_node_modules_root` | `comedor-uagrm-frontend-node_modules-root` | `node_modules` de la raíz del workspace pnpm, **dentro del contenedor** | `docker compose down -v` o `docker compose rm -f -s -v comedoruagrm` |
+| `comedoruagrm_node_modules_pkg` | `comedor-uagrm-comedoruagrm-node_modules-pkg` | `node_modules` de `projects/frontend/comedoruagrm/`, **dentro del contenedor** | ídem |
+| `nexware_landing_node_modules` | `comedor-uagrm-nexware-landing-node_modules` | `node_modules` de `projects/frontend/nexware-landing/` (npm, no pnpm), **dentro del contenedor** | `docker compose down -v` o `docker compose rm -f -s -v nexware-landing` |
 
 Todos los nombres llevan el prefijo `comedor-uagrm-` **a propósito**: esta
 plantilla se reutiliza para otros proyectos en la misma máquina, y sin ese
@@ -271,15 +341,18 @@ prefijo, dos proyectos distintos basados en la misma plantilla terminarían
 compartiendo el mismo volumen físico de Postgres/Redis/MinIO (pasó de
 verdad antes de este fix — ver el historial de `docs/README.md`).
 
-**Por qué los `node_modules` del frontend están en volúmenes separados y no
-en el bind mount `.:/app`**: si no lo estuvieran, `pnpm install` dentro del
-contenedor escribiría symlinks de Linux directo en tu filesystem de
-Windows, apuntando a rutas que **solo existen dentro del contenedor**
-(ej. `/app/node_modules/.pnpm/...`). Esos symlinks quedan rotos para
-cualquier `pnpm`/`tsc`/ESLint que corras en tu host, y un `pnpm install` en
-el host los pisa de vuelta en sentido contrario — rompiendo lo del
-contenedor. Con volúmenes nombrados, cada lado (host y contenedor) tiene su
-propio `node_modules` real, completamente independiente, y no chocan.
+**Por qué los `node_modules` de los frontends están en volúmenes separados
+y no en el bind mount `.:/app`**: si no lo estuvieran, `pnpm install`/`npm
+install` dentro del contenedor escribiría symlinks de Linux directo en tu
+filesystem de Windows, apuntando a rutas que **solo existen dentro del
+contenedor** (ej. `/app/node_modules/.pnpm/...`). Esos symlinks quedan
+rotos para cualquier `pnpm`/`npm`/`tsc`/ESLint que corras en tu host, y un
+`pnpm install`/`npm install` en el host los pisa de vuelta en sentido
+contrario — rompiendo lo del contenedor. Con volúmenes nombrados, cada lado
+(host y contenedor) tiene su propio `node_modules` real, completamente
+independiente, y no chocan. Esto aplica igual a `nexware-landing` aunque
+use npm en vez de pnpm — el problema de fondo (symlinks/binarios Linux
+sobre un bind mount de Windows) no depende del gestor de paquetes.
 
 El backend **no** tiene este problema porque Maven no genera nada parecido
 a `node_modules` dentro del proyecto — todo lo que descarga vive en
@@ -332,7 +405,7 @@ Usadas por `docker-compose.yml` para levantar `postgres` y `minio`:
 | `MINIO_ROOT_USER` | `minio_admin` | Usuario admin de MinIO (mínimo 3 caracteres, si no MinIO no arranca) |
 | `MINIO_ROOT_PASSWORD` | `minio_local_pass_123` | Password admin de MinIO (**mínimo 8 caracteres**, si no MinIO tira `FATAL` y no arranca — pasó de verdad en esta sesión) |
 
-### 6.2 Backend (`projects/backend/.env`, a partir de `.env.example`)
+### 6.2 Backend core (`projects/backend/comedor-uagrm-core/.env`, a partir de `.env.example`)
 
 Usadas directamente por Spring Boot (`application.properties` las lee vía
 `${VARIABLE:default}`):
@@ -349,12 +422,35 @@ Usadas directamente por Spring Boot (`application.properties` las lee vía
 | `CORS_ALLOWED_ORIGINS` | Orígenes permitidos para CORS (separados por coma) | `http://localhost:5173,http://localhost` |
 | `RATE_LIMIT_CAPACITY` | Cupo del rate limit por IP (ver `SEGURIDAD_AUTH_BACKEND.md#rate-limit`) | `100` |
 | `RATE_LIMIT_REFILL_PER_MINUTE` | Cuántos tokens se regeneran por minuto | `100` |
+| `MAIL_HOST` / `MAIL_PORT` | Servidor SMTP (en desarrollo, Mailpit) | `localhost` / `1025` |
+| `MAIL_USERNAME` / `MAIL_PASSWORD` | Credenciales del SMTP real (vacías con Mailpit) | vacías |
+| `MAIL_SMTP_AUTH` / `MAIL_SMTP_STARTTLS` | `true` con un proveedor real | `false` |
+| `MAIL_FROM` | Remitente de los correos | `no-responder@comedoru.local` |
+| `FRONTEND_URL` | URL del portal web, base del enlace del correo de recuperación | `http://localhost` |
+| `RESET_TTL_MINUTES` | Vigencia del enlace de restablecimiento (minutos) | `60` |
+
+| `FIREBASE_CREDENTIALS_PATH` | Ruta al JSON de la cuenta de servicio de Firebase (push). En Docker ya apunta a `/run/secrets/firebase-sa.json` | vacía (push en modo log) |
+| `NOTIFICACIONES_REINTENTOS` / `NOTIFICACIONES_ESPERAS_MS` | Intentos de un envío de push o correo y esperas entre ellos | `3` / `2000,8000` |
 
 > `CORS_ALLOWED_ORIGINS` y las dos de `RATE_LIMIT_*` tienen default
 > razonable en `application.properties`, así que no es obligatorio
 > definirlas en `.env` salvo que se necesite un valor distinto.
 
-### 6.3 Frontend (`projects/frontend/.env`, a partir de `.env.example`)
+#### Notificaciones push (Firebase) — CU-EXTRA-01
+
+El backend envía push con Firebase Cloud Messaging y la app Android los recibe.
+Necesita **dos archivos del mismo proyecto de Firebase**, ninguno se versiona:
+
+| Archivo | De dónde sale | Dónde se deja |
+| --- | --- | --- |
+| Cuenta de servicio (JSON) | Firebase Console → Configuración del proyecto → Cuentas de servicio → «Generar nueva clave privada» | `projects/backend/comedor-uagrm-core/secrets/firebase-sa.json` (**ese nombre exacto**) |
+| `google-services.json` | Firebase Console → Tus apps → Android (paquete `com.comedoruagrm.mobile`) | `projects/mobile/android/app/google-services.json` (hay un `.example` como plantilla) |
+
+- `docker-compose.yml` monta la carpeta `secrets/` en `core` como solo lectura en `/run/secrets`.
+- **Sin esos archivos todo funciona igual**: el backend arranca con el push en modo log (solo escribe en el log cuántos teléfonos se habrían avisado) y los avisos se guardan y salen por correo (Mailpit). El CI tampoco necesita secretos.
+- Para trabajar con push real, pídele los archivos a quien los tenga **por un canal privado** (nunca git ni un chat grupal: el JSON da permisos sobre el proyecto de Firebase), o crea tu propio proyecto de Firebase y genera ambos desde ahí.
+
+### 6.3 Frontend — ComedorUAGRM (`projects/frontend/comedoruagrm/.env`, a partir de `.env.example`)
 
 Usadas por Vite (`import.meta.env.VITE_*`, solo las que empiezan con
 `VITE_` quedan expuestas al código del navegador):
@@ -375,10 +471,10 @@ genéricas + bind mount del código, sin build). Para producción existen dos
 `Dockerfile` independientes, probados manualmente esta sesión con
 `docker build`/`docker run` reales (no solo revisados a ojo):
 
-### 7.1 `projects/backend/Dockerfile`
+### 7.1 `projects/backend/comedor-uagrm-core/Dockerfile`
 
-Build multi-stage self-contenido (contexto = `projects/backend`, no la
-raíz — el backend no es un workspace, es un único módulo Maven):
+Build multi-stage self-contenido (contexto = `projects/backend/comedor-uagrm-core`,
+no la raíz — el core no es un workspace, es un único módulo Maven):
 
 1. **Etapa `builder`** (`maven:3.9.6-eclipse-temurin-21-alpine`): copia
    `pom.xml` primero (cache de capas de Docker), descarga dependencias
@@ -386,34 +482,42 @@ raíz — el backend no es un workspace, es un único módulo Maven):
    para agilizar el build — los tests ya corrieron en CI/pre-commit antes
    de llegar acá).
 2. **Etapa runtime** (`eclipse-temurin:21-jre-alpine`, sin Maven ni
-   compiladores — imagen final más liviana): crea un usuario sin
-   privilegios (`springuser`) y corre el `.jar` como ese usuario, no como
-   root.
+   compiladores — imagen final más liviana): instala `fontconfig` y una
+   fuente (JasperReports las necesita para el PDF de la lista priorizada),
+   crea un usuario sin privilegios (`springuser`) y corre el `.jar` como
+   ese usuario, no como root.
 
 ```bash
-docker build -f projects/backend/Dockerfile -t comedor-uagrm-backend projects/backend
+docker build -f projects/backend/comedor-uagrm-core/Dockerfile -t comedor-uagrm-core projects/backend/comedor-uagrm-core
 ```
 
 Probado real: build exitoso, y corriendo contra la red de
 `docker-compose.yml` (Postgres/Redis/MinIO reales) arrancó y `/health`
 respondió `200` a la primera, sin ajustes.
 
-### 7.2 `projects/frontend/Dockerfile`
+### 7.2 `projects/frontend/comedoruagrm/Dockerfile`
 
 Build multi-stage, pero acá **el contexto de build es la raíz del repo**,
-no `projects/frontend` — es un detalle crítico, documentado en un
-comentario al principio del propio archivo:
+no `projects/frontend/comedoruagrm` — es un detalle crítico, documentado en
+un comentario al principio del propio archivo:
 
 ```bash
-docker build -f projects/frontend/Dockerfile -t comedor-uagrm-frontend .
+docker build -f projects/frontend/comedoruagrm/Dockerfile -t comedor-uagrm-frontend .
 ```
+
+> `nexware-landing` todavía no tiene un `Dockerfile` de producción propio —
+> hoy es solo un placeholder servido en modo desarrollo (ver sección 2.2b).
+> Al construir la landing real, se agrega acá un Dockerfile análogo al del
+> backend (build con `npm`, contexto limitado a
+> `projects/frontend/nexware-landing` porque no es parte del workspace
+> pnpm) que sirva `dist/` (el output estático de `astro build`) con nginx.
 
 **Por qué contexto raíz**: el proyecto es un workspace de pnpm
 (`pnpm-workspace.yaml` en la raíz). Para que `pnpm install` use el
 `pnpm-lock.yaml` real (build reproducible) en vez de resolver versiones
 nuevas cada vez, hace falta copiar `package.json` + `pnpm-workspace.yaml` +
 `pnpm-lock.yaml` de la raíz antes de instalar, algo que un contexto
-limitado a `projects/frontend/` no puede ver.
+limitado a `projects/frontend/comedoruagrm/` no puede ver.
 
 1. **Etapa `builder`** (`node:22-alpine`): copia los manifiestos primero
    (cache de capas), instala con `pnpm install --frozen-lockfile --filter
@@ -426,14 +530,14 @@ limitado a `projects/frontend/` no puede ver.
    ninguna config custom (usa el `nginx.conf` default de la imagen).
 
 **Hay un `.dockerignore` en la raíz del repo** (no en
-`projects/frontend/`, porque el contexto de build es la raíz — Docker solo
-lee el `.dockerignore` que está en la raíz del contexto). Sin él,
-`COPY projects/frontend ./projects/frontend` arrastraba el `node_modules`
-real del host hacia adentro de la imagen, con symlinks apuntando a rutas
-que no existen ahí — rompía el build con `Cannot find module`. Excluye
-`node_modules`, `dist`, `.dart_tool`, `build`, `target`, `.git` y los
-`.env` reales (dejando pasar los `.env.example`) en cualquier subcarpeta
-del repo.
+`projects/frontend/comedoruagrm/`, porque el contexto de build es la raíz
+— Docker solo lee el `.dockerignore` que está en la raíz del contexto).
+Sin él, `COPY projects/frontend/comedoruagrm ./projects/frontend/comedoruagrm`
+arrastraba el `node_modules` real del host hacia adentro de la imagen, con
+symlinks apuntando a rutas que no existen ahí — rompía el build con
+`Cannot find module`. Excluye `node_modules`, `dist`, `.dart_tool`,
+`build`, `target`, `.git` y los `.env` reales (dejando pasar los
+`.env.example`) en cualquier subcarpeta del repo.
 
 Probado real: build exitoso, contenedor corriendo, `200` +
 `<title>ComedorUAGRM</title>` al pedir `/`.

@@ -1,6 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Sin esto una build de release no tiene red (Flutter solo lo agrega en debug y
+         profile). La app habla con el backend por HTTP(S). -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Android 13+: sin este permiso la app no puede mostrar notificaciones push (CU-EXTRA-01). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
     <application
-        android:label="mobile"
+        android:label="ComedorU"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -30,6 +36,10 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!-- Canal de los push (lo crea MainActivity); el mismo que usa el backend. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="notificaciones" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

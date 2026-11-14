@@ -1,0 +1,9 @@
+{
+  "eyebrow": "PORTFOLIO",
+  "title": "What we build.",
+  "label": "DEMO PROJECT",
+  "name": "ComedorUAGRM",
+  "image": "[ ComedorUAGRM project screenshot ]",
+  "description": "Web and mobile system to apply for and preselect candidates for UAGRM's Beca Comedor (university meal scholarship). An artificial intelligence model preselects applications, computes a socioeconomic vulnerability score and prioritizes the files the DUBSS must audit, with Business Intelligence dashboards. It replaces the manual review of about 20,000 files per term.",
+  "cta": "View demo"
+}

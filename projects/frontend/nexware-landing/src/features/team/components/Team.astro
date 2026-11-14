@@ -1,0 +1,64 @@
+---
+import Section from '@/components/ui/Section.astro'
+import SectionHeader from '@/components/ui/SectionHeader.astro'
+import { useTranslations, type Lang } from '@/i18n/utils'
+import TeamCard from './TeamCard.astro'
+
+interface Props {
+  lang: Lang
+}
+
+const t = useTranslations(Astro.props.lang)
+---
+
+<Section id="nosotros" labelledby="nosotros-title" surface>
+  <div class="inner">
+    <div class="copy">
+      <SectionHeader
+        index="05"
+        eyebrow={t('team.eyebrow')}
+        title={t('team.title')}
+        titleId="nosotros-title"
+      />
+      <p>{t('team.text1')}</p>
+      <p>
+        <strong>{t('team.whyLabel')}</strong> {t('team.text2')}
+      </p>
+    </div>
+    <div class="people">
+      <TeamCard name={t('team.mauro')} role={t('team.role')} />
+      <TeamCard name={t('team.leonel')} role={t('team.role')} />
+    </div>
+  </div>
+</Section>
+
+<style>
+  .inner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 48px;
+  }
+  .copy {
+    flex: 1 1 420px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .copy p {
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--soft);
+  }
+  strong {
+    color: var(--ink);
+  }
+  .people {
+    flex: 1 1 420px;
+    min-width: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-content: flex-start;
+  }
+</style>

@@ -1,0 +1,20 @@
+{
+  "eyebrow": "PROCESS",
+  "title": "How we work.",
+  "discovery": {
+    "title": "Discovery",
+    "text": "We listen to your idea, understand the problem and define the scope before writing a line of code."
+  },
+  "design": {
+    "title": "Design",
+    "text": "We prototype the screens and the flow with you, to validate the experience before building it."
+  },
+  "development": {
+    "title": "Development",
+    "text": "We build in short cycles with frequent deliveries, so you see real progress and can adjust."
+  },
+  "delivery": {
+    "title": "Delivery",
+    "text": "We deploy, document and walk with you through the first steps with your product in production."
+  }
+}

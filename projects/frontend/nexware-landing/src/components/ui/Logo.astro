@@ -1,0 +1,59 @@
+---
+// N de píxeles sobre una cuadrícula de 5x5. La N usa `currentColor` y el
+// píxel central (el punto de conexión) usa siempre el acento.
+interface Props {
+  variant?: 'horizontal' | 'icon'
+  size?: number
+  label?: string
+}
+
+const { variant = 'horizontal', size = 32, label } = Astro.props
+const cells = [
+  [0, 0],
+  [0, 15],
+  [0, 30],
+  [0, 45],
+  [0, 60],
+  [60, 0],
+  [60, 15],
+  [60, 30],
+  [60, 45],
+  [60, 60],
+  [15, 15],
+  [45, 45],
+]
+---
+
+<span class="logo" class:list={[variant]}>
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 72 72"
+    role={label ? 'img' : undefined}
+    aria-label={label}
+    aria-hidden={label ? undefined : 'true'}
+  >
+    <g fill="currentColor">
+      {cells.map(([x, y]) => (
+        <rect x={x} y={y} width="12" height="12" rx="2.5" />
+      ))}
+    </g>
+    <rect x="30" y="30" width="12" height="12" rx="2.5" style="fill: var(--accent)"></rect>
+  </svg>
+  {variant === 'horizontal' && <span class="wordmark">nexware</span>}
+</span>
+
+<style>
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--ink);
+  }
+  .wordmark {
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+</style>

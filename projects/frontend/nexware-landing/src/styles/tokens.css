@@ -1,0 +1,22 @@
+/* Paleta Pizarra y teal. Todo color de un componente sale de estos tokens. */
+:root {
+  --bg: #f2f5f6;
+  --surface: #ffffff;
+  --ink: #1e2a33;
+  --soft: #54616b;
+  --border: #d3dbdf;
+  --accent: #266b66;
+  --accent-ink: #f2f5f6;
+  --tint: #e1edec;
+}
+
+:root[data-theme='dark'] {
+  --bg: #11181d;
+  --surface: #18222a;
+  --ink: #e9eff1;
+  --soft: #96a4ad;
+  --border: #26323a;
+  --accent: #5bb5ac;
+  --accent-ink: #11181d;
+  --tint: #16302f;
+}

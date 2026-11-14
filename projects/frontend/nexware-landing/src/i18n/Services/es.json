@@ -1,0 +1,19 @@
+{
+  "eyebrow": "SERVICIOS",
+  "title": "A medida, de punta a punta.",
+  "web": {
+    "title": "Web a medida",
+    "text": "Sitios y aplicaciones web con React y TypeScript: rápidas, accesibles y hechas para crecer contigo.",
+    "tags": "React · TypeScript"
+  },
+  "mobile": {
+    "title": "Apps móviles",
+    "text": "Una sola base de código para Android e iOS con Flutter, con la experiencia que tu usuario espera.",
+    "tags": "Flutter"
+  },
+  "backend": {
+    "title": "Backend e IA",
+    "text": "APIs sólidas con Spring Boot y servicios de inteligencia artificial con FastAPI, integrados a lo que ya tienes.",
+    "tags": "Spring Boot · FastAPI"
+  }
+}

@@ -1,0 +1,17 @@
+---
+// Etiqueta corta en mono y mayúsculas que antecede a un título.
+---
+
+<span class="eyebrow">
+  <slot />
+</span>
+
+<style>
+  .eyebrow {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+</style>

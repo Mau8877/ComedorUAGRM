@@ -11,13 +11,15 @@ on:
 
 jobs:
   # Detecta qué carpetas cambiaron para no correr, por ejemplo, todo el
-  # pipeline de Flutter cuando el cambio solo tocó el backend -- ver
+  # pipeline de Flutter cuando el cambio solo tocó el backend core -- ver
   # .claude/rules/CI_CD.md#un-job-por-proyecto-no-uno-solo-para-todo.
   changes:
     runs-on: ubuntu-latest
     outputs:
-      backend: ${{ steps.filter.outputs.backend }}
+      core: ${{ steps.filter.outputs.core }}
+      ia: ${{ steps.filter.outputs.ia }}
       frontend: ${{ steps.filter.outputs.frontend }}
+      landing: ${{ steps.filter.outputs.landing }}
       mobile: ${{ steps.filter.outputs.mobile }}
     steps:
       - uses: actions/checkout@v4
@@ -25,22 +27,27 @@ jobs:
         id: filter
         with:
           filters: |
-            backend:
-              - 'projects/backend/**'
+            core:
+              - 'projects/backend/comedor-uagrm-core/**'
+            ia:
+              - 'projects/backend/comedor-uagrm-ia/**'
             frontend:
-              - 'projects/frontend/**'
+              - 'projects/frontend/comedoruagrm/**'
               - 'pnpm-lock.yaml'
               - 'pnpm-workspace.yaml'
+            landing:
+              - 'projects/frontend/nexware-landing/**'
             mobile:
               - 'projects/mobile/**'
 
-  backend:
+  # Backend core (Spring Boot): projects/backend/comedor-uagrm-core.
+  core:
     needs: changes
-    if: needs.changes.outputs.backend == 'true'
+    if: needs.changes.outputs.core == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: projects/backend
+        working-directory: projects/backend/comedor-uagrm-core
     # ComedorUagrmBackendApplicationTests/SecurityConfigTest usan @SpringBootTest
     # (contexto completo), y Flyway/JPA necesitan una conexión real al arrancar
     # -- el datasource por defecto de application.properties apunta a
@@ -92,6 +99,26 @@ jobs:
       - name: Build
         run: ./mvnw -B clean package -DskipTests
 
+  # Backend IA (FastAPI): projects/backend/comedor-uagrm-ia.
+  ia:
+    needs: changes
+    if: needs.changes.outputs.ia == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: projects/backend/comedor-uagrm-ia
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: projects/backend/comedor-uagrm-ia/requirements*.txt
+      - run: pip install -r requirements-dev.txt
+      - run: ruff check .
+      - run: ruff format --check .
+      - run: pytest
+
   frontend:
     needs: changes
     if: needs.changes.outputs.frontend == 'true'
@@ -106,11 +133,36 @@ jobs:
           node-version: 22
           cache: pnpm
       # El lockfile vive en la raíz del workspace pnpm, no dentro de
-      # projects/frontend -- ver docs/README.md.
+      # projects/frontend/comedoruagrm -- ver docs/README.md. nexware-landing
+      # usa npm por separado y tiene su propio job (`landing`, abajo).
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --dir projects/frontend run lint
-      - run: pnpm --dir projects/frontend run test
-      - run: pnpm --dir projects/frontend run build
+      - run: pnpm --dir projects/frontend/comedoruagrm run lint
+      - run: pnpm --dir projects/frontend/comedoruagrm run test
+      - run: pnpm --dir projects/frontend/comedoruagrm run build
+
+  # Landing de Nexware (Astro): fuera del workspace pnpm, con npm propio.
+  landing:
+    needs: changes
+    if: needs.changes.outputs.landing == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: projects/frontend/nexware-landing
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          # Astro 7 exige Node >= 22.23.4 (la imagen node:22 vieja de Docker
+          # fallaba por eso); 22 resuelve siempre al último parche.
+          node-version: 22
+          cache: npm
+          cache-dependency-path: projects/frontend/nexware-landing/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run check:i18n
+      - run: npm test
+      - run: npm run build
 
   mobile:
     needs: changes
@@ -121,9 +173,14 @@ jobs:
         working-directory: projects/mobile
     steps:
       - uses: actions/checkout@v4
+      # Versión fijada a la que se usa en local: `stable` pasó a Flutter 3.47+,
+      # donde `package:flutter/material.dart` está deprecado en favor de
+      # `package:material_ui` (que exige Flutter >= 3.47). Se migra a
+      # material_ui cuando se suba Flutter también en local.
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: 3.44.8
       - run: flutter pub get
       # pubspec.yaml declara `.env` como asset (ver CONSUMO_API_MOBILE.md) --
       # el archivo real no se commitea (.gitignore), así que sin este paso

@@ -1,0 +1,9 @@
+---
+import { homePath } from '@/i18n/routes'
+import { DEFAULT_LANG } from '@/i18n/utils'
+
+// No se detecta el idioma del navegador en esta primera versión: la raíz
+// siempre lleva a /es/. En un build estático Astro genera la redirección
+// como una página con <meta http-equiv="refresh">.
+return Astro.redirect(homePath(DEFAULT_LANG))
+---

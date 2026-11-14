@@ -1,8 +1,8 @@
 # CI/CD
 
 Aplica a todo el repositorio (el pipeline vive en `.github/workflows/` y
-cubre backend, frontend y mobile a la vez, con un job independiente por
-proyecto).
+cubre el backend (`core` e `ia`), el frontend y mobile a la vez, con un job
+independiente por proyecto).
 
 ## Qué hay implementado y qué no
 
@@ -20,8 +20,9 @@ proyecto).
 
 El pipeline usa un job `changes` (con la acción `dorny/paths-filter`) que
 detecta qué carpetas cambiaron en el PR/push, y cada job de proyecto
-(`backend`, `frontend`, `mobile`) solo corre si `changes` marcó que su
-carpeta tuvo cambios. Esto es deliberado por dos razones:
+(`core`, `ia`, `frontend`, `landing`, `mobile`) solo corre si `changes`
+marcó que su carpeta tuvo cambios (`core` e `ia` son las dos carpetas de
+`projects/backend/`). Esto es deliberado por dos razones:
 
 - **Este es un monorepo con 3 proyectos independientes** (ver
   [`README.md`](../../README.md)) que no comparten build ni runtime — no
@@ -35,7 +36,7 @@ Si un cambio toca más de un proyecto a la vez (lo cual, según
 [CONVENCIONES_GIT.md](CONVENCIONES_GIT.md#regla-estricta-un-commit-un-scope),
 va a venir en commits separados por scope de todos modos), simplemente
 corren los jobs de ambos proyectos en paralelo — no hay orden de
-dependencia entre `backend`, `frontend` y `mobile`.
+dependencia entre `core`, `ia`, `frontend`, `landing` y `mobile`.
 
 ## Qué corre cada job
 
@@ -45,11 +46,12 @@ sin nada adicional inventado solo para CI:
 
 | Job | Pasos |
 | --- | --- |
-| `backend` | `mvnw checkstyle:check` → `mvnw test` → `mvnw clean package` |
+| `core` (`projects/backend/comedor-uagrm-core`) | `mvnw checkstyle:check` → `mvnw test` → `mvnw clean package` |
+| `ia` (`projects/backend/comedor-uagrm-ia`) | `pip install -r requirements-dev.txt` → `ruff check` → `ruff format --check` → `pytest` |
 | `frontend` | `pnpm install --frozen-lockfile` (desde la raíz, ver [docs/README.md](../../docs/README.md)) → `pnpm lint` → `pnpm test` → `pnpm build` |
 | `mobile` | `flutter pub get` → `flutter analyze` → `flutter test` |
 
-- El job de `backend` corre en un runner de Ubuntu, que trae Docker nativo
+- El job `core` corre en un runner de Ubuntu, que trae Docker nativo
   disponible — a diferencia del setup local en Windows (ver
   [TESTING_BACKEND.md](backend/TESTING_BACKEND.md)), acá los tests que
   usan Testcontainers corren de verdad en vez de quedar `SKIPPED`. Si un

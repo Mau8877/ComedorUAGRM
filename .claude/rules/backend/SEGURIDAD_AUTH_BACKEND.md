@@ -1,190 +1,214 @@
----
-globs: projects/backend/**/*
----
-
 # Seguridad y Autenticación — Backend
 
-## Estado actual (punto de partida)
+## Modelo: JWT propio (access token + refresh token)
 
-`SecurityConfig.java` hoy usa el `InMemoryUserDetailsManager` autogenerado
-por Spring Boot (usuario/password aleatorio impreso en el log en cada
-arranque). Esto es **solo un placeholder de desarrollo** y debe
-reemplazarse por la implementación real descrita abajo antes de considerar
-la autenticación "hecha" — no es un requisito opcional.
+La autenticación **la implementa este backend**: guarda las contraseñas
+(solo como hash BCrypt), verifica las credenciales, emite los tokens y los
+verifica en cada request. **No se usa Firebase Auth** (Firebase queda
+únicamente para notificaciones push desde mobile, ver
+[ARQUITECTURA_BACKEND.md](../ARQUITECTURA_BACKEND.md#módulos-del-dominio)).
 
-## Flujo: JWT + refresh token
+| Pieza | Qué es | Dónde vive |
+| --- | --- | --- |
+| **Token de acceso** | JWT firmado con HS256 (`JWT_SECRET`), vida corta (15 min por default). Lleva el `codigo` público del usuario como `sub`, y nada más (ni rol ni correo). Viaja en `Authorization: Bearer`. | `security/TokenService`, `config/AutenticacionConfig` |
+| **Refresh token** | Cadena aleatoria opaca de 256 bits (no es un JWT), vida larga (7 días por default). Sirve para renovar el token de acceso. Uno por dispositivo/sesión. | tabla `sesion` (solo su hash SHA-256), `features/auth/service/SesionService` |
+| **Contraseña** | Hash BCrypt en `usuario.password_hash`. Nunca en texto plano, nunca en un DTO de salida, nunca en un log. | `features/usuarios/` |
 
-> **Decisión de diseño confirmada — por qué este esquema y no "todo en
-> cookies".** Se evaluó explícitamente mover también el access token a una
-> cookie `HttpOnly` (para que ningún token sea legible por JavaScript en
-> ningún momento) contra el esquema híbrido documentado abajo (access
-> token en memoria + refresh token en cookie `HttpOnly`), y se **confirmó
-> el híbrido** — es el patrón estándar de la industria para SPAs (mismo
-> enfoque que recomiendan proveedores como Auth0/Okta), por dos razones
-> concretas:
-> 1. **Inmunidad a CSRF en los endpoints de negocio.** El header
->    `Authorization` nunca se auto-envía (a diferencia de una cookie, que
->    el browser adjunta solo) — un endpoint que exige ese header queda
->    protegido contra CSRF sin necesitar un token anti-CSRF adicional. Si
->    el access token también fuera cookie, **todos** los endpoints de
->    negocio necesitarían esa protección extra (`SameSite=Strict` no
->    alcanza solo, o un patrón de doble-submit) — complejidad real sin un
->    beneficio de seguridad proporcional para el alcance de este proyecto.
-> 2. **El refresh token (el credential de larga vida, el que más importa
->    proteger) sí queda completamente fuera del alcance de JavaScript**
->    vía `HttpOnly` — el access token, al ser de vida corta (~15 min) y
->    nunca tocar disco (ni `localStorage` ni cookie), acota el daño de un
->    XSS exitoso a esa ventana de tiempo.
-> No se reabre esta decisión sin una razón concreta nueva (un requisito de
-> seguridad que el esquema actual no cubra) — no "por prolijidad" de tener
-> todo en cookies.
+El backend usa el **resource server de Spring Security**
+(`spring-boot-starter-security-oauth2-resource-server`) para verificar la
+firma, el emisor (`JWT_ISSUER`) y la expiración del token de acceso.
 
-- **Access token**: JWT de corta duración (ej. 15 minutos). Va en el header
-  `Authorization: Bearer <token>` en cada request. Contiene el `codigo`
-  (UUID) del usuario y la lista de nombres de sus roles activos (ver
-  [Roles](#roles-y-permisos)) como claims — nada sensible además de eso.
-  Viaja en el **body** de la respuesta de login (el cliente lo guarda en
-  memoria, nunca en `localStorage`/cookie).
-- **Refresh token**: de larga duración (ej. 7 días), opaco (UUID aleatorio,
-  no JWT), persistido en **Redis** (ver abajo). Se usa únicamente contra el
-  endpoint de refresh, nunca contra endpoints de negocio.
-- **Transporte del refresh token: cookie `HttpOnly`, no en el body.** El
-  cliente (browser) nunca ve ni maneja el valor del refresh token —
-  `document.cookie` no puede leerla, lo que mitiga robo por XSS. El backend
-  la setea/borra explícitamente en cada respuesta relevante:
+- `JWT_SECRET` es **obligatorio y de al menos 32 caracteres**: si falta o es
+  corto, el backend no arranca (`AutenticacionConfig`). Nunca se versiona
+  (solo vive en el `.env`); cambiarlo invalida todos los tokens de acceso
+  emitidos.
+- Tiempos configurables: `JWT_ACCESS_TTL_MINUTES` (15) y
+  `JWT_REFRESH_TTL_DAYS` (7).
 
-  | Cookie | `refreshToken` |
-  | --- | --- |
-  | Atributos | `HttpOnly`; `SameSite=Lax`; `Path=/api/v1/auth`; `Max-Age` = duración del refresh token (ej. 7 días en segundos) |
-  | `Secure` | `true` en producción; `false` en `dev` (el stack local corre sobre HTTP) — controlado por `app.cookies.secure` (`application-dev.properties` lo pisa a `false`) |
-  | La setea | `POST /api/v1/auth/login` (al emitir uno nuevo) y `POST /api/v1/auth/refresh` si rota el token |
-  | La borra | `POST /api/v1/auth/logout` (`Max-Age=0`) |
-  | La lee | `POST /api/v1/auth/refresh` y `POST /api/v1/auth/logout` — **nunca** del body del request, del header `Cookie` vía `@CookieValue` |
+## Cómo viajan los tokens: cookies en la web, Bearer en mobile
 
-  `SameSite=Lax` alcanza porque frontend y backend son **same-site** (mismo
-  dominio registrable `localhost` en dev vía puertos distintos, mismo
-  origen real detrás de nginx en producción, ver
-  [`docker-compose.yml`](../../../docker-compose.yml)) — un request
-  programático (`fetch`/axios) same-site igual envía la cookie aunque sea
-  `Lax`, esa restricción solo afecta navegación cross-site de nivel
-  superior. El cliente HTTP (`apiClient`/`axios`) necesita
-  `withCredentials: true` para que el browser adjunte/acepte esta cookie
-  entre orígenes distintos (ver
-  [TANSTACK_QUERY_FRONTEND.md](../frontend/TANSTACK_QUERY_FRONTEND.md)), y
-  `SecurityConfig` ya tiene `allowCredentials(true)` en su configuración de
-  CORS — necesario para que el browser acepte la cookie en una respuesta
-  cross-origin.
-- **Endpoints** (`/api/v1/auth/...`):
-  - `POST /api/v1/auth/login` → valida credenciales, responde
-    `{ accessToken, usuario }` en el body y setea la cookie `refreshToken`.
-  - `POST /api/v1/auth/refresh` → lee el refresh token de la cookie, valida
-    que no esté invalidado/expirado contra Redis, responde
-    `{ accessToken }` (y opcionalmente rota la cookie).
-  - `POST /api/v1/auth/logout` → lee el refresh token de la cookie, lo
-    invalida en Redis, y borra la cookie en la respuesta.
-- **Invalidación en logout**: el refresh token se guarda del lado del
-  servidor en **Redis** con TTL igual a su vencimiento (Redis ya está en
-  `docker-compose.yml`, y `spring-boot-starter-data-redis` **ya está
-  agregada** en `pom.xml`, sin más wiring que la conexión automática vía
-  `spring.data.redis.host`; falta el código real del storage de tokens, eso
-  sigue pendiente). En logout se borra esa entrada; en refresh se valida
-  contra ese storage, no solo contra el formato del token.
-- El access token **no** se invalida antes de tiempo (es stateless por
-  diseño) — por eso su vida útil es corta. No se implementa una blacklist de
-  access tokens salvo que aparezca un requisito concreto que lo justifique.
+| Cliente | Token de acceso | Refresh token |
+| --- | --- | --- |
+| **Web** | Cookie `access_token` (`HttpOnly`, `SameSite=Strict`, `Path=/api/v1`) | Cookie `refresh_token` (`HttpOnly`, `SameSite=Strict`, `Path=/api/v1/auth`) |
+| **Mobile** | Header `Authorization: Bearer` (en memoria) | Cuerpo de `/refresh` y `/logout` (guardado en `flutter_secure_storage`) |
 
-## Reemplazo del `InMemoryUserDetailsManager`
+- `registro`, `login` y `refresh` **siempre** escriben las cookies (`AuthCookies`) **y** devuelven los tokens en el cuerpo (`SesionResponse`); la web ignora el cuerpo y mobile ignora las cookies. `logout` vence las cookies.
+- El token se lee del header `Authorization` y, si no viene, de la cookie `access_token`; en `/refresh` y `/logout` gana el cuerpo sobre la cookie `refresh_token`. `/refresh` sin ninguno de los dos → `401` `ERR_AUTH_06`; `/logout` sin ninguno igual responde `200`.
+- **Por qué cookies HttpOnly:** el JavaScript de la página no puede leerlas, así un XSS no roba la sesión (con `localStorage` sí). Por eso la web **no guarda ningún token** en `localStorage`/`sessionStorage`/memoria.
+- **CSRF:** el backend tiene CSRF deshabilitado porque la API es stateless; con cookies la defensa es `SameSite=Strict` (el navegador no las manda desde otro sitio) más el CORS restringido a los orígenes de `app.cors.allowed-origins` (`allowCredentials=true`, nunca `*`). Web y API deben ser el mismo *site* (hoy `localhost`, y en producción el mismo dominio detrás del proxy). Si algún día el frontend vive en otro dominio, hay que replantear esto (token CSRF).
+- `COOKIE_SECURE=true` es **obligatorio en producción** (cookie solo por HTTPS); en desarrollo local por http queda en `false`.
 
-- Model `Usuario` (tabla `users`, `features/usuarios/model/Usuario.java`,
-  extiende `BaseModel` — ver [ARQUITECTURA_BACKEND.md](../ARQUITECTURA_BACKEND.md)),
-  **con la forma exacta que fija
-  [`docs/DiagramaConceptual.mermaid`](../../../docs/DiagramaConceptual.mermaid)**
-  (fuente de verdad del modelo de datos — ver
-  [PERSISTENCIA_BD_BACKEND.md](PERSISTENCIA_BD_BACKEND.md#antes-de-crear-un-model-nuevo-consultar-el-diagrama-conceptual)):
-  `username` (único), `correo` (único), `passwordHash` (BCrypt, nunca
-  texto plano), `estado` (`EstadoUsuario` enum — ver
-  [Roles](#roles-y-permisos) para la distinción con el bloqueo temporal
-  por intentos fallidos), `correoVerificado` (boolean). Todavía no existe
-  — es un requisito de esta regla, no algo que ya esté implementado.
-  El identificador público es `codigo` (heredado de `BaseModel`, columna
-  `codigo_usuario` en esta tabla — ver
-  [PERSISTENCIA_BD_BACKEND.md](PERSISTENCIA_BD_BACKEND.md) para el porqué
-  del nombre de columna distinto por entidad), nunca se expone el `id`
-  interno.
-- Login **acepta `username` o `correo`** indistintamente en el mismo
-  campo de entrada (ver la HU de login) — el repositorio resuelve contra
-  cualquiera de las dos columnas.
-- El nombre para mostrar (`nombres`/`apellidos`) **no** vive en `Usuario`
-  — vive en la entidad `Perfil` (relación 1 a 1, ver el diagrama
-  conceptual), que es alcance de una HU de gestión de usuarios/perfil
-  aparte, no de la HU de login.
-- `UserDetailsServiceImpl implements UserDetailsService` en `security/`, que
-  busca el usuario por `username`/`correo` vía `UsuarioRepository` y arma el
-  `UserDetails`/principal con sus roles activos (ver
-  [Roles](#roles-y-permisos)) y su `estado` (mapeado a `enabled` de
-  `UserDetails` — `enabled = true` solo si `estado == ACTIVO`, para que
-  Spring Security dispare `DisabledException` automáticamente en cualquier
-  otro estado).
-- `SecurityConfig` pasa a usar este `UserDetailsService` + un
-  `PasswordEncoder` (`BCryptPasswordEncoder`) en vez del in-memory, vía un
-  `AuthenticationManager` (vía `AuthenticationConfiguration`) que el
-  `AuthService` del módulo `auth` usa para validar credenciales. El filtro
-  de autenticación por JWT (`OncePerRequestFilter` custom) valida el access
-  token en cada request y setea el `Authentication` en el
-  `SecurityContext` — ese filtro es un follow-up de esta HU (ver
-  [HU-01](../../../docs/HistoriasDeUsuario/HU01%20-%20Iniciar%20Sesión.md)),
-  no bloqueante para que el login en sí funcione.
+## Endpoints de autenticación
+
+Todos bajo `/api/v1/auth`. Los cuatro primeros son **públicos** (no exigen
+token de acceso; ver [Endpoints públicos](#endpoints-públicos)).
+
+| Método y ruta | Qué hace | Respuesta |
+| --- | --- | --- |
+| `POST /registro` | Crea la cuenta del Postulante y abre su sesión (CU01, flujo A) | `201` (`200` si la misma petición ya se había procesado) con la sesión |
+| `POST /login` | Verifica correo y contraseña y abre la sesión (flujo B) | `200` con la sesión |
+| `POST /refresh` | Canjea un refresh token vigente por un par nuevo; el usado queda revocado (rotación) | `200` con la sesión |
+| `POST /logout` | Revoca el refresh token recibido: cierra **solo** la sesión de ese dispositivo (flujo C) | `200`, `data: null`; idempotente (un token desconocido o ya cerrado no es error) |
+| `GET /usuario-actual` | El usuario del token de acceso, para recuperar la sesión al recargar | `200` con el usuario |
+| `POST /recuperar-contrasena` | Pide el enlace para restablecer la contraseña (CU15). Público. Responde siempre `200` con el mismo mensaje exista o no la cuenta | `200`, `data: null` |
+| `POST /restablecer-contrasena` | Define la contraseña nueva con el token del enlace del correo (CU15). Público | `200`, `data: null`; `400` `ERR_AUTH_08` si el enlace no sirve |
+| `POST /cambiar-contrasena` | Cambia la contraseña desde el perfil con la actual (CU15). Exige sesión; cierra las demás sesiones y conserva la actual | `200`, `data: null`; `400` `ERR_AUTH_09` si la actual es incorrecta |
+
+La "sesión" que devuelven `registro`, `login` y `refresh` es:
+
+```json
+{
+  "accessToken": "eyJ...",
+  "refreshToken": "9d3f...",
+  "tokenType": "Bearer",
+  "expiresIn": 900,
+  "usuario": { "codigo": "...", "nombres": "...", "apellidos": "...", "correo": "...", "rol": "POSTULANTE" }
+}
+```
+
+## Flujo de una request autenticada
+
+1. El cliente inicia sesión (o se registra) y recibe `accessToken` y
+   `refreshToken`.
+2. En cada request: la cookie `access_token` (web, la manda el navegador) o `Authorization: Bearer <accessToken>` (mobile).
+3. El resource server valida firma, emisor y expiración. Token ausente,
+   mal firmado o vencido → `401` `ERR_AUTH_01`.
+4. `UsuarioActivoFilter` busca el `usuario` por el `sub` (su `codigo`),
+   comprueba que esté **activo y no eliminado** y arma el `Authentication`
+   con las `authorities` `ROLE_{rol.nombre}`. Usuario inexistente → `401`
+   `ERR_AUTH_02`; desactivado → `403` `ERR_AUTH_03`.
+5. Con el token de acceso vencido, el cliente llama a `POST /refresh` con su
+   refresh token y reintenta. Si el refresh token también venció o fue
+   revocado → `401` `ERR_AUTH_06` y el cliente lleva al usuario al login.
+
+- El `activo` se consulta en cada request (no solo al iniciar sesión): así
+  desactivar a un usuario (CU-14) surte efecto de inmediato aunque su token
+  de acceso siga vigente unos minutos, y `refresh` también lo niega. Si el
+  costo se vuelve relevante, se cachea en Redis con TTL corto.
+- **El rol sale de la base de datos**, no del token: el token no lleva
+  rol, así un cambio de rol también surte efecto de inmediato.
+- Una **ruta pública ignora el header `Authorization`** (`RutasPublicas` +
+  el `BearerTokenResolver` de `SecurityConfig`): un token vencido que el
+  cliente sigue mandando no debe hacer fallar el login con `401`.
+- El `codigo` del usuario **siempre** sale del token verificado, nunca de un
+  campo del body o de la URL.
+- **Rotación del refresh token:** cada `refresh` revoca el token usado y
+  emite uno nuevo. El refresh token se guarda en la base solo como hash
+  SHA-256 (una filtración de la tabla no permite abrir sesiones).
+- Las sesiones vencidas o revocadas quedan en la tabla `sesion`; su limpieza
+  periódica no está implementada todavía.
+
+### Registro (CU01, flujo A)
+
+- Público: no exige token. El rol inicial es siempre `POSTULANTE`; el
+  cliente no elige su rol (si lo manda, se ignora).
+- La contraseña tiene 6 a 72 caracteres (72 es el máximo que procesa BCrypt)
+  y debe coincidir con su confirmación; el correo se normaliza a minúsculas
+  y sin espacios antes de guardarlo y de compararlo.
+- `ci`, `correo` y `registro_universitario` únicos → `ConflictException`
+  (`409`) con su código de error catalogado (ver
+  [EXCEPCIONES_BACKEND.md](EXCEPCIONES_BACKEND.md)).
+- **Idempotente (RNF-03):** repetir la misma petición (mismo correo, CI y
+  contraseña) devuelve la cuenta existente con `200` y abre una sesión
+  nueva, sin duplicar el `usuario`.
+
+### Inicio de sesión y bloqueo por intentos fallidos (CU01, flujo B)
+
+Orden de las verificaciones en `UsuarioService.validarCredenciales`:
+
+1. **Cuenta bloqueada** → `403` `ERR_AUTH_05`, aunque la contraseña sea
+   correcta (el mensaje dice cuántos minutos faltan).
+2. **Contraseña incorrecta o correo inexistente** → `401` `ERR_AUTH_04` con
+   **el mismo mensaje en ambos casos** (no se revela cuál falló). Cuando el
+   correo no existe se compara igual contra un hash de relleno para que la
+   respuesta tarde lo mismo.
+3. **Cuenta desactivada** → `403` `ERR_AUTH_03`.
+
+El bloqueo lo implementa este backend (columnas `intentos_fallidos`,
+`bloqueos_consecutivos`, `bloqueado_hasta` de `usuario`):
+
+- A los **5 intentos fallidos consecutivos** la cuenta se bloquea; el
+  contador de intentos vuelve a 0.
+- La duración crece con cada bloqueo seguido: **5 min, 15 min, 1 h, 24 h**
+  (la última se repite). ⚠️ La escala exacta está **por definir con la
+  DUBSS**; hoy es una constante en `UsuarioService.DURACIONES_BLOQUEO`.
+- Un inicio de sesión correcto reinicia los intentos y la escalada.
+- El conteo debe guardarse aunque el login termine en error: por eso
+  `AuthService.iniciarSesion` y `UsuarioService.validarCredenciales` usan
+  `@Transactional(noRollbackFor = BusinessException.class)`.
+- Todo inicio de sesión exitoso (incluido el que sigue a un registro) queda
+  anotado en la bitácora (`INICIO_SESION`).
+
+- Verificar el correo no está implementado todavía; cuando se haga, lo define
+  su propio caso de uso. El `ci` no es modificable (RF-10).
+
+### Recuperar y cambiar la contraseña (CU15)
+
+- **Enlace por correo.** `recuperar-contrasena` genera un token aleatorio de 256
+  bits (`TokenEnlace`), guarda **solo su hash SHA-256** y su vencimiento en las
+  columnas `restablecimiento_token_hash` y `restablecimiento_expira_en` de
+  `usuario` (60 minutos, `app.auth.reset-ttl-minutes`) y lo envía por correo
+  (`CorreoRestablecimientoService`, asíncrono) a `{app.web.base-url}/restablecer-contrasena?token=…`.
+  Solo hay un enlace vigente por cuenta: pedir otro lo sobrescribe, y usarlo lo borra.
+- **Mensaje neutro.** La solicitud responde siempre igual, exista o no el correo y
+  esté o no activa la cuenta; no se anota en la bitácora. Un fallo del SMTP se
+  registra (sin correo ni token) y no llega al cliente.
+- **Restablecer** guarda el hash BCrypt nuevo, reinicia el bloqueo por intentos
+  fallidos, borra el enlace y **cierra todas las sesiones** de la cuenta. Un enlace
+  desconocido, vencido, usado, reemplazado o de una cuenta desactivada da el mismo
+  `400` `ERR_AUTH_08`.
+- **Cambiar la contraseña desde el perfil** exige la actual (`400` `ERR_AUTH_09` si
+  es incorrecta: no es `401`, para que el cliente no intente renovar la sesión) y
+  cierra las sesiones de los **demás** dispositivos conservando la actual
+  (`SesionService.revocarOtras`, que identifica la sesión por el refresh token del
+  cuerpo —mobile— o de la cookie —web—). Por eso vive en `/api/v1/auth`, donde viaja
+  la cookie `refresh_token`.
+- **Correo.** `spring-boot-starter-mail`; en desarrollo los correos caen en Mailpit
+  (`http://localhost:8025`), y pasar a un proveedor real es cambiar las variables
+  `MAIL_*` y `FRONTEND_URL`, sin tocar código.
 
 ## Roles y permisos
 
-**Modelo relacional, no un enum fijo** — alineado a
-[`docs/DiagramaConceptual.mermaid`](../../../docs/DiagramaConceptual.mermaid):
-un `Usuario` puede tener **varios roles activos** a la vez, vía las
-entidades `Rol` (catálogo de roles, con `nombre`, `descripcion`,
-`isActive`) y `UsuarioRol` (tabla de asociación con su propio `codigo`,
-`isActive` y timestamps — **no** es un `@ManyToMany` simple de JPA, porque
-esa fila de asociación tiene datos propios más allá de las dos FK, así que
-es una entidad propia con sus dos `@ManyToOne`). Ambas entidades viven en
-`features/usuarios/model/` (mismo dueño del dato que `Usuario`).
+**Un usuario tiene un único rol**: `usuario.rol_id` → `rol` (diagrama de
+base de datos). Catálogo actual (valores de `rol.nombre`):
 
-- Un rol solo cuenta como activo para un usuario si tanto la fila
-  `UsuarioRol.isActive` como el propio `Rol.isActive` son `true` — un rol
-  desactivado globalmente (`Rol.isActive = false`) deja de otorgar acceso
-  a todos los usuarios que lo tengan asignado, sin tener que tocar cada
-  fila de `UsuarioRol`.
-- Los nombres de rol conocidos por el sistema (ej. `"ADMIN"`, `"USUARIO"`)
-  se validan/usan como constantes de texto (`RolNombres` o similar, en
-  `features/usuarios/`), **no** como un enum Java cerrado — los roles son
-  datos (filas de la tabla `ROL`), administrables sin desplegar código
-  nuevo, a diferencia del esquema anterior de esta rule (enum fijo de 2
-  valores), que quedó reemplazado por este modelo.
-- El JWT lleva la lista de nombres de roles activos como claim (array de
-  strings, ver [Flujo JWT](#flujo-jwt--refresh-token)) — `UserDetailsServiceImpl`
-  arma las `authorities` como `ROLE_{nombre}` por cada rol activo.
-- Se protege por rol con `@PreAuthorize("hasRole('ADMIN')")` (o
-  `hasAnyRole(...)` si aplica a más de uno) a nivel de método de `service`
-  (no en el controller — mantiene la regla de controllers delgados de
-  [ENDPOINTS_BACKEND.md](ENDPOINTS_BACKEND.md)).
-- **No confundir con el bloqueo temporal por intentos fallidos de login**
-  (ver la HU de login): ese bloqueo es un estado transitorio en Redis, no
-  un valor de `Usuario.estado` ni de ningún rol — son dos mecanismos
-  independientes.
+| Rol | Quién |
+| --- | --- |
+| `POSTULANTE` | Estudiante UAGRM; postula y, si resulta becado, consulta su beca (el «Becado» **no** es un rol: es un postulante con `beca` vigente). |
+| `ADMINISTRADOR_DUBSS` | Personal de la DUBSS: audita, adjudica, gestiona convocatorias, usuarios, padrón, bitácora y parámetros del modelo. Si se divide en subroles (Trabajo Social / Encargada de Sistemas), **por definir con la DUBSS**. |
+| `DIRECTIVO` | Consume el dashboard de indicadores BI. |
+| `PERSONAL_COMEDOR` | Registra la asistencia digital. |
+
+«Usuario del Sistema» (el actor abstracto del diagrama de casos de uso) no
+se almacena como rol.
+
+- Los nombres de rol se usan como **constantes de texto** (`RolNombres`, en
+  `features/usuarios/constant/`, el módulo dueño del dato de `usuario`), no
+  como un enum Java cerrado: son filas de la tabla `rol`.
+- Las `authorities` son `ROLE_{nombre}`. Se protege por rol con
+  `@PreAuthorize("hasRole('ADMINISTRADOR_DUBSS')")` (o `hasAnyRole(...)`) a
+  nivel de método de `service` (no en el controller — mantiene la regla de
+  controllers delgados de [ENDPOINTS_BACKEND.md](ENDPOINTS_BACKEND.md)).
+- Un usuario autenticado que llama a algo que exige un rol que no tiene recibe
+  `403` con `ERR_AUTH_07` en el sobre estándar (lo escribe `ApiAccessDeniedHandler`).
+- El nombre exacto de cada rol y a qué endpoints accede lo fija el caso de
+  uso que lo necesita.
 
 ## Obtener el usuario autenticado en los controllers
 
-No se extrae el JWT manualmente en cada endpoint (`request.getHeader("Authorization")`,
-parsear, etc.). Se usa una anotación custom que resuelve el dato directo
-desde el `SecurityContext`:
+No se extrae el token manualmente en cada endpoint
+(`request.getHeader("Authorization")`, parsear, etc.). Se usa una
+anotación custom que resuelve el dato directo desde el `SecurityContext`:
 
 ```java
-@GetMapping("/{id}/pedidos")
-public ResponseEntity<ApiResponse<List<PedidoResponse>>> misPedidos(@CurrentUserId UUID userId) {
+@GetMapping("/mis-postulaciones")
+public ResponseEntity<ApiResponse<List<PostulacionResponse>>> misPostulaciones(@CurrentUserId UUID userId) {
     ...
 }
 ```
 
-`UUID`, no `Long` — es el `codigo` público del usuario (el mismo valor
-del claim `sub` del JWT), nunca el `id` interno de la tabla `users`.
+`UUID`, no `Long` — es el `codigo_usuario` público del usuario (el `sub`
+del token de acceso), nunca el `id` interno de la tabla `usuario`.
 
 La anotación `@CurrentUserId` (y su `HandlerMethodArgumentResolver`) se
 define una sola vez en `security/` — ver
@@ -242,9 +266,8 @@ intentar de más).
 > límite independiente (un atacante repartiendo requests entre instancias
 > efectivamente multiplica su cupo). Para eso existe
 > `bucket4j_jdk11-redis` (Redis ya está en el stack y
-> `spring-boot-starter-data-redis` ya está en el `pom.xml`, agregada para el
-> storage de refresh tokens de más arriba) — no se implementa hasta que haya
-> más de una instancia real corriendo.
+> `spring-boot-starter-data-redis` ya está en el `pom.xml`) — no se
+> implementa hasta que haya más de una instancia real corriendo.
 
 > **Esto no reemplaza protección a nivel de infraestructura.** Un rate
 > limit en la app (como este) es la última línea de defensa, no la única —
@@ -255,10 +278,22 @@ intentar de más).
 
 ## Endpoints públicos
 
-Solo quedan sin autenticación los ya definidos en `SecurityConfig`
-(`/health`, `/health/**`, `/prometheus`, `/swagger-ui/**`, `/v3/api-docs/**`)
-más los de `/api/v1/auth/login`, `/api/v1/auth/refresh` (obviamente, todavía
-no hay token) y `/api/v1/auth/register` si el proyecto lo requiere.
-Cualquier otro endpoint nuevo es privado por default — si necesita ser
-público, es una decisión explícita, no un olvido de agregar la regla en
-`SecurityConfig`.
+Quedan sin autenticación los de infraestructura ya definidos en
+`SecurityConfig` (`/health`, `/health/**`, `/prometheus`, `/swagger-ui/**`,
+`/v3/api-docs/**`) y estas excepciones de negocio, todas listadas en
+`security/RutasPublicas`:
+
+| Endpoint | Motivo |
+| --- | --- |
+| `POST /api/v1/auth/registro` | La persona todavía no tiene cuenta |
+| `POST /api/v1/auth/login` | La persona todavía no tiene sesión |
+| `POST /api/v1/auth/refresh` | Se llama justamente cuando el token de acceso ya venció; se autentica con el refresh token del body |
+| `POST /api/v1/auth/logout` | Se autentica con el refresh token del body; cerrar una sesión ya vencida no debe dar error (CU01, A10) |
+| `POST /api/v1/auth/recuperar-contrasena` | La persona olvidó la contraseña y no tiene sesión; la respuesta es siempre neutra (CU15) |
+| `POST /api/v1/auth/restablecer-contrasena` | Se autentica con el token de un solo uso del enlace del correo (CU15) |
+| `GET /api/v1/carreras` | El formulario de registro necesita la lista **antes** de que exista cuenta; es solo lectura de un catálogo, sin datos personales |
+
+**Ningún otro endpoint de negocio es público.** Cualquier endpoint nuevo es
+privado por default — si necesita ser público, es una decisión explícita
+(documentada acá con su motivo y agregada a `RutasPublicas`), no un olvido
+de agregar la regla en `SecurityConfig`.

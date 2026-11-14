@@ -28,9 +28,14 @@ commit **se cancela**.
 
 | Lenguaje | Herramienta | Config | Alcance |
 | --- | --- | --- | --- |
-| TypeScript (frontend) | ESLint (`--fix`) | `projects/frontend/eslint.config.js` | `projects/frontend/**/*.{ts,tsx}` |
-| Java (backend) | Checkstyle | `projects/backend/checkstyle.xml` | `projects/backend/**/*.java` |
+| TypeScript (frontend, ComedorUAGRM) | ESLint (`--fix`) | `projects/frontend/comedoruagrm/eslint.config.js` | `projects/frontend/comedoruagrm/**/*.{ts,tsx}` |
+| Java (backend core) | Checkstyle | `projects/backend/comedor-uagrm-core/checkstyle.xml` | `projects/backend/comedor-uagrm-core/**/*.java` |
 | Dart (mobile) | `flutter analyze` | `projects/mobile/analysis_options.yaml` (`flutter_lints`) | `projects/mobile/**/*.dart` |
+
+> **Python (backend IA, `projects/backend/comedor-uagrm-ia`)** usa Ruff
+> (`ruff check` y `ruff format --check`, config en su `pyproject.toml`), pero
+> **no** está enganchado al pre-commit: corre en el job `ia` del CI y en
+> local con `ruff check .` dentro de esa carpeta.
 
 **El pre-commit solo lintea, no corre tests.** Se evaluó agregar
 `vitest run`/`flutter test`/`mvn test` al mismo hook, pero se decidió que
@@ -79,8 +84,8 @@ de aceptarlo.
 - Reglas activas: `type-enum` (los 10 tipos de la tabla de
   `CONVENCIONES_GIT.md`), `scope-enum` (`BACK`/`FRONT`/`MOBILE`/`INFRA`/`DOCS`/`REPO`),
   `type-empty`/`scope-empty`/`subject-empty` (a diferencia de Conventional
-  Commits estándar, acá el scope es **obligatorio**, nunca opcional), y
-  `header-max-length` (150).
+  Commits estándar, acá el scope es **obligatorio**, nunca opcional). No hay
+  límite de largo del header (se quitó `header-max-length`).
 - Se puede probar sin hacer un commit real: `echo "feat[BACK]: algo" | pnpm exec commitlint`.
 
 ## Comentarios

@@ -1,5 +1,5 @@
 ---
-globs: projects/backend/**/*
+globs: projects/backend/comedor-uagrm-core/**/*
 ---
 
 # Testing — Backend
@@ -56,9 +56,9 @@ missing` sin eso).
   lógica de negocio pura en el `service`, se sigue mockeando el repositorio
   (`@Mock`/`@MockBean`) — no todo test pasa a ser de integración por default.
 - **Prerequisito de infra**: Testcontainers necesita hablar con el daemon de
-  Docker desde DENTRO del contenedor del backend — `docker-compose.yml`
+  Docker desde DENTRO del contenedor de `core` (el backend Spring Boot) — `docker-compose.yml`
   monta `/var/run/docker.sock:/var/run/docker.sock` en el servicio
-  `backend` para esto.
+  `core` para esto.
 - **Patrón obligatorio para tests que usan Testcontainers**: no manejar el
   container con `@Testcontainers`/`@Container` (arranca automático y sin
   forma limpia de saltear el test si Docker no está disponible). En cambio,
@@ -68,6 +68,21 @@ missing` sin eso).
   (try-with-resources) dentro del test. Así, si Docker no está accesible, el
   test queda **SKIPPED** (no rompe el build) en vez de fallar — ver
   `TestcontainersSmokeTest.java` como referencia.
+
+- **Tests de integración con contexto de Spring** (`@SpringBootTest`/
+  `@DataJpaTest` contra una base real): usan el helper
+  `support/PostgresTestDatabase` (`@BeforeAll` →
+  `asegurarDisponible()`, `@DynamicPropertySource` → `registrar(registry)`),
+  que levanta **un solo** contenedor `postgres:18-alpine` por JVM, lo comparte
+  entre clases y lo apaga al terminar. Mismo criterio de arriba: sin Docker el
+  test queda SKIPPED. Cuando Testcontainers no conecta (el problema de Docker
+  Desktop de abajo), se puede apuntar a un Postgres ya levantado y **vacío**
+  con `-Dtest.postgres.url=jdbc:postgresql://localhost:5432/mi_base_vacia`
+  (`-Dtest.postgres.user` / `-Dtest.postgres.password`, por defecto
+  `postgres`). Flyway migra esa base: usar una descartable, nunca la de
+  desarrollo.
+
+- **Un solo Postgres por JVM, tests que no se pisan.** Cada contexto de Spring distinto que cachean los tests abre su propio pool y lo mantiene hasta el final: `src/test/resources/config/application.properties` fija un pool chico (`spring.datasource.hikari.maximum-pool-size`), porque con el pool por defecto una docena de contextos supera el `max_connections` de Postgres y los siguientes fallan con "too many clients". Y un test de integración que **commitea** datos (`@SpringBootTest` + `MockMvc`) deja la base vacía al terminar (`@AfterEach`), para que los tests de repositorio que corren después sobre la misma base no vean sus cuentas.
 
 > **Docker Desktop en Windows, nota conocida:** montar
 > `/var/run/docker.sock` no alcanza siempre — Docker Desktop puede exponer
@@ -79,7 +94,7 @@ missing` sin eso).
 > Docker socket to be used"** (tiene que estar tildado). Confirmado en esta
 > sesión: con el mount + `DOCKER_HOST=unix:///var/run/docker.sock` +
 > `TESTCONTAINERS_RYUK_DISABLED=true` en el `environment` del servicio
-> `backend`, seguía sin conectar — es un tema de configuración de Docker
+> `core`, seguía sin conectar — es un tema de configuración de Docker
 > Desktop en el host, no del código ni de `docker-compose.yml`. Por eso el
 > patrón de `assumeTrue` de arriba es obligatorio: un dev sin ese setting
 > tildado sigue pudiendo correr `mvn test` sin que le rompa el build.

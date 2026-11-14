@@ -41,7 +41,7 @@ chore[REPO]: Actualizar dependencias del workspace
 
 | Scope | Cuándo |
 | --- | --- |
-| `BACK` | Cambios dentro de `projects/backend/` |
+| `BACK` | Cambios dentro de `projects/backend/` (`comedor-uagrm-core` o `comedor-uagrm-ia`) |
 | `FRONT` | Cambios dentro de `projects/frontend/` |
 | `MOBILE` | Cambios dentro de `projects/mobile/` |
 | `INFRA` | Cambios dentro de `infrastructure/`, `docker-compose.yml` |

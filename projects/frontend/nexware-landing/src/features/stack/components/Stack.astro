@@ -1,0 +1,52 @@
+---
+import Section from '@/components/ui/Section.astro'
+import SectionHeader from '@/components/ui/SectionHeader.astro'
+import { useTranslations, type Lang } from '@/i18n/utils'
+import StackCard from './StackCard.astro'
+
+interface Props {
+  lang: Lang
+}
+
+const t = useTranslations(Astro.props.lang)
+const items = [
+  { id: 'frontend', logos: ['react', 'typescript'] },
+  { id: 'backend', logos: ['springboot'] },
+  { id: 'mobile', logos: ['flutter'] },
+  { id: 'ai', logos: ['fastapi'] },
+] as const
+---
+
+<Section id="stack" labelledby="stack-title" surface>
+  <div class="inner">
+    <SectionHeader
+      index="02"
+      eyebrow={t('stack.eyebrow')}
+      title={t('stack.title')}
+      titleId="stack-title"
+    />
+    <div class="cards">
+      {items.map(({ id, logos }) => (
+        <StackCard
+          label={t(`stack.${id}.label`)}
+          tech={t(`stack.${id}.tech`)}
+          text={t(`stack.${id}.text`)}
+          logos={[...logos]}
+        />
+      ))}
+    </div>
+  </div>
+</Section>
+
+<style>
+  .inner {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+  .cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+</style>

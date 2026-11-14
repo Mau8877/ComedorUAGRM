@@ -1,0 +1,42 @@
+---
+import Section from '@/components/ui/Section.astro'
+import SectionHeader from '@/components/ui/SectionHeader.astro'
+import { SITE } from '@/config/site'
+import { useTranslations, type Lang } from '@/i18n/utils'
+import ProjectCard from './ProjectCard.astro'
+
+interface Props {
+  lang: Lang
+}
+
+const t = useTranslations(Astro.props.lang)
+---
+
+<Section id="portafolio" labelledby="portafolio-title">
+  <div class="inner">
+    <SectionHeader
+      index="04"
+      eyebrow={t('portfolio.eyebrow')}
+      title={t('portfolio.title')}
+      titleId="portafolio-title"
+    />
+    <!-- El texto entre [corchetes] de la imagen es contenido pendiente (captura real). -->
+    <ProjectCard
+      imageAlt={t('portfolio.image')}
+      label={t('portfolio.label')}
+      title={t('portfolio.name')}
+      description={t('portfolio.description')}
+      techs={['springboot', 'react', 'flutter', 'fastapi']}
+      ctaLabel={t('portfolio.cta')}
+      ctaHref={SITE.demoUrl}
+    />
+  </div>
+</Section>
+
+<style>
+  .inner {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+</style>

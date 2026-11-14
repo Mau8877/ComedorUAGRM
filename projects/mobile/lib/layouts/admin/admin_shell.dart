@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../features/auth/widgets/menu_usuario.dart';
+import '../../shared/widgets/comedoru_logo.dart';
+
 /// Shell del rol Admin -- AppBar + `NavigationDrawer` (Material 3, cuatro
 /// secciones). Equivalente mobile de `AdminLayout` en el frontend web (ver
 /// ARQUITECTURA_FRONTEND.md#layouts-por-rol): un Drawer calza mejor que un
@@ -34,7 +37,16 @@ class _AdminShellState extends State<AdminShell> {
     final seccionActual = _secciones[_selected];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('ComedorU Admin')),
+      appBar: AppBar(title: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ComedoruLogo(size: 32),
+            SizedBox(width: 10),
+            Text('ComedorU Admin'),
+          ],
+        ),
+        actions: const [MenuUsuario()],
+      ),
       drawer: NavigationDrawer(
         selectedIndex: _selected,
         onDestinationSelected: (index) {

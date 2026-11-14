@@ -1,5 +1,5 @@
 ---
-globs: projects/frontend/**/*
+globs: projects/frontend/comedoruagrm/**/*
 ---
 
 # TanStack Query — Frontend
@@ -142,6 +142,21 @@ Todo lo relacionado a API/datos vive en `src/store/` — **no** en
   `ReactQueryDevtools` (montado solo si `import.meta.env.DEV`, así el panel
   no termina en el bundle de producción). `main.tsx` monta
   `<QueryProvider><RouterProvider .../></QueryProvider>`.
+
+**Autenticación del cliente HTTP.** La sesión viaja en **cookies `HttpOnly`** que
+pone el backend (`access_token` y `refresh_token`); `apiClient` usa
+`withCredentials: true` para que el navegador las mande, y **la app no guarda
+ningún token** (ni en `localStorage`, ni en un store, ni en memoria: el
+JavaScript no puede leerlos). Por eso tampoco arma el header `Authorization`.
+El flujo de autenticación registra con `setUnauthorizedHandler()` qué hacer
+ante un `401`: intenta renovar con `POST /api/v1/auth/refresh` (sin cuerpo, el
+navegador manda la cookie; una sola renovación a la vez aunque fallen varias
+requests juntas) y reintenta; si no se puede, limpia la caché y redirige a
+`/login`. Los endpoints públicos de `/auth` (login, registro, refresh) **no**
+disparan esa renovación (un `401` de `login` es "credenciales incorrectas", no
+"sesión vencida"). Para saber si hay sesión al cargar la app se pregunta al
+backend (`GET /auth/usuario-actual`); no se lee ninguna cookie (no se puede).
+Ver [SEGURIDAD_AUTH_BACKEND.md](../backend/SEGURIDAD_AUTH_BACKEND.md).
 
 Todo hook de `api/` de cada feature usa `apiClient` — no se crea una
 instancia de axios nueva por feature, y no se llama a `createBaseApi()` de

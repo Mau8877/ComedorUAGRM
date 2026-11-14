@@ -1,0 +1,105 @@
+---
+import Logo from '@/components/ui/Logo.astro'
+import Eyebrow from '@/components/ui/Eyebrow.astro'
+import { LEGAL_PAGES, homePath, legalPath } from '@/i18n/routes'
+import { useTranslations, type Lang } from '@/i18n/utils'
+
+interface Props {
+  lang: Lang
+}
+
+const { lang } = Astro.props
+const t = useTranslations(lang)
+const home = homePath(lang)
+const company = [
+  { id: 'servicios', label: t('nav.services') },
+  { id: 'stack', label: t('nav.stack') },
+  { id: 'proceso', label: t('nav.process') },
+  { id: 'nosotros', label: t('nav.about') },
+]
+---
+
+<footer class="footer" aria-label={t('footer.label')}>
+  <div class="inner">
+    <div class="columns">
+      <div class="brand">
+        <Logo size={36} />
+        <span class="slogan">{t('footer.slogan')}</span>
+      </div>
+      <nav class="col" aria-label={t('footer.company')}>
+        <Eyebrow>{t('footer.company')}</Eyebrow>
+        {company.map((link) => (
+          <a href={`${home}#${link.id}`}>{link.label}</a>
+        ))}
+      </nav>
+      <nav class="col" aria-label={t('footer.legal')}>
+        <Eyebrow>{t('footer.legal')}</Eyebrow>
+        {LEGAL_PAGES.map((page) => (
+          <a href={legalPath(page.id, lang)}>{t(`legal.${page.id}.title`)}</a>
+        ))}
+      </nav>
+    </div>
+    <p class="disclaimer">{t('footer.disclaimer')}</p>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    padding: clamp(40px, 5vw, 64px) clamp(20px, 5vw, 80px) 32px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+  .columns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
+    justify-content: space-between;
+  }
+  .brand {
+    flex: 1 1 280px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .slogan {
+    font-size: 15px;
+    color: var(--soft);
+  }
+  .col {
+    flex: 1 1 200px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .col :global(.eyebrow) {
+    margin-bottom: 8px;
+  }
+  .col a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: 14px;
+    color: var(--soft);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+  .col a:hover {
+    color: var(--ink);
+  }
+  .disclaimer {
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--soft);
+  }
+</style>

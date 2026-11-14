@@ -1,0 +1,237 @@
+---
+import Logo from '@/components/ui/Logo.astro'
+import Button from '@/components/ui/Button.astro'
+import { homePath, type LegalId } from '@/i18n/routes'
+import { useTranslations, type Lang } from '@/i18n/utils'
+import LanguageSwitcher from './LanguageSwitcher.astro'
+import ThemeToggle from './ThemeToggle.astro'
+
+interface Props {
+  lang: Lang
+  legalId?: LegalId
+}
+
+const { lang, legalId } = Astro.props
+const t = useTranslations(lang)
+const home = homePath(lang)
+const links = [
+  { id: 'servicios', label: t('nav.services') },
+  { id: 'stack', label: t('nav.stack') },
+  { id: 'proceso', label: t('nav.process') },
+  { id: 'portafolio', label: t('nav.portfolio') },
+  { id: 'nosotros', label: t('nav.about') },
+  { id: 'contacto', label: t('nav.contact') },
+]
+---
+
+<header class="header" data-header>
+  <div class="bar">
+    <a href={home} class="brand" aria-label={t('nav.home')}>
+      <Logo size={32} />
+    </a>
+
+    <nav id="site-nav" class="nav" aria-label={t('nav.menuLabel')}>
+      {links.map((link) => (
+        <a href={`${home}#${link.id}`} data-section={link.id}>
+          {link.label}
+        </a>
+      ))}
+      <a href={`${home}#contacto`} class="nav-cta">
+        {t('nav.cta')}
+      </a>
+    </nav>
+
+    <div class="actions">
+      <LanguageSwitcher {lang} {legalId} />
+      <ThemeToggle {lang} />
+      <Button href={`${home}#contacto`} size="sm" class="cta">
+        {t('nav.cta')}
+      </Button>
+      <button
+        type="button"
+        class="menu-btn"
+        aria-controls="site-nav"
+        aria-expanded="false"
+        aria-label={t('nav.openMenu')}
+        data-open-label={t('nav.openMenu')}
+        data-close-label={t('nav.closeMenu')}
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path class="bars" d="M4 7h16M4 12h16M4 17h16"></path>
+          <path class="cross" d="M6 6l12 12M18 6L6 18"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<script>
+  const header = document.querySelector<HTMLElement>('[data-header]')
+  const button = header?.querySelector<HTMLButtonElement>('.menu-btn')
+
+  function setOpen(open: boolean) {
+    if (!header || !button) return
+    header.toggleAttribute('data-open', open)
+    button.setAttribute('aria-expanded', String(open))
+    button.setAttribute(
+      'aria-label',
+      (open ? button.dataset.closeLabel : button.dataset.openLabel) ?? ''
+    )
+  }
+
+  button?.addEventListener('click', () => setOpen(!header?.hasAttribute('data-open')))
+  header?.querySelectorAll('.nav a').forEach((link) => {
+    link.addEventListener('click', () => setOpen(false))
+  })
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') setOpen(false)
+  })
+
+  // Marca en la navegación la sección que está en pantalla (solo en el
+  // inicio: en las páginas legales esas secciones no existen).
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('.nav a[data-section]')]
+  const sections = links
+    .map((link) => document.getElementById(link.dataset.section ?? ''))
+    .filter((section): section is HTMLElement => section !== null)
+
+  if (sections.length > 0 && 'IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue
+          links.forEach((link) => {
+            if (link.dataset.section === entry.target.id)
+              link.setAttribute('aria-current', 'location')
+            else link.removeAttribute('aria-current')
+          })
+        }
+      },
+      { rootMargin: '-45% 0px -50% 0px' }
+    )
+    sections.forEach((section) => observer.observe(section))
+  }
+</script>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    padding: 12px clamp(20px, 5vw, 80px);
+    border-bottom: 1px solid var(--border);
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    backdrop-filter: blur(14px);
+  }
+  .bar {
+    position: relative;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px 24px;
+  }
+  .brand {
+    display: inline-flex;
+    text-decoration: none;
+  }
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 4px 24px;
+    font-size: 15px;
+  }
+  .nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--soft);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+  .nav a:hover,
+  .nav a[aria-current='location'] {
+    color: var(--ink);
+  }
+  .nav a[aria-current='location'] {
+    box-shadow: 0 2px 0 var(--accent);
+  }
+  .nav-cta {
+    display: none !important;
+  }
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 8px 12px;
+  }
+  .menu-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .menu-btn svg {
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+  }
+  .cross {
+    display: none;
+  }
+  [data-open] .bars {
+    display: none;
+  }
+  [data-open] .cross {
+    display: inline;
+  }
+
+  @media (max-width: 960px) {
+    .menu-btn {
+      display: inline-flex;
+    }
+    .nav {
+      display: none;
+      position: absolute;
+      top: calc(100% + 13px);
+      left: calc(-1 * clamp(20px, 5vw, 80px));
+      right: calc(-1 * clamp(20px, 5vw, 80px));
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      padding: 8px clamp(20px, 5vw, 80px) 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    [data-open] .nav {
+      display: flex;
+    }
+    .nav a {
+      min-height: 48px;
+      border-bottom: 1px solid var(--border);
+    }
+    .nav a[aria-current='location'] {
+      box-shadow: none;
+      color: var(--accent);
+    }
+    .nav-cta {
+      display: inline-flex !important;
+      justify-content: center;
+      margin-top: 12px;
+      border: 0 !important;
+      border-radius: 12px;
+      background: var(--accent);
+      color: var(--accent-ink) !important;
+      font-weight: 600;
+    }
+    /* El botón es un componente hijo: su clase solo se alcanza con :global. */
+    .actions :global(.cta) {
+      display: none;
+    }
+  }
+</style>

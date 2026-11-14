@@ -1,0 +1,24 @@
+{
+  "eyebrow": "STACK",
+  "title": "Nuestro stack, y por qué.",
+  "frontend": {
+    "label": "FRONTEND",
+    "tech": "React + TypeScript",
+    "text": "Componentes reutilizables y tipado estático: menos errores y código que otros pueden mantener."
+  },
+  "backend": {
+    "label": "BACKEND",
+    "tech": "Spring Boot",
+    "text": "Un ecosistema maduro y seguro, probado en producción, para sistemas que no pueden fallar."
+  },
+  "mobile": {
+    "label": "MÓVIL",
+    "tech": "Flutter",
+    "text": "Una base de código y rendimiento nativo en Android e iOS: menos costo y tiempos más cortos."
+  },
+  "ai": {
+    "label": "INTELIGENCIA ARTIFICIAL",
+    "tech": "FastAPI",
+    "text": "Python para modelos y automatización, con APIs rápidas y documentación generada automáticamente."
+  }
+}

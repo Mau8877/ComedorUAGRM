@@ -1,0 +1,45 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import PixelN from '@/components/ui/PixelN.astro'
+import Button from '@/components/ui/Button.astro'
+import { homePath } from '@/i18n/routes'
+import { getLangFromUrl, useTranslations } from '@/i18n/utils'
+
+// El 404 es una sola página para los dos idiomas: toma el idioma de la URL
+// solicitada si lo trae (/en/loquesea) y, si no, usa español.
+const lang = getLangFromUrl(Astro.url)
+const t = useTranslations(lang)
+---
+
+<BaseLayout {lang} title={`${t('notFound.title')} · Nexware`} description={t('notFound.text')}>
+  <section class="notfound">
+    <div class="art">
+      <PixelN />
+    </div>
+    <h1>{t('notFound.title')}</h1>
+    <p>{t('notFound.text')}</p>
+    <Button href={homePath(lang)}>{t('notFound.cta')}</Button>
+  </section>
+</BaseLayout>
+
+<style>
+  .notfound {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    text-align: center;
+    padding: clamp(56px, 8vw, 112px) clamp(20px, 5vw, 80px);
+  }
+  .art {
+    width: min(200px, 60%);
+  }
+  h1 {
+    font-size: clamp(32px, 4.4vw, 52px);
+    letter-spacing: -0.03em;
+  }
+  p {
+    color: var(--soft);
+    font-size: 18px;
+  }
+</style>
