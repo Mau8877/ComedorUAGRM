@@ -23,7 +23,7 @@ El orden respeta las dependencias y pone antes lo que destraba más trabajo.
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | [~] | 1 | B5 | Gestionar convocatoria y gestión académica (CRUD, validación de fechas, abierta/cerrada) | CU-13 | RF-08 | 3 | Web | — |
 | [~] | 2 | B6 | Validar elegibilidad y duplicados (una postulación vigente por postulante y gestión) | CU-18 | RF-13 | 2 | Backend | B5 |
-| [ ] | 3 | B7 | Digitalizar y adjuntar documentos (cámara en Flutter, carga web, validación de tipo/tamaño, MinIO) | CU-16 | RF-11 | 5 | Web + Móvil | — |
+| [~] | 3 | B7 | Digitalizar y adjuntar documentos (cámara en Flutter, carga web, validación de tipo/tamaño, MinIO) | CU-16 | RF-11 | 5 | Web + Móvil | — |
 | [ ] | 4 | B1 | Generador de datos semilla: postulaciones con puntaje, adjudicados, becas y asistencias de prueba (volumen 20.000) | extra | todos | 2 | Backend | — |
 | [ ] | 5 | B2 | IA: dataset de ajuste, entrenamiento y validación del modelo (variables socioeconómicas, Python) | CU-03 | RF-03 | 5 | IA | contrato de la interfaz de IA |
 | [ ] | 6 | B3 | IA: API del modelo y cálculo por lote (puntaje ≤ 5 s con fecha de cálculo, 20.000 postulaciones) | CU-03 | RF-03 | 3 | IA | B2 |

@@ -51,6 +51,16 @@ feature).
   campos de un DTO ya leído.
 - **Dónde se lanza:** `GlobalExceptionHandler.handleRequestMalformado()`
 
+## `ERR_SYS_06`
+
+- **HTTP:** 400
+- **Excepción:** ninguna de negocio — `MaxUploadSizeExceededException`
+- **Significado:** Una subida de archivo supera el límite de Spring
+  (`spring.servlet.multipart.max-file-size`, 8 MB por defecto), antes de que el
+  servicio compruebe el tamaño del documento (`ERR_DOC_02`). Cubre lo desmedido;
+  el rechazo normal por tamaño lo da el servicio.
+- **Dónde se lanza:** `GlobalExceptionHandler.handleSubidaDemasiadoGrande()`
+
 ## `ERR_SYS_02`
 
 - **HTTP:** 429

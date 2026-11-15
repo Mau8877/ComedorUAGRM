@@ -155,3 +155,81 @@ donde está la lista.
   actual queda fuera de su apertura y cierre; no recibe postulaciones.
 - **Dónde se lanza:** `ValidacionPostulacionService.validar()` (método privado
   `verificarConvocatoriaAbierta()`)
+
+## `ERR_DOC_01`
+
+- **HTTP:** 400
+- **Excepción:** `ValidationException`
+- **Significado:** No llegó ningún archivo en la subida de un documento, o el
+  archivo está vacío.
+- **Dónde se lanza:** `ReglasArchivoDocumento.validar()`
+
+## `ERR_DOC_02`
+
+- **HTTP:** 400
+- **Excepción:** `ValidationException`
+- **Significado:** El archivo supera el tamaño máximo permitido
+  (`app.documentos.tamano-maximo-bytes`, por definir con la DUBSS).
+- **Dónde se lanza:** `ReglasArchivoDocumento.validar()`
+
+## `ERR_DOC_03`
+
+- **HTTP:** 400
+- **Excepción:** `ValidationException`
+- **Significado:** El formato no está permitido (se decide por el contenido real
+  del archivo, no por su extensión) o el contenido no corresponde al tipo que
+  declaró el cliente.
+- **Dónde se lanza:** `ReglasArchivoDocumento.validar()`
+
+## `ERR_DOC_04`
+
+- **HTTP:** 404
+- **Excepción:** `NotFoundException`
+- **Significado:** La postulación de los documentos no existe, está eliminada o
+  es de otra persona. Los casos responden igual para no revelar si existe.
+- **Dónde se lanza:** `DocumentosPostulacionService.cabecera()` (desde
+  `listar()`, `adjuntar()`, `reemplazar()`, `eliminar()` y `acceso()`)
+
+## `ERR_DOC_05`
+
+- **HTTP:** 404
+- **Excepción:** `NotFoundException`
+- **Significado:** El tipo de documento no existe o no figura en la lista de
+  documentos requeridos de la convocatoria de la postulación.
+- **Dónde se lanza:** `DocumentosPostulacionService.adjuntar()`
+
+## `ERR_DOC_06`
+
+- **HTTP:** 409
+- **Excepción:** `ConflictException`
+- **Significado:** La postulación ya fue enviada (no está en borrador ni
+  devuelta): no se adjuntan, reemplazan ni eliminan documentos.
+- **Dónde se lanza:** `DocumentosPostulacionService.adjuntar()`,
+  `reemplazar()` y `eliminar()` (método privado `exigirEditable()`)
+
+## `ERR_DOC_07`
+
+- **HTTP:** 409
+- **Excepción:** `ConflictException`
+- **Significado:** La convocatoria de la postulación ya no está abierta, o su
+  fecha de cierre ya pasó: no se modifican documentos.
+- **Dónde se lanza:** `DocumentosPostulacionService.adjuntar()`,
+  `reemplazar()` y `eliminar()` (método privado `exigirEditable()`)
+
+## `ERR_DOC_08`
+
+- **HTTP:** 409
+- **Excepción:** `ConflictException`
+- **Significado:** Ya hay el máximo de archivos de ese tipo de documento en la
+  postulación (`app.documentos.maximo-archivos-por-tipo`, por definir con la
+  DUBSS).
+- **Dónde se lanza:** `DocumentosPostulacionService.adjuntar()`
+
+## `ERR_DOC_09`
+
+- **HTTP:** 404
+- **Excepción:** `NotFoundException`
+- **Significado:** El documento adjunto no existe, está eliminado o no es de esa
+  postulación.
+- **Dónde se lanza:** `DocumentosPostulacionService.documento()` (desde
+  `reemplazar()`, `eliminar()` y `acceso()`)

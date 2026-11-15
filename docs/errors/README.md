@@ -41,6 +41,7 @@ docs/errors/
 - [`ERR_SYS_03`](system/ERRORES_SISTEMA.md#err_sys_03) — La ruta no existe (404)
 - [`ERR_SYS_04`](system/ERRORES_SISTEMA.md#err_sys_04) — Método HTTP no permitido (405)
 - [`ERR_SYS_05`](system/ERRORES_SISTEMA.md#err_sys_05) — Request mal formado o con parámetros inválidos (400)
+- [`ERR_SYS_06`](system/ERRORES_SISTEMA.md#err_sys_06) — La subida supera el tamaño máximo de Spring (400)
 
 ### Autenticación (`AUTH`)
 
@@ -102,6 +103,18 @@ docs/errors/
 - [`ERR_VAL_01`](postulaciones/ERRORES_POSTULACIONES.md#err_val_01) — Ya hay una postulación vigente en la misma gestión (409)
 - [`ERR_VAL_02`](postulaciones/ERRORES_POSTULACIONES.md#err_val_02) — El postulante no es elegible: cuenta desactivada o que no es de un postulante (403)
 - [`ERR_VAL_03`](postulaciones/ERRORES_POSTULACIONES.md#err_val_03) — La convocatoria no está abierta o está fuera de fechas (409)
+
+### Documentos de la postulación (`DOC`)
+
+- [`ERR_DOC_01`](postulaciones/ERRORES_POSTULACIONES.md#err_doc_01) — No llegó el archivo o está vacío (400)
+- [`ERR_DOC_02`](postulaciones/ERRORES_POSTULACIONES.md#err_doc_02) — El archivo supera el tamaño máximo (400)
+- [`ERR_DOC_03`](postulaciones/ERRORES_POSTULACIONES.md#err_doc_03) — Formato no permitido o contenido que no corresponde al formato (400)
+- [`ERR_DOC_04`](postulaciones/ERRORES_POSTULACIONES.md#err_doc_04) — La postulación no existe o es de otra persona (404)
+- [`ERR_DOC_05`](postulaciones/ERRORES_POSTULACIONES.md#err_doc_05) — El tipo de documento no figura en la lista de la convocatoria (404)
+- [`ERR_DOC_06`](postulaciones/ERRORES_POSTULACIONES.md#err_doc_06) — La postulación ya fue enviada: sus documentos no se modifican (409)
+- [`ERR_DOC_07`](postulaciones/ERRORES_POSTULACIONES.md#err_doc_07) — La convocatoria ya no está abierta (409)
+- [`ERR_DOC_08`](postulaciones/ERRORES_POSTULACIONES.md#err_doc_08) — Ya hay el máximo de archivos de ese documento (409)
+- [`ERR_DOC_09`](postulaciones/ERRORES_POSTULACIONES.md#err_doc_09) — El documento adjunto no existe o no es de esa postulación (404)
 
 <!--
   A medida que se agregan módulos de negocio (platos, menú, usuarios...),
