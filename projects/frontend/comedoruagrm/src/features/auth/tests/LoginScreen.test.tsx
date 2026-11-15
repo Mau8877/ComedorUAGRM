@@ -38,6 +38,36 @@ describe('LoginScreen', () => {
     expect(screen.queryByText('La contraseña es obligatoria')).not.toBeInTheDocument()
   })
 
+  it('no muestra el error de correo mientras se escribe y sí al salir del campo', async () => {
+    const { user } = montar()
+
+    await user.type(screen.getByLabelText('Correo electrónico'), 'a')
+    expect(screen.queryByText('El correo electrónico no es válido')).not.toBeInTheDocument()
+
+    await user.tab()
+    expect(await screen.findByText('El correo electrónico no es válido')).toBeInTheDocument()
+
+    await user.type(screen.getByLabelText('Correo electrónico'), 'na@uagrm.edu.bo')
+    await waitFor(() => expect(screen.queryByText('El correo electrónico no es válido')).not.toBeInTheDocument())
+  })
+
+  it('no muestra el error de contraseña mientras se escribe', async () => {
+    const { user } = montar()
+
+    await user.type(screen.getByLabelText('Contraseña'), 'a')
+    await user.clear(screen.getByLabelText('Contraseña'))
+    expect(screen.queryByText('La contraseña es obligatoria')).not.toBeInTheDocument()
+  })
+
+  it('permite mostrar y ocultar la contraseña', async () => {
+    const { user } = montar()
+    const campo = screen.getByLabelText('Contraseña')
+    expect(campo).toHaveAttribute('type', 'password')
+
+    await user.click(screen.getByRole('button', { name: 'Mostrar contraseña' }))
+    expect(campo).toHaveAttribute('type', 'text')
+  })
+
   it('no envía si el formulario es inválido', async () => {
     const { mutate, user } = montar()
 
