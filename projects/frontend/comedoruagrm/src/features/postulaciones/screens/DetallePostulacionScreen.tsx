@@ -104,6 +104,23 @@ export function DetallePostulacionScreen({ titulo, activeHref, usuarioActual, co
               <LineaDeTiempo pasos={postulacion.lineaDeTiempo} />
             </section>
 
+            {postulacion.puedeCorregir && (
+              <section aria-label="Documentos" className="rounded-2xl border border-border bg-card p-4">
+                <h3 className="font-heading text-base">Tus documentos</h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Mientras la postulación está devuelta puedes reemplazar, agregar o eliminar documentos.
+                </p>
+                <Button
+                  className="mt-3"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => void navigate({ to: '/mis-postulaciones/$codigo/documentos', params: { codigo } })}
+                >
+                  Gestionar documentos
+                </Button>
+              </section>
+            )}
+
             {postulacion.observaciones && (
               <BloqueObservaciones
                 observaciones={postulacion.observaciones}

@@ -91,6 +91,27 @@ describe('DetallePostulacionScreen', () => {
     expect(navegar).toHaveBeenCalledWith({ to: '/mis-postulaciones' })
   })
 
+  it('una postulación que se puede corregir ofrece «Gestionar documentos» (CU16)', async () => {
+    responder(detalle({ estado: 'devuelta', puedeCorregir: true }))
+    const { user } = montar()
+    await screen.findByRole('heading', { name: 'Beca 1' })
+
+    await user.click(screen.getByRole('button', { name: 'Gestionar documentos' }))
+
+    expect(navegar).toHaveBeenCalledWith({
+      to: '/mis-postulaciones/$codigo/documentos',
+      params: { codigo: 'post-1' },
+    })
+  })
+
+  it('una postulación que no se puede corregir no ofrece «Gestionar documentos»', async () => {
+    responder(detalle({ estado: 'calificada', puedeCorregir: false }))
+    montar()
+    await screen.findByRole('heading', { name: 'Beca 1' })
+
+    expect(screen.queryByRole('button', { name: 'Gestionar documentos' })).not.toBeInTheDocument()
+  })
+
   it('la línea de tiempo muestra los pasos con su fecha y hora, y los pendientes atenuados', async () => {
     responder(
       detalle({
