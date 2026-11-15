@@ -1,0 +1,7 @@
+export * from './AltaPadronDialog'
+export * from './EstadoBecaBadge'
+export * from './MotivoBecaDialog'
+export * from './ReemplazoDialog'
+export * from './columnasPadron'
+export * from './estados'
+export * from './formatos'
