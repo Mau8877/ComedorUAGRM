@@ -85,14 +85,14 @@ Sin sesión, `401`; sin el rol, `403` (`ERR_AUTH_07`). Campos: `DocumentoAdjunto
 
 ## Follow-ups (no se implementan en estas UT)
 
-- **UT de web y móvil** (cámara, recorte, vista previa, lista de adjuntos): se escriben por capa en `UT-FRONTEND/` y `UT-MOBILE/`.
+- **Web y móvil** (selector de archivos, cámara, recorte, vista previa, lista de adjuntos): ver [`UT-FRONTEND`](../UT-FRONTEND/README.md) y [`UT-MOBILE`](../UT-MOBILE/README.md).
 - **CU17 (B9) y CU02 (B8):** crear el borrador y enviar la postulación; el CU02 comprueba los documentos obligatorios con la lista de este CU (A6).
 - **Limpieza de archivos huérfanos** si el servidor se cae entre subir el archivo y registrar la fila (hoy se retira al fallar el registro, pero no hay un barrido periódico).
 - Configuración del modo `aws-iam` contra una cuenta real y CORS del bucket si algún día se sube directo desde el navegador.
 
 ## Qué NO incluyen estas UT
 
-- Pantallas web y móviles, la cámara y el recorte.
+- Pantallas web y móviles, la cámara y el recorte (están en `UT-FRONTEND` y `UT-MOBILE`).
 - Crear borradores, enviar postulaciones (CU17, CU02) y devolverlas (CU19).
 - Los documentos del expediente que ve el administrador (CU07), que ya existen.
 - Migraciones y bitácora.
