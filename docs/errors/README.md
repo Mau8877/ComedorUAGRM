@@ -97,6 +97,12 @@ docs/errors/
 
 - [`ERR_POS_01`](postulaciones/ERRORES_POSTULACIONES.md#err_pos_01) — La postulación no existe o es de otra persona (404)
 
+### Validación de elegibilidad y duplicados (`VAL`)
+
+- [`ERR_VAL_01`](postulaciones/ERRORES_POSTULACIONES.md#err_val_01) — Ya hay una postulación vigente en la misma gestión (409)
+- [`ERR_VAL_02`](postulaciones/ERRORES_POSTULACIONES.md#err_val_02) — El postulante no es elegible: cuenta desactivada o que no es de un postulante (403)
+- [`ERR_VAL_03`](postulaciones/ERRORES_POSTULACIONES.md#err_val_03) — La convocatoria no está abierta o está fuera de fechas (409)
+
 <!--
   A medida que se agregan módulos de negocio (platos, menú, usuarios...),
   cada uno suma acá su propia sección "### Nombre (PREFIJO)" con la lista

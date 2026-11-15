@@ -124,3 +124,34 @@ donde está la lista.
   es de otra persona o todavía es un borrador. Los tres casos responden igual
   para no revelar si la postulación existe.
 - **Dónde se lanza:** `MisPostulacionesService.detalle()`
+
+## `ERR_VAL_01`
+
+- **HTTP:** 409
+- **Excepción:** `ConflictException`
+- **Significado:** El postulante ya tiene una postulación vigente (enviada, es
+  decir, no borrador) en alguna convocatoria de la misma gestión académica; no
+  se acepta otra. Una `devuelta` de la misma convocatoria no cuenta: es el
+  reenvío. El mensaje trae la gestión, el estado visible y la fecha de envío.
+- **Dónde se lanza:** `ValidacionPostulacionService.validar()` (método privado
+  `verificarSinDuplicados()`)
+
+## `ERR_VAL_02`
+
+- **HTTP:** 403
+- **Excepción:** `ForbiddenException`
+- **Significado:** El postulante no cumple las condiciones de elegibilidad: su
+  cuenta está desactivada o no es de un postulante (no tiene datos de
+  postulante). Las condiciones que defina la DUBSS se suman con este mismo
+  código.
+- **Dónde se lanza:** `ValidacionPostulacionService.validar()` (métodos
+  privados `verificarCondiciones()` y `rechazoNoElegible()`)
+
+## `ERR_VAL_03`
+
+- **HTTP:** 409
+- **Excepción:** `ConflictException`
+- **Significado:** La convocatoria de destino no está `ABIERTA` o la fecha
+  actual queda fuera de su apertura y cierre; no recibe postulaciones.
+- **Dónde se lanza:** `ValidacionPostulacionService.validar()` (método privado
+  `verificarConvocatoriaAbierta()`)
