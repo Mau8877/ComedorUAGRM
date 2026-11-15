@@ -30,8 +30,8 @@ El orden respeta las dependencias y pone antes lo que destraba más trabajo.
 | [ ] | 7 | B8 | Enviar postulación a la Beca Comedor (formulario socioeconómico largo; bloquea si faltan campos/documentos; invoca la API de B3) | CU-02 | RF-02 | 8 | Web + Móvil | B5, B6, B7, B3 (por contrato) |
 | [ ] | 8 | B9 | Guardar borrador de postulación (persistencia parcial, recuperar borrador) | CU-17 | RF-12 | 3 | Web + Móvil | B8 |
 | [ ] | 9 | B4 | Parametrizar el modelo y reprocesar puntajes (recálculo masivo en segundo plano) | CU-26 | RF-21 | 5 | Web + IA | B3 |
-| [ ] | 10 | B10 | Gestionar padrón de becados (alta desde adjudicados, baja, suspensión, reemplazo) | CU-23 | RF-18 | 5 | Web | adjudicaciones de CU-05 (ya hecho) |
-| [ ] | 11 | B15 | Consultar bitácora de acciones (filtros sobre la tabla `bitacora`, que ya existe) | CU-25 | RF-20 | 2 | Web | — |
+| [x] | 10 | B10 | Gestionar padrón de becados (alta desde adjudicados, baja, suspensión, reemplazo) | CU-23 | RF-18 | 5 | Web | adjudicaciones de CU-05 (ya hecho) |
+| [x] | 11 | B15 | Consultar bitácora de acciones (filtros sobre la tabla `bitacora`, que ya existe) | CU-25 | RF-20 | 2 | Web | — |
 | [ ] | 12 | B11 | Generar planilla de asistencia imprimible (firma + fotocopia de carnet) | CU-09 | RF-05 | 3 | Web | B10 |
 | [ ] | 13 | B12 | Registrar asistencia digital: **app móvil** del Personal del Comedor, ingresa CI del becado y confirma; idempotente (RNF-03) | CU-10 | RF-05 | 5 | Móvil | B10 |
 | [ ] | 14 | B13 | Cotejar registro digital contra la planilla física | CU-11 | RF-05 | 5 | Web | B12 |

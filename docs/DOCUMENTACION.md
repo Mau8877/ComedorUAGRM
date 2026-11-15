@@ -25,6 +25,8 @@
 | 20 | [Archivar o rechazar postulación](#cu20) | Sin registrar | — |
 | 21 | [Notificar finalistas y publicar comunicados](#cu21) | Sin registrar | — |
 | 22 | [Publicar resultados de adjudicación](#cu22) | Sin registrar | — |
+| 23 | [Gestionar padrón de becados](#cu23) | Difiere | [diferencias](Implementacion/CU23%20-%20Gestionar%20padr%C3%B3n%20de%20becados.md) |
+| 25 | [Consultar bitácora de acciones](#cu25) | Difiere | [diferencias](Implementacion/CU25%20-%20Consultar%20bit%C3%A1cora%20de%20acciones.md) |
 | EXTRA-01 | [Notificaciones push](#cuextra-01) | Sin registrar | — |
 
 ## <a id="cu01"></a>CU01 — Registrarse y autenticarse
@@ -278,6 +280,57 @@ Con todas las decisiones tomadas, el Administrador DUBSS publica los resultados 
 - **Secuencia: resumen, publicar y avisar a los finalistas:** [`PublicacionResultadosService.java`](../projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/features/resultados/service/PublicacionResultadosService.java), [`ResultadosAdminService.java`](../projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/features/resultados/service/ResultadosAdminService.java), [`ResultadosPostulanteService.java`](../projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/features/resultados/service/ResultadosPostulanteService.java), [`ResultadosConsultaRepository.java`](../projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/features/resultados/repository/ResultadosConsultaRepository.java), [`ResultadosErrorCodes.java`](../projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/features/resultados/exception/ResultadosErrorCodes.java), [`PublicarResultadosDialog.tsx`](../projects/frontend/comedoruagrm/src/features/resultados/components/PublicarResultadosDialog.tsx)
 - **Clases / modelo de datos:** [`PublicacionResultado.java`](../projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/features/resultados/model/PublicacionResultado.java), [`V20261111100000__crear_publicacion_resultado.sql`](../projects/backend/comedor-uagrm-core/src/main/resources/db/migration/V20261111100000__crear_publicacion_resultado.sql)
 - **Mockup (pantallas):** [`PublicarResultadosScreen.tsx`](../projects/frontend/comedoruagrm/src/features/resultados/screens/PublicarResultadosScreen.tsx), [`ResultadosScreen.tsx`](../projects/frontend/comedoruagrm/src/features/resultados/screens/ResultadosScreen.tsx)
+
+## <a id="cu23"></a>CU23 — Gestionar padrón de becados
+
+El Administrador DUBSS da de alta a los adjudicados como becados, consulta el padrón de una convocatoria publicada y da de baja, suspende o reemplaza el cupo de una beca, con su motivo.
+
+- **Caso de uso:** [CU23 - Gestionar padrón de becados.md](CasosDeUso/CU23%20-%20Gestionar%20padr%C3%B3n%20de%20becados.md) · **Unidades de trabajo:** [carpeta](UnidadesTrabajo/CU23%20-%20Gestionar%20padr%C3%B3n%20de%20becados) · **Diferencias con los diagramas:** [CU23](Implementacion/CU23%20-%20Gestionar%20padr%C3%B3n%20de%20becados.md)
+- **En el documento de taller:** §5.4.23 detalle y contexto (img 075), §6.2.23 análisis (img 088), §7.4.23 secuencia (img 103), §7.5.23 mockup (img 116).
+- **Elementos de los diagramas → código:**
+
+  | En el diagrama | Dónde está en el código |
+  | --- | --- |
+  | `PadronController` (análisis, img 088) | [`PadronController.java`](../projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/features/becas/controller/PadronController.java), [`BecaController.java`](../projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/features/becas/controller/BecaController.java) |
+  | `PadronView` (análisis, img 088) | [`PadronScreen.tsx`](../projects/frontend/comedoruagrm/src/features/becas/screens/PadronScreen.tsx), ruta [`padron-becados.tsx`](../projects/frontend/comedoruagrm/src/routes/_authenticated/padron-becados.tsx) |
+  | `listarPadron()` / `listarBecas(convocatoriaId)` / `mostrarPadron(becas)` (secuencia, img 103) | [`PadronService.listar`](../projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/features/becas/service/PadronService.java) y [`PadronService.resumen`](../projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/features/becas/service/PadronService.java) → [`PadronConsultaRepository.listar`](../projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/features/becas/repository/PadronConsultaRepository.java) |
+  | `darDeBaja(becaId, motivo)` / `registrarBaja(becaId, motivo)` (secuencia, img 103) | [`MotivoBecaDialog.tsx`](../projects/frontend/comedoruagrm/src/features/becas/components/MotivoBecaDialog.tsx) → [`BecaEstadoService.darDeBaja`](../projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/features/becas/service/BecaEstadoService.java) |
+  | `suspender(becaId, motivo)` / `suspenderBeca(becaId, motivo)` (secuencia, img 103) | [`MotivoBecaDialog.tsx`](../projects/frontend/comedoruagrm/src/features/becas/components/MotivoBecaDialog.tsx) → [`BecaEstadoService.suspender`](../projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/features/becas/service/BecaEstadoService.java) |
+  | `reemplazar(becaId, adjudicacionId)` / `reemplazarBeca(...)` (secuencia, img 103) | [`ReemplazoDialog.tsx`](../projects/frontend/comedoruagrm/src/features/becas/components/ReemplazoDialog.tsx) → [`BecaEstadoService.candidatoDeReemplazo` y `reemplazar`](../projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/features/becas/service/BecaEstadoService.java) (sin `adjudicacionId`: el CU y el código usan `postulanteCodigo`) |
+  | `update(estado=baja)` / `update(estado=suspendida)` (secuencia, img 103) | [`Beca.darDeBaja` y `suspender`](../projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/features/becas/model/Beca.java) |
+  | `create(movimiento)` (secuencia, img 103) | [`MovimientoBeca.java`](../projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/features/becas/model/MovimientoBeca.java), [`MovimientoBecaRepository`](../projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/features/becas/repository/MovimientoBecaRepository.java) |
+  | `create(beca)` (secuencia, img 103) | [`Beca.java`](../projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/features/becas/model/Beca.java); en el alta, [`PadronConsultaRepository.crearBecasFaltantes`](../projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/features/becas/repository/PadronConsultaRepository.java) |
+  | Dar de alta (no dibujado) | [`PadronService.darDeAlta`](../projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/features/becas/service/PadronService.java), [`AltaPadronDialog.tsx`](../projects/frontend/comedoruagrm/src/features/becas/components/AltaPadronDialog.tsx) |
+  | `Beca` y `MovimientoBeca` (análisis, img 088 / clases, img 090) | [`Beca.java`](../projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/features/becas/model/Beca.java), [`MovimientoBeca.java`](../projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/features/becas/model/MovimientoBeca.java), [`EstadoBeca`](../projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/features/becas/enums/EstadoBeca.java), [`TipoMovimientoBeca`](../projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/features/becas/enums/TipoMovimientoBeca.java) |
+  | Tabla «Becado · CI · Carrera · Estado · Inicio · Acciones» (mockup, img 116) | [`columnasPadron.tsx`](../projects/frontend/comedoruagrm/src/features/becas/components/columnasPadron.tsx), [`EstadoBecaBadge.tsx`](../projects/frontend/comedoruagrm/src/features/becas/components/EstadoBecaBadge.tsx) |
+  | Botones «Baja», «Suspender», «Reemplazar» (mockup, img 116) | Íconos por fila en [`PadronScreen.tsx`](../projects/frontend/comedoruagrm/src/features/becas/screens/PadronScreen.tsx) (`renderAcciones`) |
+  | «Buscar becado...», «Estado: Vigente ▾» (mockup, img 116) | [`PadronScreen.tsx`](../projects/frontend/comedoruagrm/src/features/becas/screens/PadronScreen.tsx) (`DataTableToolbar`); sin botón «Filtrar» |
+  | Botón «Historial» (mockup, img 116) | no implementado: sin endpoint de movimientos |
+
+- **Clases / modelo de datos:** [`V20261115100000__crear_beca_y_movimiento_beca.sql`](../projects/backend/comedor-uagrm-core/src/main/resources/db/migration/V20261115100000__crear_beca_y_movimiento_beca.sql), [`DiagramaConceptual.mermaid`](DiagramaConceptual.mermaid)
+- **Errores:** [`BecaErrorCodes.java`](../projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/features/becas/exception/BecaErrorCodes.java) · [catálogo](errors/becas/ERRORES_BECAS.md)
+- **Pruebas:** [`PadronIntegrationTest.java`](../projects/backend/comedor-uagrm-core/src/test/java/com/comedoruagrm/backend/features/becas/PadronIntegrationTest.java), [`BecaEstadoServiceTest.java`](../projects/backend/comedor-uagrm-core/src/test/java/com/comedoruagrm/backend/features/becas/service/BecaEstadoServiceTest.java), [`PadronScreen.test.tsx`](../projects/frontend/comedoruagrm/src/features/becas/tests/PadronScreen.test.tsx), [`becasApi.test.ts`](../projects/frontend/comedoruagrm/src/features/becas/tests/becasApi.test.ts)
+
+## <a id="cu25"></a>CU25 — Consultar bitácora de acciones
+
+El Administrador DUBSS consulta la bitácora (solo lectura) filtrando por usuario, acción y fechas. Backend y pantalla web.
+
+- **Caso de uso:** [CU25 - Consultar bitácora de acciones.md](CasosDeUso/CU25%20-%20Consultar%20bitácora%20de%20acciones.md) · **Unidades de trabajo:** [carpeta](UnidadesTrabajo/CU25%20-%20Consultar%20bitácora%20de%20acciones) · **Diferencias con los diagramas:** [CU25](Implementacion/CU25%20-%20Consultar%20bit%C3%A1cora%20de%20acciones.md)
+- **En el documento de taller:** contexto (img 076), análisis (img 089), secuencia (img 104), mockup (img 117).
+- **Elementos de los diagramas → código:**
+
+  | En el diagrama | Dónde está en el código |
+  | --- | --- |
+  | `BitacoraController` (análisis, img 089) | [`BitacoraController.java`](../projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/features/bitacora/controller/BitacoraController.java) |
+  | `listarAcciones(filtros)` / `filtrarAcciones(usuario, fecha, accion)` (secuencia, img 104) | [`BitacoraController.listar`](../projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/features/bitacora/controller/BitacoraController.java) → [`BitacoraConsultaService.listar`](../projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/features/bitacora/service/BitacoraConsultaService.java) |
+  | `Bitacora` · `list(acciones)` (secuencia, img 104) | [`Bitacora.java`](../projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/features/bitacora/model/Bitacora.java), [`BitacoraRepository.buscar`](../projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/features/bitacora/repository/BitacoraRepository.java), [`BitacoraSpecs.filtrar`](../projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/features/bitacora/repository/BitacoraSpecs.java) |
+  | `BitacoraView` / `consultarBitacora()` / `mostrarAcciones()` (secuencia, img 104) | [`BitacoraScreen.tsx`](../projects/frontend/comedoruagrm/src/features/bitacora/screens/BitacoraScreen.tsx), ruta [`bitacora.tsx`](../projects/frontend/comedoruagrm/src/routes/_authenticated/bitacora.tsx) |
+  | Filtros «Usuario», «Acción», «Desde», «Hasta» y «Buscar» (mockup, img 117) | [`BitacoraScreen.tsx`](../projects/frontend/comedoruagrm/src/features/bitacora/screens/BitacoraScreen.tsx) (la búsqueda es con debounce, no hay botón «Buscar») |
+  | Columnas «Fecha y hora · Usuario · Acción · Entidad · IP» (mockup, img 117) | [`columnasBitacora.tsx`](../projects/frontend/comedoruagrm/src/features/bitacora/components/columnasBitacora.tsx) |
+  | Fila «Fecha y hora · Usuario · Acción · Entidad · IP» (mockup, img 117) | [`BitacoraResponse.java`](../projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/features/bitacora/dto/BitacoraResponse.java) (la entidad sale sin `#id`: el id interno no se expone) |
+
+- **Pruebas:** [`BitacoraConsultaServiceTest.java`](../projects/backend/comedor-uagrm-core/src/test/java/com/comedoruagrm/backend/features/bitacora/service/BitacoraConsultaServiceTest.java), [`BitacoraIntegrationTest.java`](../projects/backend/comedor-uagrm-core/src/test/java/com/comedoruagrm/backend/features/bitacora/BitacoraIntegrationTest.java), [`BitacoraScreen.test.tsx`](../projects/frontend/comedoruagrm/src/features/bitacora/tests/BitacoraScreen.test.tsx), [`bitacoraApi.test.ts`](../projects/frontend/comedoruagrm/src/features/bitacora/tests/bitacoraApi.test.ts)
+- **Errores:** [`BitacoraErrorCodes.java`](../projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/features/bitacora/exception/BitacoraErrorCodes.java) · [catálogo](errors/bitacora/ERRORES_BITACORA.md)
 
 ## <a id="cuextra-01"></a>-EXTRA-01 — Notificaciones push
 

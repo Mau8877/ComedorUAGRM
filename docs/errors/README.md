@@ -186,3 +186,21 @@ docs/errors/
 - [`ERR_CV_11`](convocatorias/ERRORES_CONVOCATORIAS.md#err_cv_11) — `sort` no soportado en el listado (400)
 - [`ERR_CV_12`](convocatorias/ERRORES_CONVOCATORIAS.md#err_cv_12) — Ya existe una gestión con esa etiqueta (409)
 - [`ERR_CV_13`](convocatorias/ERRORES_CONVOCATORIAS.md#err_cv_13) — La fecha de fin de la gestión no es posterior a la de inicio (400)
+
+### Bitácora (`BIT`)
+
+- [`ERR_BIT_01`](bitacora/ERRORES_BITACORA.md#err_bit_01) — `sort` no soportado en la consulta de la bitácora (400)
+- [`ERR_BIT_02`](bitacora/ERRORES_BITACORA.md#err_bit_02) — `filter[desde]` es posterior a `filter[hasta]` (400)
+
+### Padrón de becados (`BEC`)
+
+- [`ERR_BEC_01`](becas/ERRORES_BECAS.md#err_bec_01) — La beca no existe o está eliminada (404)
+- [`ERR_BEC_02`](becas/ERRORES_BECAS.md#err_bec_02) — La convocatoria no existe o está eliminada (404)
+- [`ERR_BEC_03`](becas/ERRORES_BECAS.md#err_bec_03) — Los resultados todavía no fueron publicados (409)
+- [`ERR_BEC_04`](becas/ERRORES_BECAS.md#err_bec_04) — No hay adjudicados pendientes de alta (409)
+- [`ERR_BEC_05`](becas/ERRORES_BECAS.md#err_bec_05) — La beca no está vigente: no se puede dar de baja ni suspender (409)
+- [`ERR_BEC_06`](becas/ERRORES_BECAS.md#err_bec_06) — La beca no fue dada de baja: no se puede reemplazar (409)
+- [`ERR_BEC_07`](becas/ERRORES_BECAS.md#err_bec_07) — No hay un postulante disponible para ocupar el cupo (409)
+- [`ERR_BEC_08`](becas/ERRORES_BECAS.md#err_bec_08) — El postulante confirmado ya no es el siguiente disponible (409)
+- [`ERR_BEC_09`](becas/ERRORES_BECAS.md#err_bec_09) — La beca ya fue reemplazada (409)
+- [`ERR_BEC_10`](becas/ERRORES_BECAS.md#err_bec_10) — `sort` no soportado en el listado del padrón (400)

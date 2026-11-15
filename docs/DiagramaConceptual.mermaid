@@ -351,7 +351,7 @@ erDiagram
     uuid codigo_beca UK
     bigint convocatoria_id FK
     bigint postulante_id FK
-    bigint adjudicacion_id FK, UK
+    bigint adjudicacion_id FK, UK "nullable: NULL en una beca de reemplazo (CU-23)"
     estado_beca estado
     date fecha_inicio
     date fecha_fin
