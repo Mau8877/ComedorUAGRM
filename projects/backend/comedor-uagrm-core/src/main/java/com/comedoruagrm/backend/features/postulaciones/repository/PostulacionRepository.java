@@ -14,4 +14,7 @@ import com.comedoruagrm.backend.features.postulaciones.model.Postulacion;
 public interface PostulacionRepository extends JpaRepository<Postulacion, Long> {
 
     Optional<Postulacion> findByCodigo(UUID codigo);
+
+    /** Si la convocatoria tiene alguna postulacion (no eliminada). Lo consulta el CU13 para restringir la edicion. */
+    boolean existsByConvocatoriaId(Long convocatoriaId);
 }

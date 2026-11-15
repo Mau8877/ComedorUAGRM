@@ -54,6 +54,17 @@ public final class BitacoraAcciones {
     public static final String GENERACION_ACTA = "GENERACION_ACTA";
     public static final String DESCARGA_ACTA = "DESCARGA_ACTA";
 
+    // CU13: el actor es el administrador (en el cierre automatico es nulo: lo hace el sistema); el detalle lleva
+    // codigos, estados y los nombres de los campos modificados, nunca textos libres.
+    public static final String CREACION_GESTION = "CREACION_GESTION";
+    public static final String EDICION_GESTION = "EDICION_GESTION";
+    public static final String CREACION_CONVOCATORIA = "CREACION_CONVOCATORIA";
+    public static final String EDICION_CONVOCATORIA = "EDICION_CONVOCATORIA";
+    public static final String APERTURA_CONVOCATORIA = "APERTURA_CONVOCATORIA";
+    public static final String CIERRE_CONVOCATORIA = "CIERRE_CONVOCATORIA";
+    public static final String CIERRE_AUTOMATICO_CONVOCATORIA = "CIERRE_AUTOMATICO_CONVOCATORIA";
+    public static final String ELIMINACION_CONVOCATORIA = "ELIMINACION_CONVOCATORIA";
+
     private BitacoraAcciones() {
     }
 }
