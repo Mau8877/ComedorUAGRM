@@ -65,6 +65,13 @@ public final class BitacoraAcciones {
     public static final String CIERRE_AUTOMATICO_CONVOCATORIA = "CIERRE_AUTOMATICO_CONVOCATORIA";
     public static final String ELIMINACION_CONVOCATORIA = "ELIMINACION_CONVOCATORIA";
 
+    // CU23: el actor es el administrador; el detalle lleva codigos, estados y cantidades, nunca el motivo, nombres, CI,
+    // correos ni tokens.
+    public static final String ALTA_BECAS = "ALTA_BECAS";
+    public static final String BAJA_BECA = "BAJA_BECA";
+    public static final String SUSPENSION_BECA = "SUSPENSION_BECA";
+    public static final String REEMPLAZO_BECA = "REEMPLAZO_BECA";
+
     private BitacoraAcciones() {
     }
 }
