@@ -40,4 +40,14 @@ describe('adminNavItems', () => {
     expect(adminNavItems).toContainEqual(expect.objectContaining({ label: 'Actas', href: '/actas' }))
     expect(etiquetas.indexOf('Actas')).toBe(etiquetas.indexOf('Publicar resultados') + 1)
   })
+
+  it('tiene la entrada «Convocatorias» que lleva a su pantalla (CU13)', () => {
+    expect(adminNavItems).toContainEqual(expect.objectContaining({ label: 'Convocatorias', href: '/convocatorias' }))
+  })
+
+  it('tiene la entrada «Gestiones académicas» que lleva a su pantalla (CU13)', () => {
+    expect(adminNavItems).toContainEqual(
+      expect.objectContaining({ label: 'Gestiones académicas', href: '/gestiones-academicas' }),
+    )
+  })
 })

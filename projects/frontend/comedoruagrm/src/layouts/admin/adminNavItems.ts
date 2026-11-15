@@ -1,5 +1,7 @@
 import {
   AwardIcon,
+  CalendarDaysIcon,
+  CalendarRangeIcon,
   FileTextIcon,
   LayoutDashboardIcon,
   ListOrderedIcon,
@@ -16,6 +18,8 @@ import type { NavItem } from '@/components/layout'
 
 export const adminNavItems: NavItem[] = [
   { label: 'Dashboard', href: '/panel', icon: LayoutDashboardIcon },
+  { label: 'Convocatorias', href: '/convocatorias', icon: CalendarRangeIcon },
+  { label: 'Gestiones académicas', href: '/gestiones-academicas', icon: CalendarDaysIcon },
   { label: 'Lista priorizada', href: '/lista-priorizada', icon: ListOrderedIcon },
   { label: 'Finalistas', href: '/finalistas', icon: MegaphoneIcon },
   { label: 'Auditoría y adjudicación', href: '/adjudicacion', icon: AwardIcon },
