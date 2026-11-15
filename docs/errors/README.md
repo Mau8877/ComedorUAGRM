@@ -151,3 +151,19 @@ docs/errors/
 
 - [`ERR_DAS_01`](dashboard/ERRORES_DASHBOARD.md#err_das_01) — La gestión o la convocatoria no existe, o no es de la gestión (404)
 - [`ERR_DAS_02`](dashboard/ERRORES_DASHBOARD.md#err_das_02) — No hay datos que exportar a PDF (400)
+
+### Convocatorias (`CV`)
+
+- [`ERR_CV_01`](convocatorias/ERRORES_CONVOCATORIAS.md#err_cv_01) — La convocatoria no existe o está eliminada (404)
+- [`ERR_CV_02`](convocatorias/ERRORES_CONVOCATORIAS.md#err_cv_02) — La gestión académica no existe o está eliminada (404)
+- [`ERR_CV_03`](convocatorias/ERRORES_CONVOCATORIAS.md#err_cv_03) — Un tipo de documento indicado no existe (404)
+- [`ERR_CV_04`](convocatorias/ERRORES_CONVOCATORIAS.md#err_cv_04) — La fecha de cierre no es posterior a la de apertura (400)
+- [`ERR_CV_05`](convocatorias/ERRORES_CONVOCATORIAS.md#err_cv_05) — Ningún documento de la lista es obligatorio (400)
+- [`ERR_CV_06`](convocatorias/ERRORES_CONVOCATORIAS.md#err_cv_06) — Un tipo de documento aparece más de una vez (400)
+- [`ERR_CV_07`](convocatorias/ERRORES_CONVOCATORIAS.md#err_cv_07) — Ya hay otra convocatoria abierta en la misma gestión (409)
+- [`ERR_CV_08`](convocatorias/ERRORES_CONVOCATORIAS.md#err_cv_08) — La operación no corresponde al estado actual de la convocatoria (409)
+- [`ERR_CV_09`](convocatorias/ERRORES_CONVOCATORIAS.md#err_cv_09) — La convocatoria ya tiene postulaciones: no se cambian sus documentos ni su fecha de apertura (409)
+- [`ERR_CV_10`](convocatorias/ERRORES_CONVOCATORIAS.md#err_cv_10) — La convocatoria tiene postulaciones: no se elimina (409)
+- [`ERR_CV_11`](convocatorias/ERRORES_CONVOCATORIAS.md#err_cv_11) — `sort` no soportado en el listado (400)
+- [`ERR_CV_12`](convocatorias/ERRORES_CONVOCATORIAS.md#err_cv_12) — Ya existe una gestión con esa etiqueta (409)
+- [`ERR_CV_13`](convocatorias/ERRORES_CONVOCATORIAS.md#err_cv_13) — La fecha de fin de la gestión no es posterior a la de inicio (400)
