@@ -15,12 +15,14 @@ import org.springframework.stereotype.Service;
 import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
+import io.minio.RemoveObjectArgs;
 import io.minio.StatObjectArgs;
 import io.minio.errors.ErrorResponseException;
 import io.minio.http.Method;
 
 /**
- * Almacenamiento de archivos en MinIO (transversal: lo usan el expediente, CU07, y la subida de documentos, CU16).
+ * Almacenamiento de archivos en MinIO o Amazon S3 (transversal: lo usan el expediente, CU07, y la subida de
+ * documentos, CU16). Es el mismo codigo en los dos: cambia solo la configuracion (ver `MinioConfig`).
  *
  * * La base solo guarda la ruta de cada objeto; los binarios viven aca.
  * * Un archivo se abre con una URL temporal firmada con el host publico, nunca con una ruta permanente.
@@ -54,6 +56,15 @@ public class AlmacenamientoService {
                     .stream(entrada, contenido.length, -1).contentType(mimeType).build());
         } catch (Exception e) {
             throw fallo("subir", e);
+        }
+    }
+
+    /** Elimina el objeto de `ruta`. Si no existe no es un error (S3 y MinIO responden igual). */
+    public void eliminar(String ruta) {
+        try {
+            minio.removeObject(RemoveObjectArgs.builder().bucket(bucket).object(ruta).build());
+        } catch (Exception e) {
+            throw fallo("eliminar", e);
         }
     }
 
