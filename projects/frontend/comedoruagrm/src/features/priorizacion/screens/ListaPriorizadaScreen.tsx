@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { EyeIcon, RefreshCwIcon } from 'lucide-react'
 import type { Row } from '@tanstack/react-table'
 
+import { CargandoContenido } from '@/components/layout/CargandoContenido'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
@@ -169,7 +170,7 @@ export function ListaPriorizadaScreen({ titulo, activeHref, usuarioActual }: Lis
           <p className="py-8 text-center text-sm text-muted-foreground">Todavía no hay convocatorias registradas.</p>
         )}
 
-        {convocatorias.isLoading && <p className="py-8 text-center text-sm text-muted-foreground">Cargando convocatorias…</p>}
+        {convocatorias.isLoading && <CargandoContenido etiqueta="Cargando convocatorias…" forma="tabla" />}
 
         {convocatoriaId && (
           <>

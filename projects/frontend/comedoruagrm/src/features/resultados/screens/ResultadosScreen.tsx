@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { SortingState } from '@tanstack/react-table'
 
+import { CargandoContenido } from '@/components/layout/CargandoContenido'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -126,7 +127,7 @@ export function ResultadosScreen({ titulo, activeHref, usuarioActual }: Resultad
           <Alerta mensaje={errorPublicadas.mensaje} onReintentar={() => void publicadas.refetch()} />
         </div>
       )}
-      {publicadas.isLoading && <p className="py-8 text-center text-sm text-muted-foreground">Cargando resultados…</p>}
+      {publicadas.isLoading && <CargandoContenido etiqueta="Cargando resultados…" forma="tabla" />}
       {publicadas.isSuccess && disponibles.length === 0 && (
         <p className="py-8 text-center text-sm text-muted-foreground">Aún no hay resultados publicados</p>
       )}

@@ -170,7 +170,8 @@ describe('AdjudicacionScreen', () => {
     responder({ 'conv-2': panel(extra) })
     montar()
 
-    expect((await screen.findByRole('status')).textContent).toContain(aviso)
+    await screen.findByText('Cupos disponibles')
+    expect(screen.getByRole('status').textContent).toContain(aviso)
   })
 
   it('con decisiones habilitadas no muestra avisos', async () => {

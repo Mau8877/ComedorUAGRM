@@ -81,6 +81,9 @@ export function CampoFormulario({
           onBlur={field.handleBlur}
           onChange={(e) => {
             onEdit?.()
+            // * El error de onBlur no se limpia solo al escribir: se descarta acá y el
+            // * validador onChange lo vuelve a generar si el dato sigue siendo inválido.
+            field.setMeta((m) => ({ ...m, errorMap: { ...m.errorMap, onBlur: undefined } }))
             field.handleChange(e.target.value)
           }}
         />

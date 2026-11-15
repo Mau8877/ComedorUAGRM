@@ -47,7 +47,8 @@ describe('LoginScreen', () => {
     await user.tab()
     expect(await screen.findByText('El correo electrónico no es válido')).toBeInTheDocument()
 
-    await user.type(screen.getByLabelText('Correo electrónico'), 'na@uagrm.edu.bo')
+    await user.clear(screen.getByLabelText('Correo electrónico'))
+    await user.type(screen.getByLabelText('Correo electrónico'), 'ana@uagrm.edu.bo')
     await waitFor(() => expect(screen.queryByText('El correo electrónico no es válido')).not.toBeInTheDocument())
   })
 

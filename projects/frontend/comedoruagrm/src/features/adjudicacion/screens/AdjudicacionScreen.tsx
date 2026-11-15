@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { ListOrderedIcon, MegaphoneIcon, UsersRoundIcon } from 'lucide-react'
 
+import { CargandoContenido } from '@/components/layout/CargandoContenido'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -125,7 +126,7 @@ export function AdjudicacionScreen({ titulo, activeHref, usuarioActual }: Adjudi
       )}
 
       {convocatorias.isLoading && (
-        <p className="py-8 text-center text-sm text-muted-foreground">Cargando convocatorias…</p>
+        <CargandoContenido etiqueta="Cargando convocatorias…" forma="tabla" />
       )}
       {convocatorias.isSuccess && disponibles.length === 0 && (
         <p className="py-8 text-center text-sm text-muted-foreground">Todavía no hay convocatorias registradas.</p>
@@ -185,7 +186,7 @@ export function AdjudicacionScreen({ titulo, activeHref, usuarioActual }: Adjudi
             </p>
           )}
 
-          {panelConsulta.isLoading && <p className="py-8 text-center text-sm text-muted-foreground">Cargando panel…</p>}
+          {panelConsulta.isLoading && <CargandoContenido etiqueta="Cargando panel…" forma="tabla" />}
 
           {errorPanel && !errorPanel.convocatoriaInexistente && (
             <div

@@ -5,9 +5,11 @@ import type { NotificationItem } from '@/components/layout'
 import { useNotificaciones } from '@/features/notificaciones'
 
 import { estudianteNavItems } from './estudianteNavItems'
+import { ContenidoEnShell } from '../shell/ShellPersistente'
+import { useShellPersistente } from '../shell/shellContext'
 import type { EstudianteLayoutProps } from './estudianteTypes'
 
-export function EstudianteLayout({
+function EstudianteMarco({
   title,
   user,
   notifications,
@@ -44,4 +46,18 @@ export function EstudianteLayout({
       {children}
     </AppShell>
   )
+}
+
+// * Dentro del shell persistente (rutas privadas) solo se aporta el contenido; fuera de él (pantallas de prueba)
+// * se dibuja el marco completo.
+export function EstudianteLayout(props: EstudianteLayoutProps) {
+  const shell = useShellPersistente()
+  if (shell) {
+    return (
+      <ContenidoEnShell shell={shell} title={props.title} activeHref={props.activeHref}>
+        {props.children}
+      </ContenidoEnShell>
+    )
+  }
+  return <EstudianteMarco {...props} />
 }
