@@ -59,7 +59,10 @@ elegir en silencio.
 El trabajo se organiza por **casos de uso** (`docs/CasosDeUso/`) y se
 descompone en **unidades de trabajo** (`docs/UnidadesTrabajo/`), ver
 [CASOS_DE_USO.md](rules/CASOS_DE_USO.md) y
-[UNIDADES_DE_TRABAJO.md](rules/UNIDADES_DE_TRABAJO.md).
+[UNIDADES_DE_TRABAJO.md](rules/UNIDADES_DE_TRABAJO.md). Al terminar un caso
+de uso (o cambiar su comportamiento) se registra el flujo real y en qué
+difiere de los diagramas en `docs/Implementacion/`, ver
+[DOCUMENTACION_IMPLEMENTACION.md](rules/DOCUMENTACION_IMPLEMENTACION.md).
 
 ## Comandos básicos
 
