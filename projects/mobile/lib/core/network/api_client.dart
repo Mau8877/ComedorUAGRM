@@ -49,6 +49,10 @@ class ApiClient {
   static const _rutasDeAcceso = ['/auth/login', '/auth/registro', '/auth/refresh', '/auth/logout'];
   static const _marcaReintentada = 'reintentada';
 
+  /// Copia sin enviar del `FormData` de una subida de archivos: un `FormData` ya enviado no se puede reutilizar, así que
+  /// la petición reintentada tras renovar la sesión (401) usa esta copia.
+  static const _copiaFormData = 'copiaFormData';
+
   static Dio get instance {
     _instance ??= construir(
       dotenv.env['API_BASE_URL'] ?? 'http://10.0.2.2:8080/api/v1',
@@ -75,6 +79,10 @@ class ApiClient {
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
+          final cuerpo = options.data;
+          if (cuerpo is FormData && options.extra[_copiaFormData] == null) {
+            options.extra[_copiaFormData] = cuerpo.clone();
+          }
           final token = tokens.accessToken;
           if (token != null) {
             options.headers['Authorization'] = 'Bearer $token';
@@ -94,6 +102,8 @@ class ApiClient {
           if (await _renovarUnaVez()) {
             opciones.extra[_marcaReintentada] = true;
             opciones.headers['Authorization'] = 'Bearer ${tokens.accessToken}';
+            final copia = opciones.extra[_copiaFormData];
+            if (copia is FormData) opciones.data = copia;
             try {
               handler.resolve(await dio.fetch<dynamic>(opciones));
             } on DioException catch (e) {

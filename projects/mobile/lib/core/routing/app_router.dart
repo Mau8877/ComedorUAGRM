@@ -12,7 +12,10 @@ import '../../features/auth/screens/registro_screen.dart';
 import '../../features/auth/screens/sin_modulo_screen.dart';
 import '../../features/health/screens/health_check_screen.dart';
 import '../../features/perfil/screens/perfil_screen.dart';
+import '../../features/postulaciones/models/revision_documento.dart';
 import '../../features/postulaciones/screens/detalle_postulacion_screen.dart';
+import '../../features/postulaciones/screens/documentos_postulacion_screen.dart';
+import '../../features/postulaciones/screens/revisar_documento_screen.dart';
 import '../../features/pruebas_layout/screens/demo_home_screen.dart';
 import '../../features/pruebas_layout/screens/ingredientes_screen.dart';
 import '../../layouts/admin/admin_shell.dart';
@@ -74,6 +77,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/mis-postulaciones/:codigo',
         builder: (context, state) => DetallePostulacionScreen(codigo: state.pathParameters['codigo']!),
+      ),
+      // Documentos de una postulación (CU16): la lista y, encima, «Revisar y adjuntar» con el archivo elegido. La
+      // revisión recibe el archivo por `extra`; sin él (la app se reinició) vuelve a la lista.
+      GoRoute(
+        path: '/mis-postulaciones/:codigo/documentos',
+        builder: (context, state) => DocumentosPostulacionScreen(codigo: state.pathParameters['codigo']!),
+      ),
+      GoRoute(
+        path: '/mis-postulaciones/:codigo/documentos/revisar',
+        redirect: (context, state) =>
+            state.extra is RevisionDocumento ? null : '/mis-postulaciones/${state.pathParameters['codigo']}/documentos',
+        builder: (context, state) => RevisarDocumentoScreen(revision: state.extra! as RevisionDocumento),
       ),
       GoRoute(path: '/ingredientes', builder: (context, state) => const IngredientesScreen()),
       GoRoute(path: '/diagnostico', builder: (context, state) => const HealthCheckScreen()),

@@ -105,6 +105,29 @@ void main() {
     expect(sesionInvalida, 1);
   });
 
+  test('una subida de archivos (FormData) se reintenta tras renovar la sesión con una copia del cuerpo', () async {
+    tokens.accessToken = 'vencido';
+    ApiClient.onRenovar = () async {
+      tokens.accessToken = 'nuevo';
+      return true;
+    };
+    final adapter = FakeAdapter((o) => o.headers['Authorization'] == 'Bearer nuevo'
+        ? respuestaJson(200, exito({'ok': true}))
+        : respuestaJson(401, fallo('ERR_AUTH_01')));
+    final cuerpo = FormData.fromMap({
+      'tipoDocumento': 't-1',
+      'archivo': MultipartFile.fromBytes([1, 2, 3], filename: 'carnet.pdf'),
+    });
+
+    final respuesta = await clienteCon(adapter).post<dynamic>('/postulaciones/p-1/documentos', data: cuerpo);
+
+    expect(respuesta.data, {'ok': true});
+    expect(adapter.peticiones, hasLength(2));
+    final reintento = adapter.peticiones.last.data as FormData;
+    expect(reintento.fields.single.value, 't-1');
+    expect(reintento.files.single.value.filename, 'carnet.pdf');
+  });
+
   test('si el reintento también da 401 no renueva de nuevo ni entra en bucle', () async {
     var renovaciones = 0;
     ApiClient.onRenovar = () async {
