@@ -106,6 +106,19 @@ class FinalistaConsultaRepositoryTest {
     }
 
     @Test
+    void estado_unAvisoSinEntregarRecienCreadoEstaEnviando_yPasadaLaVentanaEsFallida() {
+        long conv = convocatoria();
+        long reciente = finalista(conv, 1, "9100031", "Ana", "Uno");
+        long vencido = finalista(conv, 2, "9100032", "Beto", "Dos");
+        aviso(reciente, null, java.time.Instant.now().toString(), null);
+        aviso(vencido, null, java.time.Instant.now().minusSeconds(120).toString(), null);
+
+        UUID codigo = codigoConvocatoria(conv);
+        assertThat(estado(codigo, 1)).isEqualTo("ENVIANDO");
+        assertThat(estado(codigo, 2)).isEqualTo("FALLIDA");
+    }
+
+    @Test
     void estado_soloCuentaElUltimoAviso() {
         long conv = convocatoria();
         long postulacion = finalista(conv, 1, "9100011", "Ana", "Uno");
