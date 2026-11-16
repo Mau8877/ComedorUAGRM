@@ -1,7 +1,10 @@
 import type { ReactNode } from 'react'
+import type { LucideIcon } from 'lucide-react'
 
 import { AppHeader } from './AppHeader'
 import { AppSidebar } from './AppSidebar'
+import { EncabezadoPagina } from './EncabezadoPagina'
+import type { MigaPagina } from './EncabezadoPagina'
 import type { LayoutUser, NavItem, NotificationsController } from './types'
 
 interface AppShellProps {
@@ -9,6 +12,10 @@ interface AppShellProps {
   title: string
   navItems: NavItem[]
   activeHref?: string
+  /** Ícono del encabezado; por defecto el del ítem activo del sidebar. */
+  icono?: LucideIcon
+  /** Migas del encabezado; por defecto `rol > título`. */
+  migas?: MigaPagina[]
   user: LayoutUser
   /** Ver AppHeaderProps. */
   notifications?: NotificationsController
@@ -30,6 +37,8 @@ export function AppShell({
   title,
   navItems,
   activeHref,
+  icono,
+  migas,
   user,
   notifications,
   onCerrarSesion,
@@ -54,10 +63,14 @@ export function AppShell({
       <div className="flex min-h-0 flex-1 gap-4 overflow-hidden p-4">
         <AppSidebar items={navItems} activeHref={activeHref} />
         <main className="min-w-0 flex-1 overflow-y-auto rounded-2xl border border-border bg-card p-6 shadow-sm">
-          <h1 className="font-heading text-2xl font-semibold text-foreground">
-            {title}
-          </h1>
-          <div className="mt-4">{children}</div>
+          {title && (
+            <EncabezadoPagina
+              icono={icono ?? navItems.find((item) => item.href === activeHref)?.icon}
+              titulo={title}
+              migas={migas ?? [{ label: user.rol }, { label: title }]}
+            />
+          )}
+          <div className="mt-6">{children}</div>
         </main>
       </div>
     </div>

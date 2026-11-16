@@ -118,6 +118,7 @@ export function ResultadosScreen({ titulo, activeHref, usuarioActual }: Resultad
     <EstudianteLayout
       title={titulo}
       activeHref={activeHref}
+      migas={[{ label: 'Postulante' }, { label: 'Postulaciones' }, { label: titulo }]}
       user={{ nombre: `${usuarioActual.nombres} ${usuarioActual.apellidos}`, rol: etiquetaRol(usuarioActual.rol) }}
       onCerrarSesion={() => cerrarSesion.mutate()}
       {...accionesDeCuenta}

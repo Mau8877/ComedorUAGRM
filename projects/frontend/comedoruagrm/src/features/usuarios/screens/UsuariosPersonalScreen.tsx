@@ -215,6 +215,7 @@ export function UsuariosPersonalScreen({ rol, titulo, activeHref, usuarioActual 
     <AdminLayout
       title={titulo}
       activeHref={activeHref}
+      migas={[{ label: 'Admin' }, { label: 'Usuarios' }, { label: titulo }]}
       user={{ nombre: `${usuarioActual.nombres} ${usuarioActual.apellidos}`, rol: etiquetaRol(usuarioActual.rol) }}
       onCerrarSesion={() => cerrarSesion.mutate()}
       {...accionesDeCuenta}

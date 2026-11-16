@@ -89,6 +89,7 @@ export function DashboardScreen({ titulo, activeHref, usuarioActual }: Dashboard
     <DirectivoLayout
       title={titulo}
       activeHref={activeHref}
+      migas={[{ label: 'Directivo' }, { label: 'Indicadores' }, { label: titulo }]}
       user={{ nombre: `${usuarioActual.nombres} ${usuarioActual.apellidos}`, rol: etiquetaRol(usuarioActual.rol) }}
       onCerrarSesion={() => cerrarSesion.mutate()}
       {...accionesDeCuenta}

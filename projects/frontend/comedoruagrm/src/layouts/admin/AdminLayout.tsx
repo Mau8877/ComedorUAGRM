@@ -14,6 +14,8 @@ function AdminMarco({
   onPerfil,
   onCambiarContrasena,
   activeHref,
+  icono,
+  migas,
   children,
 }: AdminLayoutProps) {
   // La campanita usa la bandeja real salvo que quien arma el layout pase su propio controlador (pantallas de prueba).
@@ -24,6 +26,8 @@ function AdminMarco({
       title={title}
       navItems={adminNavItems}
       activeHref={activeHref}
+      icono={icono}
+      migas={migas}
       user={user}
       notifications={notifications ?? bandeja}
       onCerrarSesion={onCerrarSesion}
@@ -41,7 +45,11 @@ export function AdminLayout(props: AdminLayoutProps) {
   const shell = useShellPersistente()
   if (shell) {
     return (
-      <ContenidoEnShell shell={shell} title={props.title} activeHref={props.activeHref}>
+      <ContenidoEnShell shell={shell} title={props.title}
+        activeHref={props.activeHref}
+        icono={props.icono}
+        migas={props.migas}
+      >
         {props.children}
       </ContenidoEnShell>
     )

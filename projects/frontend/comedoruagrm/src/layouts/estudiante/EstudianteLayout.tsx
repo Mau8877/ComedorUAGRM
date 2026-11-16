@@ -17,6 +17,8 @@ function EstudianteMarco({
   onPerfil,
   onCambiarContrasena,
   activeHref,
+  icono,
+  migas,
   children,
 }: EstudianteLayoutProps) {
   // La campanita usa la bandeja real salvo que quien arma el layout pase su propio controlador (pantallas de prueba).
@@ -37,6 +39,8 @@ function EstudianteMarco({
       title={title}
       navItems={estudianteNavItems}
       activeHref={activeHref}
+      icono={icono}
+      migas={migas}
       user={user}
       notifications={notifications ?? bandejaConDestino}
       onCerrarSesion={onCerrarSesion}
@@ -54,7 +58,11 @@ export function EstudianteLayout(props: EstudianteLayoutProps) {
   const shell = useShellPersistente()
   if (shell) {
     return (
-      <ContenidoEnShell shell={shell} title={props.title} activeHref={props.activeHref}>
+      <ContenidoEnShell shell={shell} title={props.title}
+        activeHref={props.activeHref}
+        icono={props.icono}
+        migas={props.migas}
+      >
         {props.children}
       </ContenidoEnShell>
     )

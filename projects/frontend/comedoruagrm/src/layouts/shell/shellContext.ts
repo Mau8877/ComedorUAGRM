@@ -1,8 +1,13 @@
 import { createContext, useContext } from 'react'
+import type { LucideIcon } from 'lucide-react'
+
+import type { MigaPagina } from '@/components/layout'
 
 export interface PaginaShell {
   title: string
   activeHref?: string
+  icono?: LucideIcon
+  migas?: MigaPagina[]
 }
 
 export interface ShellContextValue {

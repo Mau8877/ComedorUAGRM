@@ -104,6 +104,7 @@ export function ActasScreen({ titulo, activeHref, usuarioActual }: ActasScreenPr
     <AdminLayout
       title={titulo}
       activeHref={activeHref}
+      migas={[{ label: 'Admin' }, { label: 'Adjudicación' }, { label: titulo }]}
       user={{ nombre: `${usuarioActual.nombres} ${usuarioActual.apellidos}`, rol: etiquetaRol(usuarioActual.rol) }}
       onCerrarSesion={() => cerrarSesion.mutate()}
       {...accionesDeCuenta}

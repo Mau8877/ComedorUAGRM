@@ -44,6 +44,8 @@ export function ShellDeRol({ rol, user, onCerrarSesion, onPerfil, onCambiarContr
     <Layout
       title={pagina.title}
       activeHref={pagina.activeHref}
+      icono={pagina.icono}
+      migas={pagina.migas}
       user={user}
       onCerrarSesion={onCerrarSesion}
       onPerfil={onPerfil}
