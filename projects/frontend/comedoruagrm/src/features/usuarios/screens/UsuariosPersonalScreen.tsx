@@ -3,7 +3,6 @@ import { ArrowRightLeftIcon, PencilIcon, PlusIcon, RefreshCwIcon, UserCheckIcon,
 import type { ColumnDef, Row, SortingState } from '@tanstack/react-table'
 
 import { Button } from '@/components/ui/button'
-import { toastInfo } from '@/components/ui/toast'
 import {
   DataCards,
   DataTable,
@@ -30,7 +29,7 @@ import {
   EstadoCuentaBadge,
 } from '../components'
 import type { RolPersonal } from '../roles'
-import type { UsuarioCreado, UsuarioPersonal } from '../types'
+import type { UsuarioPersonal } from '../types'
 
 const PAGE_SIZE_INICIAL = 20
 const RETARDO_BUSQUEDA_MS = 300
@@ -108,13 +107,6 @@ export function UsuariosPersonalScreen({ rol, titulo, activeHref, usuarioActual 
   const [sorting, setSorting] = useState<SortingState>([])
   const [creando, setCreando] = useState(false)
   const [accion, setAccion] = useState<AccionFila | null>(null)
-
-  // La lista ya se refresca sola (la mutación invalida los listados); si la cuenta es de otro rol, no aparecerá en esta vista.
-  const alCrearCuenta = (creada: UsuarioCreado) => {
-    if (creada.rol !== rol) {
-      toastInfo('Cuenta creada', `${creada.nombres} ${creada.apellidos} tiene el rol ${etiquetaRol(creada.rol)}; la verás en su vista.`)
-    }
-  }
 
   // La búsqueda escribe al instante en el input, pero consulta al backend recién cuando se deja de teclear.
   const aplicarBusqueda = useMemo(
@@ -292,9 +284,7 @@ export function UsuariosPersonalScreen({ rol, titulo, activeHref, usuarioActual 
       </div>
 
       {/* Se monta solo mientras está abierto: al cerrar se descarta su estado (incluida la contraseña temporal). */}
-      {creando && (
-        <CrearUsuarioModal open onOpenChange={setCreando} rolInicial={rol} onCreada={alCrearCuenta} />
-      )}
+      {creando && <CrearUsuarioModal open onOpenChange={setCreando} rol={rol} />}
       {accion?.tipo === 'editar' && <EditarUsuarioModal open onOpenChange={cerrarAccion} usuario={accion.usuario} />}
       {accion?.tipo === 'cambiar-rol' && <CambiarRolModal open onOpenChange={cerrarAccion} usuario={accion.usuario} />}
       {(accion?.tipo === 'desactivar' || accion?.tipo === 'reactivar') && (

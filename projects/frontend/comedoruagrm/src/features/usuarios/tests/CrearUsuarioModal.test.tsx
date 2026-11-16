@@ -21,10 +21,11 @@ vi.mock('@/components/ui/toast', () => ({
   toastError: vi.fn(),
 }))
 
-import { toastInfo } from '@/components/ui/toast'
 import { ApiError } from '@/store'
 
-import { cliente, montar, pagina, reiniciarCliente, usuario } from './montarPantalla'
+import { UsuariosPersonalScreen } from '../screens/UsuariosPersonalScreen'
+import type { RolPersonal } from '../roles'
+import { cliente, montar, pagina, reiniciarCliente, usuario, yo } from './montarPantalla'
 
 const CONTRASENA = 'Temporal-9xK2'
 const creada = { ...usuario(9, { nombres: 'Rosa', apellidos: 'Soliz', rol: 'DIRECTIVO' }), contrasenaTemporal: CONTRASENA }
@@ -45,7 +46,6 @@ describe('CrearUsuarioModal', () => {
     reiniciarCliente()
     cliente.get.mockResolvedValue(pagina([usuario(1)]))
     cliente.post.mockResolvedValue({ data: creada, status: 201 })
-    vi.mocked(toastInfo).mockClear()
     window.localStorage?.clear()
     window.sessionStorage?.clear()
   })
@@ -88,18 +88,15 @@ describe('CrearUsuarioModal', () => {
   })
 
   it.each([
-    ['Directivo', 'DIRECTIVO'],
-    ['Administrador DUBSS', 'ADMINISTRADOR_DUBSS'],
-    ['Personal del comedor', 'PERSONAL_COMEDOR'],
-  ])('envía una cuenta válida con el rol %s', async (etiqueta, rol) => {
-    const { user } = montar()
+    ['Directivos', '/usuarios/directivos', 'DIRECTIVO', 'Nuevo directivo'],
+    ['Administradores DUBSS', '/usuarios/administradores', 'ADMINISTRADOR_DUBSS', 'Nuevo administrador DUBSS'],
+    ['Personal del comedor', '/usuarios/personal-comedor', 'PERSONAL_COMEDOR', 'Nuevo personal del comedor'],
+  ])('en la vista %s no pide el rol y envía el rol de la vista', async (titulo, href, rol, tituloModal) => {
+    const { user } = montar(<UsuariosPersonalScreen rol={rol as RolPersonal} titulo={titulo} activeHref={href} usuarioActual={yo} />)
     await abrirYLlenar(user)
 
-    expect(screen.getByRole('combobox', { name: 'Rol' })).toHaveTextContent('Directivo')
-    if (rol !== 'DIRECTIVO') {
-      await user.click(screen.getByRole('combobox', { name: 'Rol' }))
-      await user.click(await screen.findByRole('option', { name: etiqueta }))
-    }
+    expect(screen.getByText(tituloModal)).toBeInTheDocument()
+    expect(screen.queryByRole('combobox', { name: 'Rol' })).not.toBeInTheDocument()
     await enviar(user)
 
     await waitFor(() => expect(cliente.post).toHaveBeenCalledTimes(1))
@@ -207,26 +204,5 @@ describe('CrearUsuarioModal', () => {
     await user.dblClick(screen.getByRole('button', { name: 'Crear cuenta' }))
 
     expect(cliente.post).toHaveBeenCalledTimes(1)
-  })
-
-  it('avisa con un toast si la cuenta creada es de otro rol que el de la vista', async () => {
-    cliente.post.mockResolvedValue({ data: { ...creada, rol: 'PERSONAL_COMEDOR' }, status: 201 })
-    const { user } = montar()
-    await abrirYLlenar(user)
-
-    await enviar(user)
-    await screen.findByText('Cuenta creada')
-
-    expect(toastInfo).toHaveBeenCalledWith('Cuenta creada', expect.stringContaining('Personal del comedor'))
-  })
-
-  it('no avisa con toast si la cuenta es del mismo rol que la vista', async () => {
-    const { user } = montar()
-    await abrirYLlenar(user)
-
-    await enviar(user)
-    await screen.findByText('Cuenta creada')
-
-    expect(toastInfo).not.toHaveBeenCalled()
   })
 })
