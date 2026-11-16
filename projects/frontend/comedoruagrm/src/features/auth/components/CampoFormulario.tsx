@@ -22,6 +22,8 @@ interface CampoFormularioProps {
   icono?: ComponentType<{ className?: string }>
   /** Solo para `type="password"`: botón para mostrar/ocultar lo escrito. */
   alternarVisibilidad?: boolean
+  /** Descarta todo lo que no sea dígito, tanto al teclear como al pegar. */
+  soloDigitos?: boolean
 }
 
 /**
@@ -46,6 +48,7 @@ export function CampoFormulario({
   placeholder,
   icono: Icono,
   alternarVisibilidad,
+  soloDigitos,
 }: CampoFormularioProps) {
   const intentosDeEnvio = useStore(field.form.store, (s) => s.submissionAttempts)
   const [visible, setVisible] = useState(false)
@@ -84,7 +87,7 @@ export function CampoFormulario({
             // * El error de onBlur no se limpia solo al escribir: se descarta acá y el
             // * validador onChange lo vuelve a generar si el dato sigue siendo inválido.
             field.setMeta((m) => ({ ...m, errorMap: { ...m.errorMap, onBlur: undefined } }))
-            field.handleChange(e.target.value)
+            field.handleChange(soloDigitos ? e.target.value.replace(/\D/g, '') : e.target.value)
           }}
         />
         {conToggle && (

@@ -5,12 +5,18 @@ import { z } from 'zod'
 // * - La contraseña: de 6 a 72 caracteres, sin exigir mayúsculas ni números
 // *   (72 es el máximo que procesa BCrypt).
 // * - Registro universitario: exactamente 9 dígitos y sin cero inicial.
-// * - Formato del CI: por definir con la DUBSS, solo no vacío y largo máximo.
+// * - CI: solo dígitos, no vacío y largo máximo (el complemento alfanumérico, si
+// *   existiera, está por definir con la DUBSS).
 export const registroSchema = z
   .object({
     nombres: z.string().trim().min(1, 'Los nombres son obligatorios').max(100, 'Los nombres no pueden superar los 100 caracteres'),
     apellidos: z.string().trim().min(1, 'Los apellidos son obligatorios').max(100, 'Los apellidos no pueden superar los 100 caracteres'),
-    ci: z.string().trim().min(1, 'El CI es obligatorio').max(20, 'El CI no puede superar los 20 caracteres'),
+    ci: z
+      .string()
+      .trim()
+      .min(1, 'El CI es obligatorio')
+      .max(20, 'El CI no puede superar los 20 caracteres')
+      .regex(/^\d+$/, 'El CI solo puede contener dígitos'),
     registroUniversitario: z
       .string()
       .min(1, 'El registro universitario es obligatorio')
