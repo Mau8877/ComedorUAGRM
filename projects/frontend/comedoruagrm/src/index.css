@@ -100,3 +100,13 @@
     );
   }
 }
+
+/* Barra de progreso de navegación (components/layout/NavigationProgress.tsx) */
+@keyframes navprogress {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(300%);
+  }
+}
