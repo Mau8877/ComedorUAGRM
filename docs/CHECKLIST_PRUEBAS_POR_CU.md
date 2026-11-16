@@ -14,7 +14,7 @@ Llena la columna «Resultado» al terminar cada CU (`OK` / `Falla` / `Parcial`).
 | --- | --- | --- | --- | --- | --- | --- |
 | CU01 | Registrarse y autenticarse | Web + móvil | Hecho | 16 / 9 / 10 | OK | |
 | CU15 | Recuperar contraseña y gestionar perfil | Web + móvil | Hecho | 14 / 7 / 6 | OK | |
-| CU14 | Gestionar usuarios y roles | Web | Hecho | 13 / 7 / – | | |
+| CU14 | Gestionar usuarios y roles | Web | Hecho | 13 / 7 / – | OK | |
 | CU-EXTRA-01 | Notificaciones push (bandeja + push + correo) | Backend + móvil + bandeja web | Hecho | 12 / – / 5 | | |
 | CU06 | Visualizar lista priorizada | Web | Hecho | 10 / 5 / – | | |
 | CU21 | Notificar finalistas y publicar comunicados | Web | Hecho | 12 / 7 / – | | |
@@ -214,19 +214,19 @@ flutter pub get && flutter analyze && flutter test
 
 **Plataforma:** web. **Rol:** Administrador. **Rutas:** `/usuarios/administradores`, `/usuarios/directivos`, `/usuarios/personal-comedor`. **Md:** `CU14 - Gestionar usuarios y roles.md`.
 
-- [ ] Entra como `admin@dubss.com`. El menú muestra «Administradores DUBSS», «Directivos» y «Personal del Comedor»; cada una lista solo ese rol, paginada (10/20/50), con filtros por estado y búsqueda por CI o nombre. **Los postulantes no aparecen.**
-- [ ] **Crear** una cuenta (nombres, apellidos, CI, correo, rol): el sistema muestra una **contraseña temporal una sola vez**. Entra con esa cuenta y comprueba que funciona y llega a su módulo.
-- [ ] Crear con CI repetido o correo repetido → `409` indicando el campo. Con rol `POSTULANTE` o inválido → `400` `ERR_US_10`.
-- [ ] **Editar** nombres/apellidos/correo; correo de otra cuenta → `409`.
-- [ ] **Cambiar rol** de una cuenta: tras el cambio sus sesiones se cierran y el rol nuevo rige al volver a entrar. Mismo rol → `409` `ERR_US_12`.
-- [ ] **Desactivar** una cuenta: no puede entrar (`403`) y su sesión abierta se corta. Desactivar una ya desactivada → `409` `ERR_US_07`.
-- [ ] **Reactivar** → recupera su rol anterior y puede entrar.
-- [ ] No puedes **desactivarte ni cambiarte el rol a ti mismo** (`403` `ERR_US_08`).
-- [ ] No puedes dejar al sistema **sin administrador activo** (si solo queda uno: `403` `ERR_US_09`).
-- [ ] Con un `POSTULANTE` o un código inexistente en la URL → `404` `ERR_US_06`.
-- [ ] Un usuario sin rol admin (directivo/postulante) llamando a `/api/v1/usuarios` → `403` `ERR_AUTH_07`; sin sesión → `401`.
-- [ ] `sort`/`filter` no soportado por Swagger → `400` `ERR_US_11`.
-- [ ] BD: cada acción deja fila en `bitacora` (cambio de rol con rol anterior y nuevo).
+- [x] Entra como `admin@dubss.com`. El menú muestra «Administradores DUBSS», «Directivos» y «Personal del Comedor»; cada una lista solo ese rol, paginada (10/20/50), con filtros por estado y búsqueda por CI o nombre. **Los postulantes no aparecen.**
+- [x] **Crear** una cuenta (nombres, apellidos, CI, correo, rol): el sistema muestra una **contraseña temporal una sola vez**. Entra con esa cuenta y comprueba que funciona y llega a su módulo.
+- [x] Crear con CI repetido o correo repetido → `409` indicando el campo. Con rol `POSTULANTE` o inválido → `400` `ERR_US_10`.
+- [x] **Editar** nombres/apellidos/correo; correo de otra cuenta → `409`.
+- [x] **Cambiar rol** de una cuenta: tras el cambio sus sesiones se cierran y el rol nuevo rige al volver a entrar. Mismo rol → `409` `ERR_US_12`.
+- [x] **Desactivar** una cuenta: no puede entrar (`403`) y su sesión abierta se corta. Desactivar una ya desactivada → `409` `ERR_US_07`.
+- [x] **Reactivar** → recupera su rol anterior y puede entrar.
+- [x] No puedes **desactivarte ni cambiarte el rol a ti mismo** (`403` `ERR_US_08`).
+- [x] No puedes dejar al sistema **sin administrador activo** (si solo queda uno: `403` `ERR_US_09`).
+- [x] Con un `POSTULANTE` o un código inexistente en la URL → `404` `ERR_US_06`.
+- [x] Un usuario sin rol admin (directivo/postulante) llamando a `/api/v1/usuarios` → `403` `ERR_AUTH_07`; sin sesión → `401`.
+- [x] `sort`/`filter` no soportado por Swagger → `400` `ERR_US_11`.
+- [x] BD: cada acción deja fila en `bitacora` (cambio de rol con rol anterior y nuevo).
 
 **UT:** `./mvnw test -Dtest='Usuario*Test,GestionUsuariosRequestTest,GeneradorContrasenaTemporalTest,CatalogosRepositoryTest'` · `pnpm test -- src/features/usuarios`.
 
