@@ -160,14 +160,16 @@ export function UsuariosPersonalScreen({ rol, titulo, activeHref, usuarioActual 
     },
   ]
 
-  // En la fila de la propia cuenta no se ofrece «Cambiar rol» ni «Desactivar»: es solo una ayuda de
-  // interfaz, el backend las niega igual (403 ERR_US_08).
+  // En la fila de la propia cuenta no se ofrece «Editar», «Cambiar rol» ni «Desactivar» (los datos propios
+  // se editan desde Mi perfil): es solo una ayuda de interfaz, el backend las niega igual (403 ERR_US_08).
   const renderAcciones = (fila: Row<UsuarioPersonal>) => {
     const cuenta = fila.original
     const esPropia = cuenta.codigo === usuarioActual.codigo
     return (
       <>
-        <RowActionButton icon={<PencilIcon />} label="Editar" onClick={() => setAccion({ tipo: 'editar', usuario: cuenta })} />
+        {!esPropia && (
+          <RowActionButton icon={<PencilIcon />} label="Editar" onClick={() => setAccion({ tipo: 'editar', usuario: cuenta })} />
+        )}
         {!esPropia && (
           <RowActionButton
             icon={<ArrowRightLeftIcon />}
@@ -207,7 +209,7 @@ export function UsuariosPersonalScreen({ rol, titulo, activeHref, usuarioActual 
     <AdminLayout
       title={titulo}
       activeHref={activeHref}
-      migas={[{ label: 'Admin' }, { label: 'Usuarios' }, { label: titulo }]}
+      migas={[{ label: 'Usuarios' }, { label: titulo }]}
       user={{ nombre: `${usuarioActual.nombres} ${usuarioActual.apellidos}`, rol: etiquetaRol(usuarioActual.rol) }}
       onCerrarSesion={() => cerrarSesion.mutate()}
       {...accionesDeCuenta}
