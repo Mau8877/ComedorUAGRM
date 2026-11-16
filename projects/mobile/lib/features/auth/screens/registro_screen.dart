@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../shared/widgets/campo_formulario.dart';
+import '../../../shared/widgets/selector_buscable.dart';
 import '../auth_error_mapper.dart';
 import '../auth_validators.dart';
 import '../models/registro_request.dart';
@@ -105,7 +108,6 @@ class _RegistroScreenState extends ConsumerState<RegistroScreen> {
               constraints: const BoxConstraints(maxWidth: 480),
               child: Form(
                 key: _formKey,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -115,30 +117,33 @@ class _RegistroScreenState extends ConsumerState<RegistroScreen> {
                       AlertaError(error: _errorGeneral!, onReintentar: enviando ? null : _enviar),
                       const SizedBox(height: 16),
                     ],
-                    TextFormField(
+                    CampoFormulario(
                       controller: _nombres,
                       textCapitalization: TextCapitalization.words,
                       decoration: const InputDecoration(labelText: 'Nombres'),
                       validator: AuthValidators.nombres,
                     ),
                     const SizedBox(height: 16),
-                    TextFormField(
+                    CampoFormulario(
                       controller: _apellidos,
                       textCapitalization: TextCapitalization.words,
                       decoration: const InputDecoration(labelText: 'Apellidos'),
                       validator: AuthValidators.apellidos,
                     ),
                     const SizedBox(height: 16),
-                    TextFormField(
+                    CampoFormulario(
                       controller: _ci,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       decoration: InputDecoration(labelText: 'CI', errorText: _erroresServidor[CampoAuth.ci]),
                       validator: AuthValidators.ci,
                       onChanged: (_) => _limpiarServidor(CampoAuth.ci),
                     ),
                     const SizedBox(height: 16),
-                    TextFormField(
+                    CampoFormulario(
                       controller: _registro,
                       keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       decoration: InputDecoration(
                         labelText: 'Registro universitario',
                         errorText: _erroresServidor[CampoAuth.registroUniversitario],
@@ -149,14 +154,14 @@ class _RegistroScreenState extends ConsumerState<RegistroScreen> {
                     const SizedBox(height: 16),
                     _selectorCarrera(carreras),
                     const SizedBox(height: 16),
-                    TextFormField(
+                    CampoFormulario(
                       controller: _telefono,
                       keyboardType: TextInputType.phone,
                       decoration: const InputDecoration(labelText: 'Teléfono'),
                       validator: AuthValidators.telefono,
                     ),
                     const SizedBox(height: 16),
-                    TextFormField(
+                    CampoFormulario(
                       controller: _correo,
                       keyboardType: TextInputType.emailAddress,
                       decoration: InputDecoration(
@@ -167,14 +172,14 @@ class _RegistroScreenState extends ConsumerState<RegistroScreen> {
                       onChanged: (_) => _limpiarServidor(CampoAuth.correo),
                     ),
                     const SizedBox(height: 16),
-                    TextFormField(
+                    CampoFormulario(
                       controller: _contrasena,
                       obscureText: true,
                       decoration: const InputDecoration(labelText: 'Contraseña'),
                       validator: AuthValidators.contrasena,
                     ),
                     const SizedBox(height: 16),
-                    TextFormField(
+                    CampoFormulario(
                       controller: _confirmacion,
                       obscureText: true,
                       decoration: const InputDecoration(labelText: 'Confirmar contraseña'),
@@ -218,20 +223,11 @@ class _RegistroScreenState extends ConsumerState<RegistroScreen> {
           ),
         ),
       ),
-      data: (lista) => DropdownButtonFormField<String>(
-        isExpanded: true,
-        initialValue: _carreraCodigo,
-        decoration: InputDecoration(
-          labelText: 'Carrera',
-          errorText: _erroresServidor[CampoAuth.carrera],
-        ),
-        items: [
-          for (final carrera in lista)
-            DropdownMenuItem<String>(
-              value: carrera.codigo,
-              child: Text(carrera.nombre, overflow: TextOverflow.ellipsis),
-            ),
-        ],
+      data: (lista) => SelectorBuscable(
+        label: 'Carrera',
+        errorText: _erroresServidor[CampoAuth.carrera],
+        valor: _carreraCodigo,
+        opciones: [for (final c in lista) OpcionSelector(c.codigo, c.nombre)],
         validator: AuthValidators.carrera,
         onChanged: (valor) {
           _limpiarServidor(CampoAuth.carrera);

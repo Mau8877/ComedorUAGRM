@@ -74,7 +74,6 @@ class _CambiarContrasenaFormState extends ConsumerState<CambiarContrasenaForm> {
 
     return Form(
       key: _formKey,
-      autovalidateMode: AutovalidateMode.onUserInteraction,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

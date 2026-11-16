@@ -120,6 +120,8 @@ void main() {
       expect(AuthValidators.ci(null), 'El CI es obligatorio');
       expect(AuthValidators.carrera(null), 'La carrera es obligatoria');
       expect(AuthValidators.ci('1' * 21), isNotNull);
+      expect(AuthValidators.ci('12a45'), 'El CI solo puede contener dígitos');
+      expect(AuthValidators.ci('1234567'), isNull);
     });
   });
 

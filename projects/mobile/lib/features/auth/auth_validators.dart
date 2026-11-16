@@ -23,9 +23,12 @@ class AuthValidators {
   static String? apellidos(String? v) => texto(v,
       obligatorioMsg: 'Los apellidos son obligatorios', max: 100, largoMsg: 'Los apellidos no pueden superar los 100 caracteres');
 
-  /// El formato del CI está por definir con la DUBSS: solo no vacío y largo máximo.
-  static String? ci(String? v) =>
-      texto(v, obligatorioMsg: 'El CI es obligatorio', max: 20, largoMsg: 'El CI no puede superar los 20 caracteres');
+  /// Solo dígitos (el formato exacto está por definir con la DUBSS), no vacío y con largo máximo.
+  static String? ci(String? v) {
+    final falta = texto(v, obligatorioMsg: 'El CI es obligatorio', max: 20, largoMsg: 'El CI no puede superar los 20 caracteres');
+    if (falta != null) return falta;
+    return RegExp(r'^\d+$').hasMatch(v!.trim()) ? null : 'El CI solo puede contener dígitos';
+  }
 
   /// Exactamente 9 dígitos y sin cero inicial.
   static String? registroUniversitario(String? v) {

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../shared/widgets/comedoru_logo.dart';
+import '../../../shared/widgets/campo_formulario.dart';
 import '../auth_error_mapper.dart';
 import '../auth_validators.dart';
 import '../providers/auth_provider.dart';
@@ -121,8 +122,7 @@ class _RecuperarContrasenaScreenState extends ConsumerState<RecuperarContrasenaS
       ],
       Form(
         key: _formKey,
-        autovalidateMode: AutovalidateMode.onUserInteraction,
-        child: TextFormField(
+        child: CampoFormulario(
           controller: _correo,
           keyboardType: TextInputType.emailAddress,
           autofillHints: const [AutofillHints.email],
