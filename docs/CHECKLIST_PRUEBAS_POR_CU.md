@@ -15,7 +15,7 @@ Llena la columna «Resultado» al terminar cada CU (`OK` / `Falla` / `Parcial`).
 | CU01 | Registrarse y autenticarse | Web + móvil | Hecho | 16 / 9 / 10 | OK | |
 | CU15 | Recuperar contraseña y gestionar perfil | Web + móvil | Hecho | 14 / 7 / 6 | OK | |
 | CU14 | Gestionar usuarios y roles | Web | Hecho | 13 / 7 / – | OK | |
-| CU-EXTRA-01 | Notificaciones push (bandeja + push + correo) | Backend + móvil + bandeja web | Hecho | 12 / – / 5 | | |
+| CU-EXTRA-01 | Notificaciones push (bandeja + push + correo) | Backend + móvil + bandeja web | Hecho | 12 / – / 5 | OK | Probado con Firebase real (push al Android) |
 | CU06 | Visualizar lista priorizada | Web | Hecho | 10 / 5 / – | | |
 | CU21 | Notificar finalistas y publicar comunicados | Web | Hecho | 12 / 7 / – | | |
 | CU07 | Auditar expediente finalista | Web | Hecho | 12 / 5 / – | | |
@@ -236,14 +236,14 @@ flutter pub get && flutter analyze && flutter test
 
 No es una pantalla propia: se prueba con la campana de la web, Swagger y el móvil. **Md:** `CU-EXTRA-01 - Notificaciones push.md`.
 
-- [ ] Como admin, `POST /api/v1/notificaciones/prueba` → `200`; el aviso de prueba aparece en **tu bandeja** (campana del encabezado) y en Mailpit (correo a tu cuenta).
-- [ ] La campana muestra el contador de no leídos (`GET /notificaciones/me/resumen`); abre un aviso → «marcar como leído» (`POST /{codigo}/leer`), «Leer todo» y «Eliminar notificaciones» funcionan.
-- [ ] Un usuario no ve ni puede marcar avisos de otro (`404` `ERR_NOT_01`).
-- [ ] **Sin Firebase configurado** todo sigue funcionando; el push solo queda en el log del backend (sin el token). Anota si lo probaste con Firebase real o no.
-- [ ] Móvil: al iniciar sesión se registra el teléfono (`POST /dispositivos-fcm`); al cerrar sesión se da de baja (`POST /dispositivos-fcm/baja`, idempotente). BD: tabla `dispositivo_fcm`.
-- [ ] Token compartido con otra cuenta → se reasigna al usuario actual, sin duplicarse.
-- [ ] Un fallo de envío (apaga Mailpit un momento) **no** deshace la operación que originó el aviso; el aviso queda en la bandeja.
-- [ ] Sin sesión → `401`; endpoint de prueba con un rol que no es admin → `403`.
+- [x] Como admin, `POST /api/v1/notificaciones/prueba` → `200`; el aviso de prueba aparece en **tu bandeja** (campana del encabezado) y en Mailpit (correo a tu cuenta).
+- [x] La campana muestra el contador de no leídos (`GET /notificaciones/me/resumen`); abre un aviso → «marcar como leído» (`POST /{codigo}/leer`), «Leer todo» y «Eliminar notificaciones» funcionan.
+- [x] Un usuario no ve ni puede marcar avisos de otro (`404` `ERR_NOT_01`).
+- [x] **Sin Firebase configurado** todo sigue funcionando; el push solo queda en el log del backend (sin el token). Anota si lo probaste con Firebase real o no. _Probado con Firebase real: el push llegó a un Android._
+- [x] Móvil: al iniciar sesión se registra el teléfono (`POST /dispositivos-fcm`); al cerrar sesión se da de baja (`POST /dispositivos-fcm/baja`, idempotente). BD: tabla `dispositivo_fcm`.
+- [x] Token compartido con otra cuenta → se reasigna al usuario actual, sin duplicarse.
+- [x] Un fallo de envío (apaga Mailpit un momento) **no** deshace la operación que originó el aviso; el aviso queda en la bandeja.
+- [x] Sin sesión → `401`; endpoint de prueba con un rol que no es admin → `403`.
 
 **UT:** `./mvnw test -Dtest='*Notificacion*Test,DispositivoFcm*Test,CanalPush*Test,Despacho*Test,ReintentosTest,Eventos*PlantillaTest'` · `pnpm test -- src/features/notificaciones` · `flutter test`.
 
