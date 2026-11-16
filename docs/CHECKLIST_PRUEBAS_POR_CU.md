@@ -16,7 +16,7 @@ Llena la columna «Resultado» al terminar cada CU (`OK` / `Falla` / `Parcial`).
 | CU15 | Recuperar contraseña y gestionar perfil | Web + móvil | Hecho | 14 / 7 / 6 | OK | |
 | CU14 | Gestionar usuarios y roles | Web | Hecho | 13 / 7 / – | OK | |
 | CU-EXTRA-01 | Notificaciones push (bandeja + push + correo) | Backend + móvil + bandeja web | Hecho | 12 / – / 5 | OK | Probado con Firebase real (push al Android) |
-| CU06 | Visualizar lista priorizada | Web | Hecho | 10 / 5 / – | | |
+| CU06 | Visualizar lista priorizada | Web | Hecho | 10 / 5 / – | OK | |
 | CU21 | Notificar finalistas y publicar comunicados | Web | Hecho | 12 / 7 / – | | |
 | CU07 | Auditar expediente finalista | Web | Hecho | 12 / 5 / – | | |
 | CU19 | Devolver postulación para corrección | Web | Hecho | 9 / 4 / – | | |
@@ -253,20 +253,20 @@ No es una pantalla propia: se prueba con la campana de la web, Swagger y el móv
 
 **Plataforma:** web, ruta `/lista-priorizada`, menú «Lista priorizada». **Rol:** Administrador. **Md:** `CU06 - Visualizar lista priorizada de postulantes.md`.
 
-- [ ] Abre la pantalla: queda seleccionada la **convocatoria más reciente**. La tabla muestra posición, nombre, CI, carrera, puntaje y fecha de cálculo, de **mayor a menor puntaje**, y arriba el total y cuántas siguen pendientes de precalificar. (CA01)
-- [ ] Solo aparecen postulaciones «calificada»; las devueltas/archivadas/adjudicadas/no adjudicadas/borrador/pendientes **no**. (CA03)
-- [ ] Cada postulación aparece **una sola vez**, con su puntaje vigente. (CA02)
-- [ ] Paginación: 10/20/50 (20 por defecto); en la página 2 con 20 filas la primera posición es **21**. (CA05, CA06)
-- [ ] Busca por **nombre** y por **CI**; filtra por **carrera**: solo salen los que cumplen y cada uno **conserva su posición real** de la lista completa. (CA07)
-- [ ] Recorre todas las páginas con empates de puntaje: ninguna se repite ni falta. (CA08)
-- [ ] Convocatoria sin calificadas → mensaje «No hay postulaciones calificadas…» y cuántas pendientes; sin tabla. (CA04)
-- [ ] **Exportar PDF** con la lista completa: descarga un PDF con convocatoria, fecha/hora, quién lo generó, **toda** la lista (no solo la página), mismo orden y posiciones, sin datos socioeconómicos. (CA16, CA18)
-- [ ] Exporta con una búsqueda/filtro activo → el PDF trae solo los filtrados e indica los filtros usados. (CA17)
-- [ ] Exporta con la lista vacía (filtro sin resultados) → no genera PDF, avisa «no hay postulaciones» (`400` `ERR_PRI_03`). (CA19)
-- [ ] BD: la exportación dejó una fila en `bitacora` (usuario, convocatoria, filtros). La consulta normal **no** deja nada. (CA14, CA20)
-- [ ] Un código de convocatoria inexistente en `GET /lista-priorizada?convocatoriaCodigo=...` → `404` `ERR_PRI_01`. (CA13)
-- [ ] Postulante/directivo llamando al endpoint → `403`; sin sesión → `401`. (CA11, CA12)
-- [ ] Rendimiento (opcional): con `SEED_PRIORIZACION_POSTULACIONES=20000` cada página responde en ≤ 3 s. (CA09)
+- [x] Abre la pantalla: queda seleccionada la **convocatoria más reciente**. La tabla muestra posición, nombre, CI, carrera, puntaje y fecha de cálculo, de **mayor a menor puntaje**, y arriba el total y cuántas siguen pendientes de precalificar. (CA01)
+- [x] Solo aparecen postulaciones «calificada»; las devueltas/archivadas/adjudicadas/no adjudicadas/borrador/pendientes **no**. (CA03)
+- [x] Cada postulación aparece **una sola vez**, con su puntaje vigente. (CA02)
+- [x] Paginación: 10/20/50 (20 por defecto); en la página 2 con 20 filas la primera posición es **21**. (CA05, CA06)
+- [x] Busca por **nombre** y por **CI**; filtra por **carrera**: solo salen los que cumplen y cada uno **conserva su posición real** de la lista completa. (CA07)
+- [x] Recorre todas las páginas con empates de puntaje: ninguna se repite ni falta. (CA08)
+- [x] Convocatoria sin calificadas → mensaje «No hay postulaciones calificadas…» y cuántas pendientes; sin tabla. (CA04)
+- [x] **Exportar PDF** con la lista completa: descarga un PDF con convocatoria, fecha/hora, quién lo generó, **toda** la lista (no solo la página), mismo orden y posiciones, sin datos socioeconómicos. (CA16, CA18)
+- [x] Exporta con una búsqueda/filtro activo → el PDF trae solo los filtrados e indica los filtros usados. (CA17)
+- [x] Exporta con la lista vacía (filtro sin resultados) → no genera PDF, avisa «no hay postulaciones» (`400` `ERR_PRI_03`). (CA19)
+- [x] BD: la exportación dejó una fila en `bitacora` (usuario, convocatoria, filtros). La consulta normal **no** deja nada. (CA14, CA20)
+- [x] Un código de convocatoria inexistente en `GET /lista-priorizada?convocatoriaCodigo=...` → `404` `ERR_PRI_01`. (CA13)
+- [x] Postulante/directivo llamando al endpoint → `403`; sin sesión → `401`. (CA11, CA12)
+- [x] Rendimiento (opcional): con `SEED_PRIORIZACION_POSTULACIONES=20000` cada página responde en ≤ 3 s. (CA09)
 
 **UT:** `./mvnw test -Dtest='ListaPriorizada*Test'` · `pnpm test -- src/features/priorizacion`.
 
