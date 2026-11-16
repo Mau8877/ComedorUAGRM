@@ -16,6 +16,8 @@ import { Input } from '@/components/ui/input'
 import { ModalDetailLayout, ModalLayout } from '@/components/ui/modal-layout'
 import { Textarea } from '@/components/ui/textarea'
 import { AlertaError } from '@/features/auth'
+import { validacionFormulario } from '@/utils/validacionFormulario'
+import { Label } from '@/components/ui/label'
 
 import { mapearErrorFinalistas } from '../api/mapearErrorFinalistas'
 import { useNotificarFinalistas } from '../api/useFinalistas'
@@ -57,7 +59,7 @@ export function NotificarFinalistasDialog({
 
   const form = useForm({
     defaultValues: { plazoEntrega: '', lugarHorario: '', documentos: '' } as NotificarFinalistasValues,
-    validators: { onChange: notificarFinalistasSchema, onBlur: notificarFinalistasSchema },
+    ...validacionFormulario(notificarFinalistasSchema),
     onSubmit: ({ value }) => {
       setError(null)
       setPendiente(value)
@@ -135,9 +137,9 @@ export function NotificarFinalistasDialog({
           <form.Field name="plazoEntrega">
             {(field) => (
               <div className="flex flex-col gap-1">
-                <label htmlFor="notificar-plazo" className="text-sm font-medium">
+                <Label htmlFor="notificar-plazo" required>
                   Plazo de entrega
-                </label>
+                </Label>
                 <DatePicker
                   id="notificar-plazo"
                   min={mananaIso()}
@@ -153,9 +155,9 @@ export function NotificarFinalistasDialog({
           <form.Field name="lugarHorario">
             {(field) => (
               <div className="flex flex-col gap-1">
-                <label htmlFor="notificar-lugar" className="text-sm font-medium">
+                <Label htmlFor="notificar-lugar" required>
                   Lugar y horario de entrega
-                </label>
+                </Label>
                 <Input
                   id="notificar-lugar"
                   placeholder="Ej.: DUBSS, oficina 3, lunes a viernes de 8:00 a 12:00"
@@ -171,9 +173,9 @@ export function NotificarFinalistasDialog({
           <form.Field name="documentos">
             {(field) => (
               <div className="flex flex-col gap-1">
-                <label htmlFor="notificar-documentos" className="text-sm font-medium">
+                <Label htmlFor="notificar-documentos" required>
                   Documentos físicos a presentar
-                </label>
+                </Label>
                 <Textarea
                   id="notificar-documentos"
                   rows={3}

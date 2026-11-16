@@ -6,6 +6,7 @@ import { ClipboardCheckIcon, LockIcon, Loader2Icon, MailIcon, ShieldCheckIcon, U
 import { PublicHeader } from '@/components/layout'
 import { Button } from '@/components/ui/button'
 import { ComedoruLogo } from '@/components/layout/ComedoruLogo'
+import { validacionFormulario } from '@/utils/validacionFormulario'
 
 import { mapearError, type ErrorMapeado } from '../api/mapearError'
 import { useLogin } from '../api/useLogin'
@@ -23,7 +24,7 @@ export function LoginScreen() {
     defaultValues: { correo: '', contrasena: '' },
     // * El error se muestra tras salir del campo o al enviar (ver CampoFormulario);
     // * onChange sigue validando para que desaparezca al corregir.
-    validators: { onChange: loginSchema, onBlur: loginSchema },
+    ...validacionFormulario(loginSchema),
     onSubmit: ({ value }) => {
       setError(null)
       login.mutate(value, {
@@ -94,7 +95,7 @@ export function LoginScreen() {
                 {(field) => (
                   <CampoFormulario
                     field={field}
-                    label="Correo electrónico"
+                    label="Correo electrónico" required
                     type="email"
                     autoComplete="email"
                     placeholder="nombre@correo.com"
@@ -106,7 +107,7 @@ export function LoginScreen() {
                 {(field) => (
                   <CampoFormulario
                     field={field}
-                    label="Contraseña"
+                    label="Contraseña" required
                     type="password"
                     autoComplete="current-password"
                     icono={LockIcon}

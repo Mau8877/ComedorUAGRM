@@ -16,6 +16,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { toastSuccess } from '@/components/ui/toast'
 import { AlertaError } from '@/features/auth'
+import { validacionFormulario } from '@/utils/validacionFormulario'
+import { Label } from '@/components/ui/label'
+import { MARCA_OBLIGATORIO } from '@/components/ui/label'
+import { cn } from '@/lib/utils'
 import { mapearErrorComunicados } from '../api/mapearErrorComunicados'
 import { usePublicarComunicado } from '../api/useComunicados'
 import { aPublicarRequest, comunicadoSchema, ETIQUETAS_DESTINATARIOS, requiereConvocatoria } from '../schemas'
@@ -42,7 +46,7 @@ export function ComunicadoForm({ convocatoriaId }: ComunicadoFormProps) {
 
   const form = useForm({
     defaultValues: VALORES_INICIALES,
-    validators: { onChange: comunicadoSchema, onBlur: comunicadoSchema },
+    ...validacionFormulario(comunicadoSchema),
     onSubmit: ({ value }) => {
       setError(null)
       setEnviadoA(null)
@@ -91,9 +95,9 @@ export function ComunicadoForm({ convocatoriaId }: ComunicadoFormProps) {
         <form.Field name="titulo">
           {(field) => (
             <div className="flex flex-col gap-1">
-              <label htmlFor="comunicado-titulo-campo" className="text-sm font-medium">
+              <Label htmlFor="comunicado-titulo-campo" required>
                 Título
-              </label>
+              </Label>
               <Input
                 id="comunicado-titulo-campo"
                 value={field.state.value}
@@ -110,9 +114,9 @@ export function ComunicadoForm({ convocatoriaId }: ComunicadoFormProps) {
         <form.Field name="contenido">
           {(field) => (
             <div className="flex flex-col gap-1">
-              <label htmlFor="comunicado-contenido" className="text-sm font-medium">
+              <Label htmlFor="comunicado-contenido" required>
                 Contenido
-              </label>
+              </Label>
               <Textarea
                 id="comunicado-contenido"
                 rows={4}
@@ -130,7 +134,7 @@ export function ComunicadoForm({ convocatoriaId }: ComunicadoFormProps) {
         <form.Field name="destinatarios">
           {(field) => (
             <div className="flex flex-col gap-1">
-              <span className="text-sm font-medium">Dirigido a</span>
+              <span className={cn('text-sm font-medium', MARCA_OBLIGATORIO)}>Dirigido a</span>
               <Select
                 value={field.state.value}
                 onValueChange={(valor) => valor && field.handleChange(valor as DestinatariosComunicado)}

@@ -3,11 +3,14 @@ import { useStore, type AnyFieldApi } from '@tanstack/react-form'
 import { EyeIcon, EyeOffIcon } from 'lucide-react'
 
 import { Input } from '@/components/ui/input'
+import { MARCA_OBLIGATORIO } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
 
 interface CampoFormularioProps {
   field: AnyFieldApi
   label: string
+  /** Campo obligatorio: agrega el asterisco rojo después de la etiqueta. */
+  required?: boolean
   /** `id` del input; por defecto el nombre del campo. Se pasa cuando dos formularios de una misma página comparten nombres. */
   id?: string
   type?: 'text' | 'email' | 'password' | 'tel'
@@ -38,6 +41,7 @@ interface CampoFormularioProps {
 export function CampoFormulario({
   field,
   label,
+  required,
   id,
   type = 'text',
   autoComplete,
@@ -62,7 +66,7 @@ export function CampoFormulario({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={idInput} className="text-sm font-medium text-foreground">
+      <label htmlFor={idInput} className={cn('text-sm font-medium text-foreground', required && MARCA_OBLIGATORIO)}>
         {label}
       </label>
       <div className="relative">

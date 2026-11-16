@@ -5,6 +5,7 @@ import { Loader2Icon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toastSuccess } from '@/components/ui/toast'
 import { AlertaError, CampoFormulario } from '@/features/auth'
+import { validacionFormulario } from '@/utils/validacionFormulario'
 
 import { mapearErrorPerfil, type ErrorPerfil } from '../api/mapearError'
 import { useActualizarPerfil } from '../api/useActualizarPerfil'
@@ -38,7 +39,7 @@ export function DatosContactoForm({ perfil }: { perfil: Perfil }) {
 
   const form = useForm({
     defaultValues: valoresDe(perfil),
-    validators: { onChange: schema, onBlur: schema },
+    ...validacionFormulario(schema),
     onSubmit: ({ value }) => {
       const request = aActualizarPerfilRequest(value, original)
       if (Object.keys(request).length === 0) return
@@ -95,7 +96,7 @@ export function DatosContactoForm({ perfil }: { perfil: Perfil }) {
             <CampoFormulario
               field={field}
               id="contacto-correo"
-              label="Correo electrónico"
+              label="Correo electrónico" required
               type="email"
               autoComplete="email"
               errorExterno={erroresServidor.correo}
@@ -110,7 +111,7 @@ export function DatosContactoForm({ perfil }: { perfil: Perfil }) {
               <CampoFormulario
                 field={field}
                 id="contacto-telefono"
-                label="Teléfono"
+                label="Teléfono" required
                 type="tel"
                 inputMode="tel"
                 autoComplete="tel"
@@ -129,7 +130,7 @@ export function DatosContactoForm({ perfil }: { perfil: Perfil }) {
                     <CampoFormulario
                       field={field}
                       id="contacto-contrasena-actual"
-                      label="Contraseña actual"
+                      label="Contraseña actual" required
                       type="password"
                       autoComplete="current-password"
                       errorExterno={erroresServidor.contrasenaActual}

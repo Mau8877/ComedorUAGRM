@@ -6,6 +6,7 @@ import { Loader2Icon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toastSuccess } from '@/components/ui/toast'
 import { AlertaError, CampoFormulario } from '@/features/auth'
+import { validacionFormulario } from '@/utils/validacionFormulario'
 
 import { mapearErrorPerfil, type ErrorPerfil } from '../api/mapearError'
 import { useCambiarContrasena } from '../api/useCambiarContrasena'
@@ -35,7 +36,7 @@ export function CambiarContrasenaForm() {
 
   const form = useForm({
     defaultValues: { contrasenaActual: '', contrasenaNueva: '', confirmarContrasena: '' },
-    validators: { onChange: cambiarContrasenaSchema, onBlur: cambiarContrasenaSchema },
+    ...validacionFormulario(cambiarContrasenaSchema),
     onSubmit: ({ value }) => {
       setErrorGeneral(null)
       setErrorActual(undefined)
@@ -90,7 +91,7 @@ export function CambiarContrasenaForm() {
             <CampoFormulario
               field={field}
               id="cambiar-contrasenaActual"
-              label="Contraseña actual"
+              label="Contraseña actual" required
               type="password"
               autoComplete="current-password"
               errorExterno={errorActual}
@@ -103,7 +104,7 @@ export function CambiarContrasenaForm() {
             <CampoFormulario
               field={field}
               id="cambiar-contrasenaNueva"
-              label="Contraseña nueva"
+              label="Contraseña nueva" required
               type="password"
               autoComplete="new-password"
             />
@@ -114,7 +115,7 @@ export function CambiarContrasenaForm() {
             <CampoFormulario
               field={field}
               id="cambiar-confirmarContrasena"
-              label="Confirmar contraseña nueva"
+              label="Confirmar contraseña nueva" required
               type="password"
               autoComplete="new-password"
             />

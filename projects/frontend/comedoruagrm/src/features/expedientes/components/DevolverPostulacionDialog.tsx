@@ -6,6 +6,8 @@ import { ModalLayout } from '@/components/ui/modal-layout'
 import { Textarea } from '@/components/ui/textarea'
 import { toastSuccess } from '@/components/ui/toast'
 import { AlertaError } from '@/features/auth'
+import { validacionFormulario } from '@/utils/validacionFormulario'
+import { Label } from '@/components/ui/label'
 
 import { mapearErrorExpedientes } from '../api/mapearErrorExpedientes'
 import { useDevolverPostulacion } from '../api/useExpediente'
@@ -46,7 +48,7 @@ export function DevolverPostulacionDialog({
 
   const form = useForm({
     defaultValues: VALORES_INICIALES,
-    validators: { onChange: devolucionSchema, onBlur: devolucionSchema },
+    ...validacionFormulario(devolucionSchema),
     onSubmit: ({ value }) => {
       const analizado = devolucionSchema.safeParse(value)
       if (!analizado.success || enviando.current) return
@@ -103,9 +105,9 @@ export function DevolverPostulacionDialog({
         <form.Field name="motivo">
           {(field) => (
             <div className="flex flex-col gap-1">
-              <label htmlFor="devolver-motivo" className="text-sm font-medium">
+              <Label htmlFor="devolver-motivo" required>
                 Motivo
-              </label>
+              </Label>
               <Textarea
                 id="devolver-motivo"
                 rows={5}

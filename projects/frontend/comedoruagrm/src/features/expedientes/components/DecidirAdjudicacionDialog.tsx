@@ -7,6 +7,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { toastSuccess } from '@/components/ui/toast'
 import type { PanelAdjudicacion } from '@/features/adjudicacion'
 import { AlertaError } from '@/features/auth'
+import { validacionFormulario } from '@/utils/validacionFormulario'
+import { Label } from '@/components/ui/label'
 
 import { mapearErrorExpedientes } from '../api/mapearErrorExpedientes'
 import { useAdjudicarFinalista } from '../api/useAdjudicarFinalista'
@@ -109,7 +111,7 @@ export function DecidirAdjudicacionDialog({
 
   const form = useForm({
     defaultValues: VALORES_INICIALES,
-    validators: pideMotivo ? { onChange: noAdjudicarSchema, onBlur: noAdjudicarSchema } : undefined,
+    ...(pideMotivo ? validacionFormulario(noAdjudicarSchema) : {}),
     onSubmit: ({ value }) => {
       if (enviando.current) return
       if (!pideMotivo) {
@@ -189,9 +191,9 @@ export function DecidirAdjudicacionDialog({
           <form.Field name="motivo">
             {(field) => (
               <div className="flex flex-col gap-1">
-                <label htmlFor="decidir-motivo" className="text-sm font-medium">
+                <Label htmlFor="decidir-motivo" required>
                   Motivo
-                </label>
+                </Label>
                 <Textarea
                   id="decidir-motivo"
                   rows={5}

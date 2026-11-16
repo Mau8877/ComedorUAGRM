@@ -4,6 +4,7 @@ import { CheckIcon, CopyIcon, KeyRoundIcon, UserPlusIcon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { ModalDetailLayout, ModalLayout } from '@/components/ui/modal-layout'
+import { validacionFormulario } from '@/utils/validacionFormulario'
 
 import { mapearErrorUsuarios, useCrearUsuario } from '../api'
 import type { ErrorUsuarios } from '../api'
@@ -41,7 +42,7 @@ export function CrearUsuarioModal({ open, onOpenChange, rol, onCreada }: CrearUs
 
   const form = useForm({
     defaultValues: { nombres: '', apellidos: '', ci: '', correo: '' },
-    validators: { onChange: datosCuentaPersonalSchema, onBlur: datosCuentaPersonalSchema },
+    ...validacionFormulario(datosCuentaPersonalSchema),
     onSubmit: ({ value }) => {
       if (enviando.current) return
       enviando.current = true
@@ -132,7 +133,7 @@ export function CrearUsuarioModal({ open, onOpenChange, rol, onCreada }: CrearUs
             {(field) => (
               <CampoUsuario
                 id={field.name}
-                label="Nombres"
+                label="Nombres" required
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={field.handleChange}
@@ -144,7 +145,7 @@ export function CrearUsuarioModal({ open, onOpenChange, rol, onCreada }: CrearUs
             {(field) => (
               <CampoUsuario
                 id={field.name}
-                label="Apellidos"
+                label="Apellidos" required
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={field.handleChange}
@@ -158,7 +159,7 @@ export function CrearUsuarioModal({ open, onOpenChange, rol, onCreada }: CrearUs
           {(field) => (
             <CampoUsuario
               id={field.name}
-              label="CI"
+              label="CI" required
               value={field.state.value}
               onBlur={field.handleBlur}
               onChange={(valor) => {
@@ -174,7 +175,7 @@ export function CrearUsuarioModal({ open, onOpenChange, rol, onCreada }: CrearUs
           {(field) => (
             <CampoUsuario
               id={field.name}
-              label="Correo electrónico"
+              label="Correo electrónico" required
               type="email"
               autoComplete="off"
               value={field.state.value}

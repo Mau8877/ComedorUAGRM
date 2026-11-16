@@ -7,6 +7,8 @@ import { DatePicker } from '@/components/ui/date-picker'
 import { Textarea } from '@/components/ui/textarea'
 import { toastSuccess } from '@/components/ui/toast'
 import { AlertaError } from '@/features/auth'
+import { validacionFormulario } from '@/utils/validacionFormulario'
+import { Label } from '@/components/ui/label'
 
 import { mapearErrorFinalistas } from '../api/mapearErrorFinalistas'
 import { useRegistrarEntrega } from '../api/useFinalistas'
@@ -35,7 +37,7 @@ function FormularioEntrega({
 
   const form = useForm({
     defaultValues: { fechaRecepcion: finalista.documentacionRecibidaEn ?? hoyIso(), observaciones: '' },
-    validators: { onChange: registrarEntregaSchema, onBlur: registrarEntregaSchema },
+    ...validacionFormulario(registrarEntregaSchema),
     onSubmit: ({ value }) => {
       setError(null)
       registrar.mutate(
@@ -85,9 +87,9 @@ function FormularioEntrega({
       <form.Field name="fechaRecepcion">
         {(field) => (
           <div className="flex flex-col gap-1">
-            <label htmlFor="entrega-fecha" className="text-sm font-medium">
+            <Label htmlFor="entrega-fecha" required>
               Fecha de recepción
-            </label>
+            </Label>
             <DatePicker
               id="entrega-fecha"
               max={hoyIso()}

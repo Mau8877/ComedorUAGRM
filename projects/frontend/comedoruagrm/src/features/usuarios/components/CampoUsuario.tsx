@@ -1,8 +1,12 @@
 import { Input } from '@/components/ui/input'
+import { MARCA_OBLIGATORIO } from '@/components/ui/label'
+import { cn } from '@/lib/utils'
 
 interface CampoUsuarioProps {
   id: string
   label: string
+  /** Campo obligatorio: agrega el asterisco rojo después de la etiqueta. */
+  required?: boolean
   value: string
   onChange: (valor: string) => void
   onBlur?: () => void
@@ -15,10 +19,10 @@ interface CampoUsuarioProps {
   ayuda?: string
 }
 
-export function CampoUsuario({ id, label, value, onChange, onBlur, error, type, readOnly, autoComplete, ayuda }: CampoUsuarioProps) {
+export function CampoUsuario({ id, label, required, value, onChange, onBlur, error, type, readOnly, autoComplete, ayuda }: CampoUsuarioProps) {
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor={id} className="text-sm font-medium text-foreground">
+      <label htmlFor={id} className={cn('text-sm font-medium text-foreground', required && MARCA_OBLIGATORIO)}>
         {label}
       </label>
       <Input

@@ -18,6 +18,9 @@ import { Textarea } from '@/components/ui/textarea'
 import { toastSuccess } from '@/components/ui/toast'
 import { AlertaError } from '@/features/auth'
 import { ApiError } from '@/store'
+import { validacionFormulario } from '@/utils/validacionFormulario'
+import { MARCA_OBLIGATORIO } from '@/components/ui/label'
+import { cn } from '@/lib/utils'
 
 import { nuevaClaveIdempotencia } from '../api/claveIdempotencia'
 import { mapearErrorExpedientes } from '../api/mapearErrorExpedientes'
@@ -66,7 +69,7 @@ export function AuditoriaForm({ finalista, bloqueo, onRegistrada, onFinalistaIne
 
   const form = useForm({
     defaultValues: VALORES_INICIALES,
-    validators: { onChange: auditoriaSchema, onBlur: auditoriaSchema },
+    ...validacionFormulario(auditoriaSchema),
     onSubmit: ({ value }) => {
       const analizado = auditoriaSchema.safeParse(value)
       if (analizado.success) setPendiente(analizado.data)
@@ -138,7 +141,7 @@ export function AuditoriaForm({ finalista, bloqueo, onRegistrada, onFinalistaIne
         <form.Field name="resultado">
           {(field) => (
             <div className="flex flex-col gap-1">
-              <span id="auditoria-resultado" className="text-sm font-medium">
+              <span id="auditoria-resultado" className={cn('text-sm font-medium', MARCA_OBLIGATORIO)}>
                 Resultado
               </span>
               <RadioGroup
@@ -172,9 +175,9 @@ export function AuditoriaForm({ finalista, bloqueo, onRegistrada, onFinalistaIne
               <form.Field name="puntajeAcademico">
                 {(field) => (
                   <div className="flex flex-col gap-1">
-                    <label htmlFor="auditoria-puntaje" className="text-sm font-medium">
+                    <Label htmlFor="auditoria-puntaje" required>
                       Puntaje académico (0 a 30)
-                    </label>
+                    </Label>
                     <Input
                       id="auditoria-puntaje"
                       inputMode="decimal"
@@ -196,9 +199,16 @@ export function AuditoriaForm({ finalista, bloqueo, onRegistrada, onFinalistaIne
         <form.Field name="observaciones">
           {(field) => (
             <div className="flex flex-col gap-1">
-              <label htmlFor="auditoria-observaciones" className="text-sm font-medium">
-                Observaciones
-              </label>
+              <form.Subscribe selector={(estado) => estado.values.resultado}>
+                {(resultado) => (
+                  <Label
+                    htmlFor="auditoria-observaciones"
+                    required={resultado === 'OBSERVADO' || resultado === 'NO_VALIDO'}
+                  >
+                    Observaciones
+                  </Label>
+                )}
+              </form.Subscribe>
               <Textarea
                 id="auditoria-observaciones"
                 rows={4}

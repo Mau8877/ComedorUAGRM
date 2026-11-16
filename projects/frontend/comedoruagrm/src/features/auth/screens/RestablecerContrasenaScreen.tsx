@@ -7,6 +7,7 @@ import { PublicHeader } from '@/components/layout'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { toastSuccess } from '@/components/ui/toast'
+import { validacionFormulario } from '@/utils/validacionFormulario'
 
 import { mapearError, type ErrorMapeado } from '../api/mapearError'
 import { useRestablecerContrasena } from '../api/useRestablecerContrasena'
@@ -37,7 +38,7 @@ export function RestablecerContrasenaScreen({ tokenInicial }: RestablecerContras
 
   const form = useForm({
     defaultValues: { contrasena: '', confirmarContrasena: '' },
-    validators: { onChange: restablecerContrasenaSchema, onBlur: restablecerContrasenaSchema },
+    ...validacionFormulario(restablecerContrasenaSchema),
     onSubmit: ({ value }) => {
       if (!token) return
       setError(null)
@@ -112,14 +113,14 @@ export function RestablecerContrasenaScreen({ tokenInicial }: RestablecerContras
 
                   <form.Field name="contrasena">
                     {(field) => (
-                      <CampoFormulario field={field} label="Nueva contraseña" type="password" autoComplete="new-password" />
+                      <CampoFormulario field={field} label="Nueva contraseña" required type="password" autoComplete="new-password" />
                     )}
                   </form.Field>
                   <form.Field name="confirmarContrasena">
                     {(field) => (
                       <CampoFormulario
                         field={field}
-                        label="Confirmar contraseña"
+                        label="Confirmar contraseña" required
                         type="password"
                         autoComplete="new-password"
                       />

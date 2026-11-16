@@ -6,6 +6,8 @@ import { ModalLayout } from '@/components/ui/modal-layout'
 import { Textarea } from '@/components/ui/textarea'
 import { toastSuccess } from '@/components/ui/toast'
 import { AlertaError } from '@/features/auth'
+import { validacionFormulario } from '@/utils/validacionFormulario'
+import { Label } from '@/components/ui/label'
 
 import { mapearErrorExpedientes } from '../api/mapearErrorExpedientes'
 import { useArchivarPostulacion } from '../api/useArchivarPostulacion'
@@ -84,7 +86,7 @@ export function CerrarPostulacionDialog({
 
   const form = useForm({
     defaultValues: VALORES_INICIALES,
-    validators: { onChange: cierreSchema, onBlur: cierreSchema },
+    ...validacionFormulario(cierreSchema),
     onSubmit: ({ value }) => {
       const analizado = cierreSchema.safeParse(value)
       if (!analizado.success || enviando.current) return
@@ -149,9 +151,9 @@ export function CerrarPostulacionDialog({
         <form.Field name="motivo">
           {(field) => (
             <div className="flex flex-col gap-1">
-              <label htmlFor="cerrar-motivo" className="text-sm font-medium">
+              <Label htmlFor="cerrar-motivo" required>
                 Motivo
-              </label>
+              </Label>
               <Textarea
                 id="cerrar-motivo"
                 rows={5}

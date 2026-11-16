@@ -8,6 +8,9 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useCarreras } from '@/shared/api'
+import { validacionFormulario } from '@/utils/validacionFormulario'
+import { MARCA_OBLIGATORIO } from '@/components/ui/label'
+import { cn } from '@/lib/utils'
 
 import { mapearError, type ErrorMapeado } from '../api/mapearError'
 import { useRegistro } from '../api/useRegistro'
@@ -43,7 +46,7 @@ export function RegistroScreen() {
       contrasena: '',
       confirmarContrasena: '',
     },
-    validators: { onChange: registroSchema, onBlur: registroSchema },
+    ...validacionFormulario(registroSchema),
     onSubmit: ({ value }) => {
       setErrorGeneral(null)
       setErroresServidor({})
@@ -95,16 +98,16 @@ export function RegistroScreen() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <form.Field name="nombres">
-                  {(field) => <CampoFormulario field={field} label="Nombres" autoComplete="given-name" />}
+                  {(field) => <CampoFormulario field={field} label="Nombres" required autoComplete="given-name" />}
                 </form.Field>
                 <form.Field name="apellidos">
-                  {(field) => <CampoFormulario field={field} label="Apellidos" autoComplete="family-name" />}
+                  {(field) => <CampoFormulario field={field} label="Apellidos" required autoComplete="family-name" />}
                 </form.Field>
                 <form.Field name="ci">
                   {(field) => (
                     <CampoFormulario
                       field={field}
-                      label="CI"
+                      label="CI" required
                       inputMode="numeric"
                       soloDigitos
                       errorExterno={erroresServidor.ci}
@@ -116,7 +119,7 @@ export function RegistroScreen() {
                   {(field) => (
                     <CampoFormulario
                       field={field}
-                      label="Registro universitario"
+                      label="Registro universitario" required
                       inputMode="numeric"
                       soloDigitos
                       errorExterno={erroresServidor.registroUniversitario}
@@ -132,7 +135,7 @@ export function RegistroScreen() {
                       (field.state.meta.isTouched ? field.state.meta.errors[0]?.message : undefined)
                     return (
                       <div className="flex flex-col gap-1">
-                        <span id="carrera-label" className="text-sm font-medium text-foreground">
+                        <span id="carrera-label" className={cn('text-sm font-medium text-foreground', MARCA_OBLIGATORIO)}>
                           Carrera
                         </span>
                         <Select
@@ -172,7 +175,7 @@ export function RegistroScreen() {
                   }}
                 </form.Field>
                 <form.Field name="telefono">
-                  {(field) => <CampoFormulario field={field} label="Teléfono" type="tel" autoComplete="tel" inputMode="tel" />}
+                  {(field) => <CampoFormulario field={field} label="Teléfono" required type="tel" autoComplete="tel" inputMode="tel" />}
                 </form.Field>
 
                 <div className="sm:col-span-2">
@@ -180,7 +183,7 @@ export function RegistroScreen() {
                     {(field) => (
                       <CampoFormulario
                         field={field}
-                        label="Correo electrónico"
+                        label="Correo electrónico" required
                         type="email"
                         autoComplete="email"
                         errorExterno={erroresServidor.correo}
@@ -191,14 +194,14 @@ export function RegistroScreen() {
                 </div>
                 <form.Field name="contrasena">
                   {(field) => (
-                    <CampoFormulario field={field} label="Contraseña" type="password" autoComplete="new-password" />
+                    <CampoFormulario field={field} label="Contraseña" required type="password" autoComplete="new-password" />
                   )}
                 </form.Field>
                 <form.Field name="confirmarContrasena">
                   {(field) => (
                     <CampoFormulario
                       field={field}
-                      label="Confirmar contraseña"
+                      label="Confirmar contraseña" required
                       type="password"
                       autoComplete="new-password"
                     />
