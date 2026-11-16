@@ -9,7 +9,7 @@ import '../../features/auth/screens/cargando_screen.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/recuperar_contrasena_screen.dart';
 import '../../features/auth/screens/registro_screen.dart';
-import '../../features/auth/screens/sin_modulo_screen.dart';
+import '../../features/auth/screens/solo_postulantes_screen.dart';
 import '../../features/health/screens/health_check_screen.dart';
 import '../../features/perfil/screens/perfil_screen.dart';
 import '../../features/postulaciones/screens/detalle_postulacion_screen.dart';
@@ -37,7 +37,16 @@ String? redirectDeSesion({required AsyncValue<Usuario?> sesion, required String 
     return _rutasPublicas.contains(ubicacion) ? null : '/login';
   }
 
-  if (_rutasPublicas.contains(ubicacion) || ubicacion == '/' || ubicacion == '/cargando') {
+  // * La app es solo para postulantes: cualquier otro rol queda en
+  // * /solo-postulantes (al iniciar sesión, al restaurar la sesión guardada y
+  // * ante cualquier intento de navegar a una pantalla de postulante).
+  if (usuario.rol != rolPostulante) {
+    return ubicacion == '/solo-postulantes' ? null : '/solo-postulantes';
+  }
+  if (_rutasPublicas.contains(ubicacion) ||
+      ubicacion == '/' ||
+      ubicacion == '/cargando' ||
+      ubicacion == '/solo-postulantes') {
     return rutaInicioPorRol(usuario.rol);
   }
   return null;
@@ -66,7 +75,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/registro', builder: (context, state) => const RegistroScreen()),
       GoRoute(path: '/recuperar-contrasena', builder: (context, state) => const RecuperarContrasenaScreen()),
       GoRoute(path: '/perfil', builder: (context, state) => const PerfilScreen()),
-      GoRoute(path: '/sin-modulo', builder: (context, state) => const SinModuloScreen()),
+      GoRoute(path: '/solo-postulantes', builder: (context, state) => const SoloPostulantesScreen()),
       GoRoute(path: '/admin', builder: (context, state) => const AdminShell()),
       GoRoute(path: '/estudiante', builder: (context, state) => const EstudianteShell()),
       // Detalle de una postulación (CU04): la lista vive dentro del shell del Estudiante. El `redirect` global
