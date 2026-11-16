@@ -27,10 +27,13 @@ export function exigirRol(rol: string) {
   }
 }
 
-/** `beforeLoad` de /login y /registro: con sesión activa no tiene sentido verlas, se lleva al módulo del rol. */
+/**
+ * `beforeLoad` de las rutas solo para invitados (/, /login, /registro): con sesión activa no tiene
+ * sentido verlas, se lleva al módulo del rol reemplazando el historial (el botón atrás no regresa).
+ */
 export async function redirigirSiHaySesion() {
   const usuario = await esperarSesionInicial()
   if (usuario) {
-    throw redirect({ to: rutaInicioPorRol(usuario.rol) })
+    throw redirect({ to: rutaInicioPorRol(usuario.rol), replace: true })
   }
 }
