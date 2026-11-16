@@ -18,7 +18,7 @@ export interface DirectivoLayoutProps {
   activeHref?: string
   /** Ícono del encabezado (por defecto el del ítem activo). */
   icono?: LucideIcon
-  /** Migas del encabezado (por defecto `rol > título`). */
+  /** Migas del encabezado (por defecto solo la página actual). */
   migas?: MigaPagina[]
   children: ReactNode
 }

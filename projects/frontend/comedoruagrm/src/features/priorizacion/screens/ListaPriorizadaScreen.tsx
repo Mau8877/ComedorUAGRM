@@ -136,7 +136,6 @@ export function ListaPriorizadaScreen({ titulo, activeHref, usuarioActual }: Lis
     <AdminLayout
       title={titulo}
       activeHref={activeHref}
-      migas={[{ label: 'Admin' }, { label: 'Preselección' }, { label: titulo }]}
       user={{ nombre: `${usuarioActual.nombres} ${usuarioActual.apellidos}`, rol: etiquetaRol(usuarioActual.rol) }}
       onCerrarSesion={() => cerrarSesion.mutate()}
       {...accionesDeCuenta}

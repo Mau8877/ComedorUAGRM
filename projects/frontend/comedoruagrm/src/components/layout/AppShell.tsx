@@ -14,7 +14,7 @@ interface AppShellProps {
   activeHref?: string
   /** Ícono del encabezado; por defecto el del ítem activo del sidebar. */
   icono?: LucideIcon
-  /** Migas del encabezado; por defecto `rol > título`. */
+  /** Migas del encabezado; por defecto solo la página actual. */
   migas?: MigaPagina[]
   user: LayoutUser
   /** Ver AppHeaderProps. */
@@ -67,7 +67,7 @@ export function AppShell({
             <EncabezadoPagina
               icono={icono ?? navItems.find((item) => item.href === activeHref)?.icon}
               titulo={title}
-              migas={migas ?? [{ label: user.rol }, { label: title }]}
+              migas={migas ?? [{ label: title }]}
             />
           )}
           <div className="mt-6">{children}</div>

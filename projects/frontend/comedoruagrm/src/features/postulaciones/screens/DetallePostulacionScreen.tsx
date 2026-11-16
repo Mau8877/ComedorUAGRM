@@ -48,7 +48,7 @@ export function DetallePostulacionScreen({ titulo, activeHref, usuarioActual, co
     <EstudianteLayout
       title={titulo}
       activeHref={activeHref}
-      migas={[{ label: 'Postulante' }, { label: 'Postulaciones' }, { label: titulo }]}
+      migas={[{ label: 'Mis postulaciones', href: '/mis-postulaciones' }, { label: titulo }]}
       user={{ nombre: `${usuarioActual.nombres} ${usuarioActual.apellidos}`, rol: etiquetaRol(usuarioActual.rol) }}
       onCerrarSesion={() => cerrarSesion.mutate()}
       {...accionesDeCuenta}

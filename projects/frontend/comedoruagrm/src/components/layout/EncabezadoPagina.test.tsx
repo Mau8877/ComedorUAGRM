@@ -34,3 +34,12 @@ describe('EncabezadoPagina', () => {
     expect(screen.getByRole('link', { name: 'Inicio' })).toHaveAttribute('href', '/panel')
   })
 })
+
+describe('EncabezadoPagina alineación', () => {
+  it('con ícono, la casa ocupa la misma columna que el ícono grande', () => {
+    const { container } = render(<EncabezadoPagina icono={UsersIcon} titulo="Actas" migas={[{ label: 'Actas' }]} />)
+    const casa = container.querySelector('ol li')
+    expect(casa?.className).toContain('w-7')
+    expect(casa?.className).toContain('justify-center')
+  })
+})

@@ -13,7 +13,7 @@ export interface MigaPagina {
 interface EncabezadoPaginaProps {
   icono?: LucideIcon
   titulo: string
-  /** rol > sección > página. El último tramo se resalta como chip. */
+  /** sección > página, según la ruta real. El último tramo se resalta como chip. */
   migas?: MigaPagina[]
   className?: string
 }
@@ -23,16 +23,22 @@ interface EncabezadoPaginaProps {
 // * decide el ícono y las migas (el shell las deriva del ítem activo si la pantalla no las declara).
 export function EncabezadoPagina({ icono: Icono, titulo, migas = [], className }: EncabezadoPaginaProps) {
   return (
-    <header className={cn('flex min-w-0 items-start gap-3', className)}>
-      {Icono && <Icono aria-hidden className="mt-1 size-7 shrink-0 text-accent sm:size-8" />}
-      <div className="flex min-w-0 flex-col gap-1.5">
-        <h1 className="font-heading text-xl font-bold tracking-wide break-words text-accent uppercase sm:text-3xl">
-          {titulo}
-        </h1>
-        {migas.length > 0 && (
+    <header className={cn('grid min-w-0 grid-cols-[auto_1fr] items-center gap-x-3 gap-y-1.5', className)}>
+      {Icono && <Icono aria-hidden className="size-7 shrink-0 text-accent sm:size-8" />}
+      <h1
+        className={cn(
+          'font-heading text-xl font-bold tracking-wide break-words text-accent uppercase sm:text-3xl',
+          !Icono && 'col-span-2',
+        )}
+      >
+        {titulo}
+      </h1>
+      {migas.length > 0 && (
+        <div className="col-span-2 min-w-0">
           <nav aria-label="Ruta de la página">
             <ol className="flex flex-wrap items-center gap-1.5 text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
-              <li className="flex items-center">
+              {/* * Misma columna que el ícono grande: el ancho de la casa iguala al del ícono del título. */}
+              <li className={cn('flex items-center justify-center', Icono && 'w-7 sm:w-8')}>
                 <HomeIcon aria-hidden className="size-3.5" />
               </li>
               {migas.map((miga, index) => {
@@ -63,8 +69,8 @@ export function EncabezadoPagina({ icono: Icono, titulo, migas = [], className }
               })}
             </ol>
           </nav>
-        )}
-      </div>
+        </div>
+      )}
     </header>
   )
 }

@@ -167,7 +167,6 @@ export function PublicarResultadosScreen({ titulo, activeHref, usuarioActual }: 
     <AdminLayout
       title={titulo}
       activeHref={activeHref}
-      migas={[{ label: 'Admin' }, { label: 'Adjudicación' }, { label: titulo }]}
       user={{ nombre: `${usuarioActual.nombres} ${usuarioActual.apellidos}`, rol: etiquetaRol(usuarioActual.rol) }}
       onCerrarSesion={() => cerrarSesion.mutate()}
       {...accionesDeCuenta}
