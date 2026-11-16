@@ -129,6 +129,18 @@ describe('FinalistasScreen', () => {
     expect(screen.getAllByText('94.00').length).toBeGreaterThan(0)
   })
 
+  it('un aviso que todavía se está despachando se ve «Enviando…» y no cuenta como fallido', async () => {
+    responder([finalista(1, { estadoNotificacion: 'ENVIANDO' }), finalista(2, { estadoNotificacion: 'FALLIDA' })])
+    const user = montar()
+    await screen.findAllByText('Nombre1 Apellido1')
+
+    expect(screen.getAllByText('Enviando…').length).toBeGreaterThan(0)
+    await user.click(screen.getByRole('button', { name: 'Seleccionar fallidos' }))
+
+    expect(screen.getByRole('button', { name: 'Notificar seleccionados (1)' })).toBeInTheDocument()
+    expect(screen.getAllByRole('checkbox', { name: 'Seleccionar a Nombre1 Apellido1' })[0]).not.toBeChecked()
+  })
+
   it('muestra el resultado de la auditoría y el total junto al puntaje (CU07)', async () => {
     responder([
       finalista(1, { resultadoAuditoria: 'VALIDADO', puntajeTotal: 80.5 }),
@@ -268,7 +280,8 @@ describe('FinalistasScreen', () => {
       lugarHorario: 'DUBSS oficina 3',
       documentos: 'CI y certificado',
     })
-    expect(await screen.findByText(/Se enviaron/)).toHaveTextContent('Se enviaron 2 avisos y fallaron 0.')
+    expect(await screen.findByText(/Se está enviando/)).toHaveTextContent('Se está enviando el aviso a 2 finalistas.')
+    expect(screen.queryByText(/No se pudo registrar/)).not.toBeInTheDocument()
   })
 
   it('no deja enviar con campos vacíos ni con el plazo de hoy y no manda nada (A6, CA05, CA06)', async () => {

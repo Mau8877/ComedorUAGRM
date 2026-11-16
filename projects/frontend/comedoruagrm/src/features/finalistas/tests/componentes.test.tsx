@@ -119,7 +119,8 @@ describe('NotificarFinalistasDialog', () => {
     await user.click(within(dialogo).getByRole('button', { name: 'Enviar aviso' }))
     await user.click(await screen.findByRole('button', { name: 'Confirmar envío' }))
 
-    expect(await screen.findByText(/Se enviaron/)).toHaveTextContent('Se enviaron 1 avisos y fallaron 1.')
+    expect(await screen.findByText(/Se está enviando/)).toHaveTextContent('Se está enviando el aviso a 1 finalista.')
+    expect(screen.getByText(/No se pudo registrar el aviso de 1 finalista/)).toBeInTheDocument()
     expect(screen.getByText(/Seleccionar fallidos/)).toBeInTheDocument()
     expect(alNotificar).toHaveBeenCalled()
   })

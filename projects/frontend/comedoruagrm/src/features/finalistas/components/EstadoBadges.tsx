@@ -2,17 +2,19 @@ import type { EstadoNotificacion, ResultadoAuditoriaFinalista } from '../types'
 
 const ETIQUETAS_NOTIFICACION: Record<EstadoNotificacion, string> = {
   SIN_ENVIAR: 'Sin enviar',
+  ENVIANDO: 'Enviando…',
   ENVIADA: 'Enviada',
   FALLIDA: 'Fallida',
 }
 
 const CLASES_NOTIFICACION: Record<EstadoNotificacion, string> = {
   SIN_ENVIAR: 'bg-muted text-muted-foreground',
+  ENVIANDO: 'bg-info/15 text-info',
   ENVIADA: 'bg-success/15 text-success',
   FALLIDA: 'bg-destructive/15 text-destructive',
 }
 
-/** Estado del último aviso al finalista: «Sin enviar», «Enviada» o «Fallida». */
+/** Estado del último aviso al finalista: «Sin enviar», «Enviando…», «Enviada» o «Fallida». */
 export function EstadoNotificacionBadge({ estado }: { estado: EstadoNotificacion }) {
   return (
     <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${CLASES_NOTIFICACION[estado]}`}>

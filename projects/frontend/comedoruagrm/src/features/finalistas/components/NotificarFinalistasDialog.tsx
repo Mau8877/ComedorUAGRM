@@ -100,11 +100,18 @@ export function NotificarFinalistasDialog({
         size="sm"
       >
         <p className="text-sm" role="status">
-          Se enviaron <strong>{resultado.enviados}</strong> avisos y fallaron <strong>{resultado.fallidos}</strong>.
+          Se está enviando el aviso a <strong>{resultado.enviados}</strong>{' '}
+          {resultado.enviados === 1 ? 'finalista' : 'finalistas'}.
         </p>
+        {resultado.fallidos > 0 && (
+          <p className="mt-1 text-sm text-destructive">
+            No se pudo registrar el aviso de {resultado.fallidos}{' '}
+            {resultado.fallidos === 1 ? 'finalista' : 'finalistas'}.
+          </p>
+        )}
         <p className="mt-2 text-sm text-muted-foreground">
-          El push y el correo salen en segundo plano: si un finalista queda como «Fallida» en la tabla, usa
-          «Seleccionar fallidos» y vuelve a notificar solo a esos.
+          Mira el avance en la columna «Notificación». Si alguno queda «Fallida», usa «Seleccionar fallidos» para
+          reintentar.
         </p>
       </ModalDetailLayout>
     )

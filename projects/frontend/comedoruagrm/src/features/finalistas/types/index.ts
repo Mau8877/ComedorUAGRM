@@ -1,7 +1,8 @@
 // Contrato del backend de CU21 -- ver UT-BACKEND/README.md (FinalistaResponse,
 // ResultadoNotificacionResponse).
 
-export type EstadoNotificacion = 'SIN_ENVIAR' | 'ENVIADA' | 'FALLIDA'
+/** `ENVIANDO`: el push y el correo salen en segundo plano y todavía no se sabe si llegaron. */
+export type EstadoNotificacion = 'SIN_ENVIAR' | 'ENVIANDO' | 'ENVIADA' | 'FALLIDA'
 
 /** Resultado de la última auditoría del expediente (CU07); `SIN_AUDITAR` si todavía no hay ninguna. */
 export type ResultadoAuditoriaFinalista = 'SIN_AUDITAR' | 'VALIDADO' | 'OBSERVADO' | 'NO_VALIDO'
