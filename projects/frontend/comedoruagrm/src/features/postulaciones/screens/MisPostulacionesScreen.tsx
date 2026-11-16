@@ -3,6 +3,7 @@ import type { Row, SortingState } from '@tanstack/react-table'
 import { useNavigate } from '@tanstack/react-router'
 import { EyeIcon, RefreshCwIcon } from 'lucide-react'
 
+import { CargandoContenido } from '@/components/layout/CargandoContenido'
 import { Button } from '@/components/ui/button'
 import {
   DataCards,
@@ -135,7 +136,7 @@ export function MisPostulacionesScreen({ titulo, activeHref, usuarioActual }: Mi
         </div>
       )}
 
-      {lista.isLoading && <p className="py-8 text-center text-sm text-muted-foreground">Cargando postulaciones…</p>}
+      {lista.isLoading && <CargandoContenido etiqueta="Cargando postulaciones…" forma="tarjetas" />}
 
       {sinNinguna && (
         <div className="flex flex-col items-center gap-3 py-8 text-center">

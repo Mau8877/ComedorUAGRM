@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../shared/widgets/campo_formulario.dart';
 import '../../../shared/widgets/comedoru_logo.dart';
 import '../auth_error_mapper.dart';
 import '../auth_validators.dart';
@@ -60,7 +61,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               constraints: const BoxConstraints(maxWidth: 420),
               child: Form(
                 key: _formKey,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -78,7 +78,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       AlertaError(error: _error!, onReintentar: enviando ? null : _enviar),
                       const SizedBox(height: 16),
                     ],
-                    TextFormField(
+                    CampoFormulario(
                       controller: _correo,
                       keyboardType: TextInputType.emailAddress,
                       autofillHints: const [AutofillHints.email],
@@ -86,7 +86,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       validator: AuthValidators.correo,
                     ),
                     const SizedBox(height: 16),
-                    TextFormField(
+                    CampoFormulario(
                       controller: _contrasena,
                       obscureText: true,
                       autofillHints: const [AutofillHints.password],

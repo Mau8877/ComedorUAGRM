@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { createRootRoute, Link, Outlet } from '@tanstack/react-router'
 
-import { ComedoruLogo } from '@/components/layout'
+import { ComedoruLogo, NavigationProgress } from '@/components/layout'
 import { buttonVariants } from '@/components/ui/button'
 import { useUiStore } from '@/store'
 
@@ -27,7 +27,12 @@ function RootLayout() {
     document.documentElement.classList.toggle('dark', theme === 'dark')
   }, [theme])
 
-  return <Outlet />
+  return (
+    <>
+      <NavigationProgress />
+      <Outlet />
+    </>
+  )
 }
 
 function NotFoundPage() {

@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 import { BellRingIcon } from 'lucide-react'
 
+import { CargandoContenido } from '@/components/layout/CargandoContenido'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { etiquetaRol, useCerrarSesion } from '@/features/auth'
@@ -99,7 +100,7 @@ export function FinalistasScreen({ titulo, activeHref, usuarioActual, onAuditar 
       )}
 
       {convocatorias.isLoading && (
-        <p className="py-8 text-center text-sm text-muted-foreground">Cargando convocatorias…</p>
+        <CargandoContenido etiqueta="Cargando convocatorias…" forma="tabla" />
       )}
       {convocatorias.isSuccess && disponibles.length === 0 && (
         <p className="py-8 text-center text-sm text-muted-foreground">Todavía no hay convocatorias registradas.</p>

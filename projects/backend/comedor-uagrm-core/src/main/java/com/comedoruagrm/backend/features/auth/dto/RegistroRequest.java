@@ -14,7 +14,8 @@ import jakarta.validation.constraints.Size;
  * (si el cliente lo manda igual, se ignora).
  *
  * * El registro universitario son exactamente 9 digitos y no empieza por 0.
- * * El formato del CI esta por definir con la DUBSS: solo no vacio y largo.
+ * * El CI son solo digitos (no vacio, largo maximo 20). Solo se valida al registrar:
+ * * los CI ya guardados no se tocan.
  * * La contraseña tiene al menos 6 caracteres y como maximo 72 (el limite de BCrypt).
  * ! La contraseña no se loguea ni se devuelve nunca.
  */
@@ -29,6 +30,7 @@ public record RegistroRequest(
 
         @NotBlank(message = "El CI es obligatorio")
         @Size(max = 20, message = "El CI no puede superar los 20 caracteres")
+        @Pattern(regexp = "^\\d+$", message = "El CI solo puede contener dígitos")
         String ci,
 
         @NotBlank(message = "El registro universitario es obligatorio")

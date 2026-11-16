@@ -31,18 +31,14 @@ void main() {
   });
 
   group('rutaInicioPorRol', () {
-    test('cada rol va a su módulo', () {
+    test('el postulante va a su módulo', () {
       expect(rutaInicioPorRol('POSTULANTE'), '/estudiante');
-      expect(rutaInicioPorRol('ADMINISTRADOR_DUBSS'), '/admin');
     });
 
-    test('los roles sin shell van a /sin-modulo', () {
-      expect(rutaInicioPorRol('DIRECTIVO'), '/sin-modulo');
-      expect(rutaInicioPorRol('PERSONAL_COMEDOR'), '/sin-modulo');
-    });
-
-    test('un rol desconocido vuelve al login', () {
-      expect(rutaInicioPorRol('HACKER'), '/login');
+    test('cualquier otro rol (o uno desconocido) va a /solo-postulantes', () {
+      for (final rol in ['ADMINISTRADOR_DUBSS', 'DIRECTIVO', 'PERSONAL_COMEDOR', 'HACKER']) {
+        expect(rutaInicioPorRol(rol), '/solo-postulantes', reason: rol);
+      }
     });
 
     test('etiquetaRol traduce y deja tal cual uno desconocido', () {
@@ -120,6 +116,8 @@ void main() {
       expect(AuthValidators.ci(null), 'El CI es obligatorio');
       expect(AuthValidators.carrera(null), 'La carrera es obligatoria');
       expect(AuthValidators.ci('1' * 21), isNotNull);
+      expect(AuthValidators.ci('12a45'), 'El CI solo puede contener dígitos');
+      expect(AuthValidators.ci('1234567'), isNull);
     });
   });
 
@@ -136,7 +134,7 @@ void main() {
     test('sin sesión una ruta privada lleva a /login (CA15, CA18)', () {
       expect(redirectDeSesion(sesion: sinSesion, ubicacion: '/estudiante'), '/login');
       expect(redirectDeSesion(sesion: sinSesion, ubicacion: '/'), '/login');
-      expect(redirectDeSesion(sesion: sinSesion, ubicacion: '/sin-modulo'), '/login');
+      expect(redirectDeSesion(sesion: sinSesion, ubicacion: '/solo-postulantes'), '/login');
       expect(redirectDeSesion(sesion: sinSesion, ubicacion: '/perfil'), '/login');
     });
 
@@ -163,11 +161,28 @@ void main() {
       for (final ruta in ['/login', '/registro', '/', '/cargando']) {
         expect(redirectDeSesion(sesion: postulante, ubicacion: ruta), '/estudiante', reason: ruta);
       }
-      expect(redirectDeSesion(sesion: AsyncData<Usuario?>(_usuario('ADMINISTRADOR_DUBSS')), ubicacion: '/login'), '/admin');
+      expect(redirectDeSesion(sesion: AsyncData<Usuario?>(_usuario('ADMINISTRADOR_DUBSS')), ubicacion: '/login'), '/solo-postulantes');
     });
 
-    test('un rol sin shell aterriza en /sin-modulo', () {
-      expect(redirectDeSesion(sesion: AsyncData<Usuario?>(_usuario('DIRECTIVO')), ubicacion: '/login'), '/sin-modulo');
+    test('un rol que no es postulante aterriza en /solo-postulantes al iniciar o restaurar la sesión', () {
+      for (final rol in ['ADMINISTRADOR_DUBSS', 'DIRECTIVO', 'PERSONAL_COMEDOR']) {
+        final sesion = AsyncData<Usuario?>(_usuario(rol));
+        for (final ruta in ['/login', '/registro', '/', '/cargando']) {
+          expect(redirectDeSesion(sesion: sesion, ubicacion: ruta), '/solo-postulantes', reason: '$rol $ruta');
+        }
+      }
+    });
+
+    test('un rol que no es postulante no puede navegar a pantallas de postulante', () {
+      final admin = AsyncData<Usuario?>(_usuario('ADMINISTRADOR_DUBSS'));
+      for (final ruta in ['/estudiante', '/admin', '/perfil', '/mis-postulaciones/abc']) {
+        expect(redirectDeSesion(sesion: admin, ubicacion: ruta), '/solo-postulantes', reason: ruta);
+      }
+      expect(redirectDeSesion(sesion: admin, ubicacion: '/solo-postulantes'), isNull);
+    });
+
+    test('un postulante no se queda en /solo-postulantes', () {
+      expect(redirectDeSesion(sesion: AsyncData<Usuario?>(_usuario('POSTULANTE')), ubicacion: '/solo-postulantes'), '/estudiante');
     });
 
     test('con sesión una ruta privada se deja pasar', () {

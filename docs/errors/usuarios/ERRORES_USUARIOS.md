@@ -69,10 +69,10 @@ Errores del registro y la gestión de cuentas de usuario.
 
 - **HTTP:** 403
 - **Excepción:** `ForbiddenException`
-- **Significado:** El Administrador intentó desactivar su propia cuenta o
-  cambiarse a sí mismo el rol.
-- **Dónde se lanza:** `UsuarioPersonalService.cambiarRol()` y
-  `UsuarioPersonalService.desactivar()`
+- **Significado:** El Administrador intentó editar, desactivar o cambiarse el
+  rol a su propia cuenta (los datos propios se editan desde Mi perfil).
+- **Dónde se lanza:** `UsuarioPersonalService.editar()`,
+  `UsuarioPersonalService.cambiarRol()` y `UsuarioPersonalService.desactivar()`
 
 ## `ERR_US_09`
 

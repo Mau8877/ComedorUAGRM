@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import type { SortingState } from '@tanstack/react-table'
 import { RefreshCwIcon, TrophyIcon } from 'lucide-react'
 
+import { CargandoContenido } from '@/components/layout/CargandoContenido'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -189,7 +190,7 @@ export function PublicarResultadosScreen({ titulo, activeHref, usuarioActual }: 
       )}
 
       {convocatorias.isLoading && (
-        <p className="py-8 text-center text-sm text-muted-foreground">Cargando convocatorias…</p>
+        <CargandoContenido etiqueta="Cargando convocatorias…" forma="tabla" />
       )}
       {convocatorias.isSuccess && disponibles.length === 0 && (
         <p className="py-8 text-center text-sm text-muted-foreground">Todavía no hay convocatorias registradas.</p>
@@ -249,7 +250,7 @@ export function PublicarResultadosScreen({ titulo, activeHref, usuarioActual }: 
           )}
 
           {resumenConsulta.isLoading && (
-            <p className="py-8 text-center text-sm text-muted-foreground">Cargando resumen…</p>
+            <CargandoContenido etiqueta="Cargando resumen…" forma="tabla" />
           )}
 
           {errorResumen && !errorResumen.convocatoriaInexistente && (

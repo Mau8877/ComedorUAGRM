@@ -4,13 +4,12 @@ import { CheckIcon, CopyIcon, KeyRoundIcon, UserPlusIcon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { ModalDetailLayout, ModalLayout } from '@/components/ui/modal-layout'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 import { mapearErrorUsuarios, useCrearUsuario } from '../api'
 import type { ErrorUsuarios } from '../api'
-import { OPCIONES_ROL_PERSONAL } from '../roles'
 import type { RolPersonal } from '../roles'
-import { crearUsuarioPersonalSchema } from '../schemas'
+import { TITULOS_NUEVA_CUENTA } from '../roles'
+import { crearUsuarioPersonalSchema, datosCuentaPersonalSchema } from '../schemas'
 import type { UsuarioCreado } from '../types'
 import { AlertaUsuarios } from './AlertaUsuarios'
 import { CampoUsuario } from './CampoUsuario'
@@ -20,8 +19,8 @@ const FORM_ID = 'crear-usuario-form'
 interface CrearUsuarioModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  /** Rol preseleccionado: el de la vista desde la que se abre. */
-  rolInicial: RolPersonal
+  /** Rol de la cuenta: lo define la vista desde la que se abre; no se pregunta en el formulario. */
+  rol: RolPersonal
   /** Se llama una vez creada la cuenta (la lista ya se está refrescando). */
   onCreada?: (usuario: UsuarioCreado) => void
 }
@@ -32,7 +31,7 @@ interface CrearUsuarioModalProps {
  * ni en un store, ni en la URL, ni en la caché de TanStack Query) y se descarta cuando el
  * padre lo desmonta al cerrar.
  */
-export function CrearUsuarioModal({ open, onOpenChange, rolInicial, onCreada }: CrearUsuarioModalProps) {
+export function CrearUsuarioModal({ open, onOpenChange, rol, onCreada }: CrearUsuarioModalProps) {
   const crear = useCrearUsuario()
   const [resultado, setResultado] = useState<UsuarioCreado | null>(null)
   const [error, setError] = useState<ErrorUsuarios | null>(null)
@@ -41,13 +40,13 @@ export function CrearUsuarioModal({ open, onOpenChange, rolInicial, onCreada }: 
   const enviando = useRef(false)
 
   const form = useForm({
-    defaultValues: { nombres: '', apellidos: '', ci: '', correo: '', rol: rolInicial as string },
-    validators: { onChange: crearUsuarioPersonalSchema, onBlur: crearUsuarioPersonalSchema },
+    defaultValues: { nombres: '', apellidos: '', ci: '', correo: '' },
+    validators: { onChange: datosCuentaPersonalSchema, onBlur: datosCuentaPersonalSchema },
     onSubmit: ({ value }) => {
       if (enviando.current) return
       enviando.current = true
       setError(null)
-      crear.mutate(crearUsuarioPersonalSchema.parse(value), {
+      crear.mutate(crearUsuarioPersonalSchema.parse({ ...value, rol }), {
         onSuccess: (creada) => {
           setResultado(creada)
           onCreada?.(creada)
@@ -107,7 +106,7 @@ export function CrearUsuarioModal({ open, onOpenChange, rolInicial, onCreada }: 
     <ModalLayout
       open={open}
       onOpenChange={onOpenChange}
-      title="Nueva cuenta"
+      title={TITULOS_NUEVA_CUENTA[rol]}
       subtitle="Crea la cuenta de un funcionario; el sistema genera su contraseña temporal"
       icon={UserPlusIcon}
       formId={FORM_ID}
@@ -188,33 +187,6 @@ export function CrearUsuarioModal({ open, onOpenChange, rolInicial, onCreada }: 
                 error?.campo === 'correo' ? error.mensaje : field.state.meta.isTouched ? field.state.meta.errors[0]?.message : undefined
               }
             />
-          )}
-        </form.Field>
-
-        <form.Field name="rol">
-          {(field) => (
-            <div className="flex flex-col gap-1">
-              <span id="crear-rol-label" className="text-sm font-medium text-foreground">
-                Rol
-              </span>
-              <Select value={field.state.value} onValueChange={(valor) => field.handleChange(valor ?? '')}>
-                <SelectTrigger className="w-full" aria-labelledby="crear-rol-label">
-                  <SelectValue>
-                    {(valor: string | null) => OPCIONES_ROL_PERSONAL.find((o) => o.value === valor)?.label ?? 'Selecciona un rol'}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {OPCIONES_ROL_PERSONAL.map((opcion) => (
-                    <SelectItem key={opcion.value} value={opcion.value}>
-                      {opcion.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {field.state.meta.isTouched && field.state.meta.errors[0] && (
-                <span className="text-xs text-destructive">{field.state.meta.errors[0].message}</span>
-              )}
-            </div>
           )}
         </form.Field>
       </form>

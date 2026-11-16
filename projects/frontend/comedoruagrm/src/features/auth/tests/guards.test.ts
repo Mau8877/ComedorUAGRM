@@ -69,7 +69,13 @@ describe('redirigirSiHaySesion', () => {
   it('con sesión lleva al módulo del rol', async () => {
     vi.mocked(esperarSesionInicial).mockResolvedValue(usuario)
 
-    await expect(redirigirSiHaySesion()).rejects.toMatchObject({ options: { to: '/panel' } })
+    await expect(redirigirSiHaySesion()).rejects.toMatchObject({ options: { to: '/panel', replace: true } })
+  })
+
+  it('con sesión de directivo lleva a su inicio, no a la landing', async () => {
+    vi.mocked(esperarSesionInicial).mockResolvedValue({ ...usuario, rol: 'DIRECTIVO' })
+
+    await expect(redirigirSiHaySesion()).rejects.toMatchObject({ options: { to: '/dashboard', replace: true } })
   })
 
   it('sin sesión deja ver la pantalla', async () => {

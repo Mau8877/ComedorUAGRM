@@ -5,10 +5,19 @@ import './index.css'
 import { routeTree } from './routeTree.gen'
 import { instalarManejadorDeSesion } from '@/features/auth'
 import { QueryProvider } from './store'
+import { CargandoPagina } from '@/components/layout'
 import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 
-const router = createRouter({ routeTree })
+// * Feedback inmediato al navegar: por defecto el router espera 1000 ms antes de mostrar el pendingComponent
+// * (y la pantalla vieja queda congelada). Con 0 ms el skeleton aparece al hacer clic, y el mínimo de 250 ms
+// * evita el parpadeo cuando la ruta carga casi al instante.
+const router = createRouter({
+  routeTree,
+  defaultPendingComponent: CargandoPagina,
+  defaultPendingMs: 0,
+  defaultPendingMinMs: 250,
+})
 
 // * Ante un 401 el cliente HTTP intenta renovar la sesión; si no se puede, lleva
 // * al login (salvo que ya se esté en una pantalla pública). Se instala acá, antes

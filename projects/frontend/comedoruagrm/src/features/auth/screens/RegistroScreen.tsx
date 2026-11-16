@@ -105,6 +105,8 @@ export function RegistroScreen() {
                     <CampoFormulario
                       field={field}
                       label="CI"
+                      inputMode="numeric"
+                      soloDigitos
                       errorExterno={erroresServidor.ci}
                       onEdit={limpiarErrorServidor('ci')}
                     />
@@ -116,6 +118,7 @@ export function RegistroScreen() {
                       field={field}
                       label="Registro universitario"
                       inputMode="numeric"
+                      soloDigitos
                       errorExterno={erroresServidor.registroUniversitario}
                       onEdit={limpiarErrorServidor('registroUniversitario')}
                     />

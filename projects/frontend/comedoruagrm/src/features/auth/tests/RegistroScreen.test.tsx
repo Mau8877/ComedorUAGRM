@@ -70,6 +70,22 @@ describe('RegistroScreen', () => {
     expect(await screen.findByText('Las contraseñas no coinciden')).toBeInTheDocument()
   })
 
+  it('CI y registro universitario descartan las letras al teclear y al pegar', async () => {
+    const { user } = montar()
+    const ci = screen.getByLabelText('CI')
+    const registro = screen.getByLabelText('Registro universitario')
+
+    expect(ci).toHaveAttribute('inputmode', 'numeric')
+    expect(registro).toHaveAttribute('inputmode', 'numeric')
+
+    await user.type(ci, '12a3-4b5')
+    await user.click(registro)
+    await user.paste('21 90x12345')
+
+    expect(ci).toHaveValue('12345')
+    expect(registro).toHaveValue('219012345')
+  })
+
   it('no ofrece elegir rol ni crear cuentas del personal (CA16)', () => {
     montar()
 
