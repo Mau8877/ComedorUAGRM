@@ -12,8 +12,8 @@ Llena la columna «Resultado» al terminar cada CU (`OK` / `Falla` / `Parcial`).
 
 | CU | Nombre | Plataforma | Estado en el md | UT (BE/FE/MOB) | Resultado | Obs. |
 | --- | --- | --- | --- | --- | --- | --- |
-| CU01 | Registrarse y autenticarse | Web + móvil | Hecho | 16 / 9 / 10 | | |
-| CU15 | Recuperar contraseña y gestionar perfil | Web + móvil | Hecho | 14 / 7 / 6 | | |
+| CU01 | Registrarse y autenticarse | Web + móvil | Hecho | 16 / 9 / 10 | OK | |
+| CU15 | Recuperar contraseña y gestionar perfil | Web + móvil | Hecho | 14 / 7 / 6 | OK | |
 | CU14 | Gestionar usuarios y roles | Web | Hecho | 13 / 7 / – | | |
 | CU-EXTRA-01 | Notificaciones push (bandeja + push + correo) | Backend + móvil + bandeja web | Hecho | 12 / – / 5 | | |
 | CU06 | Visualizar lista priorizada | Web | Hecho | 10 / 5 / – | | |
@@ -44,10 +44,10 @@ Orden de prueba recomendado (cada uno prepara datos o confianza para el siguient
 
 ### 1.1 Requisitos
 
-- [ ] Docker Desktop corriendo (lo usan Postgres, Redis, MinIO, Mailpit y los tests de integración con Testcontainers).
-- [ ] Archivos `.env` creados a partir de sus `.env.example`: raíz del repo, `projects/backend/comedor-uagrm-core/` y `projects/frontend/comedoruagrm/`.
-- [ ] En el `.env` del backend: `JWT_SECRET` de **al menos 32 caracteres** (si no, el backend no arranca), `COOKIE_SECURE=false` (desarrollo por http).
-- [ ] Para probar correos (CU15, CU21, CU-EXTRA-01) con Mailpit, en el `.env`: `MAIL_HOST=comedor-uagrm-mailpit`, `MAIL_PORT=1025`, `MAIL_SMTP_AUTH=false`, `MAIL_SMTP_STARTTLS=false`, `MAIL_FROM=no-responder@comedoru.local`, `FRONTEND_URL=http://localhost` (el enlace de restablecer abre el portal).
+- [x] Docker Desktop corriendo (lo usan Postgres, Redis, MinIO, Mailpit y los tests de integración con Testcontainers).
+- [x] Archivos `.env` creados a partir de sus `.env.example`: raíz del repo, `projects/backend/comedor-uagrm-core/` y `projects/frontend/comedoruagrm/`.
+- [x] En el `.env` del backend: `JWT_SECRET` de **al menos 32 caracteres** (si no, el backend no arranca), `COOKIE_SECURE=false` (desarrollo por http).
+- [x] Para probar correos (CU15, CU21, CU-EXTRA-01) con Mailpit, en el `.env`: `MAIL_HOST=comedor-uagrm-mailpit`, `MAIL_PORT=1025`, `MAIL_SMTP_AUTH=false`, `MAIL_SMTP_STARTTLS=false`, `MAIL_FROM=no-responder@comedoru.local`, `FRONTEND_URL=http://localhost` (el enlace de restablecer abre el portal).
 
 ### 1.2 Levantar todo
 
@@ -66,12 +66,12 @@ cd projects/backend/comedor-uagrm-core && ./mvnw spring-boot:run -Dspring-boot.r
 cd projects/frontend/comedoruagrm && pnpm install && pnpm dev
 ```
 
-- [ ] Backend arriba: `http://localhost:8080/health` responde.
-- [ ] Swagger: `http://localhost:8080/swagger-ui/index.html` abre.
-- [ ] Frontend: `http://localhost:5173` (o `http://localhost` si pasas por el proxy nginx).
-- [ ] Mailpit (bandeja de correos de desarrollo): `http://localhost:8025`.
-- [ ] MinIO (consola): `http://localhost:9001` (los PDF de expedientes y actas viven ahí).
-- [ ] En la consola del backend, al arrancar, aparecen los cargadores `DatosPrueba*` (si no, verifica que el perfil sea `dev` y que ningún `SEED_*_ENABLED=false` los apague).
+- [x] Backend arriba: `http://localhost:8080/health` responde.
+- [x] Swagger: `http://localhost:8080/swagger-ui/index.html` abre.
+- [x] Frontend: `http://localhost:5173` (o `http://localhost` si pasas por el proxy nginx).
+- [x] Mailpit (bandeja de correos de desarrollo): `http://localhost:8025`.
+- [x] MinIO (consola): `http://localhost:9001` (los PDF de expedientes y actas viven ahí).
+- [x] En la consola del backend, al arrancar, aparecen los cargadores `DatosPrueba*` (si no, verifica que el perfil sea `dev` y que ningún `SEED_*_ENABLED=false` los apague).
 
 ### 1.3 Cuentas de prueba (perfil `dev`, contraseña `123123123`)
 
@@ -86,8 +86,8 @@ Los otros ~60 postulantes de prueba (`postulante.NN@prueba.local`) **no tienen a
 
 ### 1.4 Cómo llamar la API (Swagger)
 
-- [ ] En Swagger, ejecuta `POST /api/v1/auth/login` con `{"correo":"admin@dubss.com","contrasena":"123123123"}`. La sesión viaja en **cookies HttpOnly** (`access_token`, `refresh_token`): después de iniciar sesión en Swagger (o en la web, mismo host `localhost`), los demás endpoints ya van autenticados. Para probar `401`/`403` usa una ventana de incógnito o cierra sesión con `POST /auth/logout`.
-- [ ] Cada respuesta debe tener el sobre `{status, data, message, timestamp, error?}`. Un error trae `status:"failed"` y `error:"ERR_..."` (ver `docs/errors/README.md`).
+- [x] En Swagger, ejecuta `POST /api/v1/auth/login` con `{"correo":"admin@dubss.com","contrasena":"123123123"}`. La sesión viaja en **cookies HttpOnly** (`access_token`, `refresh_token`): después de iniciar sesión en Swagger (o en la web, mismo host `localhost`), los demás endpoints ya van autenticados. Para probar `401`/`403` usa una ventana de incógnito o cierra sesión con `POST /auth/logout`.
+- [x] Cada respuesta debe tener el sobre `{status, data, message, timestamp, error?}`. Un error trae `status:"failed"` y `error:"ERR_..."` (ver `docs/errors/README.md`).
 
 ### 1.5 Encontrar datos de prueba por estado (SQL)
 
@@ -130,10 +130,10 @@ cd projects/mobile
 flutter pub get && flutter analyze && flutter test
 ```
 
-- [ ] `./mvnw test` verde (salvo `SecurityConfigTest` si no hay Redis).
-- [ ] `pnpm test` verde (salvo las 10 conocidas del CU07).
-- [ ] `pnpm lint` y `pnpm build` sin errores.
-- [ ] `flutter analyze` y `flutter test` verdes.
+- [x] `./mvnw test` verde (salvo `SecurityConfigTest` si no hay Redis).
+- [x] `pnpm test` verde (salvo las 10 conocidas del CU07).
+- [x] `pnpm lint` y `pnpm build` sin errores.
+- [x] `flutter analyze` y `flutter test` verdes.
 
 ---
 
@@ -143,36 +143,36 @@ flutter pub get && flutter analyze && flutter test
 
 ### Registro (flujo A)
 
-- [ ] Abre `/registro`. Registra un postulante nuevo con datos válidos (registro universitario de **9 dígitos**, contraseña ≥ 6 caracteres y confirmación igual). **Esperado:** cuenta creada, sesión abierta y te lleva al módulo del Postulante (`/mis-postulaciones`). (CA01)
-- [ ] Repite el registro con el **mismo CI** → mensaje de conflicto señalando el CI, `409`, no se crea. (CA02)
-- [ ] Repite con el **mismo correo** → conflicto en correo. (CA03)
-- [ ] Repite con el **mismo registro universitario** → conflicto en ese campo. (CA21)
-- [ ] Deja un campo obligatorio vacío, correo mal formado, contraseña de 5 caracteres, o contraseña ≠ confirmación → cada campo muestra su error inline, no se crea. (CA04, CA05)
-- [ ] En Swagger `POST /auth/registro` manda además `"rol":"ADMINISTRADOR_DUBSS"` → la cuenta se crea igual como **POSTULANTE**. (CA06, CA16)
-- [ ] Doble clic rápido en «Crear cuenta» (o repite el mismo `POST` idéntico) → una sola cuenta; la repetición devuelve `200`. (CA12)
-- [ ] BD: el nuevo usuario tiene `password_hash` (BCrypt, nunca la contraseña) y hay filas en `bitacora` por el alta y el acceso. (CA20)
+- [x] Abre `/registro`. Registra un postulante nuevo con datos válidos (registro universitario de **9 dígitos**, contraseña ≥ 6 caracteres y confirmación igual). **Esperado:** cuenta creada, sesión abierta y te lleva al módulo del Postulante (`/mis-postulaciones`). (CA01)
+- [x] Repite el registro con el **mismo CI** → mensaje de conflicto señalando el CI, `409`, no se crea. (CA02)
+- [x] Repite con el **mismo correo** → conflicto en correo. (CA03)
+- [x] Repite con el **mismo registro universitario** → conflicto en ese campo. (CA21)
+- [x] Deja un campo obligatorio vacío, correo mal formado, contraseña de 5 caracteres, o contraseña ≠ confirmación → cada campo muestra su error inline, no se crea. (CA04, CA05)
+- [x] En Swagger `POST /auth/registro` manda además `"rol":"ADMINISTRADOR_DUBSS"` → la cuenta se crea igual como **POSTULANTE**. (CA06, CA16)
+- [x] Doble clic rápido en «Crear cuenta» (o repite el mismo `POST` idéntico) → una sola cuenta; la repetición devuelve `200`. (CA12)
+- [x] BD: el nuevo usuario tiene `password_hash` (BCrypt, nunca la contraseña) y hay filas en `bitacora` por el alta y el acceso. (CA20)
 
 ### Inicio de sesión (flujo B)
 
-- [ ] Entra con `admin@dubss.com` → te lleva al panel del Administrador (`/panel`). (CA07)
-- [ ] Entra con `directivo@dubss.com` → te lleva al dashboard (`/dashboard`). (CA07)
-- [ ] Entra con el postulante → `/mis-postulaciones`. (CA07)
-- [ ] Contraseña incorrecta y correo inexistente → **mismo mensaje** en ambos casos (`401`, `ERR_AUTH_04`). (CA08)
-- [ ] Cuenta desactivada (desactívala en CU14) → `403`, mensaje «comuníquese con la DUBSS». (CA09)
-- [ ] **Bloqueo:** 5 contraseñas incorrectas seguidas → al 6.º intento, incluso con la contraseña correcta, `403` `ERR_AUTH_05` con los minutos que faltan (5 min la primera vez). (CA10)
-- [ ] Tras el bloqueo, espera/ajusta el tiempo y falla otra vez 5 veces → el siguiente bloqueo es **más largo** (15 min). (CA11)
+- [x] Entra con `admin@dubss.com` → te lleva al panel del Administrador (`/panel`). (CA07)
+- [x] Entra con `directivo@dubss.com` → te lleva al dashboard (`/dashboard`). (CA07)
+- [x] Entra con el postulante → `/mis-postulaciones`. (CA07)
+- [x] Contraseña incorrecta y correo inexistente → **mismo mensaje** en ambos casos (`401`, `ERR_AUTH_04`). (CA08)
+- [x] Cuenta desactivada (desactívala en CU14) → `403`, mensaje «comuníquese con la DUBSS». (CA09)
+- [x] **Bloqueo:** 5 contraseñas incorrectas seguidas → al 6.º intento, incluso con la contraseña correcta, `403` `ERR_AUTH_05` con los minutos que faltan (5 min la primera vez). (CA10)
+- [x] Tras el bloqueo, espera/ajusta el tiempo y falla otra vez 5 veces → el siguiente bloqueo es **más largo** (15 min). (CA11)
 
 ### Cierre y continuidad de sesión (flujos C y D)
 
-- [ ] «Cerrar sesión» → vuelves a `/login`; si escribes a mano `/panel`, te devuelve a `/login`. (CA17, CA18)
-- [ ] Inicia sesión en dos navegadores, cierra en uno → el otro **sigue** con sesión. (CA19)
-- [ ] Con sesión abierta, **recarga la página** → sigues dentro sin pedir credenciales (consulta `GET /auth/usuario-actual`). (CA23)
-- [ ] Sesión que expira: baja `JWT_ACCESS_TTL_MINUTES` a 1, espera y navega → se renueva sola (`POST /auth/refresh`); si borras las cookies, te manda a `/login`. (CA15, CA22)
-- [ ] Logs del backend: no aparecen contraseñas ni tokens. (CA20)
+- [x] «Cerrar sesión» → vuelves a `/login`; si escribes a mano `/panel`, te devuelve a `/login`. (CA17, CA18)
+- [x] Inicia sesión en dos navegadores, cierra en uno → el otro **sigue** con sesión. (CA19)
+- [x] Con sesión abierta, **recarga la página** → sigues dentro sin pedir credenciales (consulta `GET /auth/usuario-actual`). (CA23)
+- [x] Sesión que expira: baja `JWT_ACCESS_TTL_MINUTES` a 1, espera y navega → se renueva sola (`POST /auth/refresh`); si borras las cookies, te manda a `/login`. (CA15, CA22)
+- [x] Logs del backend: no aparecen contraseñas ni tokens. (CA20)
 
 ### Móvil (si lo vas a probar)
 
-- [ ] `flutter run`: registro, login, logout y reapertura de la app con sesión vigente se comportan igual que en la web. (CA14)
+- [x] `flutter run`: registro, login, logout y reapertura de la app con sesión vigente se comportan igual que en la web. (CA14)
 
 **UT:** `./mvnw test -Dtest='Auth*Test,Sesion*Test,Registro*Test,TokenEnlaceTest'` · `pnpm test -- src/features/auth` · `flutter test`.
 
@@ -184,27 +184,27 @@ flutter pub get && flutter analyze && flutter test
 
 ### Recuperar contraseña
 
-- [ ] En `/login`, enlace «¿Olvidó su contraseña?» → abre `/recuperar-contrasena`. (CA13 del CU01)
-- [ ] Pide el enlace con el correo de una cuenta real → mensaje neutro («si la cuenta existe…, vence en 60 minutos»). **Mailpit** (`:8025`) recibe el correo con el enlace.
-- [ ] Pide el enlace con un correo que **no existe** y con el de una cuenta **desactivada** → **el mismo mensaje**, y Mailpit no recibe nada.
-- [ ] Pide el enlace **dos veces** seguidas → solo sirve el **último**; el primero da «el enlace ya no sirve» (`400` `ERR_AUTH_08`).
-- [ ] Abre el enlace bueno → define contraseña nueva (política: 6–72 caracteres + confirmación). **Esperado:** confirma y te lleva a `/login`; entras con la nueva; la vieja ya no sirve.
-- [ ] Reutiliza el mismo enlace → `ERR_AUTH_08` (un solo uso).
-- [ ] Contraseña nueva distinta de su confirmación → `400`, errores inline.
-- [ ] Tenías sesión abierta en otro navegador → al restablecer, esa sesión se **cierra**.
-- [ ] Una cuenta que estaba **bloqueada** por intentos fallidos queda desbloqueada tras restablecer.
-- [ ] Enlace vencido (cambia `app.auth.reset-ttl-minutes` o espera 60 min) → `ERR_AUTH_08`.
+- [x] En `/login`, enlace «¿Olvidó su contraseña?» → abre `/recuperar-contrasena`. (CA13 del CU01)
+- [x] Pide el enlace con el correo de una cuenta real → mensaje neutro («si la cuenta existe…, vence en 60 minutos»). **Mailpit** (`:8025`) recibe el correo con el enlace.
+- [x] Pide el enlace con un correo que **no existe** y con el de una cuenta **desactivada** → **el mismo mensaje**, y Mailpit no recibe nada.
+- [x] Pide el enlace **dos veces** seguidas → solo sirve el **último**; el primero da «el enlace ya no sirve» (`400` `ERR_AUTH_08`).
+- [x] Abre el enlace bueno → define contraseña nueva (política: 6–72 caracteres + confirmación). **Esperado:** confirma y te lleva a `/login`; entras con la nueva; la vieja ya no sirve.
+- [x] Reutiliza el mismo enlace → `ERR_AUTH_08` (un solo uso).
+- [x] Contraseña nueva distinta de su confirmación → `400`, errores inline.
+- [x] Tenías sesión abierta en otro navegador → al restablecer, esa sesión se **cierra**.
+- [x] Una cuenta que estaba **bloqueada** por intentos fallidos queda desbloqueada tras restablecer.
+- [x] Enlace vencido (cambia `app.auth.reset-ttl-minutes` o espera 60 min) → `ERR_AUTH_08`.
 
 ### Perfil
 
-- [ ] `/perfil` muestra nombres, apellidos, **CI (bloqueado, solo lectura)**, correo, rol y estado; el postulante además ve registro universitario, carrera y teléfono.
-- [ ] Cambia el teléfono (solo postulante) → se guarda.
-- [ ] Cambia el **correo** sin escribir contraseña actual → pide/rechaza (`ERR_AUTH_09`); con la contraseña actual correcta → se guarda; con una incorrecta → rechaza sin cambiar nada.
-- [ ] Cambia el correo a uno que ya usa otra cuenta → `409` en correo.
-- [ ] Manda `ci` en `PATCH /api/v1/perfil` por Swagger → se **ignora**, el CI no cambia.
-- [ ] Un admin (no postulante) intenta guardar teléfono por Swagger → `400` `ERR_US_13`.
-- [ ] **Cambiar contraseña:** con la actual correcta + nueva válida → ok; tus **otras** sesiones se cierran y la actual sigue abierta. Con la actual incorrecta → `400` `ERR_AUTH_09` (no `401`: no te saca de la sesión).
-- [ ] BD: filas en `bitacora` por restablecimiento, cambio de perfil y de contraseña.
+- [x] `/perfil` muestra nombres, apellidos, **CI (bloqueado, solo lectura)**, correo, rol y estado; el postulante además ve registro universitario, carrera y teléfono.
+- [x] Cambia el teléfono (solo postulante) → se guarda.
+- [x] Cambia el **correo** sin escribir contraseña actual → pide/rechaza (`ERR_AUTH_09`); con la contraseña actual correcta → se guarda; con una incorrecta → rechaza sin cambiar nada.
+- [x] Cambia el correo a uno que ya usa otra cuenta → `409` en correo.
+- [x] Manda `ci` en `PATCH /api/v1/perfil` por Swagger → se **ignora**, el CI no cambia.
+- [x] Un admin (no postulante) intenta guardar teléfono por Swagger → `400` `ERR_US_13`.
+- [x] **Cambiar contraseña:** con la actual correcta + nueva válida → ok; tus **otras** sesiones se cierran y la actual sigue abierta. Con la actual incorrecta → `400` `ERR_AUTH_09` (no `401`: no te saca de la sesión).
+- [x] BD: filas en `bitacora` por restablecimiento, cambio de perfil y de contraseña.
 
 **UT:** `./mvnw test -Dtest='RecuperacionContrasena*Test,RestablecimientoContrasenaServiceTest,CorreoRestablecimientoServiceTest,Perfil*Test,ActualizarPerfilRequestTest,ContrasenaRequestsTest'` · `pnpm test -- src/features/perfil src/features/auth` · `flutter test`.
 

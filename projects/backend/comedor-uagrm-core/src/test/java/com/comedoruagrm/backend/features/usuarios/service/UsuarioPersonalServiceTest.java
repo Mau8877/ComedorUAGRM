@@ -314,6 +314,18 @@ class UsuarioPersonalServiceTest {
     }
 
     @Test
+    void editar_laPropiaCuenta_lanzaErrUs08SinGuardar() {
+        when(usuarioRepository.findPersonalByCodigo(adminCodigo)).thenReturn(Optional.of(admin));
+
+        assertThatThrownBy(() -> service.editar(adminCodigo, adminCodigo,
+                new ActualizarUsuarioPersonalRequest("Ana", null, null)))
+                .isInstanceOfSatisfying(ForbiddenException.class,
+                        e -> assertThat(e.getErrorCode()).isEqualTo(UsuarioErrorCodes.ERR_US_08));
+        verify(admin, never()).setNombres(any());
+        verify(usuarioRepository, never()).saveAndFlush(any(Usuario.class));
+    }
+
+    @Test
     void editar_conUnaCuentaInexistenteODePostulante_lanzaErrUs06() {
         UUID codigo = UUID.randomUUID();
         when(usuarioRepository.findPersonalByCodigo(codigo)).thenReturn(Optional.empty());
