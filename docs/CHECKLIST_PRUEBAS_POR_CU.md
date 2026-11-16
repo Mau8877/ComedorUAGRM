@@ -17,7 +17,7 @@ Llena la columna «Resultado» al terminar cada CU (`OK` / `Falla` / `Parcial`).
 | CU14 | Gestionar usuarios y roles | Web | Hecho | 13 / 7 / – | OK | |
 | CU-EXTRA-01 | Notificaciones push (bandeja + push + correo) | Backend + móvil + bandeja web | Hecho | 12 / – / 5 | OK | Probado con Firebase real (push al Android) |
 | CU06 | Visualizar lista priorizada | Web | Hecho | 10 / 5 / – | OK | |
-| CU21 | Notificar finalistas y publicar comunicados | Web | Hecho | 12 / 7 / – | | |
+| CU21 | Notificar finalistas y publicar comunicados | Web | Hecho | 12 / 7 / – | OK | Estado «Enviando…» añadido; resultado del envío cuenta avisos registrados |
 | CU07 | Auditar expediente finalista | Web | Hecho | 12 / 5 / – | | |
 | CU19 | Devolver postulación para corrección | Web | Hecho | 9 / 4 / – | | |
 | CU20 | Archivar o rechazar postulación | Web | Hecho | 8 / 4 / – | | |
@@ -278,25 +278,25 @@ No es una pantalla propia: se prueba con la campana de la web, Swagger y el móv
 
 ### A. Notificar
 
-- [ ] Elige una convocatoria con finalistas (queda seleccionada la más reciente). La tabla muestra posición, nombre, puntaje, notificación («Sin enviar»/«Enviada»/«Fallida») y documentación («Pendiente»/«Recibida»).
-- [ ] Selecciona dos finalistas, define **plazo (posterior a hoy)**, **lugar y horario** y **documentos físicos**, y confirma el envío. **Esperado:** resultado «N enviados, M fallidos»; esos finalistas pasan a «Enviada». (BD: `finalista.notificado_en`.)
-- [ ] Plazo de hoy o anterior → `400` `ERR_FIN_04`. Faltan lugar/documentos o ningún finalista seleccionado → no envía, indica los campos.
-- [ ] Entra con `postulante.finalista@prueba.local`: el aviso aparece en su **bandeja** de la web; ábrelo y márcalo como leído. Mailpit recibe el correo.
-- [ ] Reintento: simula fallo (apaga Mailpit), notifica, verifica «Fallida», vuelve a notificar solo a esos: el resto **no** recibe el aviso dos veces.
-- [ ] Convocatoria sin finalistas → «Todavía no hay finalistas en esta convocatoria», sin tabla.
+- [x] Elige una convocatoria con finalistas (queda seleccionada la más reciente). La tabla muestra posición, nombre, puntaje, notificación («Sin enviar»/«Enviada»/«Fallida») y documentación («Pendiente»/«Recibida»).
+- [x] Selecciona dos finalistas, define **plazo (posterior a hoy)**, **lugar y horario** y **documentos físicos**, y confirma el envío. **Esperado:** resultado «Se está enviando el aviso a N finalistas» (y, si algún aviso no se pudo registrar, cuántos); esos finalistas pasan a «Enviada» en la tabla (unos segundos después). (BD: `finalista.notificado_en`.)
+- [x] Plazo de hoy o anterior → `400` `ERR_FIN_04`. Faltan lugar/documentos o ningún finalista seleccionado → no envía, indica los campos.
+- [x] Entra con `postulante.finalista@prueba.local`: el aviso aparece en su **bandeja** de la web; ábrelo y márcalo como leído. Mailpit recibe el correo.
+- [x] Reintento: simula fallo (apaga Mailpit), notifica, verifica «Fallida», vuelve a notificar solo a esos: el resto **no** recibe el aviso dos veces.
+- [x] Convocatoria sin finalistas → «Todavía no hay finalistas en esta convocatoria», sin tabla.
 
 ### B. Entrega física
 
-- [ ] Busca un finalista por CI o nombre y marca «documentación recibida» con fecha (por defecto hoy) y observaciones opcionales → pasa a «Recibida».
-- [ ] Fecha **futura** → `400` `ERR_FIN_03`.
-- [ ] Corrige la fecha ya registrada → se guarda la nueva y la anterior queda en la `bitacora`.
+- [x] Busca un finalista por CI o nombre y marca «documentación recibida» con fecha (por defecto hoy) y observaciones opcionales → pasa a «Recibida».
+- [x] Fecha **futura** → `400` `ERR_FIN_03`.
+- [x] Corrige la fecha ya registrada → se guarda la nueva y la anterior queda en la `bitacora`.
 
 ### C. Comunicados
 
-- [ ] «Nuevo aviso o comunicado»: título, contenido y destinatarios (todos los postulantes o finalistas); **vista previa**; confirma. Muestra a cuántos llegó y cada destinatario recibe el aviso.
-- [ ] Faltan título/contenido/destinatarios → no publica. Grupo sin destinatarios → `400` `ERR_COM_01`.
-- [ ] Este CU **no cambia el estado** de ninguna postulación (verifica `postulacion.estado`).
-- [ ] Rol no admin → `403`; sin sesión → `401`.
+- [x] «Nuevo aviso o comunicado»: título, contenido y destinatarios (todos los postulantes o finalistas); **vista previa**; confirma. Muestra a cuántos llegó y cada destinatario recibe el aviso.
+- [x] Faltan título/contenido/destinatarios → no publica. Grupo sin destinatarios → `400` `ERR_COM_01`.
+- [x] Este CU **no cambia el estado** de ninguna postulación (verifica `postulacion.estado`).
+- [x] Rol no admin → `403`; sin sesión → `401`.
 
 **UT:** `./mvnw test -Dtest='Finalista*Test,SeleccionFinalistas*Test,RequestsFinalistasValidacionTest,Comunicado*Test,PublicarComunicadoRequestValidacionTest,FinalistasComunicadosIntegrationTest'` · `pnpm test -- src/features/finalistas src/features/comunicados`.
 
