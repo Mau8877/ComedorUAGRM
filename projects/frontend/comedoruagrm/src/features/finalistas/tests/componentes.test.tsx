@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -16,6 +16,7 @@ import { RegistrarEntregaPanel } from '../components/RegistrarEntregaPanel'
 import { hoyIso, mananaIso } from '../schemas'
 import type { Finalista } from '../types'
 import { cliente } from './clienteSimulado'
+import { abrirYBuscarDia, elegirFecha, formatoVisible } from './elegirFecha'
 
 const FINALISTA: Finalista = {
   codigo: 'fin-1',
@@ -58,7 +59,7 @@ describe('RegistrarEntregaPanel', () => {
     const user = userEvent.setup()
     conCliente(<RegistrarEntregaPanel finalista={FINALISTA} onRegistrada={alRegistrar} />)
 
-    expect(screen.getByLabelText('Fecha de recepción')).toHaveValue(hoyIso())
+    expect(screen.getByLabelText('Fecha de recepción')).toHaveTextContent(formatoVisible(hoyIso()))
     await user.type(screen.getByLabelText('Observaciones (opcional)'), 'Completo')
     await user.click(screen.getByRole('button', { name: 'Marcar como recibida' }))
 
@@ -82,10 +83,10 @@ describe('RegistrarEntregaPanel', () => {
     const user = userEvent.setup()
     conCliente(<RegistrarEntregaPanel finalista={FINALISTA} />)
 
-    fireEvent.change(screen.getByLabelText('Fecha de recepción'), { target: { value: mananaIso() } })
-    await user.click(screen.getByRole('button', { name: 'Marcar como recibida' }))
-
-    expect(await screen.findByText('La fecha de recepción no puede ser futura')).toBeInTheDocument()
+    // El calendario no deja elegir un día futuro.
+    const manana = await abrirYBuscarDia(user, screen.getByLabelText('Fecha de recepción'), mananaIso())
+    expect(manana === null || (manana as HTMLButtonElement).disabled).toBe(true)
+    await user.keyboard('{Escape}')
     expect(cliente.patch).not.toHaveBeenCalled()
   })
 })
@@ -112,7 +113,7 @@ describe('NotificarFinalistasDialog', () => {
       <NotificarFinalistasDialog open onOpenChange={vi.fn()} finalistas={['fin-1', 'fin-2']} onNotificados={alNotificar} />,
     )
     const dialogo = await screen.findByRole('dialog')
-    fireEvent.change(within(dialogo).getByLabelText('Plazo de entrega'), { target: { value: mananaIso() } })
+    await elegirFecha(user, within(dialogo).getByLabelText('Plazo de entrega'), mananaIso())
     await user.type(within(dialogo).getByLabelText('Lugar y horario de entrega'), 'DUBSS')
     await user.type(within(dialogo).getByLabelText('Documentos físicos a presentar'), 'CI')
     await user.click(within(dialogo).getByRole('button', { name: 'Enviar aviso' }))

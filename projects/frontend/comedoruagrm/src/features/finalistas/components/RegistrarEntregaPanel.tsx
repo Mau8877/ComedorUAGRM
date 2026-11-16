@@ -3,7 +3,7 @@ import { useForm } from '@tanstack/react-form'
 import { Loader2Icon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { DatePicker } from '@/components/ui/date-picker'
 import { Textarea } from '@/components/ui/textarea'
 import { toastSuccess } from '@/components/ui/toast'
 import { AlertaError } from '@/features/auth'
@@ -88,13 +88,12 @@ function FormularioEntrega({
             <label htmlFor="entrega-fecha" className="text-sm font-medium">
               Fecha de recepción
             </label>
-            <Input
+            <DatePicker
               id="entrega-fecha"
-              type="date"
               max={hoyIso()}
               value={field.state.value}
               onBlur={field.handleBlur}
-              onChange={(e) => field.handleChange(e.target.value)}
+              onChange={field.handleChange}
             />
             {field.state.meta.isTouched && field.state.meta.errors[0] && (
               <span className="text-xs text-destructive">{field.state.meta.errors[0].message}</span>

@@ -11,6 +11,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
+import { DatePicker } from '@/components/ui/date-picker'
 import { Input } from '@/components/ui/input'
 import { ModalDetailLayout, ModalLayout } from '@/components/ui/modal-layout'
 import { Textarea } from '@/components/ui/textarea'
@@ -137,13 +138,12 @@ export function NotificarFinalistasDialog({
                 <label htmlFor="notificar-plazo" className="text-sm font-medium">
                   Plazo de entrega
                 </label>
-                <Input
+                <DatePicker
                   id="notificar-plazo"
-                  type="date"
                   min={mananaIso()}
                   value={field.state.value}
                   onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
+                  onChange={field.handleChange}
                 />
                 <ErrorCampo error={field.state.meta.isTouched ? field.state.meta.errors[0]?.message : undefined} />
               </div>

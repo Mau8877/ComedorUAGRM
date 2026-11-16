@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -46,6 +46,7 @@ import { FinalistasScreen } from '../screens/FinalistasScreen'
 import { hoyIso, mananaIso } from '../schemas'
 import type { Finalista } from '../types'
 import { cliente } from './clienteSimulado'
+import { abrirYBuscarDia, elegirFecha, formatoVisible } from './elegirFecha'
 
 const yo = { codigo: 'yo', nombres: 'Admin', apellidos: 'Principal', correo: 'admin@dubss.com', rol: 'ADMINISTRADOR_DUBSS' }
 
@@ -251,7 +252,7 @@ describe('FinalistasScreen', () => {
     await user.click(screen.getByRole('button', { name: 'Notificar seleccionados (2)' }))
 
     const dialogo = await screen.findByRole('dialog', { name: /Notificar seleccionados/ })
-    fireEvent.change(within(dialogo).getByLabelText('Plazo de entrega'), { target: { value: mananaIso() } })
+    await elegirFecha(user, within(dialogo).getByLabelText('Plazo de entrega'), mananaIso())
     await user.type(within(dialogo).getByLabelText('Lugar y horario de entrega'), 'DUBSS oficina 3')
     await user.type(within(dialogo).getByLabelText('Documentos físicos a presentar'), 'CI y certificado')
     await user.click(within(dialogo).getByRole('button', { name: 'Enviar aviso' }))
@@ -283,9 +284,10 @@ describe('FinalistasScreen', () => {
     expect(within(dialogo).getByText('El lugar y horario de entrega son obligatorios')).toBeInTheDocument()
     expect(within(dialogo).getByText('Indica los documentos que deben presentar')).toBeInTheDocument()
 
-    fireEvent.change(within(dialogo).getByLabelText('Plazo de entrega'), { target: { value: hoyIso() } })
-    await user.click(within(dialogo).getByRole('button', { name: 'Enviar aviso' }))
-    expect(await within(dialogo).findByText('El plazo debe ser posterior a hoy')).toBeInTheDocument()
+    // El calendario ni siquiera deja elegir hoy: el plazo tiene que ser posterior.
+    const hoy = await abrirYBuscarDia(user, within(dialogo).getByLabelText('Plazo de entrega'), hoyIso())
+    expect(hoy).toBeDisabled()
+    await user.keyboard('{Escape}')
     expect(screen.queryByRole('button', { name: 'Confirmar envío' })).not.toBeInTheDocument()
     expect(cliente.post).not.toHaveBeenCalled()
   })
@@ -310,7 +312,7 @@ describe('FinalistasScreen', () => {
     expect(screen.getByText(/Elige un finalista de la tabla/)).toBeInTheDocument()
 
     await user.click(screen.getAllByRole('button', { name: 'Registrar entrega' })[0])
-    expect(screen.getByLabelText('Fecha de recepción')).toHaveValue(hoyIso())
+    expect(screen.getByLabelText('Fecha de recepción')).toHaveTextContent(formatoVisible(hoyIso()))
     await user.type(screen.getByLabelText('Observaciones (opcional)'), 'Todo completo')
     await user.click(screen.getByRole('button', { name: 'Marcar como recibida' }))
 
@@ -330,10 +332,10 @@ describe('FinalistasScreen', () => {
     await screen.findAllByText('Nombre1 Apellido1')
     await user.click(screen.getAllByRole('button', { name: 'Registrar entrega' })[0])
 
-    fireEvent.change(screen.getByLabelText('Fecha de recepción'), { target: { value: mananaIso() } })
-    await user.click(screen.getByRole('button', { name: 'Marcar como recibida' }))
-
-    expect(await screen.findByText('La fecha de recepción no puede ser futura')).toBeInTheDocument()
+    // El calendario no deja elegir un día futuro.
+    const manana = await abrirYBuscarDia(user, screen.getByLabelText('Fecha de recepción'), mananaIso())
+    expect(manana === null || (manana as HTMLButtonElement).disabled).toBe(true)
+    await user.keyboard('{Escape}')
     expect(cliente.patch).not.toHaveBeenCalled()
   })
 
