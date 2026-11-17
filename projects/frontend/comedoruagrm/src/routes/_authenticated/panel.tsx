@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Loader2Icon } from 'lucide-react'
+import { LayoutDashboardIcon, Loader2Icon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { etiquetaRol, useCerrarSesion } from '@/features/auth'
@@ -25,7 +25,7 @@ function PanelPage() {
 
   if (usuario.rol === 'ADMINISTRADOR_DUBSS') {
     return (
-      <AdminLayout title="Panel" user={user} onCerrarSesion={alCerrarSesion} {...acciones}>
+      <AdminLayout title="Panel" icono={LayoutDashboardIcon} user={user} onCerrarSesion={alCerrarSesion} {...acciones}>
         {saludo}
       </AdminLayout>
     )
@@ -33,7 +33,7 @@ function PanelPage() {
 
   if (usuario.rol === 'POSTULANTE') {
     return (
-      <EstudianteLayout title="Panel" user={user} onCerrarSesion={alCerrarSesion} {...acciones}>
+      <EstudianteLayout title="Panel" icono={LayoutDashboardIcon} user={user} onCerrarSesion={alCerrarSesion} {...acciones}>
         {saludo}
       </EstudianteLayout>
     )

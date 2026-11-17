@@ -50,6 +50,7 @@ export function PostularScreen({ titulo, activeHref, usuarioActual }: PostularSc
     <EstudianteLayout
       title={titulo}
       activeHref={activeHref}
+      migas={[{ label: 'Mis postulaciones', href: '/mis-postulaciones' }, { label: titulo }]}
       user={{ nombre: `${usuarioActual.nombres} ${usuarioActual.apellidos}`, rol: etiquetaRol(usuarioActual.rol) }}
       onCerrarSesion={() => cerrarSesion.mutate()}
       {...accionesDeCuenta}
