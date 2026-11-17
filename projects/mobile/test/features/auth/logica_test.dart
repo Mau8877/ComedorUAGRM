@@ -36,9 +36,9 @@ void main() {
       expect(rutaInicioPorRol('ADMINISTRADOR_DUBSS'), '/admin');
     });
 
-    test('los roles sin shell van a /sin-modulo', () {
+    test('el rol sin módulo va a /sin-modulo y el personal del comedor a /asistencia', () {
       expect(rutaInicioPorRol('DIRECTIVO'), '/sin-modulo');
-      expect(rutaInicioPorRol('PERSONAL_COMEDOR'), '/sin-modulo');
+      expect(rutaInicioPorRol('PERSONAL_COMEDOR'), '/asistencia');
     });
 
     test('un rol desconocido vuelve al login', () {

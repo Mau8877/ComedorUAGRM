@@ -6,8 +6,8 @@ import '../providers/auth_provider.dart';
 import '../providers/auth_usuario_provider.dart';
 import '../rol_destino.dart';
 
-/// Aviso para los roles que todavía no tienen módulo en la app (`DIRECTIVO` y
-/// `PERSONAL_COMEDOR`, ver `rutaInicioPorRol`), con la opción de cerrar sesión.
+/// Aviso para los roles que todavía no tienen módulo en la app (`DIRECTIVO`, ver
+/// `rutaInicioPorRol`), con la opción de cerrar sesión.
 class SinModuloScreen extends ConsumerWidget {
   const SinModuloScreen({super.key});
 

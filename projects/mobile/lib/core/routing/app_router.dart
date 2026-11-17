@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/asistencia/screens/registrar_asistencia_screen.dart';
 import '../../features/auth/models/usuario.dart';
 import '../../features/auth/providers/auth_sesion_provider.dart';
 import '../../features/auth/rol_destino.dart';
@@ -15,6 +16,7 @@ import '../../features/perfil/screens/perfil_screen.dart';
 import '../../features/postulaciones/models/revision_documento.dart';
 import '../../features/postulaciones/screens/detalle_postulacion_screen.dart';
 import '../../features/postulaciones/screens/documentos_postulacion_screen.dart';
+import '../../features/postulaciones/screens/postular_screen.dart';
 import '../../features/postulaciones/screens/revisar_documento_screen.dart';
 import '../../features/pruebas_layout/screens/demo_home_screen.dart';
 import '../../features/pruebas_layout/screens/ingredientes_screen.dart';
@@ -71,7 +73,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/perfil', builder: (context, state) => const PerfilScreen()),
       GoRoute(path: '/sin-modulo', builder: (context, state) => const SinModuloScreen()),
       GoRoute(path: '/admin', builder: (context, state) => const AdminShell()),
+      // Registrar asistencia (CU10): módulo del Personal del Comedor. El backend exige el rol en cada endpoint.
+      GoRoute(path: '/asistencia', builder: (context, state) => const RegistrarAsistenciaScreen()),
       GoRoute(path: '/estudiante', builder: (context, state) => const EstudianteShell()),
+      // Nueva postulación y «Corregir y reenviar» (CU-02): las dos entran acá, el backend decide si abre un borrador
+      // nuevo o la postulación devuelta.
+      GoRoute(path: '/postular', builder: (context, state) => const PostularScreen()),
       // Detalle de una postulación (CU04): la lista vive dentro del shell del Estudiante. El `redirect` global
       // ya exige sesión: sin ella, primero el login.
       GoRoute(
