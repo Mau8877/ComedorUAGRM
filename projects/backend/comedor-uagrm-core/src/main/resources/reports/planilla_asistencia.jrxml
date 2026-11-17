@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Planilla de asistencia imprimible (CU09). Formato JRXML de JasperReports 7 (elementos con `kind`, sin namespace
+     XML). GENERADO por un script a partir de las medidas de las columnas: si se cambia el formato, se edita este
+     archivo a mano (las 31 columnas de dia son repetidas a proposito). Los datos llegan ya formateados desde
+     PlanillaPdfService; la plantilla solo los coloca. Cada columna de dia se dibuja solo si el dia existe en el
+     periodo (parametro Dn no vacio). El encabezado, los rotulos y el formato oficial estan por definir con la
+     DUBSS. -->
+<jasperReport name="planilla_asistencia" language="java" columnCount="1" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="24" bottomMargin="24" whenNoDataType="AllSectionsNoDetail">
+	<style name="base" default="true" fontName="SansSerif" fontSize="8" pdfFontName="Helvetica" pdfEncoding="Cp1252" pdfEmbedded="false"/>
+	<parameter name="TITULO" class="java.lang.String"/>
+	<parameter name="CONVOCATORIA" class="java.lang.String"/>
+	<parameter name="GESTION" class="java.lang.String"/>
+	<parameter name="PERIODO" class="java.lang.String"/>
+	<parameter name="TOTAL" class="java.lang.String"/>
+	<parameter name="GENERADO_EN" class="java.lang.String"/>
+	<parameter name="GENERADO_POR" class="java.lang.String"/>
+	<parameter name="D1" class="java.lang.String"/>
+	<parameter name="D2" class="java.lang.String"/>
+	<parameter name="D3" class="java.lang.String"/>
+	<parameter name="D4" class="java.lang.String"/>
+	<parameter name="D5" class="java.lang.String"/>
+	<parameter name="D6" class="java.lang.String"/>
+	<parameter name="D7" class="java.lang.String"/>
+	<parameter name="D8" class="java.lang.String"/>
+	<parameter name="D9" class="java.lang.String"/>
+	<parameter name="D10" class="java.lang.String"/>
+	<parameter name="D11" class="java.lang.String"/>
+	<parameter name="D12" class="java.lang.String"/>
+	<parameter name="D13" class="java.lang.String"/>
+	<parameter name="D14" class="java.lang.String"/>
+	<parameter name="D15" class="java.lang.String"/>
+	<parameter name="D16" class="java.lang.String"/>
+	<parameter name="D17" class="java.lang.String"/>
+	<parameter name="D18" class="java.lang.String"/>
+	<parameter name="D19" class="java.lang.String"/>
+	<parameter name="D20" class="java.lang.String"/>
+	<parameter name="D21" class="java.lang.String"/>
+	<parameter name="D22" class="java.lang.String"/>
+	<parameter name="D23" class="java.lang.String"/>
+	<parameter name="D24" class="java.lang.String"/>
+	<parameter name="D25" class="java.lang.String"/>
+	<parameter name="D26" class="java.lang.String"/>
+	<parameter name="D27" class="java.lang.String"/>
+	<parameter name="D28" class="java.lang.String"/>
+	<parameter name="D29" class="java.lang.String"/>
+	<parameter name="D30" class="java.lang.String"/>
+	<parameter name="D31" class="java.lang.String"/>
+	<field name="orden" class="java.lang.String"/>
+	<field name="nombre" class="java.lang.String"/>
+	<field name="ci" class="java.lang.String"/>
+	<field name="carrera" class="java.lang.String"/>
+	<title height="76">
+		<element kind="staticText" x="0" y="0" width="802" height="13" fontSize="10.0" bold="true" pdfFontName="Helvetica-Bold" hTextAlign="Center"><text><![CDATA[UAGRM – Universidad Autónoma Gabriel René Moreno – DUBSS]]></text></element>
+		<element kind="textField" x="0" y="15" width="802" height="20" fontSize="14.0" bold="true" pdfFontName="Helvetica-Bold" hTextAlign="Center"><expression><![CDATA[$P{TITULO}]]></expression></element>
+		<element kind="textField" x="0" y="40" width="802" height="13" fontSize="9.0" bold="true" pdfFontName="Helvetica-Bold"><expression><![CDATA["Convocatoria: " + $P{CONVOCATORIA} + "  (gestión " + $P{GESTION} + ")    Periodo: " + $P{PERIODO}]]></expression></element>
+		<element kind="textField" x="0" y="55" width="802" height="12"><expression><![CDATA[$P{TOTAL} + "    Generada el " + $P{GENERADO_EN} + " por " + $P{GENERADO_POR}]]></expression></element>
+	</title>
+	<columnHeader height="22">
+		<element kind="staticText" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="0" y="0" width="22" height="22" bold="true" pdfFontName="Helvetica-Bold" vTextAlign="Middle"><box leftPadding="2"><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><text><![CDATA[N.º]]></text></element>
+		<element kind="staticText" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="22" y="0" width="130" height="22" bold="true" pdfFontName="Helvetica-Bold" vTextAlign="Middle"><box leftPadding="2"><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><text><![CDATA[Apellidos y nombres]]></text></element>
+		<element kind="staticText" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="152" y="0" width="52" height="22" bold="true" pdfFontName="Helvetica-Bold" vTextAlign="Middle"><box leftPadding="2"><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><text><![CDATA[CI]]></text></element>
+		<element kind="staticText" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="204" y="0" width="88" height="22" bold="true" pdfFontName="Helvetica-Bold" vTextAlign="Middle"><box leftPadding="2"><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><text><![CDATA[Carrera]]></text></element>
+		<element kind="staticText" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="292" y="0" width="66" height="22" bold="true" pdfFontName="Helvetica-Bold" vTextAlign="Middle"><box leftPadding="2"><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><text><![CDATA[Fotocopia de carnet]]></text></element>
+		<element kind="textField" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="358" y="0" width="14" height="22" fontSize="5.0" bold="true" pdfFontName="Helvetica-Bold" hTextAlign="Center" vTextAlign="Middle"><printWhenExpression><![CDATA[!$P{D1}.isEmpty()]]></printWhenExpression><box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><expression><![CDATA[$P{D1}]]></expression></element>
+		<element kind="textField" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="372" y="0" width="14" height="22" fontSize="5.0" bold="true" pdfFontName="Helvetica-Bold" hTextAlign="Center" vTextAlign="Middle"><printWhenExpression><![CDATA[!$P{D2}.isEmpty()]]></printWhenExpression><box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><expression><![CDATA[$P{D2}]]></expression></element>
+		<element kind="textField" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="386" y="0" width="14" height="22" fontSize="5.0" bold="true" pdfFontName="Helvetica-Bold" hTextAlign="Center" vTextAlign="Middle"><printWhenExpression><![CDATA[!$P{D3}.isEmpty()]]></printWhenExpression><box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><expression><![CDATA[$P{D3}]]></expression></element>
+		<element kind="textField" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="400" y="0" width="14" height="22" fontSize="5.0" bold="true" pdfFontName="Helvetica-Bold" hTextAlign="Center" vTextAlign="Middle"><printWhenExpression><![CDATA[!$P{D4}.isEmpty()]]></printWhenExpression><box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><expression><![CDATA[$P{D4}]]></expression></element>
+		<element kind="textField" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="414" y="0" width="14" height="22" fontSize="5.0" bold="true" pdfFontName="Helvetica-Bold" hTextAlign="Center" vTextAlign="Middle"><printWhenExpression><![CDATA[!$P{D5}.isEmpty()]]></printWhenExpression><box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><expression><![CDATA[$P{D5}]]></expression></element>
+		<element kind="textField" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="428" y="0" width="14" height="22" fontSize="5.0" bold="true" pdfFontName="Helvetica-Bold" hTextAlign="Center" vTextAlign="Middle"><printWhenExpression><![CDATA[!$P{D6}.isEmpty()]]></printWhenExpression><box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><expression><![CDATA[$P{D6}]]></expression></element>
+		<element kind="textField" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="442" y="0" width="14" height="22" fontSize="5.0" bold="true" pdfFontName="Helvetica-Bold" hTextAlign="Center" vTextAlign="Middle"><printWhenExpression><![CDATA[!$P{D7}.isEmpty()]]></printWhenExpression><box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><expression><![CDATA[$P{D7}]]></expression></element>
+		<element kind="textField" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="456" y="0" width="14" height="22" fontSize="5.0" bold="true" pdfFontName="Helvetica-Bold" hTextAlign="Center" vTextAlign="Middle"><printWhenExpression><![CDATA[!$P{D8}.isEmpty()]]></printWhenExpression><box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><expression><![CDATA[$P{D8}]]></expression></element>
+		<element kind="textField" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="470" y="0" width="14" height="22" fontSize="5.0" bold="true" pdfFontName="Helvetica-Bold" hTextAlign="Center" vTextAlign="Middle"><printWhenExpression><![CDATA[!$P{D9}.isEmpty()]]></printWhenExpression><box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><expression><![CDATA[$P{D9}]]></expression></element>
+		<element kind="textField" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="484" y="0" width="14" height="22" fontSize="5.0" bold="true" pdfFontName="Helvetica-Bold" hTextAlign="Center" vTextAlign="Middle"><printWhenExpression><![CDATA[!$P{D10}.isEmpty()]]></printWhenExpression><box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><expression><![CDATA[$P{D10}]]></expression></element>
+		<element kind="textField" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="498" y="0" width="14" height="22" fontSize="5.0" bold="true" pdfFontName="Helvetica-Bold" hTextAlign="Center" vTextAlign="Middle"><printWhenExpression><![CDATA[!$P{D11}.isEmpty()]]></printWhenExpression><box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><expression><![CDATA[$P{D11}]]></expression></element>
+		<element kind="textField" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="512" y="0" width="14" height="22" fontSize="5.0" bold="true" pdfFontName="Helvetica-Bold" hTextAlign="Center" vTextAlign="Middle"><printWhenExpression><![CDATA[!$P{D12}.isEmpty()]]></printWhenExpression><box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><expression><![CDATA[$P{D12}]]></expression></element>
+		<element kind="textField" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="526" y="0" width="14" height="22" fontSize="5.0" bold="true" pdfFontName="Helvetica-Bold" hTextAlign="Center" vTextAlign="Middle"><printWhenExpression><![CDATA[!$P{D13}.isEmpty()]]></printWhenExpression><box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><expression><![CDATA[$P{D13}]]></expression></element>
+		<element kind="textField" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="540" y="0" width="14" height="22" fontSize="5.0" bold="true" pdfFontName="Helvetica-Bold" hTextAlign="Center" vTextAlign="Middle"><printWhenExpression><![CDATA[!$P{D14}.isEmpty()]]></printWhenExpression><box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><expression><![CDATA[$P{D14}]]></expression></element>
+		<element kind="textField" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="554" y="0" width="14" height="22" fontSize="5.0" bold="true" pdfFontName="Helvetica-Bold" hTextAlign="Center" vTextAlign="Middle"><printWhenExpression><![CDATA[!$P{D15}.isEmpty()]]></printWhenExpression><box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><expression><![CDATA[$P{D15}]]></expression></element>
+		<element kind="textField" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="568" y="0" width="14" height="22" fontSize="5.0" bold="true" pdfFontName="Helvetica-Bold" hTextAlign="Center" vTextAlign="Middle"><printWhenExpression><![CDATA[!$P{D16}.isEmpty()]]></printWhenExpression><box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><expression><![CDATA[$P{D16}]]></expression></element>
+		<element kind="textField" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="582" y="0" width="14" height="22" fontSize="5.0" bold="true" pdfFontName="Helvetica-Bold" hTextAlign="Center" vTextAlign="Middle"><printWhenExpression><![CDATA[!$P{D17}.isEmpty()]]></printWhenExpression><box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><expression><![CDATA[$P{D17}]]></expression></element>
+		<element kind="textField" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="596" y="0" width="14" height="22" fontSize="5.0" bold="true" pdfFontName="Helvetica-Bold" hTextAlign="Center" vTextAlign="Middle"><printWhenExpression><![CDATA[!$P{D18}.isEmpty()]]></printWhenExpression><box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><expression><![CDATA[$P{D18}]]></expression></element>
+		<element kind="textField" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="610" y="0" width="14" height="22" fontSize="5.0" bold="true" pdfFontName="Helvetica-Bold" hTextAlign="Center" vTextAlign="Middle"><printWhenExpression><![CDATA[!$P{D19}.isEmpty()]]></printWhenExpression><box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><expression><![CDATA[$P{D19}]]></expression></element>
+		<element kind="textField" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="624" y="0" width="14" height="22" fontSize="5.0" bold="true" pdfFontName="Helvetica-Bold" hTextAlign="Center" vTextAlign="Middle"><printWhenExpression><![CDATA[!$P{D20}.isEmpty()]]></printWhenExpression><box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><expression><![CDATA[$P{D20}]]></expression></element>
+		<element kind="textField" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="638" y="0" width="14" height="22" fontSize="5.0" bold="true" pdfFontName="Helvetica-Bold" hTextAlign="Center" vTextAlign="Middle"><printWhenExpression><![CDATA[!$P{D21}.isEmpty()]]></printWhenExpression><box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><expression><![CDATA[$P{D21}]]></expression></element>
+		<element kind="textField" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="652" y="0" width="14" height="22" fontSize="5.0" bold="true" pdfFontName="Helvetica-Bold" hTextAlign="Center" vTextAlign="Middle"><printWhenExpression><![CDATA[!$P{D22}.isEmpty()]]></printWhenExpression><box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><expression><![CDATA[$P{D22}]]></expression></element>
+		<element kind="textField" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="666" y="0" width="14" height="22" fontSize="5.0" bold="true" pdfFontName="Helvetica-Bold" hTextAlign="Center" vTextAlign="Middle"><printWhenExpression><![CDATA[!$P{D23}.isEmpty()]]></printWhenExpression><box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><expression><![CDATA[$P{D23}]]></expression></element>
+		<element kind="textField" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="680" y="0" width="14" height="22" fontSize="5.0" bold="true" pdfFontName="Helvetica-Bold" hTextAlign="Center" vTextAlign="Middle"><printWhenExpression><![CDATA[!$P{D24}.isEmpty()]]></printWhenExpression><box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><expression><![CDATA[$P{D24}]]></expression></element>
+		<element kind="textField" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="694" y="0" width="14" height="22" fontSize="5.0" bold="true" pdfFontName="Helvetica-Bold" hTextAlign="Center" vTextAlign="Middle"><printWhenExpression><![CDATA[!$P{D25}.isEmpty()]]></printWhenExpression><box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><expression><![CDATA[$P{D25}]]></expression></element>
+		<element kind="textField" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="708" y="0" width="14" height="22" fontSize="5.0" bold="true" pdfFontName="Helvetica-Bold" hTextAlign="Center" vTextAlign="Middle"><printWhenExpression><![CDATA[!$P{D26}.isEmpty()]]></printWhenExpression><box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><expression><![CDATA[$P{D26}]]></expression></element>
+		<element kind="textField" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="722" y="0" width="14" height="22" fontSize="5.0" bold="true" pdfFontName="Helvetica-Bold" hTextAlign="Center" vTextAlign="Middle"><printWhenExpression><![CDATA[!$P{D27}.isEmpty()]]></printWhenExpression><box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><expression><![CDATA[$P{D27}]]></expression></element>
+		<element kind="textField" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="736" y="0" width="14" height="22" fontSize="5.0" bold="true" pdfFontName="Helvetica-Bold" hTextAlign="Center" vTextAlign="Middle"><printWhenExpression><![CDATA[!$P{D28}.isEmpty()]]></printWhenExpression><box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><expression><![CDATA[$P{D28}]]></expression></element>
+		<element kind="textField" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="750" y="0" width="14" height="22" fontSize="5.0" bold="true" pdfFontName="Helvetica-Bold" hTextAlign="Center" vTextAlign="Middle"><printWhenExpression><![CDATA[!$P{D29}.isEmpty()]]></printWhenExpression><box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><expression><![CDATA[$P{D29}]]></expression></element>
+		<element kind="textField" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="764" y="0" width="14" height="22" fontSize="5.0" bold="true" pdfFontName="Helvetica-Bold" hTextAlign="Center" vTextAlign="Middle"><printWhenExpression><![CDATA[!$P{D30}.isEmpty()]]></printWhenExpression><box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><expression><![CDATA[$P{D30}]]></expression></element>
+		<element kind="textField" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="778" y="0" width="14" height="22" fontSize="5.0" bold="true" pdfFontName="Helvetica-Bold" hTextAlign="Center" vTextAlign="Middle"><printWhenExpression><![CDATA[!$P{D31}.isEmpty()]]></printWhenExpression><box><pen lineWidth="0.5" lineColor="#FFFFFF"/></box><expression><![CDATA[$P{D31}]]></expression></element>
+	</columnHeader>
+	<detail>
+		<band height="34">
+			<element kind="textField" x="0" y="0" width="22" height="34" vTextAlign="Middle"><box leftPadding="2"><pen lineWidth="0.5"/></box><expression><![CDATA[$F{orden}]]></expression></element>
+			<element kind="textField" x="22" y="0" width="130" height="34" vTextAlign="Middle"><box leftPadding="2"><pen lineWidth="0.5"/></box><expression><![CDATA[$F{nombre}]]></expression></element>
+			<element kind="textField" x="152" y="0" width="52" height="34" vTextAlign="Middle"><box leftPadding="2"><pen lineWidth="0.5"/></box><expression><![CDATA[$F{ci}]]></expression></element>
+			<element kind="textField" x="204" y="0" width="88" height="34" vTextAlign="Middle"><box leftPadding="2"><pen lineWidth="0.5"/></box><expression><![CDATA[$F{carrera}]]></expression></element>
+			<element kind="rectangle" x="292" y="0" width="66" height="34"><pen lineWidth="0.5"/></element>
+			<element kind="rectangle" x="358" y="0" width="14" height="34"><printWhenExpression><![CDATA[!$P{D1}.isEmpty()]]></printWhenExpression><pen lineWidth="0.5"/></element>
+			<element kind="rectangle" x="372" y="0" width="14" height="34"><printWhenExpression><![CDATA[!$P{D2}.isEmpty()]]></printWhenExpression><pen lineWidth="0.5"/></element>
+			<element kind="rectangle" x="386" y="0" width="14" height="34"><printWhenExpression><![CDATA[!$P{D3}.isEmpty()]]></printWhenExpression><pen lineWidth="0.5"/></element>
+			<element kind="rectangle" x="400" y="0" width="14" height="34"><printWhenExpression><![CDATA[!$P{D4}.isEmpty()]]></printWhenExpression><pen lineWidth="0.5"/></element>
+			<element kind="rectangle" x="414" y="0" width="14" height="34"><printWhenExpression><![CDATA[!$P{D5}.isEmpty()]]></printWhenExpression><pen lineWidth="0.5"/></element>
+			<element kind="rectangle" x="428" y="0" width="14" height="34"><printWhenExpression><![CDATA[!$P{D6}.isEmpty()]]></printWhenExpression><pen lineWidth="0.5"/></element>
+			<element kind="rectangle" x="442" y="0" width="14" height="34"><printWhenExpression><![CDATA[!$P{D7}.isEmpty()]]></printWhenExpression><pen lineWidth="0.5"/></element>
+			<element kind="rectangle" x="456" y="0" width="14" height="34"><printWhenExpression><![CDATA[!$P{D8}.isEmpty()]]></printWhenExpression><pen lineWidth="0.5"/></element>
+			<element kind="rectangle" x="470" y="0" width="14" height="34"><printWhenExpression><![CDATA[!$P{D9}.isEmpty()]]></printWhenExpression><pen lineWidth="0.5"/></element>
+			<element kind="rectangle" x="484" y="0" width="14" height="34"><printWhenExpression><![CDATA[!$P{D10}.isEmpty()]]></printWhenExpression><pen lineWidth="0.5"/></element>
+			<element kind="rectangle" x="498" y="0" width="14" height="34"><printWhenExpression><![CDATA[!$P{D11}.isEmpty()]]></printWhenExpression><pen lineWidth="0.5"/></element>
+			<element kind="rectangle" x="512" y="0" width="14" height="34"><printWhenExpression><![CDATA[!$P{D12}.isEmpty()]]></printWhenExpression><pen lineWidth="0.5"/></element>
+			<element kind="rectangle" x="526" y="0" width="14" height="34"><printWhenExpression><![CDATA[!$P{D13}.isEmpty()]]></printWhenExpression><pen lineWidth="0.5"/></element>
+			<element kind="rectangle" x="540" y="0" width="14" height="34"><printWhenExpression><![CDATA[!$P{D14}.isEmpty()]]></printWhenExpression><pen lineWidth="0.5"/></element>
+			<element kind="rectangle" x="554" y="0" width="14" height="34"><printWhenExpression><![CDATA[!$P{D15}.isEmpty()]]></printWhenExpression><pen lineWidth="0.5"/></element>
+			<element kind="rectangle" x="568" y="0" width="14" height="34"><printWhenExpression><![CDATA[!$P{D16}.isEmpty()]]></printWhenExpression><pen lineWidth="0.5"/></element>
+			<element kind="rectangle" x="582" y="0" width="14" height="34"><printWhenExpression><![CDATA[!$P{D17}.isEmpty()]]></printWhenExpression><pen lineWidth="0.5"/></element>
+			<element kind="rectangle" x="596" y="0" width="14" height="34"><printWhenExpression><![CDATA[!$P{D18}.isEmpty()]]></printWhenExpression><pen lineWidth="0.5"/></element>
+			<element kind="rectangle" x="610" y="0" width="14" height="34"><printWhenExpression><![CDATA[!$P{D19}.isEmpty()]]></printWhenExpression><pen lineWidth="0.5"/></element>
+			<element kind="rectangle" x="624" y="0" width="14" height="34"><printWhenExpression><![CDATA[!$P{D20}.isEmpty()]]></printWhenExpression><pen lineWidth="0.5"/></element>
+			<element kind="rectangle" x="638" y="0" width="14" height="34"><printWhenExpression><![CDATA[!$P{D21}.isEmpty()]]></printWhenExpression><pen lineWidth="0.5"/></element>
+			<element kind="rectangle" x="652" y="0" width="14" height="34"><printWhenExpression><![CDATA[!$P{D22}.isEmpty()]]></printWhenExpression><pen lineWidth="0.5"/></element>
+			<element kind="rectangle" x="666" y="0" width="14" height="34"><printWhenExpression><![CDATA[!$P{D23}.isEmpty()]]></printWhenExpression><pen lineWidth="0.5"/></element>
+			<element kind="rectangle" x="680" y="0" width="14" height="34"><printWhenExpression><![CDATA[!$P{D24}.isEmpty()]]></printWhenExpression><pen lineWidth="0.5"/></element>
+			<element kind="rectangle" x="694" y="0" width="14" height="34"><printWhenExpression><![CDATA[!$P{D25}.isEmpty()]]></printWhenExpression><pen lineWidth="0.5"/></element>
+			<element kind="rectangle" x="708" y="0" width="14" height="34"><printWhenExpression><![CDATA[!$P{D26}.isEmpty()]]></printWhenExpression><pen lineWidth="0.5"/></element>
+			<element kind="rectangle" x="722" y="0" width="14" height="34"><printWhenExpression><![CDATA[!$P{D27}.isEmpty()]]></printWhenExpression><pen lineWidth="0.5"/></element>
+			<element kind="rectangle" x="736" y="0" width="14" height="34"><printWhenExpression><![CDATA[!$P{D28}.isEmpty()]]></printWhenExpression><pen lineWidth="0.5"/></element>
+			<element kind="rectangle" x="750" y="0" width="14" height="34"><printWhenExpression><![CDATA[!$P{D29}.isEmpty()]]></printWhenExpression><pen lineWidth="0.5"/></element>
+			<element kind="rectangle" x="764" y="0" width="14" height="34"><printWhenExpression><![CDATA[!$P{D30}.isEmpty()]]></printWhenExpression><pen lineWidth="0.5"/></element>
+			<element kind="rectangle" x="778" y="0" width="14" height="34"><printWhenExpression><![CDATA[!$P{D31}.isEmpty()]]></printWhenExpression><pen lineWidth="0.5"/></element>
+		</band>
+	</detail>
+	<summary height="40">
+		<element kind="staticText" x="0" y="8" width="802" height="12" italic="true"><text><![CDATA[Cada becado firma en la columna del día en que usa el beneficio y pega en el recuadro la fotocopia de su carnet universitario.]]></text></element>
+	</summary>
+	<pageFooter height="16">
+		<element kind="textField" x="0" y="2" width="762" height="12" fontSize="8.0" hTextAlign="Right"><expression><![CDATA["Página " + $V{PAGE_NUMBER}]]></expression></element>
+		<element kind="textField" evaluationTime="Report" x="762" y="2" width="40" height="12" fontSize="8.0" hTextAlign="Left"><expression><![CDATA[" de " + $V{PAGE_NUMBER}]]></expression></element>
+	</pageFooter>
+</jasperReport>
