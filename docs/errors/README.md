@@ -104,6 +104,14 @@ docs/errors/
 - [`ERR_VAL_02`](postulaciones/ERRORES_POSTULACIONES.md#err_val_02) — El postulante no es elegible: cuenta desactivada o que no es de un postulante (403)
 - [`ERR_VAL_03`](postulaciones/ERRORES_POSTULACIONES.md#err_val_03) — La convocatoria no está abierta o está fuera de fechas (409)
 
+### Envío de la postulación (ENV)
+
+- [`ERR_ENV_01`](postulaciones/ERRORES_POSTULACIONES.md#err_env_01) — No hay una convocatoria abierta que reciba postulaciones (409)
+- [`ERR_ENV_02`](postulaciones/ERRORES_POSTULACIONES.md#err_env_02) — La postulación no existe o no es del usuario (404)
+- [`ERR_ENV_03`](postulaciones/ERRORES_POSTULACIONES.md#err_env_03) — La postulación ya no se puede enviar (409)
+- [`ERR_ENV_04`](postulaciones/ERRORES_POSTULACIONES.md#err_env_04) — Falta un campo o documento obligatorio (400)
+- [`ERR_ENV_05`](postulaciones/ERRORES_POSTULACIONES.md#err_env_05) — Un dato del formulario es inválido (400)
+
 ### Documentos de la postulación (`DOC`)
 
 - [`ERR_DOC_01`](postulaciones/ERRORES_POSTULACIONES.md#err_doc_01) — No llegó el archivo o está vacío (400)
@@ -204,3 +212,42 @@ docs/errors/
 - [`ERR_BEC_08`](becas/ERRORES_BECAS.md#err_bec_08) — El postulante confirmado ya no es el siguiente disponible (409)
 - [`ERR_BEC_09`](becas/ERRORES_BECAS.md#err_bec_09) — La beca ya fue reemplazada (409)
 - [`ERR_BEC_10`](becas/ERRORES_BECAS.md#err_bec_10) — `sort` no soportado en el listado del padrón (400)
+
+### Planillas de asistencia (`PLA`)
+
+- [`ERR_PLA_01`](planillas/ERRORES_PLANILLAS.md#err_pla_01) — La fecha final es anterior a la inicial (400)
+- [`ERR_PLA_02`](planillas/ERRORES_PLANILLAS.md#err_pla_02) — El periodo no está dentro de la gestión académica (400)
+- [`ERR_PLA_03`](planillas/ERRORES_PLANILLAS.md#err_pla_03) — El periodo supera los 31 días de la planilla (400)
+- [`ERR_PLA_04`](planillas/ERRORES_PLANILLAS.md#err_pla_04) — La convocatoria no tiene becas vigentes (409)
+- [`ERR_PLA_05`](planillas/ERRORES_PLANILLAS.md#err_pla_05) — La planilla no existe (404)
+- [`ERR_PLA_06`](planillas/ERRORES_PLANILLAS.md#err_pla_06) — El archivo de la planilla no está en el almacenamiento (404)
+
+### Asistencia digital (`ASI`)
+
+- [`ERR_ASI_01`](asistencias/ERRORES_ASISTENCIAS.md#err_asi_01) — El CI no corresponde a ningún becado (404)
+- [`ERR_ASI_02`](asistencias/ERRORES_ASISTENCIAS.md#err_asi_02) — La beca no está vigente: no se registra asistencia (409)
+- [`ERR_ASI_03`](asistencias/ERRORES_ASISTENCIAS.md#err_asi_03) — La beca no existe (404)
+
+### Cotejo de asistencia (`COT`)
+
+- [`ERR_COT_01`](cotejos/ERRORES_COTEJOS.md#err_cot_01) — La planilla no existe (404)
+- [`ERR_COT_02`](cotejos/ERRORES_COTEJOS.md#err_cot_02) — Coincidencias y discrepancias no suman el total (400)
+- [`ERR_COT_03`](cotejos/ERRORES_COTEJOS.md#err_cot_03) — El resultado no corresponde a las discrepancias (400)
+- [`ERR_COT_04`](cotejos/ERRORES_COTEJOS.md#err_cot_04) — Con discrepancias se exigen observaciones (400)
+
+### Mi beca (`MBE`)
+
+- [`ERR_MBE_01`](mibeca/ERRORES_MIBECA.md#err_mbe_01) — El usuario no tiene beca (404)
+- [`ERR_MBE_02`](mibeca/ERRORES_MIBECA.md#err_mbe_02) — Rango de fechas inválido: «desde» posterior a «hasta» (400)
+- [`ERR_MBE_03`](mibeca/ERRORES_MIBECA.md#err_mbe_03) — Campo de `sort` no soportado en el historial (400)
+
+### Preselección (`MOD`)
+
+- [`ERR_MOD_01`](preseleccion/ERRORES_PRESELECCION.md#err_mod_01) — Parámetros del modelo no válidos: variable faltante, repetida o desconocida, ponderación fuera de rango o suma distinta de 100 (400)
+- [`ERR_MOD_02`](preseleccion/ERRORES_PRESELECCION.md#err_mod_02) — No hay una versión vigente del modelo (409)
+- [`ERR_MOD_03`](preseleccion/ERRORES_PRESELECCION.md#err_mod_03) — Ya hay un reprocesamiento en curso para la convocatoria (409)
+- [`ERR_MOD_04`](preseleccion/ERRORES_PRESELECCION.md#err_mod_04) — Los resultados ya fueron publicados: no se reprocesa (409)
+- [`ERR_MOD_05`](preseleccion/ERRORES_PRESELECCION.md#err_mod_05) — El reprocesamiento no existe (404)
+- [`ERR_MOD_06`](preseleccion/ERRORES_PRESELECCION.md#err_mod_06) — No hay postulaciones calificadas por reprocesar con la versión vigente (409)
+- [`ERR_MOD_07`](preseleccion/ERRORES_PRESELECCION.md#err_mod_07) — Otra versión se guardó al mismo tiempo (409)
+- [`ERR_MOD_08`](preseleccion/ERRORES_PRESELECCION.md#err_mod_08) — La postulación cuya precalificación se consulta no existe (404)

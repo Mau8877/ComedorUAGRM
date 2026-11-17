@@ -169,6 +169,8 @@ erDiagram
     estado_postulacion estado
     timestamptz fecha_envio
     smallint numero_envios
+    smallint intentos_precalificacion
+    timestamptz precalificacion_revision_en
     timestamptz creado_en
     timestamptz actualizado_en
     timestamptz eliminado_en
@@ -274,6 +276,8 @@ erDiagram
     bigint solicitado_por FK
     varchar estado
     int total_postulaciones
+    int procesadas "avance: postulaciones ya recalculadas (CU26)"
+    int fallidas "las que la IA no pudo calcular (CU26, A5)"
     timestamptz iniciado_en
     timestamptz terminado_en
     timestamptz creado_en
@@ -393,6 +397,7 @@ erDiagram
     bigint generada_por FK
     date fecha_desde
     date fecha_hasta
+    int total_becados "cantidad de becados vigentes incluidos (CU09)"
     timestamptz generada_en
     varchar storage_path
     timestamptz creado_en

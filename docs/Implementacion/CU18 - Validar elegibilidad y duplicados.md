@@ -6,7 +6,7 @@
 
 ## Flujo real implementado
 
-No hay pantalla ni ruta HTTP: es un servicio interno que el CU02 (B8, todavía sin implementar) llama al enviar una postulación. Hasta que B8 exista, solo lo ejercitan sus pruebas.
+No hay pantalla ni ruta HTTP: es un servicio interno que el CU02 llama al iniciar y al enviar una postulación ([`EnvioPostulacionService`](CU02%20-%20Enviar%20postulaci%C3%B3n%20a%20la%20Beca%20Comedor.md)).
 
 1. `ValidacionPostulacionService.validar(usuarioCodigo, convocatoriaCodigo)` (`@PreAuthorize("hasRole('POSTULANTE')")`, solo lectura). El usuario sale del token verificado.
 2. `ValidacionPostulacionConsultaRepository.convocatoria()` → si no existe, `404` `ERR_CV_01`.
