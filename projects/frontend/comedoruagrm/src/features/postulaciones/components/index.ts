@@ -1,4 +1,5 @@
 export * from './BloqueFinalista'
+export * from './BorradorPendienteCard'
 export * from './BloqueMotivo'
 export * from './BloqueObservaciones'
 export * from './BloqueResultado'

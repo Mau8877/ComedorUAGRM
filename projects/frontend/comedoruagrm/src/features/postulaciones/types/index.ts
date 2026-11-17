@@ -86,3 +86,4 @@ export interface MisPostulacionesParams {
 }
 
 export * from './documentos'
+export * from './envio'

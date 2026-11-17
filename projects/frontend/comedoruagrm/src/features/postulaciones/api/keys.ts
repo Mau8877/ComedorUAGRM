@@ -7,4 +7,5 @@ export const postulacionesKeys = {
   mias: (params: MisPostulacionesParams) => [...postulacionesKeys.all, 'mias', params] as const,
   detalle: (codigo: string) => [...postulacionesKeys.all, 'detalle', codigo] as const,
   documentos: (codigo: string) => [...postulacionesKeys.all, 'documentos', codigo] as const,
+  miBorrador: () => [...postulacionesKeys.all, 'mi-borrador'] as const,
 }

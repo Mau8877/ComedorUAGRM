@@ -1,12 +1,16 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import type { MisPostulacionesParams } from '../types'
+import type { EnviarPostulacionRequest, GuardarBorradorRequest, MisPostulacionesParams } from '../types'
 import {
   accesoDocumentoApi,
   adjuntarDocumentoApi,
   eliminarDocumentoApi,
+  enviarPostulacionApi,
+  guardarBorradorApi,
+  iniciarPostulacionApi,
   listarDocumentosApi,
   listarMisPostulacionesApi,
+  miBorradorApi,
   obtenerPostulacionApi,
   reemplazarDocumentoApi,
 } from './postulacionesApi'
@@ -78,4 +82,39 @@ export function useEliminarDocumento(codigo: string) {
 /** Pide la dirección temporal de un archivo; quien llama la abre en otra pestaña. */
 export function useAccesoDocumento(codigo: string) {
   return useMutation({ mutationFn: (documento: string) => accesoDocumentoApi(codigo, documento) })
+}
+
+// ---- Enviar la postulación (CU-02) ----
+
+/** «Nueva postulación»: abre (o recupera) la postulación en edición de la convocatoria abierta. */
+export function useIniciarPostulacion() {
+  return useMutation({ mutationFn: iniciarPostulacionApi })
+}
+
+/**
+ * Envía el formulario. Al terminar, «Mis postulaciones» y el detalle quedan desactualizados (aparece una postulación
+ * nueva o cambia su estado), así que se invalidan; la lista de documentos ya no se edita.
+ */
+export function useEnviarPostulacion(codigo: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (respuestas: EnviarPostulacionRequest) => enviarPostulacionApi(codigo, respuestas),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: postulacionesKeys.all }),
+  })
+}
+
+// ---- Borrador de la postulación (CU-17) ----
+
+/** Guarda el avance del formulario. Deja desactualizado «Mi borrador» (cambia lo que falta y la hora del guardado). */
+export function useGuardarBorrador(codigo: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (borrador: GuardarBorradorRequest) => guardarBorradorApi(codigo, borrador),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: postulacionesKeys.miBorrador() }),
+  })
+}
+
+/** «Mi borrador»: el borrador de la convocatoria abierta (`null` si no hay). */
+export function useMiBorrador() {
+  return useQuery({ queryKey: postulacionesKeys.miBorrador(), queryFn: miBorradorApi })
 }

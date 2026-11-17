@@ -3,7 +3,13 @@ import { apiClient } from '@/store'
 import type {
   AccesoDocumento,
   ArchivoAdjunto,
+  BorradorGuardado,
+  BorradorResumen,
+  ComprobantePostulacion,
   DocumentosPostulacion,
+  EnviarPostulacionRequest,
+  FormularioPostulacion,
+  GuardarBorradorRequest,
   MiPostulacionDetalle,
   MiPostulacionResumen,
   MisPostulacionesParams,
@@ -88,4 +94,40 @@ export async function eliminarDocumentoApi(codigo: string, documento: string): P
 export async function accesoDocumentoApi(codigo: string, documento: string): Promise<AccesoDocumento> {
   const respuesta = await apiClient.get<AccesoDocumento>(`/postulaciones/${codigo}/documentos/${documento}/acceso`)
   return respuesta.data
+}
+
+// ---- Enviar la postulación (CU-02) ----
+
+/**
+ * «Nueva postulación»: crea el borrador de la convocatoria abierta, o devuelve el que ya existe (incluida una devuelta
+ * a corregir). Es idempotente, así que repetirla no duplica nada.
+ */
+export async function iniciarPostulacionApi(): Promise<FormularioPostulacion> {
+  const respuesta = await apiClient.post<FormularioPostulacion>('/postulaciones')
+  return respuesta.data
+}
+
+/** Envía las respuestas del formulario; si ya se había enviado, devuelve el mismo comprobante. */
+export async function enviarPostulacionApi(
+  codigo: string,
+  respuestas: EnviarPostulacionRequest,
+): Promise<ComprobantePostulacion> {
+  const respuesta = await apiClient.post<ComprobantePostulacion>(`/postulaciones/${codigo}/enviar`, respuestas)
+  return respuesta.data
+}
+
+// ---- Borrador de la postulación (CU-17) ----
+
+/** Guarda el avance del formulario sin exigir lo obligatorio; no cambia el estado de la postulación. */
+export async function guardarBorradorApi(codigo: string, borrador: GuardarBorradorRequest): Promise<BorradorGuardado> {
+  const respuesta = await apiClient.put<BorradorGuardado>(`/postulaciones/${codigo}/borrador`, borrador)
+  return respuesta.data
+}
+
+/** «Mi borrador»: el borrador de la convocatoria abierta, o `null` si no hay (o la convocatoria ya cerró). */
+export async function miBorradorApi(): Promise<BorradorResumen | null> {
+  const respuesta = await apiClient.get<BorradorResumen | null>('/postulaciones/mi-borrador')
+  // * El sobre del backend omite `data` cuando no hay borrador (ApiResponse no serializa los nulos), y TanStack Query
+  // * no admite que una query devuelva `undefined`: se normaliza a `null`.
+  return respuesta.data ?? null
 }
