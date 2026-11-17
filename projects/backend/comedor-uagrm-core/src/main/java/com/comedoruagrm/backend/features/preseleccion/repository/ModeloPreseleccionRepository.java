@@ -10,4 +10,7 @@ import com.comedoruagrm.backend.features.preseleccion.model.ModeloPreseleccion;
 public interface ModeloPreseleccionRepository extends JpaRepository<ModeloPreseleccion, Long> {
 
     Optional<ModeloPreseleccion> findByCodigo(UUID codigo);
+
+    /** La version que informo el modulo de IA al calcular un puntaje (CU03). */
+    Optional<ModeloPreseleccion> findByVersion(String version);
 }

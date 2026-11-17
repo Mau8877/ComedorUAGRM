@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * Puntaje de vulnerabilidad de una postulacion. Es un historial: solo el `vigente` cuenta para la
- * lista priorizada; los anteriores se conservan (RF-03, RF-21). Solo lectura por ahora.
+ * lista priorizada; los anteriores se conservan (RF-03, RF-21). El CU03 lo crea al calcular; el CU26 lo hara al reprocesar.
  */
 @Getter
 @Entity
@@ -52,4 +52,15 @@ public class PuntajePostulacion extends BaseModel {
 
     @Column(name = "vigente", nullable = false)
     private boolean vigente;
+
+    /** Un puntaje nuevo, vigente. El anterior de la postulacion ya se paso a historial antes de insertarlo. */
+    public PuntajePostulacion(ModeloPreseleccion modelo, Postulacion postulacion, BigDecimal puntajeTotal,
+            Map<String, Object> detalle, Instant fechaCalculo) {
+        this.modelo = modelo;
+        this.postulacion = postulacion;
+        this.puntajeTotal = puntajeTotal;
+        this.detalle = detalle;
+        this.fechaCalculo = fechaCalculo;
+        this.vigente = true;
+    }
 }
