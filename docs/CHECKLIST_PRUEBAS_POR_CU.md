@@ -21,7 +21,7 @@ Llena la columna «Resultado» al terminar cada CU (`OK` / `Falla` / `Parcial`).
 | CU07 | Auditar expediente finalista | Web | Hecho | 12 / 5 / – | OK | Los 10 fallos previos del frontend ya no ocurren (167 pruebas en verde) |
 | CU19 | Devolver postulación para corrección | Web | Hecho | 9 / 4 / – | OK | «Corregir y reenviar» oculto hasta que exista el CU02 |
 | CU20 | Archivar o rechazar postulación | Web | Hecho | 8 / 4 / – | OK | Doble clic cubierto por prueba de integración (dos peticiones a la vez) |
-| CU05 | Auditar y adjudicar becas | Web | Hecho | 11 / 7 / – | | |
+| CU05 | Auditar y adjudicar becas | Web | Hecho | 11 / 7 / – | OK | Probado a mano: panel, adjudicar, cupos agotados y no adjudicar. Seleccionar finalistas, ERR_ADJ_02/03, concurrencia y doble clic: cubiertos por las pruebas de integración |
 | CU22 | Publicar resultados de adjudicación | Web + móvil (consulta) | Hecho | 11 / 5 / – | | |
 | CU08 | Generar acta de adjudicación | Web | Hecho | 10 / 4 / – | | |
 | CU04 | Consultar estado de postulación | Web + móvil | Hecho | 7 / 4 / 4 | | |
@@ -371,29 +371,29 @@ Datos: la convocatoria `[PRUEBA]` principal tiene cupos 5, puntaje mínimo 70 y 
 
 ### Panel y selección de finalistas
 
-- [ ] Abre `/adjudicacion` y elige la convocatoria: panel con **cupos, adjudicados, no adjudicados, disponibles y puntaje mínimo** + lista priorizada. (CA01)
-- [ ] «Seleccionar finalistas» propone la **cantidad configurada**; ajústala y confirma → se registran en el orden de la lista con su **posición real** y sin repetir a los ya seleccionados. (CA02, CA22)
-- [ ] Cantidad **0, negativa o mayor** que las calificadas disponibles → `400`, no selecciona a nadie. (CA03)
-- [ ] Pedir más finalistas que cupos **se permite** (suplentes). (A3)
-- [ ] Convocatoria sin cupos/mínimo definidos (o no cerrada) → `409` `ERR_ADJ_05`: no deja seleccionar ni decidir. (CA14)
-- [ ] La cantidad configurada **no** aparece en ninguna respuesta a postulantes ni pública. (CA22)
+- [x] Abre `/adjudicacion` y elige la convocatoria: panel con **cupos, adjudicados, no adjudicados, disponibles y puntaje mínimo** + lista priorizada. (CA01)
+- [x] «Seleccionar finalistas» propone la **cantidad configurada**; ajústala y confirma → se registran en el orden de la lista con su **posición real** y sin repetir a los ya seleccionados. (CA02, CA22)
+- [x] Cantidad **0, negativa o mayor** que las calificadas disponibles → `400`, no selecciona a nadie. (CA03)
+- [x] Pedir más finalistas que cupos **se permite** (suplentes). (A3)
+- [x] Convocatoria sin cupos/mínimo definidos (o no cerrada) → `409` `ERR_ADJ_05`: no deja seleccionar ni decidir. (CA14)
+- [x] La cantidad configurada **no** aparece en ninguna respuesta a postulantes ni pública. (CA22)
 
 ### Decisión sobre un finalista (desde su expediente)
 
-- [ ] **Adjudicar** un finalista «Validado», con puntaje total ≥ mínimo y cupos libres: ventana de confirmación con nombre, puntaje total y cupos; confirma → postulación **«adjudicada»**; los cupos disponibles bajan. (BD: fila en `adjudicacion` con puntaje final, usuario, fecha; `postulacion_historial`; `bitacora`.) (CA04)
-- [ ] **No adjudicar** con motivo válido → **«no adjudicada»** y fila en `adjudicacion` con resultado `NO_ADJUDICADA`. Sin motivo / solo espacios / > 500 → `400`. (CA05, CA06)
-- [ ] Finalista **sin auditoría** → ambas decisiones dan `409` `ERR_ADJ_02`. (CA07)
-- [ ] Última auditoría **no «Validado»** → «Adjudicar» da `409` `ERR_ADJ_02`, «No adjudicar» sí funciona. (CA08)
-- [ ] Puntaje total **bajo el mínimo** (el finalista validado con puntaje bajo de la semilla) → «Adjudicar» `409` `ERR_ADJ_03`; «No adjudicar» sí. (CA09)
-- [ ] **Cupos agotados** → «Adjudicar» `409` `ERR_ADJ_04`; «No adjudicar» sí. (CA10)
-- [ ] En la convocatoria de **un solo cupo libre**, intenta adjudicar a dos finalistas (idealmente casi a la vez desde dos ventanas) → solo uno se adjudica, el otro `409`; nunca se superan los cupos. (CA11)
-- [ ] Doble clic en confirmar → una sola decisión y una sola anotación en bitácora; la segunda `409` `ERR_ADJ_01`. (CA13)
-- [ ] Postulación que ya no es «calificada» o resultados publicados → `409` `ERR_ADJ_01`. (CA12)
-- [ ] **Cancelar** la ventana → nada cambia. (CA18)
-- [ ] Una vez decidida, la postulación **no aparece** en la lista priorizada ni se puede auditar/decidir otra vez. (CA19)
-- [ ] Al decidir **no se avisa** al postulante (se hará al publicar, CU22). Verifica que no hay aviso nuevo. (CA20)
-- [ ] La bitácora anota la decisión **sin** nombres, CI ni motivo. (CA17)
-- [ ] Finalista/convocatoria inexistente → `404`; rol no admin → `403`; sin sesión → `401`. (CA21)
+- [x] **Adjudicar** un finalista «Validado», con puntaje total ≥ mínimo y cupos libres: ventana de confirmación con nombre, puntaje total y cupos; confirma → postulación **«adjudicada»**; los cupos disponibles bajan. (BD: fila en `adjudicacion` con puntaje final, usuario, fecha; `postulacion_historial`; `bitacora`.) (CA04)
+- [x] **No adjudicar** con motivo válido → **«no adjudicada»** y fila en `adjudicacion` con resultado `NO_ADJUDICADA`. Sin motivo / solo espacios / > 500 → `400`. (CA05, CA06)
+- [x] Finalista **sin auditoría** → ambas decisiones dan `409` `ERR_ADJ_02`. (CA07)
+- [x] Última auditoría **no «Validado»** → «Adjudicar» da `409` `ERR_ADJ_02`, «No adjudicar» sí funciona. (CA08)
+- [x] Puntaje total **bajo el mínimo** (el finalista validado con puntaje bajo de la semilla) → «Adjudicar» `409` `ERR_ADJ_03`; «No adjudicar» sí. (CA09)
+- [x] **Cupos agotados** → «Adjudicar» `409` `ERR_ADJ_04`; «No adjudicar» sí. (CA10)
+- [x] En la convocatoria de **un solo cupo libre**, intenta adjudicar a dos finalistas (idealmente casi a la vez desde dos ventanas) → solo uno se adjudica, el otro `409`; nunca se superan los cupos. (CA11)
+- [x] Doble clic en confirmar → una sola decisión y una sola anotación en bitácora; la segunda `409` `ERR_ADJ_01`. (CA13)
+- [x] Postulación que ya no es «calificada» o resultados publicados → `409` `ERR_ADJ_01`. (CA12)
+- [x] **Cancelar** la ventana → nada cambia. (CA18)
+- [x] Una vez decidida, la postulación **no aparece** en la lista priorizada ni se puede auditar/decidir otra vez. (CA19)
+- [x] Al decidir **no se avisa** al postulante (se hará al publicar, CU22). Verifica que no hay aviso nuevo. (CA20)
+- [x] La bitácora anota la decisión **sin** nombres, CI ni motivo. (CA17)
+- [x] Finalista/convocatoria inexistente → `404`; rol no admin → `403`; sin sesión → `401`. (CA21)
 
 **UT:** `./mvnw test -Dtest='Adjudicacion*Test,CantidadFinalistasPrivadaTest,ListaPriorizadaAdjudicacionTest,SeleccionFinalistas*Test'` · `pnpm test -- src/features/adjudicacion src/features/expedientes`. (Pendiente anotado: imagen 091 del diseño lógico por actualizar en la documentación de grado.)
 
