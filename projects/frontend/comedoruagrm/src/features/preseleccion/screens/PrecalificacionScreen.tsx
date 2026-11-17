@@ -53,7 +53,6 @@ export function PrecalificacionScreen({ titulo, activeHref, usuarioActual, codig
     <AdminLayout
       title={titulo}
       activeHref={activeHref}
-      migas={[{ label: 'Lista priorizada', href: '/lista-priorizada' }, { label: titulo }]}
       user={{ nombre: `${usuarioActual.nombres} ${usuarioActual.apellidos}`, rol: etiquetaRol(usuarioActual.rol) }}
       onCerrarSesion={() => cerrarSesion.mutate()}
       {...accionesDeCuenta}
