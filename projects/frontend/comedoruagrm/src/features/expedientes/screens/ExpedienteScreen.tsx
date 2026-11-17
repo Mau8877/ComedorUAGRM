@@ -3,6 +3,7 @@ import { Link } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { ArchiveIcon, ArrowLeftIcon, AwardIcon, BanIcon, BellRingIcon, UndoIcon, XCircleIcon } from 'lucide-react'
 
+import { CargandoContenido } from '@/components/layout/CargandoContenido'
 import { Button } from '@/components/ui/button'
 import { toastError } from '@/components/ui/toast'
 import { adjudicacionKeys, usePanelAdjudicacion } from '@/features/adjudicacion'
@@ -131,6 +132,7 @@ export function ExpedienteScreen({
     <AdminLayout
       title={titulo}
       activeHref={activeHref}
+      migas={[{ label: 'Finalistas', href: '/finalistas' }, { label: titulo }]}
       user={{ nombre: `${usuarioActual.nombres} ${usuarioActual.apellidos}`, rol: etiquetaRol(usuarioActual.rol) }}
       onCerrarSesion={() => cerrarSesion.mutate()}
       {...accionesDeCuenta}
@@ -201,7 +203,7 @@ export function ExpedienteScreen({
         </p>
       ))}
 
-      {consulta.isLoading && <p className="py-8 text-center text-sm text-muted-foreground">Cargando expediente…</p>}
+      {consulta.isLoading && <CargandoContenido etiqueta="Cargando expediente…" forma="detalle" />}
 
       {error && (
         <div

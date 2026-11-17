@@ -55,6 +55,13 @@ describe('registroSchema', () => {
     expect(camposConError({ registroUniversitario: '100000000' })).toEqual([])
   })
 
+  it('valida que el CI tenga solo dígitos', () => {
+    for (const malo of ['12345a', '123-456', '12 34']) {
+      expect(camposConError({ ci: malo })).toEqual(['ci'])
+    }
+    expect(camposConError({ ci: '1234567' })).toEqual([])
+  })
+
   it('rechaza un correo sin formato', () => {
     expect(camposConError({ correo: 'no-es-un-correo' })).toEqual(['correo'])
   })

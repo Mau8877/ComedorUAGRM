@@ -1,6 +1,7 @@
 import { useNavigate } from '@tanstack/react-router'
 import { ArrowLeftIcon } from 'lucide-react'
 
+import { CargandoContenido } from '@/components/layout/CargandoContenido'
 import { Button } from '@/components/ui/button'
 import { etiquetaRol, useCerrarSesion } from '@/features/auth'
 import type { Usuario } from '@/features/auth'
@@ -47,6 +48,7 @@ export function DetallePostulacionScreen({ titulo, activeHref, usuarioActual, co
     <EstudianteLayout
       title={titulo}
       activeHref={activeHref}
+      migas={[{ label: 'Mis postulaciones', href: '/mis-postulaciones' }, { label: titulo }]}
       user={{ nombre: `${usuarioActual.nombres} ${usuarioActual.apellidos}`, rol: etiquetaRol(usuarioActual.rol) }}
       onCerrarSesion={() => cerrarSesion.mutate()}
       {...accionesDeCuenta}
@@ -59,7 +61,7 @@ export function DetallePostulacionScreen({ titulo, activeHref, usuarioActual, co
           </Button>
         </div>
 
-        {consulta.isLoading && <p className="py-8 text-center text-sm text-muted-foreground">Cargando postulación…</p>}
+        {consulta.isLoading && <CargandoContenido etiqueta="Cargando postulación…" forma="detalle" />}
 
         {error?.noEncontrada && (
           <div className="flex flex-col items-center gap-3 py-8 text-center">

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../shared/widgets/campo_formulario.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../auth/auth_error_mapper.dart';
@@ -110,7 +112,6 @@ class _DatosContactoFormState extends ConsumerState<DatosContactoForm> {
 
     return Form(
       key: _formKey,
-      autovalidateMode: AutovalidateMode.onUserInteraction,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -122,7 +123,7 @@ class _DatosContactoFormState extends ConsumerState<DatosContactoForm> {
             AlertaError(error: _errorGeneral!, onReintentar: guardando ? null : _guardar),
             const SizedBox(height: 16),
           ],
-          TextFormField(
+          CampoFormulario(
             controller: _correo,
             keyboardType: TextInputType.emailAddress,
             autofillHints: const [AutofillHints.email],
@@ -132,7 +133,7 @@ class _DatosContactoFormState extends ConsumerState<DatosContactoForm> {
           ),
           if (_perfil.esPostulante) ...[
             const SizedBox(height: 16),
-            TextFormField(
+            CampoFormulario(
               controller: _telefono,
               keyboardType: TextInputType.phone,
               autofillHints: const [AutofillHints.telephoneNumber],

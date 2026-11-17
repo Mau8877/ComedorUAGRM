@@ -2,9 +2,11 @@ import { AppShell } from '@/components/layout'
 import { useNotificaciones } from '@/features/notificaciones'
 
 import { adminNavItems } from './adminNavItems'
+import { ContenidoEnShell } from '../shell/ShellPersistente'
+import { useShellPersistente } from '../shell/shellContext'
 import type { AdminLayoutProps } from './adminTypes'
 
-export function AdminLayout({
+function AdminMarco({
   title,
   user,
   notifications,
@@ -12,6 +14,8 @@ export function AdminLayout({
   onPerfil,
   onCambiarContrasena,
   activeHref,
+  icono,
+  migas,
   children,
 }: AdminLayoutProps) {
   // La campanita usa la bandeja real salvo que quien arma el layout pase su propio controlador (pantallas de prueba).
@@ -22,6 +26,8 @@ export function AdminLayout({
       title={title}
       navItems={adminNavItems}
       activeHref={activeHref}
+      icono={icono}
+      migas={migas}
       user={user}
       notifications={notifications ?? bandeja}
       onCerrarSesion={onCerrarSesion}
@@ -31,4 +37,22 @@ export function AdminLayout({
       {children}
     </AppShell>
   )
+}
+
+// * Dentro del shell persistente (rutas privadas) solo se aporta el contenido; fuera de él (pantallas de prueba)
+// * se dibuja el marco completo.
+export function AdminLayout(props: AdminLayoutProps) {
+  const shell = useShellPersistente()
+  if (shell) {
+    return (
+      <ContenidoEnShell shell={shell} title={props.title}
+        activeHref={props.activeHref}
+        icono={props.icono}
+        migas={props.migas}
+      >
+        {props.children}
+      </ContenidoEnShell>
+    )
+  }
+  return <AdminMarco {...props} />
 }

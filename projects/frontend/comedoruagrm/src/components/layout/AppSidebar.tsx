@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useLocation } from '@tanstack/react-router'
+import { Link, useLocation, useRouterState } from '@tanstack/react-router'
 import { XIcon } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
@@ -14,11 +14,10 @@ interface SidebarNavProps {
   onNavigate?: () => void
 }
 
-// * Se usa <a> en vez del <Link> tipado de TanStack Router porque los
-// * navItems de cada rol (src/layouts/) hoy apuntan a rutas que todavía no
-// * existen (ej. /usuarios, /menus) -- son placeholders de la estructura del
-// * menú, no rutas reales todavía. Cuando esas rutas se implementen, este
-// * componente pasa a usar <Link to={item.href}> para navegación tipada.
+// * Se usa <Link> (navegación del router, sin recargar la página) para que el header y el sidebar sigan
+// * montados al cambiar de pantalla. Algunos navItems apuntan a rutas que todavía no existen (ej. /menus,
+// * /pedidos): son placeholders del menú y caen en la página 404 del router; por eso el `to` se castea,
+// * ya que el tipado estricto de rutas no los conoce.
 function SidebarNav({
   items,
   activeHref,
@@ -26,7 +25,10 @@ function SidebarNav({
   onNavigate,
 }: SidebarNavProps) {
   const location = useLocation()
-  const current = activeHref ?? location.pathname
+  // * Destino de la navegación en curso: `state.location` ya apunta a la ruta nueva mientras ella carga, así que
+  // * el ítem se marca activo al hacer clic sin esperar a que la pantalla registre su `activeHref`.
+  const destino = useRouterState({ select: (s) => (s.status === 'pending' ? s.location.pathname : undefined) })
+  const current = destino ?? activeHref ?? location.pathname
 
   return (
     <nav className="flex flex-col gap-1 px-3 py-4">
@@ -34,14 +36,16 @@ function SidebarNav({
         const Icon = item.icon
         const isActive = current === item.href
         return (
-          <a
+          <Link
             key={item.href}
-            href={item.href}
+            to={item.href as '/'}
             onClick={onNavigate}
+            aria-busy={destino === item.href || undefined}
             className={cn(
               'relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-sidebar-foreground/80 transition-colors hover:bg-sidebar-primary/5 hover:text-sidebar-foreground',
               isActive &&
-                'bg-sidebar-primary/10 font-semibold text-sidebar-primary hover:bg-sidebar-primary/10 hover:text-sidebar-primary'
+                'bg-sidebar-primary/10 font-semibold text-sidebar-primary hover:bg-sidebar-primary/10 hover:text-sidebar-primary',
+              destino === item.href && 'animate-pulse'
             )}
           >
             {isActive && (
@@ -51,7 +55,7 @@ function SidebarNav({
             <span className={cn(collapsed && 'md:hidden')}>
               {item.label}
             </span>
-          </a>
+          </Link>
         )
       })}
     </nav>

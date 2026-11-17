@@ -158,8 +158,8 @@ public class UsuarioPersonalService {
 
     /**
      * Edicion parcial: solo cambian los campos que llegan (y que de verdad cambian). El CI y el rol
-     * no se editan por acá. Un administrador puede editar sus propios datos. Si no cambia nada no se
-     * anota una edicion vacia.
+     * no se editan por acá. La propia cuenta no se edita desde acá (403 ERR_US_08): cada persona
+     * edita sus datos de contacto desde su perfil. Si no cambia nada no se anota una edicion vacia.
      */
     @PreAuthorize("hasRole('ADMINISTRADOR_DUBSS')")
     @Transactional
@@ -168,6 +168,10 @@ public class UsuarioPersonalService {
             ActualizarUsuarioPersonalRequest request) {
         Usuario actor = actor(actorCodigo);
         Usuario cuenta = buscarPersonal(codigo);
+        if (actor.getId().equals(cuenta.getId())) {
+            throw rechazar("Edición de cuenta rechazada", new ForbiddenException(UsuarioErrorCodes.ERR_US_08,
+                    "No puedes editar tu propia cuenta desde aquí; hazlo desde Mi perfil"));
+        }
         List<String> modificados = new ArrayList<>();
 
         if (request.nombres() != null && !request.nombres().trim().equals(cuenta.getNombres())) {

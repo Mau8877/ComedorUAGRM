@@ -63,12 +63,12 @@ describe('acciones por fila', () => {
       expect(fila('Apellido2 Nombre2').queryByRole('button', { name: 'Desactivar' })).not.toBeInTheDocument()
     })
 
-    it('la propia cuenta no ofrece Cambiar rol ni Desactivar, pero sí Editar', async () => {
+    it('la propia cuenta no ofrece Editar, Cambiar rol ni Desactivar', async () => {
       montar()
       await screen.findAllByText('Apellido1 Nombre1')
 
       const propiaFila = fila('Apellido3 Nombre3')
-      expect(propiaFila.getByRole('button', { name: 'Editar' })).toBeInTheDocument()
+      expect(propiaFila.queryByRole('button', { name: 'Editar' })).not.toBeInTheDocument()
       expect(propiaFila.queryByRole('button', { name: 'Cambiar rol' })).not.toBeInTheDocument()
       expect(propiaFila.queryByRole('button', { name: 'Desactivar' })).not.toBeInTheDocument()
       expect(fila('Apellido1 Nombre1').getByRole('button', { name: 'Cambiar rol' })).toBeInTheDocument()

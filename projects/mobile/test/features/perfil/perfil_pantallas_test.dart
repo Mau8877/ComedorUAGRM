@@ -3,7 +3,6 @@ import 'package:comedor_uagrm_mobile/features/auth/auth_error_mapper.dart';
 import 'package:comedor_uagrm_mobile/features/auth/models/usuario.dart';
 import 'package:comedor_uagrm_mobile/features/auth/providers/auth_provider.dart';
 import 'package:comedor_uagrm_mobile/features/auth/providers/auth_sesion_provider.dart';
-import 'package:comedor_uagrm_mobile/features/auth/screens/sin_modulo_screen.dart';
 import 'package:comedor_uagrm_mobile/features/auth/widgets/menu_usuario.dart';
 import 'package:comedor_uagrm_mobile/features/perfil/models/actualizar_perfil_request.dart';
 import 'package:comedor_uagrm_mobile/features/perfil/models/perfil.dart';
@@ -348,18 +347,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(acciones.cierres, 1);
-    });
-
-    testWidgets('un rol sin módulo (Directivo) llega a su perfil desde «sin módulo»', (tester) async {
-      final directivo = Usuario.fromJson({...usuarioJson, 'rol': 'DIRECTIVO'});
-      final r = router(const SinModuloScreen());
-      await tester.pumpWidget(appCon(r, usuario: directivo, acciones: FakeAcciones()));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.widgetWithText(OutlinedButton, 'Mi perfil'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('pantalla-perfil'), findsOneWidget);
     });
 
     testWidgets('la sección «Perfil» del shell del Estudiante muestra el perfil real', (tester) async {

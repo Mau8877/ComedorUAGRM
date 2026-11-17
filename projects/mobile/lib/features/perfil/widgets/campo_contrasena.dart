@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../shared/widgets/campo_formulario.dart';
+
 /// Campo de contraseña con la opción de mostrarla u ocultarla. Los errores del servidor (ej. contraseña
 /// actual incorrecta) llegan por [errorText] y desaparecen cuando la persona edita el campo.
 /// ! Lo escrito no se guarda fuera del controlador ni se imprime.
@@ -34,7 +36,7 @@ class _CampoContrasenaState extends State<CampoContrasena> {
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
+    return CampoFormulario(
       controller: widget.controller,
       obscureText: _oculta,
       autofillHints: widget.autofillHints,

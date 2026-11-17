@@ -27,7 +27,7 @@ public final class UsuarioErrorCodes {
     /** 409 - La cuenta ya esta en el estado pedido (desactivar una desactivada, reactivar una activa). */
     public static final String ERR_US_07 = "ERR_US_07";
 
-    /** 403 - No se puede desactivar ni cambiar el rol de la propia cuenta. */
+    /** 403 - No se puede editar, desactivar ni cambiar el rol de la propia cuenta. */
     public static final String ERR_US_08 = "ERR_US_08";
 
     /** 403 - La operacion dejaria al sistema sin Administrador activo. */

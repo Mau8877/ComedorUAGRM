@@ -1,4 +1,8 @@
 export * from './AppShell'
+export * from './EncabezadoPagina'
+export { NavigationProgress } from './NavigationProgress'
+export { CargandoPagina } from './CargandoPagina'
 export * from './ComedoruLogo'
 export * from './PublicHeader'
 export * from './types'
+export * from './CargandoContenido'

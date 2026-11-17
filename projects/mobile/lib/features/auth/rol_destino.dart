@@ -1,22 +1,11 @@
-/// Ruta de inicio de cada rol al entrar. `POSTULANTE` y `ADMINISTRADOR_DUBSS`
-/// tienen shell; `PERSONAL_COMEDOR` va directo a «Registrar asistencia» (CU10, una
-/// sola pantalla, sin shell); `DIRECTIVO` todavía no tiene módulo (lo crea el CU
-/// del dashboard) y va a `/sin-modulo`. Este es el único lugar a actualizar cuando
-/// eso cambie. Un rol desconocido vuelve al login.
-String rutaInicioPorRol(String rol) {
-  switch (rol) {
-    case 'POSTULANTE':
-      return '/estudiante';
-    case 'ADMINISTRADOR_DUBSS':
-      return '/admin';
-    case 'PERSONAL_COMEDOR':
-      return '/asistencia';
-    case 'DIRECTIVO':
-      return '/sin-modulo';
-    default:
-      return '/login';
-  }
-}
+/// Único rol que puede usar la app móvil.
+const rolPostulante = 'POSTULANTE';
+
+/// Ruta de inicio al entrar. La app móvil es solo para `POSTULANTE`: cualquier
+/// otro rol (o uno desconocido) va a `/solo-postulantes`, que le indica usar la
+/// plataforma web. Este es el único lugar a actualizar si otro rol llega a
+/// tener módulo en mobile.
+String rutaInicioPorRol(String rol) => rol == rolPostulante ? '/estudiante' : '/solo-postulantes';
 
 /// Nombre legible del rol para mostrar en pantalla (uno desconocido se muestra tal cual).
 String etiquetaRol(String rol) {

@@ -58,6 +58,16 @@ class RegistroRequestTest {
     }
 
     @Test
+    void validar_conCiNoNumerico_marcaElCampo() {
+        for (String invalido : new String[] {"12345a", "123-456", "12 34"}) {
+            RegistroRequest request = new RegistroRequest("Ana", "Perez", invalido, "219012345", UUID.randomUUID(),
+                    "70000001", "ana@uagrm.edu.bo", "secreta1", "secreta1");
+
+            assertThat(nombresDeCampo(violaciones(request))).as("ci %s", invalido).containsExactly("ci");
+        }
+    }
+
+    @Test
     void validar_conNueveDigitosSinCeroInicial_esValido() {
         for (String valido : new String[] {"100000000", "219012345", "999999999"}) {
             RegistroRequest request = con(valido, "ana@uagrm.edu.bo", "secreta1", "secreta1");

@@ -16,13 +16,15 @@ const correo = z
   .email('El correo electrónico no es válido')
 const rol = z.enum(ROLES_PERSONAL, { message: 'Selecciona un rol del personal' })
 
-export const crearUsuarioPersonalSchema = z.object({
+// Campos que llena la persona; el rol lo define la vista y se agrega al enviar.
+export const datosCuentaPersonalSchema = z.object({
   nombres,
   apellidos,
   ci: z.string().trim().min(1, 'El CI es obligatorio').max(20, 'El CI no puede superar los 20 caracteres'),
   correo,
-  rol,
 })
+
+export const crearUsuarioPersonalSchema = datosCuentaPersonalSchema.extend({ rol })
 
 export const editarUsuarioPersonalSchema = z.object({ nombres, apellidos, correo })
 

@@ -7,3 +7,10 @@ export type RolPersonal = (typeof ROLES_PERSONAL)[number]
 
 /** Opciones de un select de rol, con la etiqueta de `etiquetaRol` (no se duplican los textos). */
 export const OPCIONES_ROL_PERSONAL = ROLES_PERSONAL.map((rol) => ({ value: rol, label: etiquetaRol(rol) }))
+
+/** Título del modal de alta según el rol de la vista (el rol no se pregunta en el formulario). */
+export const TITULOS_NUEVA_CUENTA: Record<RolPersonal, string> = {
+  ADMINISTRADOR_DUBSS: 'Nuevo administrador DUBSS',
+  DIRECTIVO: 'Nuevo directivo',
+  PERSONAL_COMEDOR: 'Nuevo personal del comedor',
+}
