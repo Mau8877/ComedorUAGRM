@@ -13,6 +13,10 @@ describe('estudianteNavItems', () => {
     )
   })
 
+  it('tiene la entrada «Mi beca» que lleva a su pantalla (CU24)', () => {
+    expect(estudianteNavItems).toContainEqual(expect.objectContaining({ label: 'Mi beca', href: '/mi-beca' }))
+  })
+
   it('conserva el resto de las entradas del postulante', () => {
     expect(estudianteNavItems.map((item) => item.label)).toEqual(
       expect.arrayContaining(['Mi Menú', 'Mis Pedidos', 'Perfil']),

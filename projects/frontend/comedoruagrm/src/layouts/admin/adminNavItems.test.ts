@@ -45,6 +45,31 @@ describe('adminNavItems', () => {
     expect(adminNavItems).toContainEqual(expect.objectContaining({ label: 'Convocatorias', href: '/convocatorias' }))
   })
 
+  it('tiene la entrada «Planillas» que lleva a su pantalla, justo después del padrón de becados (CU09)', () => {
+    const etiquetas = adminNavItems.map((item) => item.label)
+
+    expect(adminNavItems).toContainEqual(expect.objectContaining({ label: 'Planillas', href: '/planillas' }))
+    expect(etiquetas.indexOf('Planillas')).toBe(etiquetas.indexOf('Padrón de becados') + 1)
+  })
+
+  it('tiene la entrada «Cotejo de asistencia» que lleva a su pantalla, justo después de «Planillas» (CU11)', () => {
+    const etiquetas = adminNavItems.map((item) => item.label)
+
+    expect(adminNavItems).toContainEqual(
+      expect.objectContaining({ label: 'Cotejo de asistencia', href: '/cotejo-asistencia' }),
+    )
+    expect(etiquetas.indexOf('Cotejo de asistencia')).toBe(etiquetas.indexOf('Planillas') + 1)
+  })
+
+  it('tiene la entrada «Parámetros del modelo» que lleva a su pantalla, justo después de «Lista priorizada» (CU26)', () => {
+    const etiquetas = adminNavItems.map((item) => item.label)
+
+    expect(adminNavItems).toContainEqual(
+      expect.objectContaining({ label: 'Parámetros del modelo', href: '/parametros-modelo' }),
+    )
+    expect(etiquetas.indexOf('Parámetros del modelo')).toBe(etiquetas.indexOf('Lista priorizada') + 1)
+  })
+
   it('tiene la entrada «Gestiones académicas» que lleva a su pantalla (CU13)', () => {
     expect(adminNavItems).toContainEqual(
       expect.objectContaining({ label: 'Gestiones académicas', href: '/gestiones-academicas' }),
