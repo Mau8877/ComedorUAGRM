@@ -1,4 +1,7 @@
-import { ListOrderedIcon } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
+import { ListOrderedIcon, SparklesIcon } from 'lucide-react'
+
+import { Button } from '@/components/ui/button'
 
 import { ModalDetailLayout } from '@/components/ui/modal-layout'
 
@@ -47,6 +50,16 @@ export function DetallePostulacionDialog({ open, onOpenChange, postulacion }: De
         <Dato etiqueta="Puntaje calculado el" valor={formatearFecha(postulacion.fechaCalculo)} />
         <Dato etiqueta="Estado" valor={ETIQUETAS_ESTADO[postulacion.estado] ?? postulacion.estado} />
       </dl>
+      <div className="mt-4">
+        <Button
+          variant="outline"
+          size="sm"
+          nativeButton={false}
+          render={<Link to="/precalificacion/$codigo" params={{ codigo: postulacion.codigo }} />}
+        >
+          <SparklesIcon /> Ver precalificación con IA
+        </Button>
+      </div>
     </ModalDetailLayout>
   )
 }

@@ -20,6 +20,10 @@ vi.mock('@/layouts', () => ({
     </div>
   ),
 }))
+// El detalle enlaza a la precalificación (CU03) con el router; acá basta con una ancla.
+vi.mock('@tanstack/react-router', () => ({
+  Link: ({ to, children }: { to: string; children?: ReactNode }) => <a href={to}>{children}</a>,
+}))
 vi.mock('@/utils/descargarArchivo', async () => ({ descargarArchivo: (await import('./clienteSimulado')).descargar }))
 
 import { ApiError } from '@/store'

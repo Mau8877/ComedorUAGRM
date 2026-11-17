@@ -127,6 +127,8 @@ services:
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
       - SPRING_DATA_REDIS_HOST=comedor-uagrm-redis
       - MINIO_URL=http://comedor-uagrm-minio:9000
+      # Modulo de IA (puntaje de la postulacion, CU02/CU03): dentro de la red de Docker
+      - IA_BASE_URL=${IA_BASE_URL:-http://comedor-uagrm-ia:8000}
       # Direccion de MinIO que ve el navegador (URL temporales de los documentos, CU07)
       - MINIO_PUBLIC_URL=${MINIO_PUBLIC_URL:-http://localhost:9000}
       # Secreto con el que el backend firma los JWT (HS256, mínimo 32 caracteres)

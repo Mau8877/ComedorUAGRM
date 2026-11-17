@@ -106,7 +106,7 @@ void main() {
       expect(find.text('Eres finalista'), findsNothing);
     });
 
-    testWidgets('devuelta: observaciones con su fecha y sin «Corregir y reenviar» mientras no exista el CU-02',
+    testWidgets('devuelta: observaciones con su fecha y la opción «Corregir y reenviar»',
         (tester) async {
       final servicio = ServicioFalso()
         ..detalle = (_) async => detalle('devuelta', {'observaciones': _observaciones, 'puedeCorregir': true});
@@ -117,7 +117,40 @@ void main() {
       expect(find.text('Observaciones de la DUBSS'), findsOneWidget);
       expect(find.text('Falta el certificado de notas'), findsOneWidget);
       expect(find.text('15/11/2026, 10:00'), findsOneWidget);
-      expect(find.text('Corregir y reenviar'), findsNothing);
+      expect(find.text('Corregir y reenviar'), findsOneWidget);
+    });
+
+    testWidgets('devuelta que se puede corregir: ofrece «Gestionar documentos», que abre los documentos (CU16)',
+        (tester) async {
+      final servicio = ServicioFalso()
+        ..detalle = (_) async => detalle('devuelta', {'observaciones': _observaciones, 'puedeCorregir': true});
+      final router = GoRouter(initialLocation: '/mis-postulaciones/post-1', routes: [
+        GoRoute(
+          path: '/mis-postulaciones/:codigo',
+          builder: (context, state) => DetallePostulacionScreen(codigo: state.pathParameters['codigo']!),
+        ),
+        GoRoute(
+          path: '/mis-postulaciones/:codigo/documentos',
+          builder: (context, state) => Scaffold(body: Text('documentos ${state.pathParameters['codigo']}')),
+        ),
+      ]);
+
+      await tester.pumpWidget(pantalla(servicio, router: router));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Gestionar documentos'));
+      await tester.tap(find.text('Gestionar documentos'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('documentos post-1'), findsOneWidget);
+    });
+
+    testWidgets('una postulación que no se puede corregir no ofrece «Gestionar documentos»', (tester) async {
+      final servicio = ServicioFalso()..detalle = (_) async => detalle('calificada');
+
+      await tester.pumpWidget(pantalla(servicio));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Gestionar documentos'), findsNothing);
     });
 
     testWidgets('archivada: muestra el motivo del archivo', (tester) async {

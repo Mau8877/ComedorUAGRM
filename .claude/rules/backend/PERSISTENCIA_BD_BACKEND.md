@@ -77,9 +77,17 @@ código contra cualquiera de los dos — nunca se asume en silencio cuál
   extiende `BaseModelSinId` (`common/model/`, mismas columnas comunes que
   `BaseModel` pero sin `id`), declara `@Id @Column(name = "usuario_id") Long`
   y la relación con `@MapsId @OneToOne`, y fija el nombre de la columna
-  pública con `@AttributeOverride` (`codigo_postulante`). Una tabla con
-  clave compuesta (`convocatoria_documento`) se resolverá en la primera UT
-  que la cree.
+  pública con `@AttributeOverride` (`codigo_postulante`).
+  **Ya resuelto para una tabla con clave compuesta (`convocatoria_documento`):**
+  el Model extiende `BaseModelSinId`, la clave es una clase `@Embeddable`
+  (`ConvocatoriaDocumentoId`, con las dos FK y `equals`/`hashCode`) declarada
+  con `@EmbeddedId`, cada parte se une a su entidad con `@ManyToOne` +
+  `@MapsId("parte")` y la columna pública se fija con `@AttributeOverride`
+  (`codigo_convocatoria_documento`). **La clave compuesta incluye a las
+  filas eliminadas lógicamente** (el `@SQLRestriction` las oculta, pero siguen
+  en la tabla): volver a agregar un par ya eliminado se hace **reactivando** la
+  fila con una consulta nativa (`eliminado_en = NULL`), no insertando otra,
+  porque el `INSERT` violaría la clave primaria.
 
 ## Columnas comunes a todas las tablas
 

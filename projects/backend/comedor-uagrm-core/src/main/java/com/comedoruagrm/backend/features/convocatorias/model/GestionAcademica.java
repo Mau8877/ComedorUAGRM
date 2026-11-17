@@ -11,12 +11,12 @@ import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * Gestion academica (ej. «2026-II») a la que pertenecen las convocatorias.
  *
- * * Solo lectura por ahora: la lista priorizada (CU06) no la modifica. El CU que cree
- * * gestiones (CU13) agrega el constructor y los setters que necesite.
+ * * La crea y edita el CU13 (alta y edicion de gestiones); el resto de los CU solo la lee.
  */
 @Getter
 @Entity
@@ -25,12 +25,21 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class GestionAcademica extends BaseModel {
 
+    @Setter
     @Column(name = "etiqueta", nullable = false, length = 50)
     private String etiqueta;
 
+    @Setter
     @Column(name = "fecha_inicio", nullable = false)
     private LocalDate fechaInicio;
 
+    @Setter
     @Column(name = "fecha_fin", nullable = false)
     private LocalDate fechaFin;
+
+    public GestionAcademica(String etiqueta, LocalDate fechaInicio, LocalDate fechaFin) {
+        this.etiqueta = etiqueta;
+        this.fechaInicio = fechaInicio;
+        this.fechaFin = fechaFin;
+    }
 }

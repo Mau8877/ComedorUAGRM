@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../features/auth/widgets/menu_usuario.dart';
+import '../../features/mibeca/widgets/mi_beca_vista.dart';
 import '../../features/perfil/widgets/perfil_vista.dart';
 import '../../features/postulaciones/widgets/mis_postulaciones_vista.dart';
 import '../../shared/widgets/comedoru_logo.dart';
@@ -28,14 +29,18 @@ const _secciones = [
   _EstudianteSeccion('Mi Menú', Icons.restaurant_outlined),
   _EstudianteSeccion('Mis Pedidos', Icons.list_alt_outlined),
   _EstudianteSeccion('Mis postulaciones', Icons.assignment_outlined),
+  _EstudianteSeccion('Mi beca', Icons.wallet_outlined),
   _EstudianteSeccion('Perfil', Icons.person_outline),
 ];
 
 /// Posición de «Mis postulaciones» (CU04) en [_secciones].
 const _indicePostulaciones = 2;
 
+/// Posición de «Mi beca» (CU24) en [_secciones].
+const _indiceMiBeca = 3;
+
 /// Posición de «Perfil» en [_secciones].
-const _indicePerfil = 3;
+const _indicePerfil = 4;
 
 class _EstudianteShellState extends State<EstudianteShell> {
   int _selected = 0;
@@ -55,12 +60,15 @@ class _EstudianteShellState extends State<EstudianteShell> {
         ),
         actions: const [MenuUsuario()],
       ),
-      // La sección «Perfil» (CU15) muestra el perfil real; las demás siguen de prueba hasta que exista su feature.
+      // «Perfil» (CU15), «Mis postulaciones» (CU04) y «Mi beca» (CU24) muestran su contenido real; las demás siguen
+      // de prueba hasta que exista su feature.
       body: _selected == _indicePerfil
           ? const PerfilVista()
           : _selected == _indicePostulaciones
               ? const MisPostulacionesVista()
-              : Padding(
+              : _selected == _indiceMiBeca
+                  ? MiBecaVista(onVerPostulaciones: () => setState(() => _selected = _indicePostulaciones))
+                  : Padding(
               padding: const EdgeInsets.all(24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

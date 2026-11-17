@@ -110,6 +110,20 @@ class _Contenido extends StatelessWidget {
           Text('Recorrido de tu postulación', style: texto.titleMedium),
           const SizedBox(height: 12),
           LineaDeTiempo(pasos: detalle.lineaDeTiempo),
+          if (detalle.puedeCorregir) ...[
+            const SizedBox(height: 24),
+            Text('Tus documentos', style: texto.titleMedium),
+            const SizedBox(height: 4),
+            Text(
+              'Mientras la postulación está devuelta puedes reemplazar, agregar o eliminar documentos.',
+              style: texto.bodySmall,
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton(
+              onPressed: () => context.push('/mis-postulaciones/${resumen.codigo}/documentos'),
+              child: const Text('Gestionar documentos'),
+            ),
+          ],
           for (final bloque in bloquesDelDetalle(detalle))
             switch (bloque) {
               BloqueDetalle.observaciones =>

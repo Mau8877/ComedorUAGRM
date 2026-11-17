@@ -161,12 +161,12 @@ describe('MisPostulacionesScreen', () => {
     expect(screen.getByRole('option', { name: '2026-2' })).toBeInTheDocument()
   })
 
-  it('sin postulaciones muestra el mensaje informativo y no invita a postular mientras no exista el CU-02', async () => {
+  it('sin postulaciones muestra el mensaje informativo e invita a postular', async () => {
     responder([], { totalItems: 0, totalPages: 0 })
     montar()
 
     expect(await screen.findByText('Todavía no enviaste ninguna postulación')).toBeInTheDocument()
-    expect(screen.queryByRole('link', { name: 'Postular' })).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Postular' })).toHaveAttribute('href', '/postular')
     expect(screen.queryByRole('table')).not.toBeInTheDocument()
   })
 

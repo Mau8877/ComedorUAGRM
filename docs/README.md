@@ -142,10 +142,21 @@ llama `comedor-uagrm-core` y es el que usan nginx y Prometheus.
   `DatosPruebaAdjudicacion`). Para el CU12 crea la cuenta de **Directivo** de prueba
   `directivo@dubss.com` / `123123123` y dos convocatorias `[PRUEBA] Dashboard` (una con
   resultados publicados y otra sin publicar) con postulaciones en varios meses, y refresca
-  la vista de indicadores (`DatosPruebaDashboard`). Se apagan con
+  la vista de indicadores (`DatosPruebaDashboard`). Para medir el sistema con
+  volumen (B1), `DatosPruebaVolumen` reutiliza los postulantes de prueba y crea la
+  convocatoria `[PRUEBA] Volumen - Becados y asistencias` con una postulación por
+  postulante, sus **respuestas del formulario** (con los datos del formulario oficial
+  de la DUBSS en `datos_extra`), un puntaje simulado de 0 a 70, las decisiones (los
+  primeros `cupos` quedan adjudicados y la mitad de esa cantidad no adjudicados), una
+  **beca** por adjudicado (algunas suspendidas o de baja, con su movimiento) y las
+  **asistencias** de las becas vigentes en 35 días corridos (`SEED_VOLUMEN_DIAS`). Con
+  `SEED_PRIORIZACION_POSTULACIONES=20000` genera 20.000 postulaciones, 1.000 becas y
+  unas 17.000 asistencias en 12 s. El puntaje es una simulación, no el de la IA: para el
+  real se reprocesa desde el CU26. Se apagan con
   `SEED_ADMIN_ENABLED=false`, `SEED_PRIORIZACION_ENABLED=false`,
-  `SEED_FINALISTAS_ENABLED=false`, `SEED_EXPEDIENTES_ENABLED=false` y
-  `SEED_ADJUDICACION_ENABLED=false` y `SEED_DASHBOARD_ENABLED=false`;
+  `SEED_FINALISTAS_ENABLED=false`, `SEED_EXPEDIENTES_ENABLED=false`,
+  `SEED_ADJUDICACION_ENABLED=false`, `SEED_DASHBOARD_ENABLED=false` y
+  `SEED_VOLUMEN_ENABLED=false`;
   `SEED_PRIORIZACION_POSTULACIONES=20000` sirve para medir el rendimiento.
   **Nunca corren fuera del perfil `dev`.**
 - **Volúmenes**:
