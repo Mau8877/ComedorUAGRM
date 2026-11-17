@@ -18,6 +18,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import com.comedoruagrm.backend.features.finalistas.dto.FinalistaResponse;
+import com.comedoruagrm.backend.features.notificaciones.enums.EventoNotificacion;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,7 +26,8 @@ import lombok.RequiredArgsConstructor;
  * Consultas de solo lectura de los finalistas (CU21), con el estado de su aviso y de su entrega.
  *
  * * `resultadoAuditoria` y `puntajeTotal` salen de la ULTIMA auditoria del finalista (CU07).
- * * El estado de la notificacion se deriva del ULTIMO aviso de la postulacion que no es un comunicado:
+ * * El estado de la notificacion se deriva del ULTIMO aviso de entrega de documentacion (el evento
+ * * FINALISTA_NOTIFICADO, que es el unico de CU21; los avisos de auditoria o de comunicado no cuentan):
  * * sin aviso es SIN_ENVIAR, con `enviada_en` es ENVIADA; sin el es ENVIANDO mientras el despacho siga
  * * dentro de su ventana (`app.notificaciones.ventana-envio-segundos`: push y correo salen en segundo plano
  * * y se reintentan) y FALLIDA pasada esa ventana.
@@ -38,6 +40,12 @@ public class FinalistaConsultaRepository {
 
     /** Zona en la que se calcula el dia de las fechas (Bolivia). */
     public static final ZoneId ZONA = ZoneId.of("America/La_Paz");
+
+    /**
+     * Titulo del aviso de CU21 (no tiene marcadores, asi que es un texto fijo). `notificacion` no guarda de que
+     * evento viene un aviso, y los de CU07 (auditoria) o CU19 (devolucion) tambien se ligan a la postulacion.
+     */
+    private static final String TITULO_AVISO = EventoNotificacion.FINALISTA_NOTIFICADO.titulo();
 
     private static final String SELECT = """
             SELECT f.codigo_finalista AS codigo, f.posicion, u.nombres, u.apellidos, u.ci,
@@ -59,6 +67,7 @@ public class FinalistaConsultaRepository {
             LEFT JOIN LATERAL (
                 SELECT x.id, x.enviada_en, x.creado_en FROM notificacion x
                 WHERE x.postulacion_id = po.id AND x.comunicado_id IS NULL AND x.eliminado_en IS NULL
+                  AND x.titulo = :tituloAviso
                 ORDER BY x.creado_en DESC, x.id DESC LIMIT 1) n ON true
             LEFT JOIN LATERAL (
                 SELECT CAST(a.resultado AS text) AS resultado, a.puntaje_academico
@@ -115,7 +124,8 @@ public class FinalistaConsultaRepository {
     public Optional<FinalistaResponse> buscarUno(UUID finalista) {
         return jdbc.query(SELECT + " AND f.codigo_finalista = CAST(:finalista AS uuid)",
                 new MapSqlParameterSource().addValue("finalista", finalista.toString(), Types.VARCHAR)
-                        .addValue("ventanaEnvio", ventanaEnvioSegundos), FILA)
+                        .addValue("ventanaEnvio", ventanaEnvioSegundos)
+                        .addValue("tituloAviso", TITULO_AVISO), FILA)
                 .stream().findFirst();
     }
 
@@ -132,6 +142,7 @@ public class FinalistaConsultaRepository {
     private MapSqlParameterSource parametros(UUID convocatoria, String busqueda) {
         return new MapSqlParameterSource()
                 .addValue("ventanaEnvio", ventanaEnvioSegundos)
+                .addValue("tituloAviso", TITULO_AVISO)
                 .addValue("convocatoria", convocatoria.toString(), Types.VARCHAR)
                 .addValue("busqueda", busqueda, Types.VARCHAR);
     }
