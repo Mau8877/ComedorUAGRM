@@ -24,7 +24,7 @@ Llena la columna «Resultado» al terminar cada CU (`OK` / `Falla` / `Parcial`).
 | CU05 | Auditar y adjudicar becas | Web | Hecho | 11 / 7 / – | OK | Probado a mano: panel, adjudicar, cupos agotados y no adjudicar. Seleccionar finalistas, ERR_ADJ_02/03, concurrencia y doble clic: cubiertos por las pruebas de integración |
 | CU22 | Publicar resultados de adjudicación | Web + móvil (consulta) | Hecho | 11 / 5 / – | OK | «Fallo de envío» y «sin adjudicados» cubiertos por pruebas de integración; 2026-II quedó publicada |
 | CU08 | Generar acta de adjudicación | Web | Hecho | 10 / 4 / – | OK | Acta 001/2026 de «Publicada» generada. ERR_ACT_04 y numeración concurrente cubiertos por pruebas de integración. Diseño del PDF por mejorar |
-| CU04 | Consultar estado de postulación | Web + móvil | Hecho | 7 / 4 / 4 | | |
+| CU04 | Consultar estado de postulación | Web + móvil | Hecho | 7 / 4 / 4 | OK | «Corregir y reenviar» oculto hasta que exista el CU02; «Eres finalista» solo con la postulación calificada |
 | CU12 | Dashboard de indicadores BI | Web | Hecho | 9 / 4 / – | | |
 
 Orden de prueba recomendado (cada uno prepara datos o confianza para el siguiente): **CU01 → CU15 → CU14 → CU-EXTRA-01 → CU06 → CU21 → CU07 → CU19 → CU20 → CU05 → CU22 → CU08 → CU04 → CU12**.
@@ -460,18 +460,18 @@ Convocatorias de prueba: **`[PRUEBA] Beca Comedor 2026-II`** (todo decidido, sin
 
 Entra con `postulante.finalista@prueba.local`. La semilla crea una convocatoria `[PRUEBA] Mis postulaciones - …` por estado (pendiente, devuelta, archivada, decisión final sin publicar, finalista, adjudicada publicada, rechazada) y un borrador, en **dos gestiones**.
 
-- [ ] La lista muestra las postulaciones enviadas, de la más reciente a la más antigua, con gestión, fecha de envío y estado visible. **El borrador no aparece.** (CA01, CA12)
-- [ ] Filtro por **gestión académica** funciona. (CA03)
-- [ ] Detalle de una postulación: estado visible y **línea de tiempo** con fecha y hora de cada cambio, **sin mostrar quién lo hizo**, más los pasos pendientes. (CA04)
-- [ ] **Devuelta:** muestra las observaciones del admin con fecha. El botón «Corregir y reenviar» sigue oculto hasta que exista el CU02 (CA05, ver CU04 A3). (CA05)
-- [ ] **Archivada** y **rechazada (CU20):** muestran el **motivo**. (CA06)
-- [ ] **Decisión final sin publicar:** se ve «calificada» y se **oculta** esa fila del historial. (CA07)
-- [ ] **Resultados publicados:** se ve «adjudicada»/«no adjudicada», botón «Ver resultado» hacia `/resultados`, **sin el motivo** de la decisión final. (CA08)
-- [ ] **Finalista:** bloque «Eres finalista» con plazo, documentos a presentar y si la documentación ya fue recibida, **solo mientras la postulación sigue «calificada»**; devuelta, archivada, rechazada o adjudicada no lo muestran. (CA09)
-- [ ] Desde un aviso de la campana (o push en móvil) se abre el detalle de la postulación correspondiente. (CA10)
-- [ ] Una cuenta sin postulaciones (la que creaste en CU01) ve mensaje informativo. (CA02)
-- [ ] `GET /api/v1/postulaciones/{codigo}` de una postulación ajena o inexistente → `404` `ERR_POS_01`; con rol admin → `403`; sin sesión → `401`. (CA11)
-- [ ] Consultar no modifica estados, avisos ni bitácora. (CA13)
+- [x] La lista muestra las postulaciones enviadas, de la más reciente a la más antigua, con gestión, fecha de envío y estado visible. **El borrador no aparece.** (CA01, CA12)
+- [x] Filtro por **gestión académica** funciona. (CA03)
+- [x] Detalle de una postulación: estado visible y **línea de tiempo** con fecha y hora de cada cambio, **sin mostrar quién lo hizo**, más los pasos pendientes. (CA04)
+- [x] **Devuelta:** muestra las observaciones del admin con fecha. El botón «Corregir y reenviar» sigue oculto hasta que exista el CU02 (CA05, ver CU04 A3). (CA05)
+- [x] **Archivada** y **rechazada (CU20):** muestran el **motivo**. (CA06)
+- [x] **Decisión final sin publicar:** se ve «calificada» y se **oculta** esa fila del historial. (CA07)
+- [x] **Resultados publicados:** se ve «adjudicada»/«no adjudicada», botón «Ver resultado» hacia `/resultados`, **sin el motivo** de la decisión final. (CA08)
+- [x] **Finalista:** bloque «Eres finalista» con plazo, documentos a presentar y si la documentación ya fue recibida, **solo mientras la postulación sigue «calificada»**; devuelta, archivada, rechazada o adjudicada no lo muestran. (CA09)
+- [x] Desde un aviso de la campana (o push en móvil) se abre el detalle de la postulación correspondiente. (CA10)
+- [x] Una cuenta sin postulaciones (la que creaste en CU01) ve mensaje informativo. (CA02)
+- [x] `GET /api/v1/postulaciones/{codigo}` de una postulación ajena o inexistente → `404` `ERR_POS_01`; con rol admin → `403`; sin sesión → `401`. (CA11)
+- [x] Consultar no modifica estados, avisos ni bitácora. (CA13)
 
 **UT:** `./mvnw test -Dtest='MisPostulaciones*Test,EstadoVisibleTest,NotificacionPostulacionCodigo*Test'` · `pnpm test -- src/features/postulaciones` · `flutter test`.
 
