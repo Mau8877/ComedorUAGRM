@@ -18,7 +18,7 @@ Llena la columna «Resultado» al terminar cada CU (`OK` / `Falla` / `Parcial`).
 | CU-EXTRA-01 | Notificaciones push (bandeja + push + correo) | Backend + móvil + bandeja web | Hecho | 12 / – / 5 | OK | Probado con Firebase real (push al Android) |
 | CU06 | Visualizar lista priorizada | Web | Hecho | 10 / 5 / – | OK | |
 | CU21 | Notificar finalistas y publicar comunicados | Web | Hecho | 12 / 7 / – | OK | Estado «Enviando…» añadido; resultado del envío cuenta avisos registrados |
-| CU07 | Auditar expediente finalista | Web | Hecho | 12 / 5 / – | | |
+| CU07 | Auditar expediente finalista | Web | Hecho | 12 / 5 / – | OK | Los 10 fallos previos del frontend ya no ocurren (167 pruebas en verde) |
 | CU19 | Devolver postulación para corrección | Web | Hecho | 9 / 4 / – | | |
 | CU20 | Archivar o rechazar postulación | Web | Hecho | 8 / 4 / – | | |
 | CU05 | Auditar y adjudicar becas | Web | Hecho | 11 / 7 / – | | |
@@ -32,7 +32,7 @@ Orden de prueba recomendado (cada uno prepara datos o confianza para el siguient
 ### Notas conocidas (no son fallos nuevos)
 
 - `SecurityConfigTest` falla si no hay **Redis local** levantado (es ajeno a los CU). Levanta Redis (sección 1) antes de correr `./mvnw test`.
-- **UT del frontend del CU07:** había 10 pruebas fallando de antes; si salen en rojo en `expedientes`, anótalo como «deuda conocida», no como regresión.
+- **UT del frontend del CU07:** había 10 pruebas fallando de antes; el 2026-11-17 las 167 de `expedientes` pasan, así que si vuelven a salir en rojo ya es una regresión.
 - **CU22:** su **Swagger no se ha verificado** y sus **pantallas no se han probado en el navegador**. Dale especial atención (sección CU22).
 - **Los CU de origen no existen:** CU02 (postular), CU03 (IA), CU13 (convocatorias) los hace otro integrante. Todos los datos (convocatorias, postulaciones, puntajes, finalistas, expedientes) vienen de **cargadores de datos de prueba** que solo corren con el perfil `dev`.
 - El menú del Administrador muestra **«Menús» y «Pedidos»**, y el del estudiante **«Mi Menú» y «Mis Pedidos»**: son placeholders del scaffold, no pertenecen a ningún CU. Ignóralos.
@@ -308,16 +308,16 @@ No es una pantalla propia: se prueba con la campana de la web, Swagger y el móv
 
 Datos de prueba del expediente (cargados al arrancar): finalista 1 validado, 2 observado, 3 con entrega y sin auditar, 4 observado y luego validado, 5 no válido, 6–10 con entrega pendiente.
 
-- [ ] Desde «Finalistas», pulsa **Auditar** en el finalista 3. El expediente muestra: datos del postulante, **respuestas socioeconómicas**, documentos con estado («Recibido»/«Falta»), puntaje de la IA vigente y las auditorías previas.
-- [ ] Abre un documento: se obtiene un **acceso temporal** (no un enlace público); un documento de otro finalista → `404` `ERR_EXP_05`. Si MinIO está caído, error claro y el resto del expediente sigue visible.
-- [ ] Registra **Validado** con puntaje académico 0–30 → el expediente muestra la auditoría y el **puntaje total = IA + académico**; el postulante recibe un aviso con el resultado. (BD: `auditoria_expediente`, bitácora.)
-- [ ] **Observado** o **No válido** **sin observaciones** → `400` `ERR_EXP_03`; observaciones > 500 caracteres → `400`.
-- [ ] **Validado sin puntaje académico** o con puntaje fuera de 0–30 → `400` `ERR_EXP_04`.
-- [ ] Finalista con la **entrega pendiente** (6–10): no deja auditar, `409` `ERR_EXP_01` («primero registra la entrega»).
-- [ ] Reaudita un finalista (p. ej. el 4): se agrega una auditoría nueva y las anteriores se conservan; vale la última.
-- [ ] Doble clic en guardar → se registra **una sola** auditoría (idempotencia; clave repetida con otro contenido → `409` `ERR_EXP_06`).
-- [ ] Postulación que ya no es «calificada» (devuelta/archivada/decidida) → `409` `ERR_EXP_02`, el expediente se actualiza.
-- [ ] Finalista inexistente en la URL → `404` y vuelve a la lista. Rol no admin → `403`; sin sesión → `401`.
+- [x] Desde «Finalistas», pulsa **Auditar** en el finalista 3. El expediente muestra: datos del postulante, **respuestas socioeconómicas**, documentos con estado («Recibido»/«Falta»), puntaje de la IA vigente y las auditorías previas.
+- [x] Abre un documento: se obtiene un **acceso temporal** (no un enlace público); un documento de otro finalista → `404` `ERR_EXP_05`. Si MinIO está caído, error claro y el resto del expediente sigue visible.
+- [x] Registra **Validado** con puntaje académico 0–30 → el expediente muestra la auditoría y el **puntaje total = IA + académico**; el postulante recibe un aviso con el resultado. (BD: `auditoria_expediente`, bitácora.)
+- [x] **Observado** o **No válido** **sin observaciones** → `400` `ERR_EXP_03`; observaciones > 500 caracteres → `400`.
+- [x] **Validado sin puntaje académico** o con puntaje fuera de 0–30 → `400` `ERR_EXP_04`.
+- [x] Finalista con la **entrega pendiente** (6–10): no deja auditar, `409` `ERR_EXP_01` («primero registra la entrega»).
+- [x] Reaudita un finalista (p. ej. el 4): se agrega una auditoría nueva y las anteriores se conservan; vale la última.
+- [x] Doble clic en guardar → se registra **una sola** auditoría (idempotencia; clave repetida con otro contenido → `409` `ERR_EXP_06`).
+- [x] Postulación que ya no es «calificada» (devuelta/archivada/decidida) → `409` `ERR_EXP_02`, el expediente se actualiza.
+- [x] Finalista inexistente en la URL → `404` y vuelve a la lista. Rol no admin → `403`; sin sesión → `401`.
 
 **UT:** `./mvnw test -Dtest='Expediente*Test,AuditoriaExpedienteRepositoryTest,RegistrarAuditoriaRequestValidacionTest'` · `pnpm test -- src/features/expedientes` (**10 fallos previos conocidos**: anota cuáles son y si cambió el número).
 
