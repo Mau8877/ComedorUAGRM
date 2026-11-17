@@ -23,7 +23,7 @@ Llena la columna «Resultado» al terminar cada CU (`OK` / `Falla` / `Parcial`).
 | CU20 | Archivar o rechazar postulación | Web | Hecho | 8 / 4 / – | OK | Doble clic cubierto por prueba de integración (dos peticiones a la vez) |
 | CU05 | Auditar y adjudicar becas | Web | Hecho | 11 / 7 / – | OK | Probado a mano: panel, adjudicar, cupos agotados y no adjudicar. Seleccionar finalistas, ERR_ADJ_02/03, concurrencia y doble clic: cubiertos por las pruebas de integración |
 | CU22 | Publicar resultados de adjudicación | Web + móvil (consulta) | Hecho | 11 / 5 / – | OK | «Fallo de envío» y «sin adjudicados» cubiertos por pruebas de integración; 2026-II quedó publicada |
-| CU08 | Generar acta de adjudicación | Web | Hecho | 10 / 4 / – | | |
+| CU08 | Generar acta de adjudicación | Web | Hecho | 10 / 4 / – | OK | Acta 001/2026 de «Publicada» generada. ERR_ACT_04 y numeración concurrente cubiertos por pruebas de integración. Diseño del PDF por mejorar |
 | CU04 | Consultar estado de postulación | Web + móvil | Hecho | 7 / 4 / 4 | | |
 | CU12 | Dashboard de indicadores BI | Web | Hecho | 9 / 4 / – | | |
 
@@ -437,18 +437,18 @@ Convocatorias de prueba: **`[PRUEBA] Beca Comedor 2026-II`** (todo decidido, sin
 
 **Plataforma:** web, ruta `/actas` (menú «Actas»). **Md:** `CU08 - Generar acta de adjudicación.md`. Requiere resultados **publicados** (CU22). Para probar usa `[PRUEBA] Publicada` (si ya le generaste acta, publica antes `[PRUEBA] Beca Comedor 2026-II` en CU22 y úsala).
 
-- [ ] `/actas` muestra la tabla de actas generadas (número, convocatoria, fecha, quién) y el panel «Generar acta» con las convocatorias **publicadas sin acta**.
-- [ ] Si ninguna cumple → mensaje «No hay convocatorias con resultados publicados pendientes de acta», la tabla se sigue viendo. (A1)
-- [ ] Elige una convocatoria y pulsa **«Vista previa»**: muestra el documento con número «borrador»; **no** guarda nada ni toca la bitácora.
-- [ ] Pulsa **«Generar PDF»** → ventana que avisa que el acta es **definitiva** (no se regenera ni se elimina). **Cancela** → nada se guarda. (A6)
-- [ ] Confirma → se genera el PDF con número automático `NNN/AAAA`, adjudicados con nombre, apellido, CI, carrera y puntaje final; se guarda en **MinIO** (verifica el objeto en `:9001`); fila en `acta_adjudicacion` y en `bitacora`.
-- [ ] «Descargar» → abre/descarga el PDF por una dirección **temporal firmada (5 min)**; la descarga queda en la bitácora. Verifica que el PDF abre bien y sus datos coinciden con los adjudicados de la convocatoria.
-- [ ] Generar una **segunda acta** para la misma convocatoria (o vista previa de una que ya tiene) → `409` `ERR_ACT_02`; muestra la existente. (A4)
-- [ ] Convocatoria con resultados **sin publicar** → `409` `ERR_ACT_01`. (A3)
-- [ ] Descargar el acta de una convocatoria **sin acta** → `404` `ERR_ACT_03`. (A5)
-- [ ] Borra el objeto del acta en MinIO y descarga → `404` `ERR_ACT_04`, no se anota descarga. (A9)
-- [ ] Dos actas de convocatorias distintas generadas casi a la vez → números distintos, nunca repetidos. (A7)
-- [ ] Rol no admin → `403`; sin sesión → `401`.
+- [x] `/actas` muestra la tabla de actas generadas (número, convocatoria, fecha, quién) y el panel «Generar acta» con las convocatorias **publicadas sin acta**.
+- [x] Si ninguna cumple → mensaje «No hay convocatorias con resultados publicados pendientes de acta», la tabla se sigue viendo. (A1)
+- [x] Elige una convocatoria y pulsa **«Vista previa»**: muestra el documento con número «borrador»; **no** guarda nada ni toca la bitácora.
+- [x] Pulsa **«Generar PDF»** → ventana que avisa que el acta es **definitiva** (no se regenera ni se elimina). **Cancela** → nada se guarda. (A6)
+- [x] Confirma → se genera el PDF con número automático `NNN/AAAA`, adjudicados con nombre, apellido, CI, carrera y puntaje final; se guarda en **MinIO** (verifica el objeto en `:9001`); fila en `acta_adjudicacion` y en `bitacora`.
+- [x] «Descargar» → abre/descarga el PDF por una dirección **temporal firmada (5 min)**; la descarga queda en la bitácora. Verifica que el PDF abre bien y sus datos coinciden con los adjudicados de la convocatoria.
+- [x] Generar una **segunda acta** para la misma convocatoria (o vista previa de una que ya tiene) → `409` `ERR_ACT_02`; muestra la existente. (A4)
+- [x] Convocatoria con resultados **sin publicar** → `409` `ERR_ACT_01`. (A3)
+- [x] Descargar el acta de una convocatoria **sin acta** → `404` `ERR_ACT_03`. (A5)
+- [x] Borra el objeto del acta en MinIO y descarga → `404` `ERR_ACT_04`, no se anota descarga. (A9)
+- [x] Dos actas de convocatorias distintas generadas casi a la vez → números distintos, nunca repetidos. (A7)
+- [x] Rol no admin → `403`; sin sesión → `401`.
 
 **UT:** `./mvnw test -Dtest='Acta*Test,ConsultaActasServiceTest,NumeroActaService*Test,ActasConsultaRepositoryTest'` · `pnpm test -- src/features/actas`.
 
