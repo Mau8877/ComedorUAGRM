@@ -19,7 +19,7 @@ Llena la columna «Resultado» al terminar cada CU (`OK` / `Falla` / `Parcial`).
 | CU06 | Visualizar lista priorizada | Web | Hecho | 10 / 5 / – | OK | |
 | CU21 | Notificar finalistas y publicar comunicados | Web | Hecho | 12 / 7 / – | OK | Estado «Enviando…» añadido; resultado del envío cuenta avisos registrados |
 | CU07 | Auditar expediente finalista | Web | Hecho | 12 / 5 / – | OK | Los 10 fallos previos del frontend ya no ocurren (167 pruebas en verde) |
-| CU19 | Devolver postulación para corrección | Web | Hecho | 9 / 4 / – | | |
+| CU19 | Devolver postulación para corrección | Web | Hecho | 9 / 4 / – | OK | «Corregir y reenviar» oculto hasta que exista el CU02 |
 | CU20 | Archivar o rechazar postulación | Web | Hecho | 8 / 4 / – | | |
 | CU05 | Auditar y adjudicar becas | Web | Hecho | 11 / 7 / – | | |
 | CU22 | Publicar resultados de adjudicación | Web + móvil (consulta) | Hecho | 11 / 5 / – | | |
@@ -329,16 +329,16 @@ Datos de prueba del expediente (cargados al arrancar): finalista 1 validado, 2 o
 
 Necesitas un finalista **«calificada» con al menos una auditoría** (usa la consulta 1.5; el 2 o el 4 del expediente de prueba si siguen calificadas).
 
-- [ ] Pulsa «Devolver para corrección»: ventana con nombre y convocatoria y campo **motivo** (obligatorio, ≤ 500).
-- [ ] **Cancela** la ventana → no cambia nada (estado sigue «calificada»).
-- [ ] Motivo vacío, solo espacios o de más de 500 caracteres → error inline; por Swagger `400` `ERR_SYS_01`.
-- [ ] Confirma con un motivo válido → el expediente pasa a «Devuelta» y **ya no permite** auditar ni devolver otra vez. (BD: `postulacion.estado='devuelta'`; fila en `postulacion_historial` con estado anterior/nuevo, usuario, fecha y motivo; fila en `bitacora`.)
-- [ ] El postulante recibe aviso con las observaciones (bandeja, correo en Mailpit, push en log).
-- [ ] La postulación **sale de la lista priorizada** (CU06).
-- [ ] Devolver un finalista **sin auditoría** → `409` `ERR_DEV_02`.
-- [ ] Devolver uno que ya no está calificada (ya devuelto/archivado/…) → `409` `ERR_DEV_01`.
-- [ ] Finalista inexistente → `404` `ERR_FIN_01`. Rol no admin → `403`; sin sesión → `401`.
-- [ ] (Cruce con CU04) Entra como el postulante: su postulación devuelta muestra las observaciones y «Corregir y reenviar».
+- [x] Pulsa «Devolver para corrección»: ventana con nombre y convocatoria y campo **motivo** (obligatorio, ≤ 500).
+- [x] **Cancela** la ventana → no cambia nada (estado sigue «calificada»).
+- [x] Motivo vacío, solo espacios o de más de 500 caracteres → error inline; por Swagger `400` `ERR_SYS_01`.
+- [x] Confirma con un motivo válido → el expediente pasa a «Devuelta» y **ya no permite** auditar ni devolver otra vez. (BD: `postulacion.estado='devuelta'`; fila en `postulacion_historial` con estado anterior/nuevo, usuario, fecha y motivo; fila en `bitacora`.)
+- [x] El postulante recibe aviso con las observaciones (bandeja, correo en Mailpit, push en log).
+- [x] La postulación **sale de la lista priorizada** (CU06).
+- [x] Devolver un finalista **sin auditoría** → `409` `ERR_DEV_02`.
+- [x] Devolver uno que ya no está calificada (ya devuelto/archivado/…) → `409` `ERR_DEV_01`.
+- [x] Finalista inexistente → `404` `ERR_FIN_01`. Rol no admin → `403`; sin sesión → `401`.
+- [x] (Cruce con CU04) Entra como el postulante: su postulación devuelta muestra el estado «Devuelta», el paso en el recorrido y las **observaciones**. «Corregir y reenviar» **no** aparece: está oculto mientras no exista el CU02 (otro integrante), por diseño del CU04.
 
 **UT:** `./mvnw test -Dtest='Devolucion*Test,DevolverPostulacionRequestValidacionTest'` · `pnpm test -- src/features/expedientes`.
 
@@ -463,7 +463,7 @@ Entra con `postulante.finalista@prueba.local`. La semilla crea una convocatoria 
 - [ ] La lista muestra las postulaciones enviadas, de la más reciente a la más antigua, con gestión, fecha de envío y estado visible. **El borrador no aparece.** (CA01, CA12)
 - [ ] Filtro por **gestión académica** funciona. (CA03)
 - [ ] Detalle de una postulación: estado visible y **línea de tiempo** con fecha y hora de cada cambio, **sin mostrar quién lo hizo**, más los pasos pendientes. (CA04)
-- [ ] **Devuelta:** muestra las observaciones del admin con fecha y el botón «Corregir y reenviar». (CA05)
+- [ ] **Devuelta:** muestra las observaciones del admin con fecha. El botón «Corregir y reenviar» sigue oculto hasta que exista el CU02 (CA05, ver CU04 A3). (CA05)
 - [ ] **Archivada** y **rechazada (CU20):** muestran el **motivo**. (CA06)
 - [ ] **Decisión final sin publicar:** se ve «calificada» y se **oculta** esa fila del historial. (CA07)
 - [ ] **Resultados publicados:** se ve «adjudicada»/«no adjudicada», botón «Ver resultado» hacia `/resultados`, **sin el motivo** de la decisión final. (CA08)
