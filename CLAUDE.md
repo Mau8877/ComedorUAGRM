@@ -11,9 +11,9 @@ proyectos independientes más la infraestructura de desarrollo:
     para almacenamiento de archivos. Es el backend que consumen el panel web
     y la app mobile, y al que le aplican las rules de `.claude/rules/backend/`.
   - **`comedor-uagrm-ia/`** — módulo de IA en Python + FastAPI (el puntaje de
-    vulnerabilidad de la preselección, que consumirá `comedor-uagrm-core` por
-    la red interna). Hoy es un esqueleto vacío que solo expone `/health`; no
-    tiene rules propias todavía (se definen junto con su primer caso de uso).
+    vulnerabilidad de la preselección, que consume `comedor-uagrm-core` por la
+    red interna). Expone `/health` y `POST /api/v1/puntaje`; sus rules están
+    en `.claude/rules/backend-ia/`.
 - **`projects/frontend`** — contiene dos proyectos de frontend
   independientes, cada uno con su propio stack:
   - **`comedoruagrm/`** — panel web en React 19 + TypeScript + Vite,

@@ -6,8 +6,8 @@ globs: projects/backend/comedor-uagrm-core/**/*
 
 > Esta regla (y todas las de `rules/backend/`) describe el proyecto
 > **`projects/backend/comedor-uagrm-core`** (Spring Boot). El módulo de IA
-> (`comedor-uagrm-ia`, FastAPI) es un proyecto aparte, hoy un esqueleto vacío
-> sin rules propias: se definen junto con su primer caso de uso.
+> (`comedor-uagrm-ia`, FastAPI) es un proyecto aparte, con sus rules en
+> [backend-ia/](backend-ia/PUNTAJE_IA.md).
 
 **Feature-based + capas**: cada módulo de negocio (`features/{modulo}/`)
 es una porción vertical completa (controller → service → repository →
