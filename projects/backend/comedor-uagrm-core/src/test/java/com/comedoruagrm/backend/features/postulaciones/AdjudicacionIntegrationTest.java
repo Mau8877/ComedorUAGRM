@@ -688,6 +688,7 @@ class AdjudicacionIntegrationTest {
         jdbc.update("DELETE FROM puntaje_postulacion");
         jdbc.update("DELETE FROM postulacion");
         jdbc.update("DELETE FROM convocatoria");
+        jdbc.update("DELETE FROM parametro_modelo");
         jdbc.update("DELETE FROM modelo_preseleccion");
         jdbc.update("DELETE FROM gestion_academica");
         jdbc.update("DELETE FROM postulante");

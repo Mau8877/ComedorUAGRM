@@ -120,8 +120,13 @@ class ConvocatoriaIntegrationTest {
             mockMvc.perform(get(ruta).with(postulante)).andExpect(status().isForbidden())
                     .andExpect(jsonPath("$.error").value("ERR_AUTH_07"));
         }
+        // * Con un cuerpo VÁLIDO: el rol se comprueba en el service (@PreAuthorize), después de la validación
+        // * del cuerpo (@Valid) que hace el controller; con un cuerpo inválido la respuesta sería 400.
+        String valido = cuerpoConvocatoria(UUID.randomUUID(), "2026-08-01", "2026-08-31", "100", "40.5", "120",
+                documentos(UUID.randomUUID(), true));
         mockMvc.perform(post("/api/v1/convocatorias").with(postulante).contentType(MediaType.APPLICATION_JSON)
-                .content("{}")).andExpect(status().isForbidden());
+                .content(valido)).andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("ERR_AUTH_07"));
         assertThat(contar("SELECT count(*) FROM convocatoria")).isZero();
     }
 

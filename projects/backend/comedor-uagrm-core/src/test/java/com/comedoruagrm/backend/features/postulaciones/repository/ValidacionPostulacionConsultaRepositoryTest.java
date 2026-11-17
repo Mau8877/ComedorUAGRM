@@ -89,7 +89,8 @@ class ValidacionPostulacionConsultaRepositoryTest {
 
         assertThat(datos.id()).isEqualTo(conv);
         assertThat(datos.gestionId()).isEqualTo(gestionDe(conv));
-        assertThat(datos.gestionEtiqueta()).isEqualTo("VAL1");
+        // * `ExpedienteFixtures.convocatoria` antepone «G-» a la etiqueta de la gestión.
+        assertThat(datos.gestionEtiqueta()).isEqualTo("G-VAL1");
         assertThat(datos.estado()).isNotBlank();
     }
 

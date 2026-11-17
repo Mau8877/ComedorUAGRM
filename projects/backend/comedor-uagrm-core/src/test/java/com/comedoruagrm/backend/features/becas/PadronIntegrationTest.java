@@ -47,7 +47,7 @@ class PadronIntegrationTest {
     // En orden de dependencia (primero las que apuntan a otras).
     private static final List<String> TABLAS = List.of("movimiento_beca", "beca", "publicacion_resultado",
             "adjudicacion", "auditoria_expediente", "finalista", "puntaje_postulacion", "postulacion",
-            "modelo_preseleccion", "bitacora", "sesion", "postulante", "usuario", "convocatoria",
+            "parametro_modelo", "modelo_preseleccion", "bitacora", "sesion", "postulante", "usuario", "convocatoria",
             "gestion_academica");
 
     @Autowired
