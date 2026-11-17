@@ -11,6 +11,7 @@ import type { Usuario } from '@/features/auth'
 import { useAccionesDeCuenta } from '@/features/perfil'
 import { useConvocatoriasPriorizables } from '@/features/priorizacion'
 import { AdminLayout } from '@/layouts'
+import { useConvocatoriaElegida } from '@/store'
 
 import { mapearErrorAdjudicacion, usePanelAdjudicacion } from '../api'
 import { avisosDelPanel, SeleccionarFinalistasDialog } from '../components'
@@ -52,7 +53,7 @@ export function AdjudicacionScreen({ titulo, activeHref, usuarioActual }: Adjudi
   const cerrarSesion = useCerrarSesion()
   const accionesDeCuenta = useAccionesDeCuenta()
 
-  const [elegida, setElegida] = useState<string | undefined>(undefined)
+  const [elegida, setElegida] = useConvocatoriaElegida()
   const [seleccionando, setSeleccionando] = useState(false)
   // Convocatorias que el backend dijo que ya no existen: se quitan del selector hasta que la lista se actualice.
   const [inexistentes, setInexistentes] = useState<Set<string>>(new Set())
@@ -60,8 +61,11 @@ export function AdjudicacionScreen({ titulo, activeHref, usuarioActual }: Adjudi
 
   const convocatorias = useConvocatoriasPriorizables()
   const disponibles = (convocatorias.data ?? []).filter((c) => !inexistentes.has(c.codigo))
+  // Sin elección previa se abre la convocatoria más reciente que ya está cerrada: es la única en la que se
+  // pueden seleccionar finalistas y decidir; una abierta o en borrador solo mostraría el aviso de que no se puede.
+  const porDefecto = disponibles.find((c) => c.estado === 'CERRADA') ?? disponibles[0]
   const convocatoriaId =
-    elegida && disponibles.some((c) => c.codigo === elegida) ? elegida : disponibles[0]?.codigo
+    elegida && disponibles.some((c) => c.codigo === elegida) ? elegida : porDefecto?.codigo
 
   const panelConsulta = usePanelAdjudicacion(convocatoriaId)
   const panel = panelConsulta.data
