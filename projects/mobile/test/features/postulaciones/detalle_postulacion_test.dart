@@ -106,7 +106,7 @@ void main() {
       expect(find.text('Eres finalista'), findsNothing);
     });
 
-    testWidgets('devuelta: observaciones con su fecha y sin «Corregir y reenviar» mientras no exista el CU-02',
+    testWidgets('devuelta: observaciones con su fecha y la opción «Corregir y reenviar»',
         (tester) async {
       final servicio = ServicioFalso()
         ..detalle = (_) async => detalle('devuelta', {'observaciones': _observaciones, 'puedeCorregir': true});
@@ -117,7 +117,7 @@ void main() {
       expect(find.text('Observaciones de la DUBSS'), findsOneWidget);
       expect(find.text('Falta el certificado de notas'), findsOneWidget);
       expect(find.text('15/11/2026, 10:00'), findsOneWidget);
-      expect(find.text('Corregir y reenviar'), findsNothing);
+      expect(find.text('Corregir y reenviar'), findsOneWidget);
     });
 
     testWidgets('devuelta que se puede corregir: ofrece «Gestionar documentos», que abre los documentos (CU16)',

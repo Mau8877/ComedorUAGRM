@@ -242,7 +242,7 @@ void main() {
           .map((d) => d.label)
           .toList();
 
-      expect(etiquetas, ['Mi Menú', 'Mis Pedidos', 'Mis postulaciones', 'Perfil']);
+      expect(etiquetas, ['Mi Menú', 'Mis Pedidos', 'Mis postulaciones', 'Mi beca', 'Perfil']);
     });
   });
 }

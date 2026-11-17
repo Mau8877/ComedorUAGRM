@@ -1,9 +1,8 @@
-// * Los dos destinos que dependen del CU-02 (enviar y corregir una postulación), que desarrolla otra persona del
-// * equipo. Mientras esa pantalla no exista valen `null` y la invitación a postular y «Corregir y reenviar» se
-// * ocultan (no se muestran deshabilitadas sin explicación). Cuando exista, se completa la ruta acá y aparecen solas.
+// * Los dos destinos del CU-02 (postular y corregir una postulación devuelta): los dos abren la misma pantalla,
+// * `/postular`, y el backend decide si crea un borrador nuevo o devuelve la postulación devuelta con sus respuestas.
 
-/// Ruta de la pantalla para postular a la convocatoria abierta (CU-02), o `null` si todavía no existe.
-const String? rutaPostular = null;
+/// Ruta de la pantalla para postular a la convocatoria abierta (CU-02).
+const String rutaPostular = '/postular';
 
-/// Ruta de la pantalla para corregir y reenviar una postulación devuelta (CU-02), o `null` si todavía no existe.
-const String? rutaCorregir = null;
+/// Ruta de la pantalla para corregir y reenviar una postulación devuelta (CU-02).
+const String rutaCorregir = '/postular';
