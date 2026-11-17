@@ -22,7 +22,7 @@ Llena la columna «Resultado» al terminar cada CU (`OK` / `Falla` / `Parcial`).
 | CU19 | Devolver postulación para corrección | Web | Hecho | 9 / 4 / – | OK | «Corregir y reenviar» oculto hasta que exista el CU02 |
 | CU20 | Archivar o rechazar postulación | Web | Hecho | 8 / 4 / – | OK | Doble clic cubierto por prueba de integración (dos peticiones a la vez) |
 | CU05 | Auditar y adjudicar becas | Web | Hecho | 11 / 7 / – | OK | Probado a mano: panel, adjudicar, cupos agotados y no adjudicar. Seleccionar finalistas, ERR_ADJ_02/03, concurrencia y doble clic: cubiertos por las pruebas de integración |
-| CU22 | Publicar resultados de adjudicación | Web + móvil (consulta) | Hecho | 11 / 5 / – | | |
+| CU22 | Publicar resultados de adjudicación | Web + móvil (consulta) | Hecho | 11 / 5 / – | OK | «Fallo de envío» y «sin adjudicados» cubiertos por pruebas de integración; 2026-II quedó publicada |
 | CU08 | Generar acta de adjudicación | Web | Hecho | 10 / 4 / – | | |
 | CU04 | Consultar estado de postulación | Web + móvil | Hecho | 7 / 4 / 4 | | |
 | CU12 | Dashboard de indicadores BI | Web | Hecho | 9 / 4 / – | | |
@@ -33,7 +33,7 @@ Orden de prueba recomendado (cada uno prepara datos o confianza para el siguient
 
 - `SecurityConfigTest` falla si no hay **Redis local** levantado (es ajeno a los CU). Levanta Redis (sección 1) antes de correr `./mvnw test`.
 - **UT del frontend del CU07:** había 10 pruebas fallando de antes; el 2026-11-17 las 167 de `expedientes` pasan, así que si vuelven a salir en rojo ya es una regresión.
-- **CU22:** su **Swagger no se ha verificado** y sus **pantallas no se han probado en el navegador**. Dale especial atención (sección CU22).
+- **CU22:** su Swagger y sus pantallas ya se verificaron (2026-11-17). Ojo: `[PRUEBA] Beca Comedor 2026-II` quedó **publicada**; CU08 usa esa convocatoria.
 - **Los CU de origen no existen:** CU02 (postular), CU03 (IA), CU13 (convocatorias) los hace otro integrante. Todos los datos (convocatorias, postulaciones, puntajes, finalistas, expedientes) vienen de **cargadores de datos de prueba** que solo corren con el perfil `dev`.
 - El menú del Administrador muestra **«Menús» y «Pedidos»**, y el del estudiante **«Mi Menú» y «Mis Pedidos»**: son placeholders del scaffold, no pertenecen a ningún CU. Ignóralos.
 - El módulo de IA (`comedor-uagrm-ia`) solo tiene `/health`; los puntajes son de prueba.
@@ -401,7 +401,7 @@ Datos: la convocatoria `[PRUEBA]` principal tiene cupos 5, puntaje mínimo 70 y 
 
 ## CU22 — Publicar resultados de adjudicación
 
-> ⚠️ **Sin verificar hasta ahora:** el Swagger de este CU y sus pantallas en el navegador. Prueba ambos y anota todo lo raro.
+> Swagger y pantallas verificados el 2026-11-17 (administrador y postulante), con `[PRUEBA] Beca Comedor 2026-II` ya publicada.
 
 **Plataforma:** web, rutas `/publicar-resultados` (Administrador, menú «Publicar resultados») y `/resultados` (Postulante). **Md:** `CU22 - Publicar resultados de adjudicación.md`.
 
@@ -409,25 +409,25 @@ Convocatorias de prueba: **`[PRUEBA] Beca Comedor 2026-II`** (todo decidido, sin
 
 ### Administrador
 
-- [ ] Swagger: `GET /api/v1/convocatorias/{codigo}/resultados/resumen` y `/decisiones` (admin) responden con adjudicados, no adjudicados y puntaje final de cada uno; `puedePublicar` verdadero/falso según el caso.
-- [ ] `/publicar-resultados` → elige `[PRUEBA] Con pendientes`: muestra cuántos finalistas **faltan por decidir** y el botón «Publicar» no debe permitir publicar; por Swagger `POST .../publicar` da `409` `ERR_PUB_01` con cuántos faltan. (A1)
-- [ ] Elige `[PRUEBA] Beca Comedor 2026-II`: resumen con adjudicados/no adjudicados y puntaje final.
-- [ ] Pulsa «Publicar» → ventana que avisa que **no se puede deshacer** y que se avisará a los finalistas; **cancela** → nada se publica. (A4)
-- [ ] Confirma → publicada. BD: fila en `publicacion_resultado` (usuario y fecha), `convocatoria.estado='PUBLICADA'`, fila en `bitacora`. Se crea **un aviso por cada finalista con decisión** (bandeja, correo en Mailpit, push en log).
-- [ ] Publica **otra vez** la misma convocatoria (doble clic o desde Swagger) → `409` `ERR_PUB_02`, muestra quién y cuándo publicó y no registra otra. (A2)
-- [ ] Convocatoria que no está **cerrada** → `409` `ERR_PUB_03`; inexistente → `404` `ERR_PRI_01`. (A3)
-- [ ] Fallo de envío de un aviso (apaga Mailpit antes de publicar) → la publicación queda registrada igual. (A5)
-- [ ] Se publica **aunque no haya adjudicados** (si todos fueron «no adjudicada») — decisión tuya; prueba con una convocatoria así si puedes.
-- [ ] **No** se puede despublicar (no existe endpoint ni botón).
-- [ ] Rol no admin → `403`; sin sesión → `401`.
+- [x] Swagger: `GET /api/v1/convocatorias/{codigo}/resultados/resumen` y `/decisiones` (admin) responden con adjudicados, no adjudicados y puntaje final de cada uno; `puedePublicar` verdadero/falso según el caso.
+- [x] `/publicar-resultados` → elige `[PRUEBA] Con pendientes`: muestra cuántos finalistas **faltan por decidir** y el botón «Publicar» no debe permitir publicar; por Swagger `POST .../publicar` da `409` `ERR_PUB_01` con cuántos faltan. (A1)
+- [x] Elige `[PRUEBA] Beca Comedor 2026-II`: resumen con adjudicados/no adjudicados y puntaje final.
+- [x] Pulsa «Publicar» → ventana que avisa que **no se puede deshacer** y que se avisará a los finalistas; **cancela** → nada se publica. (A4)
+- [x] Confirma → publicada. BD: fila en `publicacion_resultado` (usuario y fecha), `convocatoria.estado='PUBLICADA'`, fila en `bitacora`. Se crea **un aviso por cada finalista con decisión** (bandeja, correo en Mailpit, push en log).
+- [x] Publica **otra vez** la misma convocatoria (doble clic o desde Swagger) → `409` `ERR_PUB_02`, muestra quién y cuándo publicó y no registra otra. (A2)
+- [x] Convocatoria que no está **cerrada** → `409` `ERR_PUB_03`; inexistente → `404` `ERR_PRI_01`. (A3)
+- [x] Fallo de envío de un aviso (apaga Mailpit antes de publicar) → la publicación queda registrada igual. (A5)
+- [x] Se publica **aunque no haya adjudicados** (si todos fueron «no adjudicada») — decisión tuya; prueba con una convocatoria así si puedes.
+- [x] **No** se puede despublicar (no existe endpoint ni botón).
+- [x] Rol no admin → `403`; sin sesión → `401`.
 
 ### Postulante
 
-- [ ] Como `postulante.finalista@prueba.local`, `/resultados` lista convocatorias con resultados publicados (`GET /api/v1/resultados/convocatorias`).
-- [ ] La lista pública de una convocatoria muestra **solo nombre, apellido, nota, carrera y facultad** de los adjudicados. La **nota es el puntaje final**.
-- [ ] «Mi resultado» (`.../resultados/mio`) muestra «adjudicada»/«no adjudicada» **sin el motivo** de la decisión final.
-- [ ] Una convocatoria sin publicar → `404` `ERR_PUB_04` para el postulante (no se filtran resultados antes).
-- [ ] Lo mismo en la app móvil si aplica.
+- [x] Como `postulante.finalista@prueba.local`, `/resultados` lista convocatorias con resultados publicados (`GET /api/v1/resultados/convocatorias`).
+- [x] La lista pública de una convocatoria muestra **solo nombre, apellido, nota, carrera y facultad** de los adjudicados. La **nota es el puntaje final**.
+- [x] «Mi resultado» (`.../resultados/mio`) muestra «adjudicada»/«no adjudicada» **sin el motivo** de la decisión final.
+- [x] Una convocatoria sin publicar → `404` `ERR_PUB_04` para el postulante (no se filtran resultados antes).
+- [x] Lo mismo en la app móvil si aplica.
 
 **UT:** `./mvnw test -Dtest='Resultados*Test,PublicacionResultado*Test,MarcaPublicacionRepositoryTest,EventosResultadosPlantillaTest'` · `pnpm test -- src/features/resultados`.
 
