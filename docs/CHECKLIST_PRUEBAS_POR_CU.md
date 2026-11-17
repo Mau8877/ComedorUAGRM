@@ -20,7 +20,7 @@ Llena la columna «Resultado» al terminar cada CU (`OK` / `Falla` / `Parcial`).
 | CU21 | Notificar finalistas y publicar comunicados | Web | Hecho | 12 / 7 / – | OK | Estado «Enviando…» añadido; resultado del envío cuenta avisos registrados |
 | CU07 | Auditar expediente finalista | Web | Hecho | 12 / 5 / – | OK | Los 10 fallos previos del frontend ya no ocurren (167 pruebas en verde) |
 | CU19 | Devolver postulación para corrección | Web | Hecho | 9 / 4 / – | OK | «Corregir y reenviar» oculto hasta que exista el CU02 |
-| CU20 | Archivar o rechazar postulación | Web | Hecho | 8 / 4 / – | | |
+| CU20 | Archivar o rechazar postulación | Web | Hecho | 8 / 4 / – | OK | Doble clic cubierto por prueba de integración (dos peticiones a la vez) |
 | CU05 | Auditar y adjudicar becas | Web | Hecho | 11 / 7 / – | | |
 | CU22 | Publicar resultados de adjudicación | Web + móvil (consulta) | Hecho | 11 / 5 / – | | |
 | CU08 | Generar acta de adjudicación | Web | Hecho | 10 / 4 / – | | |
@@ -348,16 +348,16 @@ Necesitas un finalista **«calificada» con al menos una auditoría** (usa la co
 
 **Plataforma:** web, dentro del expediente, botones «Archivar» y «Rechazar». **Md:** `CU20 - Archivar o rechazar postulación.md`. Requiere finalista **«calificada»** y convocatoria **sin resultados publicados**.
 
-- [ ] **Archivar:** botón → ventana con nombre y convocatoria y **motivo obligatorio** (≤ 500). Cancelar no cambia nada.
-- [ ] Confirma → estado **«archivada»**; el expediente queda «Archivada» sin más acciones; fila en historial (con motivo) y en bitácora; aviso al postulante con el motivo. (CA de CU20)
-- [ ] **Rechazar** (con otro finalista) → estado **«no adjudicada»** (aviso con el texto de rechazo). Verifica en BD que **no** se creó fila en `adjudicacion` (es distinto de «No adjudicar» del CU05).
-- [ ] Motivo vacío/solo espacios/> 500 → `400` `ERR_SYS_01`.
-- [ ] Sobre una postulación que ya no es «calificada» (ya archivada, devuelta, adjudicada…) → `409` `ERR_ARC_01`.
-- [ ] En una convocatoria con resultados **ya publicados** (`[PRUEBA] Publicada`) → `409` `ERR_ARC_01`.
-- [ ] Doble clic/dos peticiones iguales → solo una surte efecto, la otra `409`.
-- [ ] Postulaciones archivadas/rechazadas salen de la lista priorizada.
-- [ ] Finalista inexistente → `404`; rol no admin → `403`; sin sesión → `401`.
-- [ ] (Cruce con CU04) El postulante ve el **motivo** en su detalle.
+- [x] **Archivar:** botón → ventana con nombre y convocatoria y **motivo obligatorio** (≤ 500). Cancelar no cambia nada.
+- [x] Confirma → estado **«archivada»**; el expediente queda «Archivada» sin más acciones; fila en historial (con motivo) y en bitácora; aviso al postulante con el motivo. (CA de CU20)
+- [x] **Rechazar** (con otro finalista) → estado **«no adjudicada»** (aviso con el texto de rechazo). Verifica en BD que **no** se creó fila en `adjudicacion` (es distinto de «No adjudicar» del CU05).
+- [x] Motivo vacío/solo espacios/> 500 → `400` `ERR_SYS_01`.
+- [x] Sobre una postulación que ya no es «calificada» (ya archivada, devuelta, adjudicada…) → `409` `ERR_ARC_01`.
+- [x] En una convocatoria con resultados **ya publicados** (`[PRUEBA] Publicada`) → `409` `ERR_ARC_01`.
+- [x] Doble clic/dos peticiones iguales → solo una surte efecto, la otra `409`.
+- [x] Postulaciones archivadas/rechazadas salen de la lista priorizada.
+- [x] Finalista inexistente → `404`; rol no admin → `403`; sin sesión → `401`.
+- [x] (Cruce con CU04) El postulante ve el **motivo** en su detalle.
 
 **UT:** `./mvnw test -Dtest='CierrePostulacion*Test,EventosCierrePostulacionPlantillaTest'` · `pnpm test -- src/features/expedientes`.
 
@@ -467,7 +467,7 @@ Entra con `postulante.finalista@prueba.local`. La semilla crea una convocatoria 
 - [ ] **Archivada** y **rechazada (CU20):** muestran el **motivo**. (CA06)
 - [ ] **Decisión final sin publicar:** se ve «calificada» y se **oculta** esa fila del historial. (CA07)
 - [ ] **Resultados publicados:** se ve «adjudicada»/«no adjudicada», botón «Ver resultado» hacia `/resultados`, **sin el motivo** de la decisión final. (CA08)
-- [ ] **Finalista:** bloque «Eres finalista» con plazo, documentos a presentar y si la documentación ya fue recibida. (CA09)
+- [ ] **Finalista:** bloque «Eres finalista» con plazo, documentos a presentar y si la documentación ya fue recibida, **solo mientras la postulación sigue «calificada»**; devuelta, archivada, rechazada o adjudicada no lo muestran. (CA09)
 - [ ] Desde un aviso de la campana (o push en móvil) se abre el detalle de la postulación correspondiente. (CA10)
 - [ ] Una cuenta sin postulaciones (la que creaste en CU01) ve mensaje informativo. (CA02)
 - [ ] `GET /api/v1/postulaciones/{codigo}` de una postulación ajena o inexistente → `404` `ERR_POS_01`; con rol admin → `403`; sin sesión → `401`. (CA11)
