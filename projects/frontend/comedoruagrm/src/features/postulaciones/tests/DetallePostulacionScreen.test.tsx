@@ -25,17 +25,6 @@ vi.mock('@tanstack/react-router', async (original) => {
   const sim = await import('./clienteSimulado')
   return { ...(await original<object>()), useNavigate: () => sim.navegar }
 })
-// Los enlaces que dependen del CU-02: cada test decide si esa pantalla «existe».
-const enlaces = vi.hoisted(() => ({ corregir: null as string | null, postular: null as string | null }))
-vi.mock('../components/enlacesCu02', () => ({
-  get RUTA_CORREGIR() {
-    return enlaces.corregir
-  },
-  get RUTA_POSTULAR() {
-    return enlaces.postular
-  },
-}))
-
 import { ApiError } from '@/store'
 
 import { DetallePostulacionScreen } from '../screens/DetallePostulacionScreen'
@@ -67,8 +56,6 @@ describe('DetallePostulacionScreen', () => {
   beforeEach(() => {
     cliente.get.mockReset()
     navegar.mockReset()
-    enlaces.corregir = null
-    enlaces.postular = null
   })
 
   it('pide la postulación del código de la ruta y muestra convocatoria, gestión, fecha y estado', async () => {
@@ -89,6 +76,27 @@ describe('DetallePostulacionScreen', () => {
     await user.click(screen.getByRole('button', { name: 'Volver a mis postulaciones' }))
 
     expect(navegar).toHaveBeenCalledWith({ to: '/mis-postulaciones' })
+  })
+
+  it('una postulación que se puede corregir ofrece «Gestionar documentos» (CU16)', async () => {
+    responder(detalle({ estado: 'devuelta', puedeCorregir: true }))
+    const { user } = montar()
+    await screen.findByRole('heading', { name: 'Beca 1' })
+
+    await user.click(screen.getByRole('button', { name: 'Gestionar documentos' }))
+
+    expect(navegar).toHaveBeenCalledWith({
+      to: '/mis-postulaciones/$codigo/documentos',
+      params: { codigo: 'post-1' },
+    })
+  })
+
+  it('una postulación que no se puede corregir no ofrece «Gestionar documentos»', async () => {
+    responder(detalle({ estado: 'calificada', puedeCorregir: false }))
+    montar()
+    await screen.findByRole('heading', { name: 'Beca 1' })
+
+    expect(screen.queryByRole('button', { name: 'Gestionar documentos' })).not.toBeInTheDocument()
   })
 
   it('la línea de tiempo muestra los pasos con su fecha y hora, y los pendientes atenuados', async () => {
@@ -144,7 +152,7 @@ describe('DetallePostulacionScreen', () => {
   })
 
   describe('bloques según el estado', () => {
-    it('devuelta: observaciones con su fecha; sin el CU-02 no hay «Corregir y reenviar»', async () => {
+    it('devuelta: observaciones con su fecha y la opción de corregir', async () => {
       responder(
         detalle({
           estado: 'devuelta',
@@ -157,12 +165,10 @@ describe('DetallePostulacionScreen', () => {
       const bloque = await screen.findByRole('region', { name: 'Observaciones' })
       expect(bloque).toHaveTextContent('Falta el certificado de notas')
       expect(bloque).toHaveTextContent('15/11/2026, 10:00')
-      expect(screen.queryByRole('link', { name: 'Corregir y reenviar' })).not.toBeInTheDocument()
-      expect(screen.queryByRole('button', { name: 'Corregir y reenviar' })).not.toBeInTheDocument()
+      expect(screen.getByRole('link', { name: 'Corregir y reenviar' })).toHaveAttribute('href', '/postular')
     })
 
-    it('devuelta con el CU-02 y puedeCorregir: ofrece «Corregir y reenviar»', async () => {
-      enlaces.corregir = '/postular'
+    it('devuelta y puedeCorregir: ofrece «Corregir y reenviar»', async () => {
       responder(
         detalle({
           estado: 'devuelta',
@@ -175,8 +181,7 @@ describe('DetallePostulacionScreen', () => {
       expect(await screen.findByRole('link', { name: 'Corregir y reenviar' })).toHaveAttribute('href', '/postular')
     })
 
-    it('devuelta con el CU-02 pero sin puedeCorregir: no ofrece «Corregir y reenviar»', async () => {
-      enlaces.corregir = '/postular'
+    it('devuelta sin puedeCorregir: no ofrece «Corregir y reenviar»', async () => {
       responder(
         detalle({
           estado: 'devuelta',

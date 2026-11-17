@@ -7,6 +7,13 @@ const FORMATO_FECHA_HORA = new Intl.DateTimeFormat('es-BO', {
   timeZone: 'America/La_Paz',
 })
 
+const FORMATO_HORA = new Intl.DateTimeFormat('es-BO', {
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false,
+  timeZone: 'America/La_Paz',
+})
+
 const FORMATO_FECHA = new Intl.DateTimeFormat('es-BO', {
   day: '2-digit',
   month: '2-digit',
@@ -17,6 +24,11 @@ const FORMATO_FECHA = new Intl.DateTimeFormat('es-BO', {
 /** «13/11/2026, 11:30»: fecha y hora en la zona de La Paz (los pasos de la línea de tiempo, las observaciones). */
 export function formatearFechaHora(iso: string): string {
   return FORMATO_FECHA_HORA.format(new Date(iso))
+}
+
+/** «14:32»: solo la hora, en la zona de La Paz (el aviso «Borrador guardado»). */
+export function formatearHora(iso: string): string {
+  return FORMATO_HORA.format(new Date(iso))
 }
 
 /** «13/11/2026»: solo la fecha (el listado, el plazo de entrega). */

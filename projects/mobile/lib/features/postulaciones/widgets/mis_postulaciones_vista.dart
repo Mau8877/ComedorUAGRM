@@ -6,8 +6,10 @@ import '../enlaces_cu02.dart';
 import '../formatos.dart';
 import '../models/mi_postulacion_resumen.dart';
 import '../postulaciones_error_mapper.dart';
+import '../providers/borrador_provider.dart';
 import '../providers/mis_postulaciones_provider.dart';
 import 'alerta_postulaciones.dart';
+import 'tarjeta_borrador.dart';
 import 'estado_postulacion_chip.dart';
 
 /// Contenido de «Mis postulaciones» (CU04): las postulaciones enviadas del postulante, de la más reciente a la más
@@ -63,6 +65,8 @@ class _MisPostulacionesVistaState extends ConsumerState<MisPostulacionesVista> {
 
     final lista = ref.watch(misPostulacionesListProvider);
     final gestion = ref.watch(misPostulacionesUiProvider);
+    // El borrador de la convocatoria abierta (CU-17). Si falla o no hay, la lista de enviadas se ve igual.
+    final borrador = ref.watch(miBorradorProvider).valueOrNull;
 
     return lista.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -76,9 +80,18 @@ class _MisPostulacionesVistaState extends ConsumerState<MisPostulacionesVista> {
         ),
       ),
       data: (datos) {
-        if (datos.items.isEmpty && gestion == null) return const _SinPostulaciones();
+        if (datos.items.isEmpty && gestion == null) {
+          return ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              if (borrador != null) TarjetaBorrador(borrador: borrador),
+              const _SinPostulaciones(),
+            ],
+          );
+        }
         return RefreshIndicator(
           onRefresh: () async {
+            ref.invalidate(miBorradorProvider);
             ref.invalidate(misPostulacionesListProvider);
             await ref.read(misPostulacionesListProvider.future).catchError((_) => datos);
           },
@@ -87,6 +100,7 @@ class _MisPostulacionesVistaState extends ConsumerState<MisPostulacionesVista> {
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(16),
             children: [
+              if (borrador != null) TarjetaBorrador(borrador: borrador),
               if (_gestiones.isNotEmpty) _FiltroGestion(gestiones: _gestiones, elegida: gestion),
               if (datos.items.isEmpty)
                 const Padding(
@@ -195,11 +209,8 @@ class _SinPostulaciones extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text('Todavía no enviaste ninguna postulación', textAlign: TextAlign.center),
-            // La invitación a postular solo existe cuando exista la pantalla del CU-02.
-            if (rutaPostular != null) ...[
-              const SizedBox(height: 12),
-              FilledButton(onPressed: () => context.push(rutaPostular!), child: const Text('Postular')),
-            ],
+            const SizedBox(height: 12),
+            FilledButton(onPressed: () => context.push(rutaPostular), child: const Text('Postular')),
           ],
         ),
       ),

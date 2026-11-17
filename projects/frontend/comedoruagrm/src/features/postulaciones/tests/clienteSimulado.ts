@@ -2,7 +2,7 @@
 // imports de la feature) para que las fábricas de `vi.mock` puedan importarlo sin ciclos.
 import { vi } from 'vitest'
 
-export const cliente = { get: vi.fn() }
+export const cliente = { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() }
 
 export const cerrarSesion = vi.fn()
 

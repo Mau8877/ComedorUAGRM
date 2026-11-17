@@ -1,10 +1,9 @@
-// * Los dos enlaces que dependen del CU-02 (enviar y corregir una postulación), que desarrolla otra persona del
-// * equipo. Mientras esa pantalla no exista valen `null` y los botones «Postular» y «Corregir y reenviar» se ocultan
-// * (no se muestran deshabilitados sin explicación). Cuando exista, se completa la ruta acá y aparecen solos.
-// ? Al engancharlas, `Link` necesita rutas tipadas: se cambia a `{ to: '/…' }` junto con la ruta nueva.
+// * Los dos enlaces del CU-02 (postular y corregir una postulación devuelta): los dos abren la misma pantalla,
+// * `/postular`, y el backend decide si crea un borrador nuevo o devuelve la postulación devuelta con sus respuestas.
+// ? Los botones usan `href` (no `Link` tipado): recargan la app, que es inocuo porque la sesión vive en cookies.
 
-/** Pantalla para postular a la convocatoria abierta (CU-02), o `null` si todavía no existe. */
-export const RUTA_POSTULAR: string | null = null
+/** Pantalla para postular a la convocatoria abierta (CU-02). */
+export const RUTA_POSTULAR: string | null = '/postular'
 
-/** Pantalla para corregir y reenviar una postulación devuelta (CU-02), o `null` si todavía no existe. */
-export const RUTA_CORREGIR: string | null = null
+/** Pantalla para corregir y reenviar una postulación devuelta (CU-02). */
+export const RUTA_CORREGIR: string | null = '/postular'

@@ -17,3 +17,9 @@ String formatearFechaHora(DateTime instante) {
 
 /// «20/11/2026»: un día sin hora (el plazo de entrega), sin correrlo por la zona horaria.
 String formatearDia(DateTime dia) => '${_dos(dia.day)}/${_dos(dia.month)}/${dia.year}';
+
+/// «14:32»: solo la hora, en la hora de La Paz (el aviso «Borrador guardado»).
+String formatearHora(DateTime instante) {
+  final l = _laPaz(instante);
+  return '${_dos(l.hour)}:${_dos(l.minute)}';
+}

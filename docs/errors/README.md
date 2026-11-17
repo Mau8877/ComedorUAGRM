@@ -41,6 +41,7 @@ docs/errors/
 - [`ERR_SYS_03`](system/ERRORES_SISTEMA.md#err_sys_03) — La ruta no existe (404)
 - [`ERR_SYS_04`](system/ERRORES_SISTEMA.md#err_sys_04) — Método HTTP no permitido (405)
 - [`ERR_SYS_05`](system/ERRORES_SISTEMA.md#err_sys_05) — Request mal formado o con parámetros inválidos (400)
+- [`ERR_SYS_06`](system/ERRORES_SISTEMA.md#err_sys_06) — La subida supera el tamaño máximo de Spring (400)
 
 ### Autenticación (`AUTH`)
 
@@ -97,6 +98,32 @@ docs/errors/
 
 - [`ERR_POS_01`](postulaciones/ERRORES_POSTULACIONES.md#err_pos_01) — La postulación no existe o es de otra persona (404)
 
+### Validación de elegibilidad y duplicados (`VAL`)
+
+- [`ERR_VAL_01`](postulaciones/ERRORES_POSTULACIONES.md#err_val_01) — Ya hay una postulación vigente en la misma gestión (409)
+- [`ERR_VAL_02`](postulaciones/ERRORES_POSTULACIONES.md#err_val_02) — El postulante no es elegible: cuenta desactivada o que no es de un postulante (403)
+- [`ERR_VAL_03`](postulaciones/ERRORES_POSTULACIONES.md#err_val_03) — La convocatoria no está abierta o está fuera de fechas (409)
+
+### Envío de la postulación (ENV)
+
+- [`ERR_ENV_01`](postulaciones/ERRORES_POSTULACIONES.md#err_env_01) — No hay una convocatoria abierta que reciba postulaciones (409)
+- [`ERR_ENV_02`](postulaciones/ERRORES_POSTULACIONES.md#err_env_02) — La postulación no existe o no es del usuario (404)
+- [`ERR_ENV_03`](postulaciones/ERRORES_POSTULACIONES.md#err_env_03) — La postulación ya no se puede enviar (409)
+- [`ERR_ENV_04`](postulaciones/ERRORES_POSTULACIONES.md#err_env_04) — Falta un campo o documento obligatorio (400)
+- [`ERR_ENV_05`](postulaciones/ERRORES_POSTULACIONES.md#err_env_05) — Un dato del formulario es inválido (400)
+
+### Documentos de la postulación (`DOC`)
+
+- [`ERR_DOC_01`](postulaciones/ERRORES_POSTULACIONES.md#err_doc_01) — No llegó el archivo o está vacío (400)
+- [`ERR_DOC_02`](postulaciones/ERRORES_POSTULACIONES.md#err_doc_02) — El archivo supera el tamaño máximo (400)
+- [`ERR_DOC_03`](postulaciones/ERRORES_POSTULACIONES.md#err_doc_03) — Formato no permitido o contenido que no corresponde al formato (400)
+- [`ERR_DOC_04`](postulaciones/ERRORES_POSTULACIONES.md#err_doc_04) — La postulación no existe o es de otra persona (404)
+- [`ERR_DOC_05`](postulaciones/ERRORES_POSTULACIONES.md#err_doc_05) — El tipo de documento no figura en la lista de la convocatoria (404)
+- [`ERR_DOC_06`](postulaciones/ERRORES_POSTULACIONES.md#err_doc_06) — La postulación ya fue enviada: sus documentos no se modifican (409)
+- [`ERR_DOC_07`](postulaciones/ERRORES_POSTULACIONES.md#err_doc_07) — La convocatoria ya no está abierta (409)
+- [`ERR_DOC_08`](postulaciones/ERRORES_POSTULACIONES.md#err_doc_08) — Ya hay el máximo de archivos de ese documento (409)
+- [`ERR_DOC_09`](postulaciones/ERRORES_POSTULACIONES.md#err_doc_09) — El documento adjunto no existe o no es de esa postulación (404)
+
 <!--
   A medida que se agregan módulos de negocio (platos, menú, usuarios...),
   cada uno suma acá su propia sección "### Nombre (PREFIJO)" con la lista
@@ -151,3 +178,76 @@ docs/errors/
 
 - [`ERR_DAS_01`](dashboard/ERRORES_DASHBOARD.md#err_das_01) — La gestión o la convocatoria no existe, o no es de la gestión (404)
 - [`ERR_DAS_02`](dashboard/ERRORES_DASHBOARD.md#err_das_02) — No hay datos que exportar a PDF (400)
+
+### Convocatorias (`CV`)
+
+- [`ERR_CV_01`](convocatorias/ERRORES_CONVOCATORIAS.md#err_cv_01) — La convocatoria no existe o está eliminada (404)
+- [`ERR_CV_02`](convocatorias/ERRORES_CONVOCATORIAS.md#err_cv_02) — La gestión académica no existe o está eliminada (404)
+- [`ERR_CV_03`](convocatorias/ERRORES_CONVOCATORIAS.md#err_cv_03) — Un tipo de documento indicado no existe (404)
+- [`ERR_CV_04`](convocatorias/ERRORES_CONVOCATORIAS.md#err_cv_04) — La fecha de cierre no es posterior a la de apertura (400)
+- [`ERR_CV_05`](convocatorias/ERRORES_CONVOCATORIAS.md#err_cv_05) — Ningún documento de la lista es obligatorio (400)
+- [`ERR_CV_06`](convocatorias/ERRORES_CONVOCATORIAS.md#err_cv_06) — Un tipo de documento aparece más de una vez (400)
+- [`ERR_CV_07`](convocatorias/ERRORES_CONVOCATORIAS.md#err_cv_07) — Ya hay otra convocatoria abierta en la misma gestión (409)
+- [`ERR_CV_08`](convocatorias/ERRORES_CONVOCATORIAS.md#err_cv_08) — La operación no corresponde al estado actual de la convocatoria (409)
+- [`ERR_CV_09`](convocatorias/ERRORES_CONVOCATORIAS.md#err_cv_09) — La convocatoria ya tiene postulaciones: no se cambian sus documentos ni su fecha de apertura (409)
+- [`ERR_CV_10`](convocatorias/ERRORES_CONVOCATORIAS.md#err_cv_10) — La convocatoria tiene postulaciones: no se elimina (409)
+- [`ERR_CV_11`](convocatorias/ERRORES_CONVOCATORIAS.md#err_cv_11) — `sort` no soportado en el listado (400)
+- [`ERR_CV_12`](convocatorias/ERRORES_CONVOCATORIAS.md#err_cv_12) — Ya existe una gestión con esa etiqueta (409)
+- [`ERR_CV_13`](convocatorias/ERRORES_CONVOCATORIAS.md#err_cv_13) — La fecha de fin de la gestión no es posterior a la de inicio (400)
+
+### Bitácora (`BIT`)
+
+- [`ERR_BIT_01`](bitacora/ERRORES_BITACORA.md#err_bit_01) — `sort` no soportado en la consulta de la bitácora (400)
+- [`ERR_BIT_02`](bitacora/ERRORES_BITACORA.md#err_bit_02) — `filter[desde]` es posterior a `filter[hasta]` (400)
+
+### Padrón de becados (`BEC`)
+
+- [`ERR_BEC_01`](becas/ERRORES_BECAS.md#err_bec_01) — La beca no existe o está eliminada (404)
+- [`ERR_BEC_02`](becas/ERRORES_BECAS.md#err_bec_02) — La convocatoria no existe o está eliminada (404)
+- [`ERR_BEC_03`](becas/ERRORES_BECAS.md#err_bec_03) — Los resultados todavía no fueron publicados (409)
+- [`ERR_BEC_04`](becas/ERRORES_BECAS.md#err_bec_04) — No hay adjudicados pendientes de alta (409)
+- [`ERR_BEC_05`](becas/ERRORES_BECAS.md#err_bec_05) — La beca no está vigente: no se puede dar de baja ni suspender (409)
+- [`ERR_BEC_06`](becas/ERRORES_BECAS.md#err_bec_06) — La beca no fue dada de baja: no se puede reemplazar (409)
+- [`ERR_BEC_07`](becas/ERRORES_BECAS.md#err_bec_07) — No hay un postulante disponible para ocupar el cupo (409)
+- [`ERR_BEC_08`](becas/ERRORES_BECAS.md#err_bec_08) — El postulante confirmado ya no es el siguiente disponible (409)
+- [`ERR_BEC_09`](becas/ERRORES_BECAS.md#err_bec_09) — La beca ya fue reemplazada (409)
+- [`ERR_BEC_10`](becas/ERRORES_BECAS.md#err_bec_10) — `sort` no soportado en el listado del padrón (400)
+
+### Planillas de asistencia (`PLA`)
+
+- [`ERR_PLA_01`](planillas/ERRORES_PLANILLAS.md#err_pla_01) — La fecha final es anterior a la inicial (400)
+- [`ERR_PLA_02`](planillas/ERRORES_PLANILLAS.md#err_pla_02) — El periodo no está dentro de la gestión académica (400)
+- [`ERR_PLA_03`](planillas/ERRORES_PLANILLAS.md#err_pla_03) — El periodo supera los 31 días de la planilla (400)
+- [`ERR_PLA_04`](planillas/ERRORES_PLANILLAS.md#err_pla_04) — La convocatoria no tiene becas vigentes (409)
+- [`ERR_PLA_05`](planillas/ERRORES_PLANILLAS.md#err_pla_05) — La planilla no existe (404)
+- [`ERR_PLA_06`](planillas/ERRORES_PLANILLAS.md#err_pla_06) — El archivo de la planilla no está en el almacenamiento (404)
+
+### Asistencia digital (`ASI`)
+
+- [`ERR_ASI_01`](asistencias/ERRORES_ASISTENCIAS.md#err_asi_01) — El CI no corresponde a ningún becado (404)
+- [`ERR_ASI_02`](asistencias/ERRORES_ASISTENCIAS.md#err_asi_02) — La beca no está vigente: no se registra asistencia (409)
+- [`ERR_ASI_03`](asistencias/ERRORES_ASISTENCIAS.md#err_asi_03) — La beca no existe (404)
+
+### Cotejo de asistencia (`COT`)
+
+- [`ERR_COT_01`](cotejos/ERRORES_COTEJOS.md#err_cot_01) — La planilla no existe (404)
+- [`ERR_COT_02`](cotejos/ERRORES_COTEJOS.md#err_cot_02) — Coincidencias y discrepancias no suman el total (400)
+- [`ERR_COT_03`](cotejos/ERRORES_COTEJOS.md#err_cot_03) — El resultado no corresponde a las discrepancias (400)
+- [`ERR_COT_04`](cotejos/ERRORES_COTEJOS.md#err_cot_04) — Con discrepancias se exigen observaciones (400)
+
+### Mi beca (`MBE`)
+
+- [`ERR_MBE_01`](mibeca/ERRORES_MIBECA.md#err_mbe_01) — El usuario no tiene beca (404)
+- [`ERR_MBE_02`](mibeca/ERRORES_MIBECA.md#err_mbe_02) — Rango de fechas inválido: «desde» posterior a «hasta» (400)
+- [`ERR_MBE_03`](mibeca/ERRORES_MIBECA.md#err_mbe_03) — Campo de `sort` no soportado en el historial (400)
+
+### Preselección (`MOD`)
+
+- [`ERR_MOD_01`](preseleccion/ERRORES_PRESELECCION.md#err_mod_01) — Parámetros del modelo no válidos: variable faltante, repetida o desconocida, ponderación fuera de rango o suma distinta de 100 (400)
+- [`ERR_MOD_02`](preseleccion/ERRORES_PRESELECCION.md#err_mod_02) — No hay una versión vigente del modelo (409)
+- [`ERR_MOD_03`](preseleccion/ERRORES_PRESELECCION.md#err_mod_03) — Ya hay un reprocesamiento en curso para la convocatoria (409)
+- [`ERR_MOD_04`](preseleccion/ERRORES_PRESELECCION.md#err_mod_04) — Los resultados ya fueron publicados: no se reprocesa (409)
+- [`ERR_MOD_05`](preseleccion/ERRORES_PRESELECCION.md#err_mod_05) — El reprocesamiento no existe (404)
+- [`ERR_MOD_06`](preseleccion/ERRORES_PRESELECCION.md#err_mod_06) — No hay postulaciones calificadas por reprocesar con la versión vigente (409)
+- [`ERR_MOD_07`](preseleccion/ERRORES_PRESELECCION.md#err_mod_07) — Otra versión se guardó al mismo tiempo (409)
+- [`ERR_MOD_08`](preseleccion/ERRORES_PRESELECCION.md#err_mod_08) — La postulación cuya precalificación se consulta no existe (404)

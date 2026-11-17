@@ -20,8 +20,8 @@ import type { Usuario } from '@/features/auth'
 import { useAccionesDeCuenta } from '@/features/perfil'
 import { EstudianteLayout } from '@/layouts'
 
-import { mapearErrorPostulaciones, useMisPostulaciones } from '../api'
-import { columnasPostulaciones, RUTA_POSTULAR } from '../components'
+import { mapearErrorPostulaciones, useMiBorrador, useMisPostulaciones } from '../api'
+import { BorradorPendienteCard, columnasPostulaciones, RUTA_POSTULAR } from '../components'
 import type { MiPostulacionResumen } from '../types'
 
 const PAGE_SIZE_INICIAL = 20
@@ -61,6 +61,9 @@ export function MisPostulacionesScreen({ titulo, activeHref, usuarioActual }: Mi
     gestionAcademica: gestion,
     sort: toSortQueryParam(sorting),
   })
+
+  // El borrador de la convocatoria abierta (CU-17). Si falla o no hay, la lista de enviadas se ve igual.
+  const miBorrador = useMiBorrador()
 
   // Se anotan las gestiones nuevas al renderizar (patrón de React para ajustar el estado a una consulta).
   const nuevas = (lista.data?.data ?? []).filter((p) => !gestiones.has(p.gestionAcademica.codigo))
@@ -124,6 +127,8 @@ export function MisPostulacionesScreen({ titulo, activeHref, usuarioActual }: Mi
       onCerrarSesion={() => cerrarSesion.mutate()}
       {...accionesDeCuenta}
     >
+      {miBorrador.data?.postulacion && <BorradorPendienteCard borrador={miBorrador.data} />}
+
       {error && sinDatos && (
         <div
           role="alert"

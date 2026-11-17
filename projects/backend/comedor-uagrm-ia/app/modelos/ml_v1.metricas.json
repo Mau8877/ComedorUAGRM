@@ -1,0 +1,27 @@
+{
+  "advertencia": "Entrenado con datos sintéticos: demuestra el proceso, no valida el modelo.",
+  "postulantes_sinteticos": 20000,
+  "entrenamiento": 15000,
+  "prueba": 5000,
+  "r2": 0.9402,
+  "mae_sobre_100": 3.682,
+  "spearman_modelo_vs_necesidad": 0.9697,
+  "spearman_reglas_vs_necesidad": 0.937,
+  "spearman_reglas_vs_modelo": 0.952,
+  "cobertura_top10_modelo": 0.738,
+  "cobertura_top10_reglas": 0.752,
+  "coincidencia_top10_reglas_modelo": 0.838,
+  "importancias": {
+    "ingresos_familiares": 0.0092,
+    "dependientes": 0.0019,
+    "procedencia": 0.0021,
+    "patrimonio": 0.0498,
+    "estado_vulnerabilidad": 0.0017,
+    "promedio_academico": 0.001,
+    "dependencia_economica": 0.0302,
+    "ocupacion_sosten": 0.0037,
+    "discapacidad": 0.0186,
+    "hijos": 0.0035,
+    "ingreso_por_persona": 0.8781
+  }
+}

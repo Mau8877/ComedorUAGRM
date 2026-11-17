@@ -84,3 +84,6 @@ export interface MisPostulacionesParams {
   gestionAcademica?: string
   sort?: string
 }
+
+export * from './documentos'
+export * from './envio'

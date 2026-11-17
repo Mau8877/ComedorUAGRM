@@ -1,4 +1,6 @@
 import 'package:comedor_uagrm_mobile/core/theme/app_theme.dart';
+import 'package:comedor_uagrm_mobile/features/postulaciones/models/borrador_postulacion.dart';
+import 'package:comedor_uagrm_mobile/features/postulaciones/models/formulario_postulacion.dart';
 import 'package:comedor_uagrm_mobile/features/postulaciones/models/mi_postulacion_detalle.dart';
 import 'package:comedor_uagrm_mobile/features/postulaciones/models/pagina_postulaciones.dart';
 import 'package:comedor_uagrm_mobile/features/postulaciones/providers/postulaciones_servicios_provider.dart';
@@ -18,6 +20,7 @@ class ServicioFalso implements PostulacionesService {
   Future<PaginaPostulaciones> Function(String? gestion, int page) listar = (_, _) async =>
       PaginaPostulaciones.fromJson({'data': <dynamic>[], 'meta': metaJson(totalItems: 0, totalPages: 0)});
   Future<MiPostulacionDetalle> Function(String codigo)? detalle;
+  BorradorResumen? borrador;
 
   @override
   Future<PaginaPostulaciones> listarMias({String? gestionAcademica, int page = 1, int pageSize = 20, String? sort}) {
@@ -27,6 +30,22 @@ class ServicioFalso implements PostulacionesService {
 
   @override
   Future<MiPostulacionDetalle> obtener(String codigo) => detalle!(codigo);
+
+  // El borrador (CU-17): «Mi borrador» es lo que decida el test; guardarlo se prueba en postular_screen_test.dart.
+  @override
+  Future<BorradorResumen?> miBorrador() async => borrador;
+
+  @override
+  Future<BorradorGuardado> guardarBorrador(String codigo, GuardarBorradorRequest borrador) =>
+      throw UnimplementedError();
+
+  // El envío (CU-02) tiene sus propios tests (postular_screen_test.dart).
+  @override
+  Future<FormularioPostulacion> iniciar() => throw UnimplementedError();
+
+  @override
+  Future<ComprobantePostulacion> enviar(String codigo, EnviarPostulacionRequest respuestas) =>
+      throw UnimplementedError();
 }
 
 PaginaPostulaciones pagina(List<Map<String, dynamic>> filas, {int page = 1, int totalPages = 1}) =>
@@ -67,14 +86,44 @@ void main() {
       expect(find.text('Devuelta'), findsOneWidget);
     });
 
-    testWidgets('sin postulaciones muestra el mensaje y no invita a postular mientras no exista el CU-02',
+    testWidgets('sin postulaciones muestra el mensaje e invita a postular',
         (tester) async {
       await tester.pumpWidget(app(ServicioFalso(), const MisPostulacionesVista()));
       await tester.pumpAndSettle();
 
       expect(find.text('Todavía no enviaste ninguna postulación'), findsOneWidget);
-      expect(find.text('Postular'), findsNothing);
+      expect(find.text('Postular'), findsOneWidget);
       expect(find.byType(ChoiceChip), findsNothing);
+    });
+
+    testWidgets('con un borrador en curso lo muestra con lo que falta, incluso sin postulaciones enviadas',
+        (tester) async {
+      final servicio = ServicioFalso()
+        ..borrador = BorradorResumen.fromJson({
+          'postulacion': 'post-1',
+          'convocatoria': 'Convocatoria 2026-II',
+          'gestion': '2026-II',
+          'fechaCierre': '2026-07-31T20:00:00Z',
+          'guardadoEn': '2026-07-12T18:32:00Z',
+          'camposPendientes': 3,
+          'documentosPendientes': 1,
+        });
+      await tester.pumpWidget(app(servicio, const MisPostulacionesVista()));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Convocatoria 2026-II'), findsOneWidget);
+      expect(find.text('Borrador'), findsOneWidget);
+      expect(find.text('Faltan 3 campos y 1 documento.'), findsOneWidget);
+      expect(find.textContaining('Última modificación: 12/07/2026, 14:32'), findsOneWidget);
+      expect(find.widgetWithText(FilledButton, 'Continuar'), findsOneWidget);
+      expect(find.text('Todavía no enviaste ninguna postulación'), findsOneWidget);
+    });
+
+    testWidgets('sin borrador no muestra la tarjeta', (tester) async {
+      await tester.pumpWidget(app(ServicioFalso(), const MisPostulacionesVista()));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Borrador'), findsNothing);
     });
 
     testWidgets('tocar una tarjeta abre el detalle de esa postulación', (tester) async {

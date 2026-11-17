@@ -26,7 +26,7 @@ import lombok.NoArgsConstructor;
  * Postulacion de un Postulante a una convocatoria.
  *
  * * La lista priorizada (CU06) no cambia su estado. El CU19 la puede devolver (`devolver()`) y el CU20 archivar o rechazar (`archivar()`/`rechazar()`) y el CU05 adjudicarla o no adjudicarla (`adjudicar()`/`noAdjudicar()`); el
- * * CU que la crea (CU02) agrega el constructor y los setters que necesite.
+ * * El CU02 la envia (`enviar()`) y el CU03 la califica (`calificar()`); la fila nace por SQL en el CU02.
  */
 @Getter
 @Entity
@@ -53,6 +53,37 @@ public class Postulacion extends BaseModel {
 
     @Column(name = "numero_envios", nullable = false)
     private short numeroEnvios;
+
+    // Veces que la IA rechazo los datos y, al llegar al maximo, cuando se marco para revision (CU03 A1).
+    @Column(name = "intentos_precalificacion", nullable = false)
+    private short intentosPrecalificacion;
+
+    @Column(name = "precalificacion_revision_en")
+    private Instant precalificacionRevisionEn;
+
+    /**
+     * Envia la postulacion (CU02): de «borrador» (primer envio) o «devuelta» (reenvio tras corregir) pasa a
+     * «pendiente», con su fecha de envio y un envio mas contado. La regla de negocio con su codigo de error es
+     * del `service`; esto es solo la red de seguridad del Model.
+     */
+    public void enviar(Instant ahora) {
+        if (estado != EstadoPostulacion.borrador && estado != EstadoPostulacion.devuelta) {
+            throw new IllegalStateException("Solo se puede enviar una postulacion en borrador o devuelta");
+        }
+        this.estado = EstadoPostulacion.pendiente;
+        this.fechaEnvio = ahora;
+        this.numeroEnvios++;
+        this.intentosPrecalificacion = 0;
+        this.precalificacionRevisionEn = null;
+    }
+
+    /** Pasa la postulacion de «pendiente» a «calificada» al registrarse su puntaje (CU03). */
+    public void calificar() {
+        if (estado != EstadoPostulacion.pendiente) {
+            throw new IllegalStateException("Solo se puede calificar una postulacion pendiente");
+        }
+        this.estado = EstadoPostulacion.calificada;
+    }
 
     /**
      * Pasa la postulacion de «calificada» a «devuelta» (CU19). La regla de negocio con su codigo de

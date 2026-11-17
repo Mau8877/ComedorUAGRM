@@ -9,6 +9,9 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -53,7 +56,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error("ERR_SYS_04", "Método HTTP no permitido para este recurso"));
     }
 
-    @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class, MissingServletRequestParameterException.class})
+    @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class, MissingServletRequestParameterException.class, MissingServletRequestPartException.class, MultipartException.class})
     public ResponseEntity<ApiResponse<Object>> handleRequestMalformado(Exception ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.error("ERR_SYS_05", "La solicitud está mal formada o tiene parámetros inválidos"));
@@ -64,6 +67,13 @@ public class GlobalExceptionHandler {
     // * ApiAccessDeniedHandler (403 ERR_AUTH_07 en el sobre). Sin este handler
     // * el catch-all de abajo la convertiria en un 500. Va acá y no se arma el
     // * 403 a mano porque `common/` no puede importar de `security/`.
+    /** Una subida que supera el limite de Spring (`spring.servlet.multipart.max-file-size`): 400, no 500. */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiResponse<Object>> handleSubidaDemasiadoGrande(MaxUploadSizeExceededException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error("ERR_SYS_06", "El archivo supera el tamaño máximo permitido"));
+    }
+
     @ExceptionHandler(AccessDeniedException.class)
     public void handleAccesoDenegado(AccessDeniedException ex) {
         throw ex;

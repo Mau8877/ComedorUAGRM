@@ -58,9 +58,9 @@ class BloqueObservaciones extends StatelessWidget {
         Text(observaciones.texto),
         const SizedBox(height: 4),
         Text(formatearFechaHora(observaciones.fecha), style: Theme.of(context).textTheme.bodySmall),
-        if (puedeCorregir && rutaCorregir != null) ...[
+        if (puedeCorregir) ...[
           const SizedBox(height: 8),
-          FilledButton(onPressed: () => context.push(rutaCorregir!), child: const Text('Corregir y reenviar')),
+          FilledButton(onPressed: () => context.push(rutaCorregir), child: const Text('Corregir y reenviar')),
         ],
       ],
     );

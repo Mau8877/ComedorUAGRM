@@ -54,6 +54,39 @@ public final class BitacoraAcciones {
     public static final String GENERACION_ACTA = "GENERACION_ACTA";
     public static final String DESCARGA_ACTA = "DESCARGA_ACTA";
 
+    // CU13: el actor es el administrador (en el cierre automatico es nulo: lo hace el sistema); el detalle lleva
+    // codigos, estados y los nombres de los campos modificados, nunca textos libres.
+    public static final String CREACION_GESTION = "CREACION_GESTION";
+    public static final String EDICION_GESTION = "EDICION_GESTION";
+    public static final String CREACION_CONVOCATORIA = "CREACION_CONVOCATORIA";
+    public static final String EDICION_CONVOCATORIA = "EDICION_CONVOCATORIA";
+    public static final String APERTURA_CONVOCATORIA = "APERTURA_CONVOCATORIA";
+    public static final String CIERRE_CONVOCATORIA = "CIERRE_CONVOCATORIA";
+    public static final String CIERRE_AUTOMATICO_CONVOCATORIA = "CIERRE_AUTOMATICO_CONVOCATORIA";
+    public static final String ELIMINACION_CONVOCATORIA = "ELIMINACION_CONVOCATORIA";
+
+    // CU23: el actor es el administrador; el detalle lleva codigos, estados y cantidades, nunca el motivo, nombres, CI,
+    // correos ni tokens.
+    public static final String ALTA_BECAS = "ALTA_BECAS";
+    public static final String BAJA_BECA = "BAJA_BECA";
+    public static final String SUSPENSION_BECA = "SUSPENSION_BECA";
+    public static final String REEMPLAZO_BECA = "REEMPLAZO_BECA";
+
+    // CU09: el actor es el administrador; el detalle lleva codigos, periodo y cantidad de becados, nunca nombres, CI
+    // ni la ruta del archivo. Descargar se anota porque el PDF lleva el CI de los becados.
+    public static final String GENERACION_PLANILLA = "GENERACION_PLANILLA";
+    public static final String DESCARGA_PLANILLA = "DESCARGA_PLANILLA";
+
+    // CU11: el actor es el administrador; el detalle lleva codigos, cantidades y resultado, nunca las observaciones,
+    // nombres ni CI.
+    public static final String COTEJO_ASISTENCIA = "COTEJO_ASISTENCIA";
+
+    // CU26: el actor es el administrador. NUEVA_VERSION_MODELO lleva la version y las ponderaciones (entidad
+    // `modelo_preseleccion`); REPROCESAMIENTO_PUNTAJES, la convocatoria, la version y el total (entidad
+    // `lote_reprocesamiento`). Nunca datos de postulantes.
+    public static final String NUEVA_VERSION_MODELO = "NUEVA_VERSION_MODELO";
+    public static final String REPROCESAMIENTO_PUNTAJES = "REPROCESAMIENTO_PUNTAJES";
+
     private BitacoraAcciones() {
     }
 }

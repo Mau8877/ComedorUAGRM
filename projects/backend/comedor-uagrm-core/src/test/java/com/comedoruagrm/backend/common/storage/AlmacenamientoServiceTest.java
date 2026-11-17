@@ -3,6 +3,7 @@ package com.comedoruagrm.backend.common.storage;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -15,6 +16,7 @@ import org.mockito.ArgumentCaptor;
 
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
+import io.minio.RemoveObjectArgs;
 import io.minio.StatObjectArgs;
 import io.minio.errors.ErrorResponseException;
 import io.minio.messages.ErrorResponse;
@@ -73,6 +75,25 @@ class AlmacenamientoServiceTest {
         when(interno.putObject(any(PutObjectArgs.class))).thenThrow(new IOException("connection refused"));
 
         assertThatThrownBy(() -> servicio().subir("secreta/ruta.pdf", new byte[] {1}, "application/pdf"))
+                .isInstanceOf(AlmacenamientoException.class)
+                .hasMessageNotContaining("secreta/ruta.pdf");
+    }
+
+    @Test
+    void eliminar_quitaElObjetoDelBucket() throws Exception {
+        servicio().eliminar("a/b.pdf");
+
+        ArgumentCaptor<RemoveObjectArgs> captura = ArgumentCaptor.forClass(RemoveObjectArgs.class);
+        verify(interno).removeObject(captura.capture());
+        assertThat(captura.getValue().bucket()).isEqualTo(BUCKET);
+        assertThat(captura.getValue().object()).isEqualTo("a/b.pdf");
+    }
+
+    @Test
+    void eliminar_conMinioCaido_lanzaAlmacenamientoExceptionSinLaRutaEnElMensaje() throws Exception {
+        doThrow(new IOException("connection refused")).when(interno).removeObject(any(RemoveObjectArgs.class));
+
+        assertThatThrownBy(() -> servicio().eliminar("secreta/ruta.pdf"))
                 .isInstanceOf(AlmacenamientoException.class)
                 .hasMessageNotContaining("secreta/ruta.pdf");
     }
