@@ -32,12 +32,18 @@ RUN pnpm install --frozen-lockfile --filter comedor-uagrm-frontend...
 # 2. Copiamos el código fuente del frontend y compilamos
 COPY packages/palette ./packages/palette
 COPY projects/frontend/comedoruagrm ./projects/frontend/comedoruagrm
+# Vite fija la URL de la API al compilar. Con la ruta relativa (default) el panel le habla al mismo sitio que lo
+# sirve (detrás del proxy, /api/), así la misma imagen sirve en cualquier dominio.
+ARG VITE_API_BASE_URL=/api/v1
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 RUN pnpm --filter comedor-uagrm-frontend build
 
 # ==========================================
 # ETAPA 2: SERVIR CON NGINX (producción)
 # ==========================================
 FROM nginx:alpine
+# Fallback de SPA (las rutas del router devuelven index.html) y cache de los assets con hash.
+COPY infrastructure/aws/panel-nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /app/projects/frontend/comedoruagrm/dist /usr/share/nginx/html
 
 EXPOSE 80
