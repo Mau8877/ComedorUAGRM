@@ -52,3 +52,96 @@ export interface SeleccionDashboard {
   gestion?: string
   convocatoria?: string
 }
+
+// ── Análisis BI (GET /dashboard/bi) ──
+
+export interface Embudo {
+  postulaciones: number
+  precalificadas: number
+  finalistas: number
+  adjudicadas: number
+  becasVigentes: number
+}
+
+export interface CarreraBi {
+  nombre: string
+  postulaciones: number
+  adjudicadas: number
+}
+
+export interface FacultadBi {
+  nombre: string
+  postulaciones: number
+  adjudicadas: number
+  /** Parte del total de postulaciones, 0–100; null sin postulaciones. */
+  porcentajePostulaciones: number | null
+  /** Adjudicadas sobre postulaciones, 0–100; null sin postulaciones. */
+  tasaAdjudicacion: number | null
+  carreras: CarreraBi[]
+}
+
+export interface ConvocatoriaComparada {
+  codigo: string
+  nombre: string
+  cupos: number | null
+  postulaciones: number
+  finalistas: number
+  adjudicadas: number
+  tasaAdjudicacion: number | null
+  puntajePromedio: number | null
+  /** Variación (%) de postulaciones frente a la convocatoria anterior; null si no hay con qué comparar. */
+  variacionPostulaciones: number | null
+  seleccionada: boolean
+}
+
+export interface TramoPuntaje {
+  desde: number
+  hasta: number
+  cantidad: number
+}
+
+export interface Cobertura {
+  cupos: number
+  becasVigentes: number
+  becasSuspendidas: number
+  becasBaja: number
+  reemplazos: number
+  porcentaje: number | null
+}
+
+export interface AsistenciaDia {
+  /** 1 = lunes … 7 = domingo. */
+  dia: number
+  tasa: number | null
+}
+
+export interface AsistenciaBi {
+  tasaPromedio: number | null
+  diasConRegistro: number
+  becasEnRiesgo: number
+  porDiaSemana: AsistenciaDia[]
+}
+
+export interface GestionTendencia {
+  codigo: string
+  etiqueta: string
+  postulaciones: number
+  adjudicadas: number
+  variacionPostulaciones: number | null
+  seleccionada: boolean
+}
+
+export interface Bi {
+  gestion: { codigo: string; etiqueta: string } | null
+  convocatoria: { codigo: string; nombre: string } | null
+  embudo: Embudo
+  facultades: FacultadBi[]
+  convocatorias: ConvocatoriaComparada[]
+  puntaje: TramoPuntaje[]
+  puntajePromedio: number | null
+  cobertura: Cobertura
+  asistencia: AsistenciaBi
+  tendencia: GestionTendencia[]
+  actualizadoEn: string | null
+  sinDatos: boolean
+}

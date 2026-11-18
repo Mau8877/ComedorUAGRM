@@ -9,9 +9,8 @@ import { formatearMes } from './formato'
 
 const CONFIG = { asistencia: { label: 'Asistencia (%)', color: 'var(--accent)' } } satisfies ChartConfig
 
-/** Asistencia por mes, en línea (CU12). Mientras llegue `null` en todos los meses muestra «Sin datos». */
+/** Asistencia por mes, en línea (CU12). Sin registros de asistencia (todos los meses en `null`) muestra «Sin datos». */
 export function GraficoAsistenciaPorMes({ datos }: { datos: IndicadorMensual[] }) {
-  // TODO CU-10: mostrar la asistencia real cuando el backend la entregue
   const hayDatos = datos.some((d) => d.asistencia !== null)
   const serie = datos.map((d) => ({ mes: formatearMes(d.mes), asistencia: d.asistencia }))
   return (

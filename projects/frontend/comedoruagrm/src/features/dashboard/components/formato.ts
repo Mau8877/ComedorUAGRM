@@ -35,3 +35,22 @@ export function formatearFechaHora(iso: string): string {
   const valor = (tipo: string) => partes.find((p) => p.type === tipo)?.value ?? ''
   return `${valor('day')}/${valor('month')}/${valor('year')} ${valor('hour')}:${valor('minute')}`
 }
+
+/** Variación porcentual con signo: `12.5` → `+12,5 %`, `-3` → `-3 %`, `null` → `—`. */
+export function formatearVariacion(valor: number | null): string {
+  if (valor === null) return '—'
+  const redondeado = Math.round(valor * 10) / 10
+  return `${redondeado > 0 ? '+' : ''}${String(redondeado).replace('.', ',')} %`
+}
+
+/** Porcentaje que admite `null` (sin denominador): `—`. */
+export function formatearPorcentajeONulo(valor: number | null): string {
+  return valor === null ? '—' : formatearPorcentaje(valor)
+}
+
+const DIAS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
+
+/** `1` → `Lun` … `7` → `Dom`. */
+export function nombreDia(dia: number): string {
+  return DIAS[dia - 1] ?? String(dia)
+}

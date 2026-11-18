@@ -1,7 +1,13 @@
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query'
 
 import type { SeleccionDashboard } from '../types'
-import { descargarDashboardApi, obtenerFiltrosApi, obtenerIndicadoresApi } from './dashboardApi'
+import {
+  descargarBiExcelApi,
+  descargarDashboardApi,
+  obtenerBiApi,
+  obtenerFiltrosApi,
+  obtenerIndicadoresApi,
+} from './dashboardApi'
 import { dashboardKeys } from './keys'
 
 /** Gestiones con sus convocatorias, para los selectores. */
@@ -21,5 +27,24 @@ export function useIndicadores(seleccion: SeleccionDashboard, habilitado = true)
 
 /** El PDF no se guarda en la caché: es una mutación que devuelve el archivo a quien la llama. */
 export function useDescargarDashboard() {
-  return useMutation({ mutationFn: (seleccion: SeleccionDashboard) => descargarDashboardApi(seleccion) })
+  return useMutation({
+    mutationFn: (seleccion: SeleccionDashboard) => descargarDashboardApi(seleccion),
+  })
+}
+
+/** El análisis BI de la selección; conserva el anterior mientras llega el nuevo. */
+export function useBi(seleccion: SeleccionDashboard, habilitado = true) {
+  return useQuery({
+    queryKey: dashboardKeys.bi(seleccion),
+    queryFn: () => obtenerBiApi(seleccion),
+    enabled: habilitado,
+    placeholderData: keepPreviousData,
+  })
+}
+
+/** El Excel tampoco se cachea: es una mutación que devuelve el archivo. */
+export function useDescargarBiExcel() {
+  return useMutation({
+    mutationFn: (seleccion: SeleccionDashboard) => descargarBiExcelApi(seleccion),
+  })
 }
