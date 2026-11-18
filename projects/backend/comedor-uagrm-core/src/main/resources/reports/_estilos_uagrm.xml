@@ -1,0 +1,27 @@
+	<style name="base" default="true" fontName="SansSerif" fontSize="9" forecolor="#141C26"
+	       pdfFontName="Helvetica" pdfEncoding="Cp1252" pdfEmbedded="false"/>
+	<style name="Negrita" style="base" bold="true" pdfFontName="Helvetica-Bold"/>
+	<style name="Banda" style="base" mode="Opaque" backcolor="#FFFFFF"/>
+	<style name="Franja" style="base" mode="Opaque" backcolor="#2A3964"/>
+	<style name="FranjaRoja" style="base" mode="Opaque" backcolor="#CC100C"/>
+	<style name="Institucion" style="Negrita" forecolor="#CC100C" fontSize="7.5"/>
+	<style name="TituloDoc" style="Negrita" forecolor="#2A3964" fontSize="16"/>
+	<style name="MetaEtiqueta" style="Negrita" forecolor="#5B6A78" fontSize="8"/>
+	<style name="MetaValor" style="base" fontSize="9"/>
+	<style name="Seccion" style="Negrita" forecolor="#2A3964" fontSize="11"/>
+	<style name="Cabecera" style="Negrita" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" vTextAlign="Middle">
+		<box leftPadding="5" rightPadding="3"/>
+	</style>
+	<style name="Celda" style="base" mode="Opaque" backcolor="#FFFFFF" vTextAlign="Middle">
+		<box leftPadding="5" rightPadding="3"><bottomPen lineWidth="0.5" lineColor="#D5DBE5"/></box>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$V{REPORT_COUNT} % 2 == 0]]></conditionExpression>
+			<style backcolor="#F1F4F9"/>
+		</conditionalStyle>
+	</style>
+	<style name="Tarjeta" style="base" mode="Opaque" backcolor="#F4F6FA">
+		<box><pen lineWidth="0.5" lineColor="#DDE3EC"/></box>
+	</style>
+	<style name="TarjetaValor" style="Negrita" forecolor="#2A3964" fontSize="16" vTextAlign="Middle"/>
+	<style name="TarjetaEtiqueta" style="base" forecolor="#5B6A78" fontSize="8" vTextAlign="Top"/>
+	<style name="Pie" style="base" forecolor="#5B6A78" fontSize="7.5"/>

@@ -1,12 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Dashboard de indicadores BI del Directivo (CU12). Formato JRXML de JasperReports 7 (elementos con `kind`,
-     sin namespace XML). Los datos llegan ya formateados (texto) desde IndicadoresPdfService; la plantilla
-     solo los coloca. Sin datos personales. -->
-<jasperReport name="indicadores_dashboard" language="java" columnCount="1" pageWidth="595" pageHeight="842"
-              columnWidth="555" leftMargin="20" rightMargin="20" topMargin="30" bottomMargin="30"
-              whenNoDataType="AllSectionsNoDetail">
-	<style name="base" default="true" fontName="SansSerif" fontSize="9"
-	       pdfFontName="Helvetica" pdfEncoding="Cp1252" pdfEmbedded="false"/>
+<!-- Dashboard de indicadores BI del Directivo (CU12). Los datos llegan ya formateados (texto) desde
+     IndicadoresPdfService; los dos graficos son imagenes (GraficosPdf). Sin datos personales. -->
+<jasperReport name="indicadores_dashboard" language="java" columnCount="1" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="24" bottomMargin="24" whenNoDataType="AllSectionsNoDetail">
+	<!--ESTILOS_UAGRM-->
 	<parameter name="GESTION" class="java.lang.String"/>
 	<parameter name="CONVOCATORIA" class="java.lang.String"/>
 	<parameter name="ACTUALIZADO_EN" class="java.lang.String"/>
@@ -14,132 +10,72 @@
 	<parameter name="TOTAL_FINALISTAS" class="java.lang.String"/>
 	<parameter name="TOTAL_ADJUDICADAS" class="java.lang.String"/>
 	<parameter name="TOTAL_ASISTENCIA" class="java.lang.String"/>
-	<parameter name="RESUMEN_EMBUDO" class="java.lang.String"/>
-	<parameter name="RESUMEN_FACULTADES" class="java.lang.String"/>
-	<parameter name="RESUMEN_CONVOCATORIAS" class="java.lang.String"/>
 	<parameter name="GENERADO_EN" class="java.lang.String"/>
 	<parameter name="GENERADO_POR" class="java.lang.String"/>
+	<parameter name="GRAFICO_EMBUDO" class="java.awt.Image"/>
+	<parameter name="GRAFICO_FACULTADES" class="java.awt.Image"/>
+	<parameter name="GRAFICO_CONVOCATORIAS" class="java.awt.Image"/>
 	<field name="mes" class="java.lang.String"/>
 	<field name="postulaciones" class="java.lang.String"/>
 	<field name="finalistas" class="java.lang.String"/>
 	<field name="adjudicadas" class="java.lang.String"/>
 	<field name="asistencia" class="java.lang.String"/>
-	<title height="120">
-		<element kind="staticText" x="0" y="0" width="555" height="22" fontSize="15.0" bold="true"
-		         pdfFontName="Helvetica-Bold">
-			<text><![CDATA[Dashboard de indicadores — Beca Comedor]]></text>
-		</element>
-		<element kind="textField" x="0" y="26" width="555" height="14" fontSize="10.0" bold="true"
-		         pdfFontName="Helvetica-Bold">
-			<expression><![CDATA["Gestión: " + $P{GESTION}]]></expression>
-		</element>
-		<element kind="textField" x="0" y="42" width="555" height="12">
-			<expression><![CDATA["Convocatoria: " + $P{CONVOCATORIA}]]></expression>
-		</element>
-		<element kind="textField" x="0" y="54" width="555" height="12">
-			<expression><![CDATA["Última actualización de los datos: " + $P{ACTUALIZADO_EN}]]></expression>
-		</element>
-		<element kind="staticText" x="0" y="74" width="555" height="14" fontSize="10.0" bold="true"
-		         pdfFontName="Helvetica-Bold">
-			<text><![CDATA[Totales]]></text>
-		</element>
-		<element kind="textField" x="0" y="90" width="275" height="12">
-			<expression><![CDATA["Postulaciones recibidas: " + $P{TOTAL_POSTULACIONES}]]></expression>
-		</element>
-		<element kind="textField" x="280" y="90" width="275" height="12">
-			<expression><![CDATA["Finalistas: " + $P{TOTAL_FINALISTAS}]]></expression>
-		</element>
-		<element kind="textField" x="0" y="103" width="275" height="12">
-			<expression><![CDATA["Becas adjudicadas: " + $P{TOTAL_ADJUDICADAS}]]></expression>
-		</element>
-		<element kind="textField" x="280" y="103" width="275" height="12">
-			<expression><![CDATA["Asistencia promedio: " + $P{TOTAL_ASISTENCIA}]]></expression>
-		</element>
+	<title height="350">
+		<element kind="staticText" style="Banda" x="0" y="0" width="555" height="58"><text><![CDATA[ ]]></text></element>
+		<element kind="staticText" style="Franja" x="0" y="62" width="555" height="1"><text><![CDATA[ ]]></text></element>
+		<element kind="image" scaleImage="RetainShape" hImageAlign="Left" vImageAlign="Middle" x="0" y="2" width="56" height="56"><expression><![CDATA["reports/logo_dubss.png"]]></expression></element>
+		<element kind="staticText" style="FranjaRoja" x="0" y="62" width="90" height="3"><text><![CDATA[ ]]></text></element>
+		<element kind="staticText" style="Institucion" mode="Transparent" x="68" y="12" width="487" height="11"><text><![CDATA[DIRECCIÓN UNIVERSITARIA DE BIENESTAR SOCIAL Y SALUD   ·   UAGRM   ·   BECA COMEDOR]]></text></element>
+		<element kind="staticText" style="TituloDoc" x="68" y="22" width="487" height="28"><text><![CDATA[Dashboard de indicadores — Beca Comedor]]></text></element>
+		<element kind="staticText" style="Tarjeta" x="0" y="70" width="555" height="50"><text><![CDATA[ ]]></text></element>
+		<element kind="textField" style="MetaValor" x="16" y="76" width="523" height="13"><expression><![CDATA["Gestión: " + $P{GESTION}]]></expression></element>
+		<element kind="textField" style="MetaValor" x="16" y="90" width="523" height="13"><expression><![CDATA["Convocatoria: " + $P{CONVOCATORIA}]]></expression></element>
+		<element kind="textField" style="MetaValor" x="16" y="104" width="523" height="13"><expression><![CDATA["Última actualización de los datos: " + $P{ACTUALIZADO_EN}]]></expression></element>
+		<element kind="staticText" style="Seccion" x="0" y="132" width="555" height="16"><text><![CDATA[Totales]]></text></element>
+		<element kind="staticText" style="Tarjeta" x="0" y="152" width="132" height="50"><text><![CDATA[ ]]></text></element>
+		<element kind="textField" style="TarjetaValor" x="10" y="156" width="118" height="26"><expression><![CDATA[$P{TOTAL_POSTULACIONES}]]></expression></element>
+		<element kind="staticText" style="TarjetaEtiqueta" x="10" y="184" width="118" height="12"><text><![CDATA[Postulaciones recibidas]]></text></element>
+		<element kind="staticText" style="Tarjeta" x="141" y="152" width="132" height="50"><text><![CDATA[ ]]></text></element>
+		<element kind="textField" style="TarjetaValor" x="151" y="156" width="118" height="26"><expression><![CDATA[$P{TOTAL_FINALISTAS}]]></expression></element>
+		<element kind="staticText" style="TarjetaEtiqueta" x="151" y="184" width="118" height="12"><text><![CDATA[Finalistas]]></text></element>
+		<element kind="staticText" style="Tarjeta" x="282" y="152" width="132" height="50"><text><![CDATA[ ]]></text></element>
+		<element kind="textField" style="TarjetaValor" x="292" y="156" width="118" height="26"><expression><![CDATA[$P{TOTAL_ADJUDICADAS}]]></expression></element>
+		<element kind="staticText" style="TarjetaEtiqueta" x="292" y="184" width="118" height="12"><text><![CDATA[Becas adjudicadas]]></text></element>
+		<element kind="staticText" style="Tarjeta" x="423" y="152" width="132" height="50"><text><![CDATA[ ]]></text></element>
+		<element kind="textField" style="TarjetaValor" x="433" y="156" width="118" height="26"><expression><![CDATA[$P{TOTAL_ASISTENCIA}]]></expression></element>
+		<element kind="staticText" style="TarjetaEtiqueta" x="433" y="184" width="118" height="12"><text><![CDATA[Asistencia promedio]]></text></element>
+		<element kind="staticText" style="Seccion" x="0" y="226" width="555" height="16"><text><![CDATA[Embudo de postulación]]></text></element>
+		<element kind="image" scaleImage="RetainShape" hImageAlign="Left" x="0" y="246" width="555" height="90"><expression><![CDATA[$P{GRAFICO_EMBUDO}]]></expression></element>
 	</title>
-	<columnHeader height="20">
-		<element kind="staticText" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="0" y="0" width="115"
-		         height="20" bold="true" pdfFontName="Helvetica-Bold" vTextAlign="Middle">
-			<box leftPadding="3"/>
-			<text><![CDATA[Mes]]></text>
-		</element>
-		<element kind="staticText" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="115" y="0" width="110"
-		         height="20" bold="true" pdfFontName="Helvetica-Bold" vTextAlign="Middle">
-			<box leftPadding="3"/>
-			<text><![CDATA[Postulaciones]]></text>
-		</element>
-		<element kind="staticText" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="225" y="0" width="110"
-		         height="20" bold="true" pdfFontName="Helvetica-Bold" vTextAlign="Middle">
-			<box leftPadding="3"/>
-			<text><![CDATA[Finalistas]]></text>
-		</element>
-		<element kind="staticText" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="335" y="0" width="110"
-		         height="20" bold="true" pdfFontName="Helvetica-Bold" vTextAlign="Middle">
-			<box leftPadding="3"/>
-			<text><![CDATA[Adjudicadas]]></text>
-		</element>
-		<element kind="staticText" mode="Opaque" backcolor="#2A3964" forecolor="#FFFFFF" x="445" y="0" width="110"
-		         height="20" bold="true" pdfFontName="Helvetica-Bold" vTextAlign="Middle">
-			<box leftPadding="3"/>
-			<text><![CDATA[Asistencia]]></text>
-		</element>
+	<columnHeader height="40">
+		<element kind="staticText" style="Seccion" x="0" y="0" width="555" height="16"><text><![CDATA[Evolución mensual]]></text></element>
+		<element kind="staticText" style="Cabecera" x="0" y="18" width="115" height="22"><text><![CDATA[Mes]]></text></element>
+		<element kind="staticText" style="Cabecera" x="115" y="18" width="110" height="22" hTextAlign="Right"><text><![CDATA[Postulaciones]]></text></element>
+		<element kind="staticText" style="Cabecera" x="225" y="18" width="110" height="22" hTextAlign="Right"><text><![CDATA[Finalistas]]></text></element>
+		<element kind="staticText" style="Cabecera" x="335" y="18" width="110" height="22" hTextAlign="Right"><text><![CDATA[Adjudicadas]]></text></element>
+		<element kind="staticText" style="Cabecera" x="445" y="18" width="110" height="22" hTextAlign="Right"><text><![CDATA[Asistencia]]></text></element>
 	</columnHeader>
 	<detail>
-		<band height="16">
-			<element kind="textField" x="0" y="0" width="115" height="16">
-				<box leftPadding="3"/>
-				<expression><![CDATA[$F{mes}]]></expression>
-			</element>
-			<element kind="textField" x="115" y="0" width="110" height="16">
-				<box leftPadding="3"/>
-				<expression><![CDATA[$F{postulaciones}]]></expression>
-			</element>
-			<element kind="textField" x="225" y="0" width="110" height="16">
-				<box leftPadding="3"/>
-				<expression><![CDATA[$F{finalistas}]]></expression>
-			</element>
-			<element kind="textField" x="335" y="0" width="110" height="16">
-				<box leftPadding="3"/>
-				<expression><![CDATA[$F{adjudicadas}]]></expression>
-			</element>
-			<element kind="textField" x="445" y="0" width="110" height="16">
-				<box leftPadding="3"/>
-				<expression><![CDATA[$F{asistencia}]]></expression>
-			</element>
+		<band height="18">
+			<element kind="textField" style="Celda" x="0" y="0" width="115" height="18"><expression><![CDATA[$F{mes}]]></expression></element>
+			<element kind="textField" style="Celda" x="115" y="0" width="110" height="18" hTextAlign="Right"><expression><![CDATA[$F{postulaciones}]]></expression></element>
+			<element kind="textField" style="Celda" x="225" y="0" width="110" height="18" hTextAlign="Right"><expression><![CDATA[$F{finalistas}]]></expression></element>
+			<element kind="textField" style="Celda" x="335" y="0" width="110" height="18" hTextAlign="Right"><expression><![CDATA[$F{adjudicadas}]]></expression></element>
+			<element kind="textField" style="Celda" x="445" y="0" width="110" height="18" hTextAlign="Right"><expression><![CDATA[$F{asistencia}]]></expression></element>
 		</band>
 	</detail>
-	<summary height="110">
-		<element kind="staticText" positionType="Float" x="0" y="14" width="555" height="14" fontSize="10.0" bold="true"
-		         pdfFontName="Helvetica-Bold">
-			<text><![CDATA[Análisis BI]]></text>
-		</element>
-		<element kind="textField" positionType="Float" textAdjust="StretchHeight" x="0" y="30" width="555" height="12">
-			<expression><![CDATA["Embudo: " + $P{RESUMEN_EMBUDO}]]></expression>
-		</element>
-		<element kind="staticText" positionType="Float" x="0" y="46" width="555" height="12" bold="true"
-		         pdfFontName="Helvetica-Bold">
-			<text><![CDATA[Postulación por facultad (de la que más postula a la que menos)]]></text>
-		</element>
-		<element kind="textField" positionType="Float" textAdjust="StretchHeight" x="0" y="59" width="555" height="12">
-			<expression><![CDATA[$P{RESUMEN_FACULTADES}]]></expression>
-		</element>
-		<element kind="staticText" positionType="Float" x="0" y="74" width="555" height="12" bold="true"
-		         pdfFontName="Helvetica-Bold">
-			<text><![CDATA[Comparación entre convocatorias de la gestión]]></text>
-		</element>
-		<element kind="textField" positionType="Float" textAdjust="StretchHeight" x="0" y="87" width="555" height="12">
-			<expression><![CDATA[$P{RESUMEN_CONVOCATORIAS}]]></expression>
-		</element>
+	<summary height="540" splitType="Stretch">
+		<element kind="staticText" style="Seccion" positionType="Float" x="0" y="20" width="555" height="16"><text><![CDATA[Postulación por facultad]]></text></element>
+		<element kind="staticText" style="MetaEtiqueta" positionType="Float" x="0" y="38" width="555" height="12"><text><![CDATA[POSTULACIONES (% DEL TOTAL) Y BECAS ADJUDICADAS, DE LA FACULTAD QUE MÁS POSTULA A LA QUE MENOS]]></text></element>
+		<element kind="image" positionType="Float" scaleImage="RetainShape" hImageAlign="Left" x="0" y="54" width="555" height="252"><expression><![CDATA[$P{GRAFICO_FACULTADES}]]></expression></element>
+		<element kind="staticText" style="Seccion" positionType="Float" x="0" y="320" width="555" height="16"><text><![CDATA[Comparación entre convocatorias de la gestión]]></text></element>
+		<element kind="staticText" style="MetaEtiqueta" positionType="Float" x="0" y="338" width="555" height="12"><text><![CDATA[POSTULACIONES, VARIACIÓN RESPECTO A LA ANTERIOR Y ADJUDICACIÓN]]></text></element>
+		<element kind="image" positionType="Float" scaleImage="RetainShape" hImageAlign="Left" x="0" y="354" width="555" height="180"><expression><![CDATA[$P{GRAFICO_CONVOCATORIAS}]]></expression></element>
 	</summary>
-	<pageFooter height="28">
-		<element kind="textField" x="0" y="2" width="555" height="12" fontSize="8.0">
-			<expression><![CDATA["Generado el " + $P{GENERADO_EN} + " por " + $P{GENERADO_POR}]]></expression>
-		</element>
-		<element kind="textField" x="0" y="14" width="515" height="12" fontSize="8.0" hTextAlign="Right">
-			<expression><![CDATA["Página " + $V{PAGE_NUMBER}]]></expression>
-		</element>
-		<element kind="textField" evaluationTime="Report" x="515" y="14" width="40" height="12" fontSize="8.0"
-		         hTextAlign="Left">
-			<expression><![CDATA[" de " + $V{PAGE_NUMBER}]]></expression>
-		</element>
+	<pageFooter height="22">
+		<element kind="line" x="0" y="2" width="555" height="1" forecolor="#D5DBE5"/>
+		<element kind="textField" style="Pie" x="0" y="6" width="435" height="12"><expression><![CDATA["Generado el " + $P{GENERADO_EN} + " por " + $P{GENERADO_POR}]]></expression></element>
+		<element kind="textField" style="Pie" x="435" y="6" width="100" height="12" hTextAlign="Right"><expression><![CDATA["Página " + $V{PAGE_NUMBER}]]></expression></element>
+		<element kind="textField" style="Pie" evaluationTime="Report" x="535" y="6" width="20" height="12" hTextAlign="Left"><expression><![CDATA[" de " + $V{PAGE_NUMBER}]]></expression></element>
 	</pageFooter>
 </jasperReport>

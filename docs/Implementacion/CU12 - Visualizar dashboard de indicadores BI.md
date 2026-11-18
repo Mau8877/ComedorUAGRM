@@ -24,6 +24,10 @@ Todo exige sesión de Directivo (`401` sin sesión, `403` `ERR_AUTH_07` con otro
 6. «Descargar PDF» → `GET /api/v1/dashboard/indicadores/pdf` → `IndicadoresPdfService.generar()` (Jasper `indicadores_dashboard.jrxml`, con una banda «Análisis BI» de resumen). Sin datos: `400` `ERR_DAS_02`.
 7. «Descargar Excel» → `GET /api/v1/dashboard/bi/excel` → `BiExcelService.generar()` (Apache POI, hojas Resumen, Por mes, Por facultad, Por carrera, Convocatorias, Puntajes, Asistencia y Tendencia; `bi-{gestion}-{yyyyMMdd}.xlsx`). Sin datos: `400` `ERR_DAS_02`.
 
+## Diseño del PDF (todos los PDF del sistema)
+
+El PDF del dashboard comparte base con los de CU06, CU08 y CU09: banda azul UAGRM con título y franja roja, bloque de datos, tabla con cabecera azul y filas alternadas, y pie con «Generado el … por …» y «Página X de Y». Los estilos viven en un solo archivo, [`_estilos_uagrm.xml`](../../projects/backend/comedor-uagrm-core/src/main/resources/reports/_estilos_uagrm.xml), que [`ReportePdf`](../../projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/common/report/ReportePdf.java) inserta en cada plantilla (marca `<!--ESTILOS_UAGRM-->`) al compilarla. El dashboard suma tarjetas de totales y dos gráficos de barras (embudo y facultades) dibujados con [`GraficosPdf`](../../projects/backend/comedor-uagrm-core/src/main/java/com/comedoruagrm/backend/common/report/GraficosPdf.java); el gráfico de facultades muestra las 8 que más postulan y el texto debajo lista todas.
+
 ## Diferencias con los diagramas
 
 | Diagrama | Lo que dibuja | Lo que hace la implementación | Por qué |
