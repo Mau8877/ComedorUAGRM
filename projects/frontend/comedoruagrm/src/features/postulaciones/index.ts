@@ -1,5 +1,5 @@
 // Lo que otras partes de la app pueden usar del CU04: los hooks, sus claves de caché, los tipos y las pantallas.
 export * from './api'
-export { DocumentosPostulacionPanel } from './components'
+export { DocumentosPostulacionPanel, EstadoPostulacionBadge } from './components'
 export * from './screens'
 export * from './types'

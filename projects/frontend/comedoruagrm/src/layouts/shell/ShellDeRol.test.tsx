@@ -95,8 +95,14 @@ describe('ShellDeRol', () => {
     expect(screen.getByText('mis resultados')).toBeInTheDocument()
   })
 
-  it('un rol sin layout web (PERSONAL_COMEDOR) no recibe marco', () => {
-    render(shell('PERSONAL_COMEDOR', <p>aviso</p>))
+  it('el Personal del Comedor recibe su marco', () => {
+    render(shell('PERSONAL_COMEDOR', <p>mi panel</p>))
+    expect(screen.getByTestId('marco')).toHaveAttribute('data-app', 'ComedorU Personal')
+    expect(screen.getByText('mi panel')).toBeInTheDocument()
+  })
+
+  it('un rol sin layout web no recibe marco', () => {
+    render(shell('ROL_DESCONOCIDO', <p>aviso</p>))
     expect(screen.queryByTestId('marco')).not.toBeInTheDocument()
     expect(screen.getByText('aviso')).toBeInTheDocument()
   })

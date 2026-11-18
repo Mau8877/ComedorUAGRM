@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import type { LayoutUser } from '@/components/layout'
 
 import { AdminLayout } from '../admin/AdminLayout'
+import { ComedorLayout } from '../comedor/ComedorLayout'
 import { DirectivoLayout } from '../directivo/DirectivoLayout'
 import { EstudianteLayout } from '../estudiante/EstudianteLayout'
 import { ShellContext } from './shellContext'
@@ -20,7 +21,7 @@ interface ShellDeRolProps {
   children: ReactNode
 }
 
-/** Marco persistente (header + sidebar) del rol; los roles sin layout web (PERSONAL_COMEDOR) no lo tienen. */
+/** Marco persistente (header + sidebar) del rol; un rol desconocido no lo tiene. */
 export function ShellDeRol({ rol, user, onCerrarSesion, onPerfil, onCambiarContrasena, children }: ShellDeRolProps) {
   const [pagina, setPagina] = useState<PaginaShell>(SIN_PAGINA)
 
@@ -37,7 +38,9 @@ export function ShellDeRol({ rol, user, onCerrarSesion, onPerfil, onCambiarContr
         ? EstudianteLayout
         : rol === 'DIRECTIVO'
           ? DirectivoLayout
-          : null
+          : rol === 'PERSONAL_COMEDOR'
+            ? ComedorLayout
+            : null
   if (!Layout) return <>{children}</>
 
   return (
