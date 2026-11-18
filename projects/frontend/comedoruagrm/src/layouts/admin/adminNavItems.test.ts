@@ -15,7 +15,7 @@ describe('adminNavItems', () => {
     const etiquetas = adminNavItems.map((item) => item.label)
 
     expect(etiquetas).not.toContain('Usuarios')
-    expect(etiquetas).toEqual(expect.arrayContaining(['Dashboard', 'Menús', 'Pedidos']))
+    expect(etiquetas).toEqual(expect.arrayContaining(['Dashboard', 'Bitácora']))
   })
 
   it('tiene la entrada «Finalistas» que lleva a su pantalla (CU21)', () => {
@@ -61,18 +61,51 @@ describe('adminNavItems', () => {
     expect(etiquetas.indexOf('Cotejo de asistencia')).toBe(etiquetas.indexOf('Planillas') + 1)
   })
 
-  it('tiene la entrada «Parámetros del modelo» que lleva a su pantalla, justo después de «Lista priorizada» (CU26)', () => {
+  it('tiene la entrada «Parámetros del modelo» que lleva a su pantalla, justo antes de «Lista priorizada» (CU26)', () => {
     const etiquetas = adminNavItems.map((item) => item.label)
 
     expect(adminNavItems).toContainEqual(
       expect.objectContaining({ label: 'Parámetros del modelo', href: '/parametros-modelo' }),
     )
-    expect(etiquetas.indexOf('Parámetros del modelo')).toBe(etiquetas.indexOf('Lista priorizada') + 1)
+    expect(etiquetas.indexOf('Parámetros del modelo')).toBe(etiquetas.indexOf('Lista priorizada') - 1)
   })
 
   it('tiene la entrada «Gestiones académicas» que lleva a su pantalla (CU13)', () => {
     expect(adminNavItems).toContainEqual(
       expect.objectContaining({ label: 'Gestiones académicas', href: '/gestiones-academicas' }),
     )
+  })
+
+  it('sigue el orden del flujo: gestión, convocatoria, preselección, adjudicación y becados', () => {
+    const etiquetas = adminNavItems.map((item) => item.label)
+    const flujo = [
+      'Gestiones académicas',
+      'Convocatorias',
+      'Parámetros del modelo',
+      'Lista priorizada',
+      'Finalistas',
+      'Auditoría y adjudicación',
+      'Publicar resultados',
+      'Actas',
+      'Padrón de becados',
+      'Planillas',
+      'Cotejo de asistencia',
+    ]
+
+    expect(flujo.map((e) => etiquetas.indexOf(e))).toEqual([...flujo.map((e) => etiquetas.indexOf(e))].sort((a, b) => a - b))
+    expect(etiquetas.indexOf('Gestiones académicas')).toBe(etiquetas.indexOf('Convocatorias') - 1)
+  })
+
+  it('agrupa los ítems: cada grupo es un tramo seguido y el Dashboard queda suelto arriba', () => {
+    expect(adminNavItems[0]).toMatchObject({ label: 'Dashboard' })
+    expect(adminNavItems[0].grupo).toBeUndefined()
+
+    const grupos = adminNavItems.map((item) => item.grupo).filter((g): g is string => g !== undefined)
+    const tramos = grupos.filter((g, i) => g !== grupos[i - 1])
+
+    // Un grupo que reaparece más tarde quedaría con su título repetido en el menú.
+    expect(new Set(tramos).size).toBe(tramos.length)
+    expect(tramos).toEqual(['Convocatoria', 'Preselección', 'Adjudicación', 'Becados', 'Administración'])
+    expect(adminNavItems.every((item, i) => i === 0 || item.grupo !== undefined)).toBe(true)
   })
 })

@@ -49,9 +49,9 @@ export function PruebaEstudianteLayout() {
 
   return (
     <EstudianteLayout
-      title="Mi Menú"
+      title="Mi beca"
       user={mockEstudianteUser}
-      activeHref="/mi-menu"
+      activeHref="/mi-beca"
       notifications={notifications}
     >
       {/* Notificaciones (toast) */}

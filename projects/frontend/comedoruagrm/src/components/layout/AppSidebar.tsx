@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { Fragment, useEffect } from 'react'
 import { Link, useLocation, useRouterState } from '@tanstack/react-router'
 import { XIcon } from 'lucide-react'
 
@@ -32,12 +32,28 @@ function SidebarNav({
 
   return (
     <nav className="flex flex-col gap-1 px-3 py-4">
-      {items.map((item) => {
+      {items.map((item, indice) => {
         const Icon = item.icon
         const isActive = current === item.href
+        // * Título de grupo cuando cambia respecto del ítem anterior. Con el sidebar colapsado (solo íconos) el
+        // * título no entra: queda una línea que separa los grupos.
+        const grupoNuevo = item.grupo !== undefined && item.grupo !== items[indice - 1]?.grupo
         return (
+          <Fragment key={item.href}>
+          {grupoNuevo && (
+            <>
+              <p
+                className={cn(
+                  'mt-3 px-3 pb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground',
+                  collapsed && 'md:hidden'
+                )}
+              >
+                {item.grupo}
+              </p>
+              {collapsed && <hr className="my-2 hidden border-sidebar-border md:block" />}
+            </>
+          )}
           <Link
-            key={item.href}
             to={item.href as '/'}
             onClick={onNavigate}
             aria-busy={destino === item.href || undefined}
@@ -56,6 +72,7 @@ function SidebarNav({
               {item.label}
             </span>
           </Link>
+          </Fragment>
         )
       })}
     </nav>
