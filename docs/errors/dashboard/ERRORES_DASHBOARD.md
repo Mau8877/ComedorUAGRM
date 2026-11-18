@@ -11,13 +11,14 @@ PDF cae en el `500` genérico (`ERR_SYS_00`).
 - **Excepción:** `NotFoundException`
 - **Significado:** La gestión o la convocatoria pedida no existe, o la
   convocatoria no pertenece a la gestión indicada.
-- **Dónde se lanza:** `IndicadoresService.consultar()` e
-  `IndicadoresPdfService.generar()`
+- **Dónde se lanza:** `IndicadoresService.consultar()`,
+  `BiService.consultar()` (vía `IndicadoresService.resolver()`),
+  `IndicadoresPdfService.generar()` y `BiExcelService.generar()`
 
 ## `ERR_DAS_02`
 
 - **HTTP:** 400
 - **Excepción:** `ValidationException`
 - **Significado:** No hay datos que exportar: todos los indicadores del
-  periodo consultado son cero, así que no se genera el PDF.
-- **Dónde se lanza:** `IndicadoresPdfService.generar()`
+  periodo consultado son cero, así que no se genera el PDF ni el Excel.
+- **Dónde se lanza:** `IndicadoresPdfService.generar()` y `BiExcelService.generar()`

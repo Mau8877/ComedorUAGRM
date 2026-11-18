@@ -25,7 +25,7 @@ Llena la columna «Resultado» al terminar cada CU (`OK` / `Falla` / `Parcial`).
 | CU22 | Publicar resultados de adjudicación | Web + móvil (consulta) | Hecho | 11 / 5 / – | OK | «Fallo de envío» y «sin adjudicados» cubiertos por pruebas de integración; 2026-II quedó publicada |
 | CU08 | Generar acta de adjudicación | Web | Hecho | 10 / 4 / – | OK | Acta 001/2026 de «Publicada» generada. ERR_ACT_04 y numeración concurrente cubiertos por pruebas de integración. Diseño del PDF por mejorar |
 | CU04 | Consultar estado de postulación | Web + móvil | Hecho | 7 / 4 / 4 | OK | «Corregir y reenviar» oculto hasta que exista el CU02; «Eres finalista» solo con la postulación calificada |
-| CU12 | Dashboard de indicadores BI | Web | Hecho | 9 / 4 / – | | |
+| CU12 | Dashboard de indicadores BI | Web | Hecho | 13 / 7 / – | | |
 
 Orden de prueba recomendado (cada uno prepara datos o confianza para el siguiente): **CU01 → CU15 → CU14 → CU-EXTRA-01 → CU06 → CU21 → CU07 → CU19 → CU20 → CU05 → CU22 → CU08 → CU04 → CU12**.
 
@@ -492,7 +492,22 @@ Entra con `directivo@dubss.com`. La semilla crea dos convocatorias `[PRUEBA] Das
 - [ ] Si los indicadores nunca se calcularon, lo indica en lugar de inventar números.
 - [ ] Admin/postulante llamando a `/api/v1/dashboard/*` → `403`; sin sesión → `401`.
 
-**UT:** `./mvnw test -Dtest='Dashboard*Test,Indicadores*Test,FiltrosDashboard*Test,RefrescoIndicadores*Test,VistaIndicadoresMigracionTest'` · `pnpm test -- src/features/dashboard`.
+**Análisis BI** (la semilla ahora trae puntajes, becas y asistencia del 26-oct al 17-nov; si no los ves, reinicia el backend en `dev` con la base vacía o espera al refresco de las 02:00):
+
+- [ ] Debajo de los gráficos aparece «Análisis BI» con **embudo**, **facultades**, **comparación de convocatorias**, **puntajes de la IA**, **cobertura de cupos**, **asistencia por día de la semana** y **tendencia entre gestiones**.
+- [ ] **Embudo:** cada etapa muestra su % respecto de la anterior; las cifras de postulaciones y adjudicadas coinciden con las tarjetas de arriba.
+- [ ] **Facultades:** la que más postulaciones tiene aparece primero; al hacer clic en una se ven sus **carreras**, y otro clic las oculta. Compara las barras (postulaciones y adjudicadas) con la BD.
+- [ ] **Comparación:** la variación (+/− %) de cada convocatoria es contra la anterior (la primera muestra «—»). Hacer clic en el nombre de una convocatoria **filtra todo el dashboard** por ella (los selectores quedan en esa convocatoria).
+- [ ] **Puntajes:** 7 tramos de 10 puntos (0–70) y el promedio; la suma de las barras es el número de postulaciones con puntaje.
+- [ ] **Cobertura:** % de cupos cubiertos por becas vigentes; suspendidas, dadas de baja y reemplazos coinciden con el padrón (CU23).
+- [ ] **Asistencia:** la tarjeta «Asistencia promedio» ya no dice «Sin datos» (hay asistencia del CU10); el gráfico por día de la semana muestra lunes a viernes y el aviso de **becas en riesgo** (menos de 60 % con 5+ días de servicio). *(Criterio a validar con la DUBSS.)*
+- [ ] **Tendencia:** barras de postulaciones y adjudicadas por gestión y la variación de la gestión elegida.
+- [ ] «Descargar Excel» → `.xlsx` con las hojas Resumen, Por mes, Por facultad, Por carrera, Convocatorias, Puntajes, Asistencia y Tendencia, con lo que ves en pantalla. Sin datos → `400` `ERR_DAS_02`.
+- [ ] Con una gestión sin datos no aparece la sección de análisis y se ve el mensaje informativo; las tarjetas muestran ceros.
+- [ ] `GET /api/v1/dashboard/bi` y `/bi/excel` con otro rol → `403`; sin sesión → `401`; gestión/convocatoria inexistente → `404` `ERR_DAS_01`.
+- [ ] Un porcentaje sin denominador (por ejemplo, tasa de una facultad sin postulaciones) se ve como «—», no como 0 %.
+
+**UT:** `./mvnw test -Dtest='Dashboard*Test,Indicadores*Test,FiltrosDashboard*Test,RefrescoIndicadores*Test,VistaIndicadoresMigracionTest,Bi*Test,VistasBiMigracionTest,DatosPruebaDashboardTest'` · `pnpm test -- src/features/dashboard`.
 
 ---
 

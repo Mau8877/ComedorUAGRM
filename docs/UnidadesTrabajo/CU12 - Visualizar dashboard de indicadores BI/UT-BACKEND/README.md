@@ -1,6 +1,6 @@
 # Unidades de trabajo — CU12-BE
 
-**Caso de uso:** Backend del dashboard de indicadores BI del Directivo: una vista precalculada por lote (postulaciones recibidas, finalistas, becas adjudicadas y, cuando exista el CU-10, asistencia) que se consulta por gestión académica y convocatoria, con descarga en PDF.
+**Caso de uso:** Backend del dashboard de indicadores BI del Directivo: una vista precalculada por lote (postulaciones recibidas, finalistas, becas adjudicadas y asistencia) más un análisis BI (embudo, facultades, convocatorias, puntajes, cobertura, asistencia y tendencia), que se consultan por gestión académica y convocatoria, con descarga en PDF y Excel.
 **Fuente CU:** [`CU12 - Visualizar dashboard de indicadores BI`](../../../CasosDeUso/CU12%20-%20Visualizar%20dashboard%20de%20indicadores%20BI.md)
 **Diagramas de grado:** CU-12 en la documentación de grado (contexto `071`, análisis `084`, secuencia `099` y maqueta `112`). Diseño lógico: `diseno_base_de_datos.md` §BI (vistas materializadas).
 **Recurso HTTP / contrato:** ver la tabla de abajo.
@@ -23,7 +23,8 @@ Decisiones confirmadas por Mau en el CU12; las marcadas *(propuesta)* las fijó 
   - `adjudicadas`: adjudicaciones con resultado `ADJUDICADA` **solo de convocatorias con fila en `publicacion_resultado`**, en el mes de su `fecha_adjudicacion`.
   - `calculado_en`: `now()` del momento del refresco; la «fecha de la última actualización» es el máximo de esa columna.
   - Los meses se calculan en la zona horaria `America/La_Paz` *(propuesta)*.
-- **Asistencia:** hoy no hay de dónde leerla (CU-10 no existe). La respuesta trae `asistencia` en `null` y el código lleva el comentario `// TODO CU-10: agregar la asistencia a la vista y al cálculo del promedio cuando exista el registro de asistencia`. **No** se crean tablas ni columnas de asistencia.
+- **Asistencia:** las UT 01–09 se hicieron antes del CU-10 (asistencia en `null`). Con el CU-10 hecho, las UT 10–13 la completan con el registro real: tasa = asistieron / esperados (becas vigentes por día de servicio con registro) y beca en riesgo = ≥ 5 días de servicio y < 60 %. ⚠️ Criterios adoptados, **a validar con la DUBSS**.
+- **Análisis BI (UT 10–13):** cuatro vistas materializadas más (`mv_bi_*`), un `BiService` con su endpoint, un Excel con Apache POI y un resumen en el PDF. Decidido con Mau; la tendencia compara gestiones ya registradas, no proyecta.
 - **Refresco por lote:** `REFRESH MATERIALIZED VIEW CONCURRENTLY` (por eso la vista lleva un índice único) desde una tarea programada **cada noche a las 02:00** (`app.dashboard.refresco-cron`, con ese valor por defecto, zona `America/La_Paz`) y **también al arrancar si la vista está vacía**. No hay botón de «actualizar ahora». Hoy el proyecto no tiene `@EnableScheduling`: lo agrega la UT-02.
 - **Una instancia:** el refresco corre en cada instancia del backend; con una sola (el caso actual) no hay problema, y `CONCURRENTLY` tolera que dos coincidan. Si algún día hay réplicas se coordina con un bloqueo (follow-up).
 - **Gestión por defecto:** la gestión vigente (`fecha_inicio <= hoy <= fecha_fin`); si no hay ninguna vigente, la de `fecha_inicio` más reciente; si no existen gestiones, la respuesta viene vacía (A1), no es un error.
@@ -66,8 +67,12 @@ Todos los identificadores son códigos públicos (UUID).
 | [UT-CU12-BE-07](./UT-CU12-BE-07.md) | Endpoints del Directivo | 04, 05, 06 |
 | [UT-CU12-BE-08](./UT-CU12-BE-08.md) | Datos de prueba del dashboard | 01, 02 |
 | [UT-CU12-BE-09](./UT-CU12-BE-09.md) | Pruebas de integración con base real | 02, 07, 08 |
+| [UT-CU12-BE-10](./UT-CU12-BE-10.md) | Migración: vistas materializadas del análisis BI | 01, 02 |
+| [UT-CU12-BE-11](./UT-CU12-BE-11.md) | Consulta del análisis BI | 05, 10 |
+| [UT-CU12-BE-12](./UT-CU12-BE-12.md) | Excel del análisis, PDF ampliado y endpoints | 06, 07, 11 |
+| [UT-CU12-BE-13](./UT-CU12-BE-13.md) | Datos de prueba y pruebas de integración del análisis BI | 08, 09, 12 |
 
-**Cadena:** `01 → 02, 05`; `03` independiente; `03 → 04`; `01, 03, 04 → 05`; `05 → 06`; `04, 05, 06 → 07`; `01, 02 → 08`; `02, 07, 08 → 09`.
+**Cadena:** `01 → 02, 05`; `03` independiente; `03 → 04`; `01, 03, 04 → 05`; `05 → 06`; `04, 05, 06 → 07`; `01, 02 → 08`; `02, 07, 08 → 09`; `01, 02 → 10`; `05, 10 → 11`; `06, 07, 11 → 12`; `08, 09, 12 → 13`.
 
 ## Criterios de aceptación cubiertos
 
@@ -80,24 +85,28 @@ Todos los identificadores son códigos públicos (UUID).
 | CA05 | Lote sin ejecutar: últimos datos o aviso | 02, 05, 09 |
 | CA06 | Los borradores no cuentan | 01, 09 |
 | CA07 | Solo adjudicaciones de resultados publicados | 01, 09 |
-| CA08 | Asistencia «Sin datos» | 05, 09 |
+| CA08 | Asistencia «Sin datos» o real | 05, 09, 11 |
 | CA09 | Solo lectura, sin bitácora | 05, 06, 09 |
 | CA10 | `403` / `401` / `404` | 04, 05, 06, 07, 09 |
 | CA11 | PDF con indicadores, fecha de actualización y quién lo generó | 06, 07, 09 |
 | CA12 | Sin datos no hay PDF (`ERR_DAS_02`) | 06, 09 |
+| CA14–CA16 | Embudo, facultades y comparación de convocatorias | 10, 11, 13 |
+| CA17–CA19 | Puntajes, cobertura y asistencia | 10, 11, 13 |
+| CA20 | Tendencia entre gestiones | 11, 13 |
+| CA21 | Excel (y `ERR_DAS_02` sin datos) | 12, 13 |
+| CA22 | Denominador cero → «—» | 11 |
 | CA13 | Rendimiento ≤ 3 s con 20 000 postulaciones | 01, 05, 09 |
 
 ## Follow-ups (no se implementan en estas UT)
 
-- **Asistencia (CU-10):** agregar a la vista la asistencia por mes y el promedio, y quitar el `TODO`. Se hace en las UT del CU-10.
-- **Fórmula de la tasa de asistencia:** definirla con la DUBSS.
+- **Fórmula de la tasa de asistencia y umbral de «beca en riesgo»:** validarlos con la DUBSS.
 - **Varias réplicas:** coordinar el refresco con un bloqueo si algún día hay más de una instancia.
-- **Proyecciones y tendencias:** descartadas por el taller; no se incluyen.
+- **Proyecciones a futuro:** descartadas por el taller; no se incluyen.
 
 ## Qué NO incluyen estas UT
 
 - La pantalla (ver [`UT-FRONTEND`](../UT-FRONTEND/README.md)).
 - Registro de asistencia (CU-10), cotejo (CU-11), padrón de becados (CU-23) y bitácora (CU-25).
 - Un botón para refrescar la vista a mano.
-- Otros formatos de exportación (Excel, CSV).
+- Otros formatos de exportación (CSV).
 - La app móvil.
