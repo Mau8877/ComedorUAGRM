@@ -11,10 +11,13 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
+import { DatePicker } from '@/components/ui/date-picker'
 import { Input } from '@/components/ui/input'
 import { ModalDetailLayout, ModalLayout } from '@/components/ui/modal-layout'
 import { Textarea } from '@/components/ui/textarea'
 import { AlertaError } from '@/features/auth'
+import { validacionFormulario } from '@/utils/validacionFormulario'
+import { Label } from '@/components/ui/label'
 
 import { mapearErrorFinalistas } from '../api/mapearErrorFinalistas'
 import { useNotificarFinalistas } from '../api/useFinalistas'
@@ -56,7 +59,7 @@ export function NotificarFinalistasDialog({
 
   const form = useForm({
     defaultValues: { plazoEntrega: '', lugarHorario: '', documentos: '' } as NotificarFinalistasValues,
-    validators: { onChange: notificarFinalistasSchema, onBlur: notificarFinalistasSchema },
+    ...validacionFormulario(notificarFinalistasSchema),
     onSubmit: ({ value }) => {
       setError(null)
       setPendiente(value)
@@ -97,11 +100,18 @@ export function NotificarFinalistasDialog({
         size="sm"
       >
         <p className="text-sm" role="status">
-          Se enviaron <strong>{resultado.enviados}</strong> avisos y fallaron <strong>{resultado.fallidos}</strong>.
+          Se está enviando el aviso a <strong>{resultado.enviados}</strong>{' '}
+          {resultado.enviados === 1 ? 'finalista' : 'finalistas'}.
         </p>
+        {resultado.fallidos > 0 && (
+          <p className="mt-1 text-sm text-destructive">
+            No se pudo registrar el aviso de {resultado.fallidos}{' '}
+            {resultado.fallidos === 1 ? 'finalista' : 'finalistas'}.
+          </p>
+        )}
         <p className="mt-2 text-sm text-muted-foreground">
-          El push y el correo salen en segundo plano: si un finalista queda como «Fallida» en la tabla, usa
-          «Seleccionar fallidos» y vuelve a notificar solo a esos.
+          Mira el avance en la columna «Notificación». Si alguno queda «Fallida», usa «Seleccionar fallidos» para
+          reintentar.
         </p>
       </ModalDetailLayout>
     )
@@ -134,16 +144,15 @@ export function NotificarFinalistasDialog({
           <form.Field name="plazoEntrega">
             {(field) => (
               <div className="flex flex-col gap-1">
-                <label htmlFor="notificar-plazo" className="text-sm font-medium">
+                <Label htmlFor="notificar-plazo" required>
                   Plazo de entrega
-                </label>
-                <Input
+                </Label>
+                <DatePicker
                   id="notificar-plazo"
-                  type="date"
                   min={mananaIso()}
                   value={field.state.value}
                   onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
+                  onChange={field.handleChange}
                 />
                 <ErrorCampo error={field.state.meta.isTouched ? field.state.meta.errors[0]?.message : undefined} />
               </div>
@@ -153,9 +162,9 @@ export function NotificarFinalistasDialog({
           <form.Field name="lugarHorario">
             {(field) => (
               <div className="flex flex-col gap-1">
-                <label htmlFor="notificar-lugar" className="text-sm font-medium">
+                <Label htmlFor="notificar-lugar" required>
                   Lugar y horario de entrega
-                </label>
+                </Label>
                 <Input
                   id="notificar-lugar"
                   placeholder="Ej.: DUBSS, oficina 3, lunes a viernes de 8:00 a 12:00"
@@ -171,9 +180,9 @@ export function NotificarFinalistasDialog({
           <form.Field name="documentos">
             {(field) => (
               <div className="flex flex-col gap-1">
-                <label htmlFor="notificar-documentos" className="text-sm font-medium">
+                <Label htmlFor="notificar-documentos" required>
                   Documentos físicos a presentar
-                </label>
+                </Label>
                 <Textarea
                   id="notificar-documentos"
                   rows={3}

@@ -22,6 +22,7 @@ import { useAccionesDeCuenta } from '@/features/perfil'
 import { useConvocatoriasPriorizables } from '@/features/priorizacion'
 import { AdminLayout } from '@/layouts'
 import { debounce } from '@/utils/debounce'
+import { useConvocatoriaElegida } from '@/store'
 
 import { mapearErrorResultados, useDecisionesResultado, useResumenPublicacion } from '../api'
 import { columnasDecisiones, formatearFechaHora, motivoDeBloqueo, PublicarResultadosDialog } from '../components'
@@ -65,7 +66,7 @@ export function PublicarResultadosScreen({ titulo, activeHref, usuarioActual }: 
   const cerrarSesion = useCerrarSesion()
   const accionesDeCuenta = useAccionesDeCuenta()
 
-  const [elegida, setElegida] = useState<string | undefined>(undefined)
+  const [elegida, setElegida] = useConvocatoriaElegida()
   const [resultado, setResultado] = useState<ResultadoDecision | undefined>(undefined)
   const [busqueda, setBusqueda] = useState('')
   const [busquedaAplicada, setBusquedaAplicada] = useState('')

@@ -137,6 +137,17 @@ de la respuesta del backend (`usuario.rol`), no del token (que no lleva rol).
   usa `EstudianteLayout`. La decisión de a qué grupo pertenece cada ruta es
   estructural (en qué carpeta vive el archivo), no una condición en runtime
   dentro de un layout único.
+- **Encabezado de página: no se arma por pantalla.** El título rojo en
+  mayúsculas con su ícono y el breadcrumb los dibuja `EncabezadoPagina` desde
+  `AppShell`, y una pantalla solo pasa `title` y `activeHref` (el ítem del
+  menú al que pertenece). El ícono sale de ese ítem y las migas las deriva
+  `migasPorDefecto` (`components/layout/`): la página principal de un ítem
+  lleva solo su título; una que **cuelga** de él (`/finalistas/{codigo}`,
+  `/postular` dentro de «Mis postulaciones») lleva antes el nombre del ítem,
+  enlazado. Una pantalla nueva con su `activeHref` correcto cumple el diseño
+  sin tocar nada. `migas` solo se declara cuando el camino tiene un tramo que el
+  menú no conoce (hoy: «Usuarios > ...» y «Mis postulaciones > Detalle > Documentos»),
+  e `icono` solo en páginas sin ítem de menú (panel, perfil del administrador).
 - El layout no vuelve a validar el rol contra el backend en cada render —
   confía en el rol resuelto una vez por el guard de `_authenticated.tsx` (o
   por el hook de sesión que este consulte), para no repetir la misma

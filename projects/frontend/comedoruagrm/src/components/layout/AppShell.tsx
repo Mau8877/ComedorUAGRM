@@ -5,6 +5,7 @@ import { AppHeader } from './AppHeader'
 import { AppSidebar } from './AppSidebar'
 import { EncabezadoPagina } from './EncabezadoPagina'
 import type { MigaPagina } from './EncabezadoPagina'
+import { migasPorDefecto } from './migasPorDefecto'
 import type { LayoutUser, NavItem, NotificationsController } from './types'
 
 interface AppShellProps {
@@ -14,7 +15,7 @@ interface AppShellProps {
   activeHref?: string
   /** Ícono del encabezado; por defecto el del ítem activo del sidebar. */
   icono?: LucideIcon
-  /** Migas del encabezado; por defecto solo la página actual. */
+  /** Migas del encabezado; por defecto se derivan del ítem activo y de la ruta (ver `migasPorDefecto`). */
   migas?: MigaPagina[]
   user: LayoutUser
   /** Ver AppHeaderProps. */
@@ -26,6 +27,12 @@ interface AppShellProps {
   /** Ver AppHeaderProps. */
   onCambiarContrasena?: () => void
   children: ReactNode
+}
+
+// * `window.location` y no un hook del router: el shell se vuelve a dibujar en cada navegación (la página nueva
+// * registra su título) y así no depende de estar dentro de un RouterProvider.
+function rutaActual() {
+  return typeof window === 'undefined' ? '' : window.location.pathname
 }
 
 // * Esqueleto compartido por todos los layouts de rol (Admin, Estudiante, y los
@@ -67,7 +74,7 @@ export function AppShell({
             <EncabezadoPagina
               icono={icono ?? navItems.find((item) => item.href === activeHref)?.icon}
               titulo={title}
-              migas={migas ?? [{ label: title }]}
+              migas={migas ?? migasPorDefecto({ title, navItems, activeHref, pathname: rutaActual() })}
             />
           )}
           <div className="mt-6">{children}</div>

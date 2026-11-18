@@ -2,9 +2,6 @@ package com.comedoruagrm.backend.features.planillas.service;
 
 import static net.logstash.logback.argument.StructuredArguments.kv;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -22,18 +19,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.comedoruagrm.backend.common.report.ReportePdf;
 import com.comedoruagrm.backend.features.planillas.repository.PlanillasConsultaRepository.Becado;
 
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRParameter;
-import net.sf.jasperreports.engine.JasperCompileManager;
-import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.data.JRMapCollectionDataSource;
-import net.sf.jasperreports.export.SimpleExporterInput;
-import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
-import net.sf.jasperreports.pdf.JRPdfExporter;
 
 /**
  * Genera el PDF imprimible de la planilla de asistencia con JasperReports (CU09).
@@ -64,7 +57,6 @@ public class PlanillaPdfService {
 
     private final String plantilla;
 
-    private volatile JasperReport plantillaCompilada;
 
     /** Todo lo que lleva la planilla, ya leido: la convocatoria, el periodo, los becados y quien la genera. */
     public record DatosPlanilla(UUID convocatoriaCodigo, String convocatoria, String gestion, LocalDate desde,
@@ -95,15 +87,10 @@ public class PlanillaPdfService {
                 parametros.put("D" + i, etiquetaDia(datos.desde(), datos.hasta(), i));
             }
 
-            JasperPrint impreso = JasperFillManager.fillReport(plantilla(), parametros,
+            JasperPrint impreso = ReportePdf.llenar(plantilla(), parametros,
                     new JRMapCollectionDataSource(filas(datos.becados())));
 
-            ByteArrayOutputStream salida = new ByteArrayOutputStream();
-            JRPdfExporter exportador = new JRPdfExporter();
-            exportador.setExporterInput(new SimpleExporterInput(impreso));
-            exportador.setExporterOutput(new SimpleOutputStreamExporterOutput(salida));
-            exportador.exportReport();
-            return salida.toByteArray();
+            return ReportePdf.exportar(impreso);
         } catch (JRException | RuntimeException e) {
             LOG.error("No se pudo generar el PDF de la planilla de asistencia", kv("module", "planillas"),
                     kv("convocatoria", datos.convocatoriaCodigo()), kv("error", e.getClass().getSimpleName()));
@@ -137,18 +124,6 @@ public class PlanillaPdfService {
 
     // La plantilla se compila una vez y se reutiliza.
     private JasperReport plantilla() throws JRException {
-        JasperReport compilada = plantillaCompilada;
-        if (compilada == null) {
-            try (InputStream fuente = getClass().getResourceAsStream(plantilla)) {
-                if (fuente == null) {
-                    throw new JRException("No se encontró la plantilla " + plantilla);
-                }
-                compilada = JasperCompileManager.compileReport(fuente);
-            } catch (IOException e) {
-                throw new JRException(e);
-            }
-            plantillaCompilada = compilada;
-        }
-        return compilada;
+        return ReportePdf.compilar(plantilla);
     }
 }

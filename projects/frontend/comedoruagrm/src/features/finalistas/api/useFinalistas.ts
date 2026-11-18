@@ -4,9 +4,10 @@ import type { FinalistasParams, NotificarFinalistasRequest, RegistrarEntregaRequ
 import { listarFinalistasApi, notificarFinalistasApi, registrarEntregaApi } from './finalistasApi'
 import { finalistasKeys } from './keys'
 
-// El push y el correo se despachan en segundo plano: tras notificar, el estado «Enviada» o «Fallida» del
-// aviso recién se conoce un momento después. Se vuelve a consultar el listado a los pocos segundos.
-const RETARDO_REFRESCO_MS = 4000
+// El push y el correo se despachan en segundo plano y se reintentan (2 s y 8 s de espera por defecto, unos
+// 15 s en total): tras notificar, el aviso está «Enviando…» y recién después se sabe si quedó «Enviada» o
+// «Fallida». Mientras alguna fila esté «Enviando…» el listado se vuelve a consultar cada pocos segundos.
+const INTERVALO_ENVIANDO_MS = 3000
 
 /** Una página de finalistas de la convocatoria; conserva la anterior mientras llega la siguiente. */
 export function useFinalistas(params: FinalistasParams | undefined) {
@@ -15,6 +16,8 @@ export function useFinalistas(params: FinalistasParams | undefined) {
     queryFn: () => listarFinalistasApi(params as FinalistasParams),
     enabled: Boolean(params),
     placeholderData: keepPreviousData,
+    refetchInterval: (consulta) =>
+      consulta.state.data?.data.some((f) => f.estadoNotificacion === 'ENVIANDO') ? INTERVALO_ENVIANDO_MS : false,
   })
 }
 
@@ -24,9 +27,6 @@ export function useNotificarFinalistas() {
     mutationFn: (pedido: NotificarFinalistasRequest) => notificarFinalistasApi(pedido),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: finalistasKeys.lists() })
-      window.setTimeout(() => {
-        void queryClient.invalidateQueries({ queryKey: finalistasKeys.lists() })
-      }, RETARDO_REFRESCO_MS)
     },
   })
 }

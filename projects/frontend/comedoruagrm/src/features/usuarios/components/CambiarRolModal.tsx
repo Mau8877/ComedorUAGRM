@@ -5,6 +5,9 @@ import { ArrowRightLeftIcon } from 'lucide-react'
 import { ModalLayout } from '@/components/ui/modal-layout'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toastSuccess, toastWarning } from '@/components/ui/toast'
+import { validacionFormulario } from '@/utils/validacionFormulario'
+import { MARCA_OBLIGATORIO } from '@/components/ui/label'
+import { cn } from '@/lib/utils'
 
 import { mapearErrorUsuarios, useCambiarRol, useRefrescarListas } from '../api'
 import type { ErrorUsuarios } from '../api'
@@ -33,7 +36,7 @@ export function CambiarRolModal({ open, onOpenChange, usuario }: CambiarRolModal
 
   const form = useForm({
     defaultValues: { rol: (opciones[0]?.value ?? '') as string },
-    validators: { onChange: cambiarRolSchema, onBlur: cambiarRolSchema },
+    ...validacionFormulario(cambiarRolSchema),
     onSubmit: ({ value }) => {
       if (enviando.current) return
       enviando.current = true
@@ -93,7 +96,7 @@ export function CambiarRolModal({ open, onOpenChange, usuario }: CambiarRolModal
         <form.Field name="rol">
           {(field) => (
             <div className="flex flex-col gap-1">
-              <span id="cambiar-rol-label" className="text-sm font-medium text-foreground">
+              <span id="cambiar-rol-label" className={cn('text-sm font-medium text-foreground', MARCA_OBLIGATORIO)}>
                 Nuevo rol
               </span>
               <Select value={field.state.value} onValueChange={(valor) => field.handleChange(valor ?? '')}>

@@ -6,6 +6,7 @@ import { Loader2Icon, MailCheckIcon } from 'lucide-react'
 import { PublicHeader } from '@/components/layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { validacionFormulario } from '@/utils/validacionFormulario'
 
 import { mapearError, type ErrorMapeado } from '../api/mapearError'
 import { useSolicitarRecuperacion } from '../api/useSolicitarRecuperacion'
@@ -27,7 +28,7 @@ export function RecuperarContrasenaScreen() {
 
   const form = useForm({
     defaultValues: { correo: '' },
-    validators: { onChange: recuperarContrasenaSchema, onBlur: recuperarContrasenaSchema },
+    ...validacionFormulario(recuperarContrasenaSchema),
     onSubmit: ({ value }) => {
       setError(null)
       solicitar.mutate(value.correo, {
@@ -93,7 +94,7 @@ export function RecuperarContrasenaScreen() {
 
                 <form.Field name="correo">
                   {(field) => (
-                    <CampoFormulario field={field} label="Correo electrónico" type="email" autoComplete="email" />
+                    <CampoFormulario field={field} label="Correo electrónico" required type="email" autoComplete="email" />
                   )}
                 </form.Field>
 

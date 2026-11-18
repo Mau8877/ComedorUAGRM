@@ -16,8 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.comedoruagrm.backend.common.exception.ValidationException;
 import com.comedoruagrm.backend.common.response.ApiResponse;
 import com.comedoruagrm.backend.common.util.ParametrosListado;
+import com.comedoruagrm.backend.features.dashboard.dto.BiResponse;
 import com.comedoruagrm.backend.features.dashboard.dto.FiltrosDashboardResponse;
 import com.comedoruagrm.backend.features.dashboard.dto.IndicadoresResponse;
+import com.comedoruagrm.backend.features.dashboard.service.BiExcelService;
+import com.comedoruagrm.backend.features.dashboard.service.BiExcelService.ExcelGenerado;
+import com.comedoruagrm.backend.features.dashboard.service.BiService;
 import com.comedoruagrm.backend.features.dashboard.service.FiltrosDashboardService;
 import com.comedoruagrm.backend.features.dashboard.service.IndicadoresPdfService;
 import com.comedoruagrm.backend.features.dashboard.service.IndicadoresPdfService.PdfGenerado;
@@ -32,7 +36,8 @@ import lombok.RequiredArgsConstructor;
  * `service`). El PDF es la unica respuesta fuera del sobre estandar: el exito es el archivo; los errores siguen
  * saliendo en el sobre.
  *
- * * Solo lectura: no hay rutas para refrescar la vista ni para escribir.
+ * * Solo lectura: no hay rutas para refrescar la vista ni para escribir. `/bi` es el analisis BI y `/bi/excel` su
+ * * descarga; el PDF y el Excel son las unicas respuestas fuera del sobre estandar.
  */
 @RestController
 @RequestMapping("/api/v1/dashboard")
@@ -46,6 +51,8 @@ public class DashboardController {
     private final FiltrosDashboardService filtrosService;
     private final IndicadoresService indicadoresService;
     private final IndicadoresPdfService pdfService;
+    private final BiService biService;
+    private final BiExcelService excelService;
 
     @GetMapping("/filtros")
     public ResponseEntity<ApiResponse<FiltrosDashboardResponse>> filtros() {
@@ -62,6 +69,34 @@ public class DashboardController {
         IndicadoresResponse indicadores = indicadoresService.consultar(uuid(FILTRO_GESTION, gestion),
                 uuid(FILTRO_CONVOCATORIA, convocatoria));
         return ResponseEntity.ok(ApiResponse.success(indicadores, "Indicadores obtenidos correctamente"));
+    }
+
+    @GetMapping("/bi")
+    public ResponseEntity<ApiResponse<BiResponse>> bi(
+            @RequestParam(name = FILTRO_GESTION, required = false) String gestion,
+            @RequestParam(name = FILTRO_CONVOCATORIA, required = false) String convocatoria,
+            HttpServletRequest request) {
+        ParametrosListado.validarFiltros(request, FILTROS);
+        BiResponse analisis = biService.consultar(uuid(FILTRO_GESTION, gestion),
+                uuid(FILTRO_CONVOCATORIA, convocatoria));
+        return ResponseEntity.ok(ApiResponse.success(analisis, "Análisis BI obtenido correctamente"));
+    }
+
+    @GetMapping("/bi/excel")
+    public ResponseEntity<byte[]> biExcel(@CurrentUserId UUID actorCodigo,
+            @RequestParam(name = FILTRO_GESTION, required = false) String gestion,
+            @RequestParam(name = FILTRO_CONVOCATORIA, required = false) String convocatoria,
+            HttpServletRequest request) {
+        ParametrosListado.validarFiltros(request, FILTROS);
+        ExcelGenerado excel = excelService.generar(actorCodigo, uuid(FILTRO_GESTION, gestion),
+                uuid(FILTRO_CONVOCATORIA, convocatoria));
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        ContentDisposition.attachment().filename(excel.nombreArchivo()).build().toString())
+                .cacheControl(CacheControl.noStore())
+                .body(excel.contenido());
     }
 
     @GetMapping("/indicadores/pdf")

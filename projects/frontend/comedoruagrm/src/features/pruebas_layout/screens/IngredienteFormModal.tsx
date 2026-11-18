@@ -3,6 +3,7 @@ import { PencilIcon, PlusIcon } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { ModalLayout } from '@/components/ui/modal-layout'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { validacionFormulario } from '@/utils/validacionFormulario'
 import {
   CATEGORIAS_INGREDIENTE,
   UNIDADES_INGREDIENTE,
@@ -56,7 +57,7 @@ export function IngredienteFormModal({
 
   const form = useForm({
     defaultValues: toDefaultValues(ingrediente),
-    validators: { onChange: ingredienteSchema },
+    ...validacionFormulario(ingredienteSchema),
     onSubmit: ({ value }) => onSubmit(value),
   })
 

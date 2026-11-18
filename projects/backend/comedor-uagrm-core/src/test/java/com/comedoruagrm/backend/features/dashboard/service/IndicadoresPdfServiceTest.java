@@ -2,6 +2,7 @@ package com.comedoruagrm.backend.features.dashboard.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -24,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.comedoruagrm.backend.common.exception.NotFoundException;
 import com.comedoruagrm.backend.common.exception.ValidationException;
+import com.comedoruagrm.backend.features.dashboard.dto.BiResponse;
 import com.comedoruagrm.backend.features.dashboard.dto.IndicadoresResponse;
 import com.comedoruagrm.backend.features.dashboard.dto.IndicadoresResponse.ConvocatoriaResumen;
 import com.comedoruagrm.backend.features.dashboard.dto.IndicadoresResponse.GestionResumen;
@@ -40,9 +42,10 @@ import com.lowagie.text.pdf.parser.PdfTextExtractor;
 class IndicadoresPdfServiceTest {
 
     private final IndicadoresService indicadores = mock(IndicadoresService.class);
+    private final BiService bi = mock(BiService.class);
     private final UsuarioService usuarios = mock(UsuarioService.class);
     private final Clock reloj = Clock.fixed(Instant.parse("2026-11-13T15:30:00Z"), ZoneOffset.UTC);
-    private final IndicadoresPdfService servicio = new IndicadoresPdfService(indicadores, usuarios, reloj);
+    private final IndicadoresPdfService servicio = new IndicadoresPdfService(indicadores, bi, usuarios, reloj);
 
     private final UUID actor = UUID.randomUUID();
 
@@ -51,6 +54,20 @@ class IndicadoresPdfServiceTest {
         Usuario directivo = new Usuario(mock(Rol.class), "0000002", "dir@uagrm.test", "hash", "Dña. Ñusta",
                 "Peña Añez");
         when(usuarios.obtenerPorCodigo(actor)).thenReturn(directivo);
+        when(bi.obtener(any(), any())).thenReturn(analisis());
+    }
+
+    static BiResponse analisis() {
+        UUID codigo = UUID.randomUUID();
+        return new BiResponse(null, null, new BiResponse.Embudo(120, 100, 30, 12, 10),
+                List.of(new BiResponse.Facultad("Facultad de Tecnología", 80, 8, 66.7, 10.0, List.of()),
+                        new BiResponse.Facultad("Facultad de Humanidades", 40, 4, 33.3, 10.0, List.of())),
+                List.of(new BiResponse.ConvocatoriaComparada(codigo, "Beca 2026-I", 20, 50, 10, 4, 8.0, null, null,
+                        false),
+                        new BiResponse.ConvocatoriaComparada(codigo, "Beca 2026-II", 20, 70, 20, 8, 11.4, null, 40.0,
+                                true)),
+                List.of(), null, new BiResponse.Cobertura(0, 0, 0, 0, 0, null),
+                new BiResponse.Asistencia(null, 0, 0, List.of()), List.of(), null, false);
     }
 
     private IndicadoresResponse datos(String gestion, ConvocatoriaResumen convocatoria, Instant actualizado) {
@@ -86,8 +103,8 @@ class IndicadoresPdfServiceTest {
         String texto = texto(pdf.contenido());
         assertThat(texto).contains("Dashboard de indicadores").contains("Gestión: 2026-II")
                 .contains("Todas las convocatorias").contains("13/11/2026 02:00")
-                .contains("Postulaciones recibidas: 120").contains("Finalistas: 30")
-                .contains("Becas adjudicadas: 12").contains("Asistencia promedio: Sin datos")
+                .contains("Postulaciones recibidas").contains("120").contains("Finalistas")
+                .contains("Becas adjudicadas").contains("Asistencia promedio").contains("Sin datos")
                 .contains("2026-09").contains("2026-10")
                 .contains("Generado el 13/11/2026 11:30 por Dña. Ñusta Peña Añez");
         assertThat(pdf.nombreArchivo()).isEqualTo("indicadores-2026-ii-20261113.pdf");
@@ -156,5 +173,18 @@ class IndicadoresPdfServiceTest {
     void nombreArchivo_quitaTildesYEspacios() {
         assertThat(IndicadoresPdfService.nombreArchivo("Gestión 2026 - II", Instant.parse("2026-11-13T15:30:00Z")))
                 .isEqualTo("indicadores-gestion-2026-ii-20261113.pdf");
+    }
+
+    @Test
+    void generar_incluyeElAnalisisBi_facultadesYComparacionDeConvocatorias() throws IOException {
+        UUID gestion = UUID.randomUUID();
+        when(indicadores.obtener(gestion, null)).thenReturn(datos("2026-II", null,
+                Instant.parse("2026-11-13T06:00:00Z")));
+
+        PdfGenerado pdf = servicio.generar(actor, gestion, null);
+
+        String contenido = texto(pdf.contenido());
+        assertThat(contenido).contains("Embudo de postulación").contains("Postulación por facultad")
+                .contains("Comparación entre convocatorias de la gestión");
     }
 }

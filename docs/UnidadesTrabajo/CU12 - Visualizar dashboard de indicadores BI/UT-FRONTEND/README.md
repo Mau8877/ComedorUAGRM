@@ -1,6 +1,6 @@
 # Unidades de trabajo — CU12-FE
 
-**Caso de uso:** Pantalla «Dashboard de indicadores» del Directivo (indicadores, gráficos por mes, filtros por gestión y convocatoria y descarga en PDF), con el layout propio del rol Directivo.
+**Caso de uso:** Pantalla «Dashboard de indicadores» del Directivo (indicadores, gráficos por mes, análisis BI, filtros por gestión y convocatoria y descarga en PDF y Excel), con el layout propio del rol Directivo.
 **Fuente CU:** [`CU12 - Visualizar dashboard de indicadores BI`](../../../CasosDeUso/CU12%20-%20Visualizar%20dashboard%20de%20indicadores%20BI.md)
 **Diagramas de grado:** CU-12 (maqueta `112`, análisis `084` y secuencia `099`).
 **Recurso HTTP / contrato:** el de [`UT-BACKEND`](../UT-BACKEND/README.md).
@@ -19,7 +19,7 @@ Todo el código va en `projects/frontend/comedoruagrm/src/` (en estas fichas, `F
 - **Destino al entrar:** `rutaInicioPorRol('DIRECTIVO')` pasa de `/panel` a `/dashboard` (el tipo de retorno se amplía y se actualizan sus tests).
 - **Gráficos:** el componente `chart` de shadcn (basado en `recharts`), agregado con `pnpm dlx shadcn@latest add chart` (rule de Tailwind/shadcn: no se edita a mano su salida). Barras para postulaciones por mes y línea para la asistencia, con los colores de tema (`primary`, `accent`); nunca valores arbitrarios.
 - **Filtros:** selector de gestión (por defecto la `vigente` del catálogo), selector de convocatoria («Todas» por defecto, solo las de la gestión elegida) y botón «Aplicar», como el mockup. Cambiar la gestión reinicia la convocatoria a «Todas». Son estado local de la pantalla (`useState`); no se usa Zustand ni TanStack Form (no hay envío de datos).
-- **Estados de la pantalla:** cargando (esqueletos), error (mensaje de `getErrorMessage`), **sin datos** (A1: mensaje informativo y ceros), **lote sin ejecutar** (A2: aviso «Aún no se calculan indicadores» si `actualizadoEn` es nulo; si no, «Actualizado el …»), asistencia **«Sin datos»** mientras llegue `null`. Con el comentario `// TODO CU-10: mostrar la asistencia real cuando el backend la entregue`.
+- **Estados de la pantalla:** cargando (esqueletos), error (mensaje de `getErrorMessage`), **sin datos** (A1: mensaje informativo y ceros), **lote sin ejecutar** (A2: aviso «Aún no se calculan indicadores» si `actualizadoEn` es nulo; si no, «Actualizado el …»), asistencia **«Sin datos»** si llega `null`; con el CU-10 hecho, la tarjeta y el gráfico muestran la asistencia real.
 - **Descarga PDF:** botón «Descargar PDF» con el mismo patrón del CU-06 (`ExportarListaButton`, `descargarArchivo`): se bloquea mientras genera, deshabilitado si `sinDatos`, y manda exactamente la selección aplicada. No se guarda en caché de TanStack Query.
 - **Keys:** `dashboardKeys` (`['dashboard', 'filtros']`, `['dashboard', 'indicadores', {gestion, convocatoria}]`). Es solo lectura: no hay mutaciones que invaliden.
 - **Solo web:** no hay mobile (decisión del CU12).
@@ -32,8 +32,11 @@ Todo el código va en `projects/frontend/comedoruagrm/src/` (en estas fichas, `F
 | [UT-CU12-FE-02](./UT-CU12-FE-02.md) | Layout y ruta del Directivo | — |
 | [UT-CU12-FE-03](./UT-CU12-FE-03.md) | Pantalla del dashboard: filtros, tarjetas y gráficos | 01, 02 |
 | [UT-CU12-FE-04](./UT-CU12-FE-04.md) | Descarga del dashboard en PDF | 01, 03 |
+| [UT-CU12-FE-05](./UT-CU12-FE-05.md) | API del análisis BI: tipos, keys y hooks | 01, UT-CU12-BE-12 |
+| [UT-CU12-FE-06](./UT-CU12-FE-06.md) | Pantalla: análisis BI | 03, 05 |
+| [UT-CU12-FE-07](./UT-CU12-FE-07.md) | Descarga del análisis en Excel | 05, 06 |
 
-**Cadena:** `01, 02 → 03 → 04`.
+**Cadena:** `01, 02 → 03 → 04`; `01 → 05`; `03, 05 → 06`; `05, 06 → 07`.
 
 ## Alcance de cada UT
 
@@ -41,6 +44,9 @@ Todo el código va en `projects/frontend/comedoruagrm/src/` (en estas fichas, `F
 - **02:** `DirectivoLayout`, su menú, la ruta `/dashboard` con `exigirRol('DIRECTIVO')` y el destino del rol Directivo.
 - **03:** `DashboardScreen`, filtros con «Aplicar», cuatro tarjetas, dos gráficos y los estados (cargando, error, sin datos, lote sin ejecutar, asistencia sin datos).
 - **04:** el botón «Descargar PDF».
+- **05:** tipos, key y hooks del análisis BI y de su Excel.
+- **06:** los siete bloques del análisis, el filtro cruzado y sus estados.
+- **07:** el botón «Descargar Excel».
 
 ## Cobertura del caso de uso
 
@@ -49,7 +55,9 @@ Todo el código va en `projects/frontend/comedoruagrm/src/` (en estas fichas, `F
 | Paso 1 (opción «Dashboard de indicadores») | 02, 03 |
 | Pasos 2–3 (indicadores de la gestión vigente y fecha de actualización) | 01, 03 |
 | Pasos 4–5 (filtrar y actualizar) | 01, 03 |
-| Paso 6, A4 (descargar PDF) | 04 |
+| Paso 6 (análisis BI) y paso 7 (facultad → carreras, convocatoria → filtro) | 05, 06 |
+| Paso 8, A4 (descargar PDF o Excel) | 04, 07 |
+| A8, A9 (falla del análisis, sin registros) | 06 |
 | A1 (sin datos), A2 (lote sin ejecutar) | 03 |
 | A3 (`ERR_DAS_01`) | 01, 03 |
 | `401` lleva al login por el cliente HTTP; `403` la ruta exige el rol | 02 |
@@ -57,12 +65,11 @@ Todo el código va en `projects/frontend/comedoruagrm/src/` (en estas fichas, `F
 
 ## Follow-ups (no se implementan en estas UT)
 
-- **Asistencia real (CU-10):** mostrar el promedio y la serie cuando el backend los entregue.
-- **Proyecciones y tendencias:** descartadas por el taller.
+- **Proyecciones a futuro:** descartadas por el taller.
 
 ## Qué NO incluyen estas UT
 
 - Cambios en el backend (ver [`UT-BACKEND`](../UT-BACKEND/README.md)).
-- La opción «Reportes» del mockup y otras exportaciones.
+- La opción «Reportes» del mockup y otras exportaciones (solo PDF y Excel).
 - El panel de inicio del Administrador DUBSS.
 - La app móvil.

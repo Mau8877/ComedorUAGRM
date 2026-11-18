@@ -57,7 +57,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * bandeja del usuario, la bitacora sin datos personales, los permisos y que ninguna postulacion cambie de
  * estado. El push y el correo estan simulados.
  */
-@SpringBootTest
+@SpringBootTest(properties = "app.notificaciones.ventana-envio-segundos=0")
 @AutoConfigureMockMvc
 class FinalistasComunicadosIntegrationTest {
 

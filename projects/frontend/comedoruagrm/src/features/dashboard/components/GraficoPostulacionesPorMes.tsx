@@ -1,11 +1,15 @@
+import { InboxIcon } from 'lucide-react'
+
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import type { ChartConfig } from '@/components/ui/chart'
 
 import type { IndicadorMensual } from '../types'
 import { formatearMes } from './formato'
+import { TituloPanel } from './ChipIcono'
+import { estiloTarjeta } from './tonos'
 
 const CONFIG = { postulaciones: { label: 'Postulaciones', color: 'var(--primary)' } } satisfies ChartConfig
 
@@ -13,9 +17,9 @@ const CONFIG = { postulaciones: { label: 'Postulaciones', color: 'var(--primary)
 export function GraficoPostulacionesPorMes({ datos }: { datos: IndicadorMensual[] }) {
   const serie = datos.map((d) => ({ mes: formatearMes(d.mes), postulaciones: d.postulaciones }))
   return (
-    <Card>
+    <Card className={estiloTarjeta('primary')}>
       <CardHeader>
-        <CardTitle>Postulaciones por mes</CardTitle>
+        <TituloPanel icono={InboxIcon} tono="primary">Postulaciones por mes</TituloPanel>
       </CardHeader>
       <CardContent>
         {serie.length === 0 ? (

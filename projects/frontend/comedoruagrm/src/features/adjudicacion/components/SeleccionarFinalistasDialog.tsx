@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input'
 import { ModalLayout } from '@/components/ui/modal-layout'
 import { toastSuccess } from '@/components/ui/toast'
 import { AlertaError } from '@/features/auth'
+import { validacionFormulario } from '@/utils/validacionFormulario'
+import { Label } from '@/components/ui/label'
 
 import { mapearErrorAdjudicacion } from '../api/mapearErrorAdjudicacion'
 import { useSeleccionarFinalistas } from '../api/useSeleccionarFinalistas'
@@ -56,7 +58,7 @@ export function SeleccionarFinalistasDialog({
 
   const form = useForm({
     defaultValues: { cantidad: cantidadPropuesta(panel) } as SeleccionValues,
-    validators: { onChange: schema, onBlur: schema },
+    ...validacionFormulario(schema),
     onSubmit: ({ value }) => {
       const analizado = schema.safeParse(value)
       if (!analizado.success || enviando.current) return
@@ -131,9 +133,9 @@ export function SeleccionarFinalistasDialog({
         <form.Field name="cantidad">
           {(field) => (
             <div className="flex flex-col gap-1">
-              <label htmlFor="seleccion-cantidad" className="text-sm font-medium">
+              <Label htmlFor="seleccion-cantidad" required={panel.cantidadFinalistas === null}>
                 Cantidad
-              </label>
+              </Label>
               <Input
                 id="seleccion-cantidad"
                 inputMode="numeric"

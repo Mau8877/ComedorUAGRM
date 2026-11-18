@@ -1,4 +1,5 @@
 export * from './admin'
 export * from './estudiante'
 export * from './directivo'
+export * from './comedor'
 export * from './shell'

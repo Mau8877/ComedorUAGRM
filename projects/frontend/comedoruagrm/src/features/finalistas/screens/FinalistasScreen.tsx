@@ -10,6 +10,7 @@ import { ComunicadoForm } from '@/features/comunicados'
 import { useAccionesDeCuenta } from '@/features/perfil'
 import { useConvocatoriasPriorizables } from '@/features/priorizacion'
 import { AdminLayout } from '@/layouts'
+import { useConvocatoriaElegida } from '@/store'
 
 import { mapearErrorFinalistas } from '../api'
 import { NotificarFinalistasDialog, RegistrarEntregaPanel, TablaFinalistas } from '../components'
@@ -35,7 +36,7 @@ export function FinalistasScreen({ titulo, activeHref, usuarioActual, onAuditar 
   const cerrarSesion = useCerrarSesion()
   const accionesDeCuenta = useAccionesDeCuenta()
 
-  const [elegida, setElegida] = useState<string | undefined>(undefined)
+  const [elegida, setElegida] = useConvocatoriaElegida()
   const [seleccionados, setSeleccionados] = useState<Set<string>>(new Set())
   const [activo, setActivo] = useState<Finalista | undefined>(undefined)
   const [notificando, setNotificando] = useState(false)

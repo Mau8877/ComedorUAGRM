@@ -479,4 +479,9 @@ erDiagram
   %% Vista materializada del dashboard BI (CU12), sin tablas nuevas: mv_indicadores_convocatoria.
   %% Una fila por (convocatoria_id, mes) con gestion_id, postulaciones_recibidas (sin borradores), finalistas,
   %% adjudicadas (solo de convocatorias con resultados publicados) y calculado_en. Indice unico (convocatoria_id, mes).
-  %% Se refresca por lote cada noche (02:00, REFRESH ... CONCURRENTLY). Pendiente CU-10: asistencia.
+  %% Se refresca por lote cada noche (02:00, REFRESH ... CONCURRENTLY).
+  %% Analisis BI (CU12), cuatro vistas materializadas mas, tambien sin tablas nuevas y con indice unico:
+  %% mv_bi_asistencia_dia (beca_id, fecha: asistio o no, para la tasa por dia de la semana y las becas en riesgo),
+  %% mv_bi_convocatoria (convocatoria_id: embudo, cupos, cobertura de becas, puntaje promedio, becas en riesgo),
+  %% mv_bi_carrera_convocatoria (convocatoria_id, facultad, carrera: postulaciones y adjudicadas) y
+  %% mv_bi_puntaje_convocatoria (convocatoria_id, tramo de 10 puntos de 0 a 70: cantidad de puntajes vigentes de la IA).

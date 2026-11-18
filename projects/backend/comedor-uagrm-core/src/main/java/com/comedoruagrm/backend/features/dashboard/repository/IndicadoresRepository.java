@@ -97,6 +97,37 @@ public class IndicadoresRepository {
                 rs.getLong("adjudicadas")));
     }
 
+    /** Asistencia de un mes (`mes` es el primer dia): asistencias registradas y asistencias esperadas. */
+    public record FilaAsistenciaMes(LocalDate mes, long asistieron, long esperados) {
+    }
+
+    /** Asistencia total de la seleccion (CU10). */
+    public record FilaAsistenciaTotal(long asistieron, long esperados) {
+    }
+
+    /** La asistencia total desde `mv_bi_asistencia_dia`; en cero si nunca se registro. */
+    public FilaAsistenciaTotal asistenciaTotal(long gestionId, Long convocatoriaId) {
+        return jdbc.queryForObject("""
+                SELECT coalesce(sum(asistieron), 0) AS asistieron, coalesce(sum(esperados), 0) AS esperados
+                FROM mv_bi_asistencia_dia
+                WHERE gestion_id = :gestion AND (CAST(:convocatoria AS bigint) IS NULL OR convocatoria_id = :convocatoria)
+                """, parametros(gestionId, convocatoriaId), (rs, n) -> new FilaAsistenciaTotal(rs.getLong("asistieron"),
+                rs.getLong("esperados")));
+    }
+
+    /** La asistencia por mes, de la mas antigua a la mas reciente, solo de los meses con registro. */
+    public List<FilaAsistenciaMes> asistenciaMensual(long gestionId, Long convocatoriaId) {
+        return jdbc.query("""
+                SELECT CAST(date_trunc('month', fecha) AS date) AS mes, sum(asistieron) AS asistieron,
+                       sum(esperados) AS esperados
+                FROM mv_bi_asistencia_dia
+                WHERE gestion_id = :gestion AND (CAST(:convocatoria AS bigint) IS NULL OR convocatoria_id = :convocatoria)
+                GROUP BY 1
+                ORDER BY 1
+                """, parametros(gestionId, convocatoriaId), (rs, n) -> new FilaAsistenciaMes(
+                rs.getObject("mes", LocalDate.class), rs.getLong("asistieron"), rs.getLong("esperados")));
+    }
+
     /** Cuando se calculo la vista por ultima vez; vacio si el lote nunca se ejecuto. */
     public Optional<Instant> ultimaActualizacion() {
         String consulta = "SELECT max(calculado_en) FROM mv_indicadores_convocatoria";

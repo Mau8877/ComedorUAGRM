@@ -55,7 +55,7 @@ import type { PanelAdjudicacion } from '../types'
 const yo = { codigo: 'yo', nombres: 'Admin', apellidos: 'Principal', correo: 'admin@dubss.com', rol: 'ADMINISTRADOR_DUBSS' }
 
 const CONVOCATORIAS = [
-  { codigo: 'conv-2', nombre: 'Beca 2027-I', gestion: '2027-I', estado: 'ABIERTA', fechaApertura: '', fechaCierre: '' },
+  { codigo: 'conv-2', nombre: 'Beca 2027-I', gestion: '2027-I', estado: 'CERRADA', fechaApertura: '', fechaCierre: '' },
   { codigo: 'conv-1', nombre: 'Beca 2026-II', gestion: '2026-II', estado: 'CERRADA', fechaApertura: '', fechaCierre: '' },
 ]
 
@@ -102,6 +102,24 @@ describe('AdjudicacionScreen', () => {
   beforeEach(() => {
     cliente.get.mockReset()
     cliente.post.mockReset()
+  })
+
+  it('sin elección previa abre la más reciente que ya está cerrada, saltándose una abierta', async () => {
+    cliente.get.mockImplementation((url: string) =>
+      url === '/lista-priorizada/convocatorias'
+        ? Promise.resolve({
+            data: [
+              { codigo: 'conv-3', nombre: 'Beca 2028-I', gestion: '2028-I', estado: 'ABIERTA', fechaApertura: '', fechaCierre: '' },
+              ...CONVOCATORIAS,
+            ],
+          })
+        : Promise.resolve({ data: panel() }),
+    )
+    montar()
+
+    expect(await screen.findByText('Cupos disponibles')).toBeInTheDocument()
+    expect(cliente.get).toHaveBeenCalledWith('/convocatorias/conv-2/adjudicacion')
+    expect(cliente.get).not.toHaveBeenCalledWith('/convocatorias/conv-3/adjudicacion')
   })
 
   it('preselecciona la convocatoria más reciente y muestra su panel de cupos', async () => {

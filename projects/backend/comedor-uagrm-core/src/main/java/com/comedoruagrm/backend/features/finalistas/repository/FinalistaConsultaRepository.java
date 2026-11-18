@@ -11,12 +11,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import com.comedoruagrm.backend.features.finalistas.dto.FinalistaResponse;
+import com.comedoruagrm.backend.features.notificaciones.enums.EventoNotificacion;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,8 +26,11 @@ import lombok.RequiredArgsConstructor;
  * Consultas de solo lectura de los finalistas (CU21), con el estado de su aviso y de su entrega.
  *
  * * `resultadoAuditoria` y `puntajeTotal` salen de la ULTIMA auditoria del finalista (CU07).
- * * El estado de la notificacion se deriva del ULTIMO aviso de la postulacion que no es un comunicado:
- * * sin aviso es SIN_ENVIAR, con `enviada_en` es ENVIADA y sin el es FALLIDA.
+ * * El estado de la notificacion se deriva del ULTIMO aviso de entrega de documentacion (el evento
+ * * FINALISTA_NOTIFICADO, que es el unico de CU21; los avisos de auditoria o de comunicado no cuentan):
+ * * sin aviso es SIN_ENVIAR, con `enviada_en` es ENVIADA; sin el es ENVIANDO mientras el despacho siga
+ * * dentro de su ventana (`app.notificaciones.ventana-envio-segundos`: push y correo salen en segundo plano
+ * * y se reintentan) y FALLIDA pasada esa ventana.
  * * Se usa JDBC (como la lista priorizada del CU06) porque cruza finalista, postulacion, usuario,
  * * puntaje y notificacion. Todo respeta el borrado logico (`eliminado_en IS NULL`).
  */
@@ -36,6 +41,12 @@ public class FinalistaConsultaRepository {
     /** Zona en la que se calcula el dia de las fechas (Bolivia). */
     public static final ZoneId ZONA = ZoneId.of("America/La_Paz");
 
+    /**
+     * Titulo del aviso de CU21 (no tiene marcadores, asi que es un texto fijo). `notificacion` no guarda de que
+     * evento viene un aviso, y los de CU07 (auditoria) o CU19 (devolucion) tambien se ligan a la postulacion.
+     */
+    private static final String TITULO_AVISO = EventoNotificacion.FINALISTA_NOTIFICADO.titulo();
+
     private static final String SELECT = """
             SELECT f.codigo_finalista AS codigo, f.posicion, u.nombres, u.apellidos, u.ci,
                    pu.puntaje_total AS puntaje, COALESCE(au.resultado, 'SIN_AUDITAR') AS resultado_auditoria,
@@ -45,6 +56,7 @@ public class FinalistaConsultaRepository {
                    CAST(po.estado AS text) AS estado_postulacion,
                    CASE WHEN n.id IS NULL THEN 'SIN_ENVIAR'
                         WHEN n.enviada_en IS NOT NULL THEN 'ENVIADA'
+                        WHEN n.creado_en > now() - make_interval(secs => :ventanaEnvio) THEN 'ENVIANDO'
                         ELSE 'FALLIDA' END AS estado_notificacion
             FROM finalista f
             JOIN postulacion po ON po.id = f.postulacion_id AND po.eliminado_en IS NULL
@@ -53,8 +65,9 @@ public class FinalistaConsultaRepository {
             LEFT JOIN puntaje_postulacion pu ON pu.postulacion_id = po.id AND pu.vigente
                  AND pu.eliminado_en IS NULL
             LEFT JOIN LATERAL (
-                SELECT x.id, x.enviada_en FROM notificacion x
+                SELECT x.id, x.enviada_en, x.creado_en FROM notificacion x
                 WHERE x.postulacion_id = po.id AND x.comunicado_id IS NULL AND x.eliminado_en IS NULL
+                  AND x.titulo = :tituloAviso
                 ORDER BY x.creado_en DESC, x.id DESC LIMIT 1) n ON true
             LEFT JOIN LATERAL (
                 SELECT CAST(a.resultado AS text) AS resultado, a.puntaje_academico
@@ -76,6 +89,10 @@ public class FinalistaConsultaRepository {
     private static final RowMapper<FinalistaResponse> FILA = FinalistaConsultaRepository::aFila;
 
     private final NamedParameterJdbcTemplate jdbc;
+
+    /** Cuanto puede tardar el despacho de un aviso (con sus reintentos) antes de darlo por fallido. */
+    @Value("${app.notificaciones.ventana-envio-segundos:30}")
+    private double ventanaEnvioSegundos;
 
     /** Si la convocatoria existe y no esta eliminada. */
     public boolean existeConvocatoria(UUID codigo) {
@@ -106,7 +123,9 @@ public class FinalistaConsultaRepository {
     /** Un finalista con sus estados al dia; vacio si no existe. */
     public Optional<FinalistaResponse> buscarUno(UUID finalista) {
         return jdbc.query(SELECT + " AND f.codigo_finalista = CAST(:finalista AS uuid)",
-                new MapSqlParameterSource().addValue("finalista", finalista.toString(), Types.VARCHAR), FILA)
+                new MapSqlParameterSource().addValue("finalista", finalista.toString(), Types.VARCHAR)
+                        .addValue("ventanaEnvio", ventanaEnvioSegundos)
+                        .addValue("tituloAviso", TITULO_AVISO), FILA)
                 .stream().findFirst();
     }
 
@@ -120,8 +139,10 @@ public class FinalistaConsultaRepository {
                 (rs, n) -> rs.getObject("codigo_usuario", UUID.class)).stream().findFirst();
     }
 
-    private static MapSqlParameterSource parametros(UUID convocatoria, String busqueda) {
+    private MapSqlParameterSource parametros(UUID convocatoria, String busqueda) {
         return new MapSqlParameterSource()
+                .addValue("ventanaEnvio", ventanaEnvioSegundos)
+                .addValue("tituloAviso", TITULO_AVISO)
                 .addValue("convocatoria", convocatoria.toString(), Types.VARCHAR)
                 .addValue("busqueda", busqueda, Types.VARCHAR);
     }

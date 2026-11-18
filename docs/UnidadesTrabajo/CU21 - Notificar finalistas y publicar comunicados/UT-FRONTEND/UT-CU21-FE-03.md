@@ -24,7 +24,7 @@ El administrador notifica a los finalistas seleccionados y ve cuántos avisos sa
 
 - `F/features/finalistas/components/NotificarFinalistasDialog.tsx`: formulario TanStack Form + `notificarFinalistasSchema` (plazo, lugar y horario, documentos), un resumen «Se enviará a N finalistas» y la confirmación con `AlertDialog` antes de enviar (A6: errores inline y no se envía nada si falta algo).
 - Botón «Notificar seleccionados» (deshabilitado sin selección), arriba de la tabla.
-- Tras enviar: resultado «N enviados, M fallidos» (`useNotificarFinalistas`); con fallidos, el resultado explica que la tabla tiene el botón «Seleccionar fallidos», que deja marcados solo a esos para reintentar (A2). Errores con el mensaje de negocio (`ERR_FIN_04`, `ERR_FIN_01`).
+- Tras enviar: resultado «se está enviando el aviso a N finalistas» (y cuántos no se pudieron registrar) (`useNotificarFinalistas`; la entrega por push y correo se conoce después, y el listado se vuelve a consultar a los 4 y 20 s); el resultado explica que la tabla tiene el botón «Seleccionar fallidos», que deja marcados solo a esos para reintentar (A2). Errores con el mensaje de negocio (`ERR_FIN_04`, `ERR_FIN_01`).
 - Tests: no deja enviar con campos vacíos ni con plazo de hoy, pide confirmación, manda lo esperado, muestra el resultado; y, en la pantalla, «Seleccionar fallidos» deja marcados solo a los fallidos.
 
 Archivos esperados (crear): `NotificarFinalistasDialog.tsx` y su test.

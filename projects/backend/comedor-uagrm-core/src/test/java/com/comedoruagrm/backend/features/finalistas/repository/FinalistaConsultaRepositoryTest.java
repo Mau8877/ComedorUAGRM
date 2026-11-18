@@ -16,6 +16,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
 import com.comedoruagrm.backend.features.finalistas.dto.FinalistaResponse;
+import com.comedoruagrm.backend.features.notificaciones.enums.EventoNotificacion;
 import com.comedoruagrm.backend.support.ExpedienteFixtures;
 import com.comedoruagrm.backend.support.PostgresTestDatabase;
 
@@ -77,12 +78,16 @@ class FinalistaConsultaRepositoryTest {
     }
 
     private void aviso(long postulacion, String enviadaEn, String creadoEn, Long comunicado) {
+        aviso(postulacion, enviadaEn, creadoEn, comunicado, EventoNotificacion.FINALISTA_NOTIFICADO.titulo());
+    }
+
+    private void aviso(long postulacion, String enviadaEn, String creadoEn, Long comunicado, String titulo) {
         jdbc.update("""
                 INSERT INTO notificacion (usuario_id, tipo, titulo, mensaje, postulacion_id, comunicado_id,
                                           enviada_en, creado_en)
-                SELECT postulante_id, CAST('INFO' AS tipo_notificacion), 'T', 'M', id, ?,
+                SELECT postulante_id, CAST('INFO' AS tipo_notificacion), ?, 'M', id, ?,
                        CAST(? AS timestamptz), CAST(? AS timestamptz)
-                FROM postulacion WHERE id = ?""", comunicado, enviadaEn, creadoEn, postulacion);
+                FROM postulacion WHERE id = ?""", titulo, comunicado, enviadaEn, creadoEn, postulacion);
     }
 
     private String estado(UUID convocatoria, int posicion) {
@@ -103,6 +108,30 @@ class FinalistaConsultaRepositoryTest {
         assertThat(estado(codigo, 1)).isEqualTo("SIN_ENVIAR");
         assertThat(estado(codigo, 2)).isEqualTo("ENVIADA");
         assertThat(estado(codigo, 3)).isEqualTo("FALLIDA");
+    }
+
+    @Test
+    void estado_unAvisoSinEntregarRecienCreadoEstaEnviando_yPasadaLaVentanaEsFallida() {
+        long conv = convocatoria();
+        long reciente = finalista(conv, 1, "9100031", "Ana", "Uno");
+        long vencido = finalista(conv, 2, "9100032", "Beto", "Dos");
+        aviso(reciente, null, java.time.Instant.now().toString(), null);
+        aviso(vencido, null, java.time.Instant.now().minusSeconds(120).toString(), null);
+
+        UUID codigo = codigoConvocatoria(conv);
+        assertThat(estado(codigo, 1)).isEqualTo("ENVIANDO");
+        assertThat(estado(codigo, 2)).isEqualTo("FALLIDA");
+    }
+
+    @Test
+    void estado_unAvisoDeAuditoriaSinEntregarNoCambiaElEstadoDeLaNotificacionDeEntrega() {
+        long conv = convocatoria();
+        long postulacion = finalista(conv, 1, "9100041", "Ana", "Uno");
+        aviso(postulacion, "2026-11-06T10:00:01Z", "2026-11-06T10:00:00Z", null);
+        // Un aviso posterior de la auditoria (solo bandeja y push) que nunca se marca como enviado.
+        aviso(postulacion, null, "2026-11-06T12:00:00Z", null, EventoNotificacion.AUDITORIA_VALIDADA.titulo());
+
+        assertThat(estado(codigoConvocatoria(conv), 1)).isEqualTo("ENVIADA");
     }
 
     @Test

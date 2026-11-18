@@ -1,15 +1,15 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Loader2Icon } from 'lucide-react'
+import { LayoutDashboardIcon, Loader2Icon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { etiquetaRol, useCerrarSesion } from '@/features/auth'
 import { useAccionesDeCuenta } from '@/features/perfil'
-import { AdminLayout, EstudianteLayout } from '@/layouts'
+import { PanelAdministradorScreen, PanelComedorScreen, PanelPostulanteScreen } from '@/features/panel'
+import { AdminLayout, ComedorLayout, EstudianteLayout } from '@/layouts'
 
-// * Sigue siendo la ruta hija que evita el conflicto del layout pathless vacío
-// * (ver _authenticated.tsx). Hasta que los CU de cada rol tengan sus
-// * módulos, todos aterrizan acá: el Administrador DUBSS y el Postulante dentro
-// * de su layout, y los otros dos roles con un aviso (todavía no tienen layout).
+// * Sigue siendo la ruta hija que evita el conflicto del layout pathless vacío (ver _authenticated.tsx). Es la
+// * pantalla de inicio del Administrador DUBSS y del Personal del Comedor (resumen con datos reales, features/panel)
+// * y del Postulante (resumen de su convocatoria, postulación y beca); el Directivo aterriza en /dashboard.
 export const Route = createFileRoute('/_authenticated/panel')({
   component: PanelPage,
 })
@@ -21,20 +21,27 @@ function PanelPage() {
   const acciones = useAccionesDeCuenta()
 
   const user = { nombre: `${usuario.nombres} ${usuario.apellidos}`, rol: etiquetaRol(usuario.rol) }
-  const saludo = <p className="text-muted-foreground">Hola, {usuario.nombres}. Tu módulo se irá habilitando pronto.</p>
 
   if (usuario.rol === 'ADMINISTRADOR_DUBSS') {
     return (
-      <AdminLayout title="Panel" user={user} onCerrarSesion={alCerrarSesion} {...acciones}>
-        {saludo}
+      <AdminLayout title="Panel" icono={LayoutDashboardIcon} user={user} onCerrarSesion={alCerrarSesion} {...acciones}>
+        <PanelAdministradorScreen nombres={usuario.nombres} />
       </AdminLayout>
+    )
+  }
+
+  if (usuario.rol === 'PERSONAL_COMEDOR') {
+    return (
+      <ComedorLayout title="Panel" icono={LayoutDashboardIcon} user={user} onCerrarSesion={alCerrarSesion} {...acciones}>
+        <PanelComedorScreen nombres={usuario.nombres} />
+      </ComedorLayout>
     )
   }
 
   if (usuario.rol === 'POSTULANTE') {
     return (
-      <EstudianteLayout title="Panel" user={user} onCerrarSesion={alCerrarSesion} {...acciones}>
-        {saludo}
+      <EstudianteLayout title="Panel" icono={LayoutDashboardIcon} user={user} onCerrarSesion={alCerrarSesion} {...acciones}>
+        <PanelPostulanteScreen nombres={usuario.nombres} />
       </EstudianteLayout>
     )
   }

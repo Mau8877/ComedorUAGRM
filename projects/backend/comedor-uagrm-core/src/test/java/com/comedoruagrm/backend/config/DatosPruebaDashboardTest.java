@@ -69,7 +69,9 @@ class DatosPruebaDashboardTest {
     void limpiar() {
         borrarTodo();
         // La vista guarda lo que vio la ultima vez: se refresca vacia para que otros tests no la vean sucia.
-        jdbc.execute("REFRESH MATERIALIZED VIEW mv_indicadores_convocatoria");
+        for (String vista : RefrescoIndicadoresService.VISTAS) {
+            jdbc.execute("REFRESH MATERIALIZED VIEW " + vista);
+        }
     }
 
     private DatosPruebaDashboard cargador() {
@@ -119,6 +121,16 @@ class DatosPruebaDashboardTest {
 
         assertThat(borradores).isEqualTo(3);
         assertThat(sumaVista("postulaciones_recibidas", DatosPruebaDashboard.PUBLICADA)).isEqualTo(enviadas);
+    }
+
+    @Test
+    void run_cargaBecasAsistenciaYPuntajesParaElAnalisisBi() {
+        cargador().run();
+
+        assertThat(contar("FROM beca")).isPositive();
+        assertThat(contar("FROM asistencia")).isPositive();
+        assertThat(contar("FROM mv_bi_asistencia_dia")).isPositive();
+        assertThat(contar("FROM mv_bi_carrera_convocatoria")).isPositive();
     }
 
     @Test
@@ -172,6 +184,9 @@ class DatosPruebaDashboardTest {
     // Deja la base vacia al terminar: los demas tests de integracion no deben ver estos datos.
     private void borrarTodo() {
         jdbc.update("DELETE FROM publicacion_resultado");
+        jdbc.update("DELETE FROM asistencia");
+        jdbc.update("DELETE FROM movimiento_beca");
+        jdbc.update("DELETE FROM beca");
         jdbc.update("DELETE FROM adjudicacion");
         jdbc.update("DELETE FROM postulacion_historial");
         jdbc.update("DELETE FROM auditoria_expediente");

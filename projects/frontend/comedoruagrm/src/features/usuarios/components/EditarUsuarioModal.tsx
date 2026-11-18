@@ -4,6 +4,7 @@ import { PencilIcon } from 'lucide-react'
 
 import { ModalLayout } from '@/components/ui/modal-layout'
 import { toastSuccess, toastWarning } from '@/components/ui/toast'
+import { validacionFormulario } from '@/utils/validacionFormulario'
 
 import { mapearErrorUsuarios, useEditarUsuario, useRefrescarListas } from '../api'
 import type { ErrorUsuarios } from '../api'
@@ -39,7 +40,7 @@ export function EditarUsuarioModal({ open, onOpenChange, usuario }: EditarUsuari
 
   const form = useForm({
     defaultValues: { nombres: usuario.nombres, apellidos: usuario.apellidos, correo: usuario.correo },
-    validators: { onChange: editarUsuarioPersonalSchema, onBlur: editarUsuarioPersonalSchema },
+    ...validacionFormulario(editarUsuarioPersonalSchema),
     onSubmit: ({ value }) => {
       if (enviando.current) return
       const cambios = soloCambios(usuario, editarUsuarioPersonalSchema.parse(value))
@@ -105,7 +106,7 @@ export function EditarUsuarioModal({ open, onOpenChange, usuario }: EditarUsuari
             {(field) => (
               <CampoUsuario
                 id={field.name}
-                label="Nombres"
+                label="Nombres" required
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={field.handleChange}
@@ -117,7 +118,7 @@ export function EditarUsuarioModal({ open, onOpenChange, usuario }: EditarUsuari
             {(field) => (
               <CampoUsuario
                 id={field.name}
-                label="Apellidos"
+                label="Apellidos" required
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={field.handleChange}
@@ -133,7 +134,7 @@ export function EditarUsuarioModal({ open, onOpenChange, usuario }: EditarUsuari
           {(field) => (
             <CampoUsuario
               id={field.name}
-              label="Correo electrónico"
+              label="Correo electrónico" required
               type="email"
               autoComplete="off"
               value={field.state.value}

@@ -48,7 +48,6 @@ export function DetallePostulacionScreen({ titulo, activeHref, usuarioActual, co
     <EstudianteLayout
       title={titulo}
       activeHref={activeHref}
-      migas={[{ label: 'Mis postulaciones', href: '/mis-postulaciones' }, { label: titulo }]}
       user={{ nombre: `${usuarioActual.nombres} ${usuarioActual.apellidos}`, rol: etiquetaRol(usuarioActual.rol) }}
       onCerrarSesion={() => cerrarSesion.mutate()}
       {...accionesDeCuenta}
@@ -130,7 +129,11 @@ export function DetallePostulacionScreen({ titulo, activeHref, usuarioActual, co
               />
             )}
             {postulacion.motivo && <BloqueMotivo motivo={postulacion.motivo} estado={postulacion.estado} />}
-            {postulacion.finalista && <BloqueFinalista finalista={postulacion.finalista} />}
+            {/* «Eres finalista» es el proceso en curso: una postulación ya devuelta, archivada, rechazada o
+                adjudicada lo dejó atrás (su motivo o su resultado salen en su propio bloque). */}
+            {postulacion.finalista && postulacion.estado === 'calificada' && (
+              <BloqueFinalista finalista={postulacion.finalista} />
+            )}
             {postulacion.resultado && (
               <BloqueResultado
                 resultado={postulacion.resultado}

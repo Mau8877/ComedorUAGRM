@@ -1,3 +1,4 @@
+import { AwardIcon, CalendarCheckIcon, InboxIcon, StarIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -8,9 +9,17 @@ import type { Usuario } from '@/features/auth'
 import { useAccionesDeCuenta } from '@/features/perfil'
 import { DirectivoLayout } from '@/layouts'
 
-import { mapearErrorDashboard, useFiltrosDashboard, useIndicadores } from '../api'
+import { mapearErrorDashboard, useBi, useFiltrosDashboard, useIndicadores } from '../api'
 import {
+  AsistenciaPorDiaSemana,
+  CoberturaCupos,
+  ComparacionConvocatorias,
   DescargarDashboardButton,
+  DescargarExcelButton,
+  EmbudoProceso,
+  HistogramaPuntajes,
+  RankingFacultades,
+  TendenciaGestiones,
   FiltrosDashboard,
   formatearFechaHora,
   formatearNumero,
@@ -31,7 +40,8 @@ export interface DashboardScreenProps {
 
 /**
  * «Dashboard de indicadores» (CU12): el Directivo ve postulaciones recibidas, finalistas, becas adjudicadas y
- * asistencia, con gráficos por mes, filtra por gestión y convocatoria y descarga el PDF.
+ * asistencia, con gráficos por mes y un análisis BI (embudo, facultades, convocatorias, puntajes, cobertura,
+ * asistencia y tendencia); filtra por gestión y convocatoria y descarga el PDF o el Excel.
  *
  * * La consulta usa la selección APLICADA (`aplicada`); los selectores editan otra copia y solo cambian la
  * * consulta al pulsar «Aplicar». Sin selección aplicada el backend muestra la gestión vigente.
@@ -46,6 +56,7 @@ export function DashboardScreen({ titulo, activeHref, usuarioActual }: Dashboard
 
   const filtros = useFiltrosDashboard()
   const indicadores = useIndicadores(aplicada)
+  const bi = useBi(aplicada)
 
   const gestiones = filtros.data?.gestiones ?? []
   const gestionVigente = gestiones.find((g) => g.vigente)?.codigo
@@ -71,11 +82,23 @@ export function DashboardScreen({ titulo, activeHref, usuarioActual }: Dashboard
   }
   useEffect(() => {
     if (fallida) {
-      toastWarning('Selección no disponible', 'La gestión o la convocatoria elegida ya no existe. Se muestra la vigente.')
+      toastWarning(
+        'Selección no disponible',
+        'La gestión o la convocatoria elegida ya no existe. Se muestra la vigente.'
+      )
     }
   }, [fallida])
 
+  // Elegir una convocatoria en la comparación filtra todo el dashboard por ella.
+  const elegirConvocatoria = (codigo: string) => {
+    const gestion = aplicada.gestion ?? gestionVigente
+    setGestionEditada(gestion)
+    setConvocatoriaEditada(codigo)
+    setAplicada({ gestion, convocatoria: codigo })
+  }
+
   const datos = indicadores.data
+  const analisis = bi.data
   const cargando = (filtros.isPending || indicadores.isPending) && !datos
   const errorGeneral = indicadores.isError && !datos && !seleccionInexistente ? error : null
 
@@ -89,7 +112,10 @@ export function DashboardScreen({ titulo, activeHref, usuarioActual }: Dashboard
     <DirectivoLayout
       title={titulo}
       activeHref={activeHref}
-      user={{ nombre: `${usuarioActual.nombres} ${usuarioActual.apellidos}`, rol: etiquetaRol(usuarioActual.rol) }}
+      user={{
+        nombre: `${usuarioActual.nombres} ${usuarioActual.apellidos}`,
+        rol: etiquetaRol(usuarioActual.rol),
+      }}
       onCerrarSesion={() => cerrarSesion.mutate()}
       {...accionesDeCuenta}
     >
@@ -103,11 +129,18 @@ export function DashboardScreen({ titulo, activeHref, usuarioActual }: Dashboard
               </p>
             )}
           </div>
-          <DescargarDashboardButton
-            seleccion={aplicada}
-            deshabilitado={!datos || datos.sinDatos || indicadores.isPlaceholderData}
-            onSeleccionInexistente={volverALaVigente}
-          />
+          <div className="flex flex-wrap gap-2">
+            <DescargarExcelButton
+              seleccion={aplicada}
+              deshabilitado={!analisis || analisis.sinDatos || bi.isPlaceholderData}
+              onSeleccionInexistente={volverALaVigente}
+            />
+            <DescargarDashboardButton
+              seleccion={aplicada}
+              deshabilitado={!datos || datos.sinDatos || indicadores.isPlaceholderData}
+              onSeleccionInexistente={volverALaVigente}
+            />
+          </div>
         </div>
 
         <FiltrosDashboard
@@ -119,7 +152,9 @@ export function DashboardScreen({ titulo, activeHref, usuarioActual }: Dashboard
             setConvocatoriaEditada(undefined)
           }}
           onConvocatoriaChange={setConvocatoriaEditada}
-          onAplicar={() => setAplicada({ gestion: gestionDelSelector, convocatoria: convocatoriaEditada })}
+          onAplicar={() =>
+            setAplicada({ gestion: gestionDelSelector, convocatoria: convocatoriaEditada })
+          }
           deshabilitado={filtros.isPending || gestiones.length === 0}
         />
 
@@ -152,7 +187,10 @@ export function DashboardScreen({ titulo, activeHref, usuarioActual }: Dashboard
         {datos && (
           <>
             {datos.sinDatos && (
-              <p role="status" className="rounded-md border bg-muted/40 p-3 text-sm text-muted-foreground">
+              <p
+                role="status"
+                className="rounded-md border bg-muted/40 p-3 text-sm text-muted-foreground"
+              >
                 {datos.gestion
                   ? 'No hay datos para la selección elegida todavía.'
                   : 'Todavía no hay gestiones académicas registradas.'}
@@ -161,15 +199,32 @@ export function DashboardScreen({ titulo, activeHref, usuarioActual }: Dashboard
 
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <TarjetaIndicador
+                tono="primary"
+                icono={InboxIcon}
                 titulo="Postulaciones recibidas"
                 valor={formatearNumero(datos.totales.postulacionesRecibidas)}
               />
-              <TarjetaIndicador titulo="Finalistas" valor={formatearNumero(datos.totales.finalistas)} />
-              <TarjetaIndicador titulo="Becas adjudicadas" valor={formatearNumero(datos.totales.becasAdjudicadas)} />
-              {/* TODO CU-10: mostrar la asistencia real cuando el backend la entregue */}
               <TarjetaIndicador
+                tono="warning"
+                icono={StarIcon}
+                titulo="Finalistas"
+                valor={formatearNumero(datos.totales.finalistas)}
+              />
+              <TarjetaIndicador
+                tono="accent"
+                icono={AwardIcon}
+                titulo="Becas adjudicadas"
+                valor={formatearNumero(datos.totales.becasAdjudicadas)}
+              />
+              <TarjetaIndicador
+                tono="success"
+                icono={CalendarCheckIcon}
                 titulo="Asistencia promedio"
-                valor={datos.totales.asistenciaPromedio === null ? 'Sin datos' : formatearPorcentaje(datos.totales.asistenciaPromedio)}
+                valor={
+                  datos.totales.asistenciaPromedio === null
+                    ? 'Sin datos'
+                    : formatearPorcentaje(datos.totales.asistenciaPromedio)
+                }
               />
             </div>
 
@@ -177,6 +232,41 @@ export function DashboardScreen({ titulo, activeHref, usuarioActual }: Dashboard
               <GraficoPostulacionesPorMes datos={datos.porMes} />
               <GraficoAsistenciaPorMes datos={datos.porMes} />
             </div>
+
+            {bi.isError && !analisis && (
+              <div
+                role="alert"
+                className="flex items-center justify-between gap-2 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive"
+              >
+                <span>No se pudo cargar el análisis BI.</span>
+                <Button size="sm" variant="outline" onClick={() => void bi.refetch()}>
+                  Reintentar
+                </Button>
+              </div>
+            )}
+
+            {analisis && !analisis.sinDatos && (
+              <>
+                <h3 className="border-l-4 border-l-accent pl-3 font-heading text-lg">Análisis BI</h3>
+                <div className="grid gap-4 lg:grid-cols-2">
+                  <EmbudoProceso embudo={analisis.embudo} />
+                  <RankingFacultades facultades={analisis.facultades} />
+                </div>
+                <ComparacionConvocatorias
+                  convocatorias={analisis.convocatorias}
+                  onElegir={elegirConvocatoria}
+                />
+                <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
+                  <HistogramaPuntajes
+                    tramos={analisis.puntaje}
+                    promedio={analisis.puntajePromedio}
+                  />
+                  <CoberturaCupos cobertura={analisis.cobertura} />
+                  <AsistenciaPorDiaSemana asistencia={analisis.asistencia} />
+                </div>
+                <TendenciaGestiones tendencia={analisis.tendencia} />
+              </>
+            )}
           </>
         )}
       </div>

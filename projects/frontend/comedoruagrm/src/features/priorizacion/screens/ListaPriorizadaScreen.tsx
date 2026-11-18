@@ -21,6 +21,7 @@ import { useAccionesDeCuenta } from '@/features/perfil'
 import { AdminLayout } from '@/layouts'
 import { useCarreras } from '@/shared/api'
 import { debounce } from '@/utils/debounce'
+import { useConvocatoriaElegida } from '@/store'
 
 import {
   mapearErrorPriorizacion,
@@ -51,7 +52,7 @@ export function ListaPriorizadaScreen({ titulo, activeHref, usuarioActual }: Lis
   const cerrarSesion = useCerrarSesion()
   const accionesDeCuenta = useAccionesDeCuenta()
 
-  const [elegida, setElegida] = useState<string | undefined>(undefined)
+  const [elegida, setElegida] = useConvocatoriaElegida()
   const [carreraId, setCarreraId] = useState<string | undefined>(undefined)
   const [busqueda, setBusqueda] = useState('')
   const [busquedaAplicada, setBusquedaAplicada] = useState('')

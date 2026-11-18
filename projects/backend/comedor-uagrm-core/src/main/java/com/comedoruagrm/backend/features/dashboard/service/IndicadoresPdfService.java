@@ -1,8 +1,5 @@
 package com.comedoruagrm.backend.features.dashboard.service;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.text.Normalizer;
 import java.time.Clock;
 import java.time.Instant;
@@ -21,7 +18,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.comedoruagrm.backend.common.report.GraficosPdf;
+import com.comedoruagrm.backend.common.report.GraficosPdf.Barra;
+import com.comedoruagrm.backend.common.report.ReportePdf;
 import com.comedoruagrm.backend.common.exception.ValidationException;
+import com.comedoruagrm.backend.features.dashboard.dto.BiResponse;
 import com.comedoruagrm.backend.features.dashboard.dto.IndicadoresResponse;
 import com.comedoruagrm.backend.features.dashboard.dto.IndicadoresResponse.IndicadorMensual;
 import com.comedoruagrm.backend.features.dashboard.exception.DashboardErrorCodes;
@@ -31,14 +32,9 @@ import com.comedoruagrm.backend.features.usuarios.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRParameter;
-import net.sf.jasperreports.engine.JasperCompileManager;
-import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.data.JRMapCollectionDataSource;
-import net.sf.jasperreports.export.SimpleExporterInput;
-import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
-import net.sf.jasperreports.pdf.JRPdfExporter;
 
 /**
  * Descarga del dashboard de indicadores en PDF con JasperReports (CU12).
@@ -62,10 +58,10 @@ public class IndicadoresPdfService {
     private static final String SIN_DATOS = "Sin datos";
 
     private final IndicadoresService indicadores;
+    private final BiService bi;
     private final UsuarioService usuarioService;
     private final Clock reloj;
 
-    private volatile JasperReport plantillaCompilada;
 
     /** El PDF ya generado y el nombre con el que se descarga. */
     public record PdfGenerado(String nombreArchivo, byte[] contenido) {
@@ -76,16 +72,17 @@ public class IndicadoresPdfService {
     public PdfGenerado generar(UUID actorCodigo, UUID gestion, UUID convocatoria) {
         Usuario actor = usuarioService.obtenerPorCodigo(actorCodigo);
         IndicadoresResponse datos = indicadores.obtener(gestion, convocatoria);
+        BiResponse analisis = bi.obtener(gestion, convocatoria);
         if (datos.sinDatos()) {
             throw new ValidationException(DashboardErrorCodes.ERR_DAS_02,
                     "No hay datos que exportar para esa selección.");
         }
         Instant ahora = reloj.instant();
-        byte[] pdf = renderizar(datos, actor, ahora);
+        byte[] pdf = renderizar(datos, analisis, actor, ahora);
         return new PdfGenerado(nombreArchivo(datos.gestion().etiqueta(), ahora), pdf);
     }
 
-    private byte[] renderizar(IndicadoresResponse datos, Usuario actor, Instant ahora) {
+    private byte[] renderizar(IndicadoresResponse datos, BiResponse analisis, Usuario actor, Instant ahora) {
         try {
             Map<String, Object> parametros = new HashMap<>();
             parametros.put(JRParameter.REPORT_LOCALE, Locale.forLanguageTag("es-BO"));
@@ -98,21 +95,72 @@ public class IndicadoresPdfService {
             parametros.put("TOTAL_FINALISTAS", String.valueOf(datos.totales().finalistas()));
             parametros.put("TOTAL_ADJUDICADAS", String.valueOf(datos.totales().becasAdjudicadas()));
             parametros.put("TOTAL_ASISTENCIA", texto(datos.totales().asistenciaPromedio()));
+            parametros.put("GRAFICO_EMBUDO", graficoEmbudo(analisis));
+            parametros.put("GRAFICO_FACULTADES", graficoFacultades(analisis));
+            parametros.put("GRAFICO_CONVOCATORIAS", graficoConvocatorias(analisis));
             parametros.put("GENERADO_EN", FECHA_HORA.format(ahora.atZone(ZONA)));
             parametros.put("GENERADO_POR", actor.getNombres() + " " + actor.getApellidos());
 
-            JasperPrint impreso = JasperFillManager.fillReport(plantilla(), parametros,
+            JasperPrint impreso = ReportePdf.llenar(plantilla(), parametros,
                     new JRMapCollectionDataSource(filas(datos.porMes())));
-            ByteArrayOutputStream salida = new ByteArrayOutputStream();
-            JRPdfExporter exportador = new JRPdfExporter();
-            exportador.setExporterInput(new SimpleExporterInput(impreso));
-            exportador.setExporterOutput(new SimpleOutputStreamExporterOutput(salida));
-            exportador.exportReport();
-            return salida.toByteArray();
+            return ReportePdf.exportar(impreso);
         } catch (JRException e) {
             LOG.error("No se pudo generar el PDF del dashboard de indicadores", e);
             throw new IllegalStateException("No se pudo generar el PDF del dashboard", e);
         }
+    }
+
+    static final int ANCHO_GRAFICO = 555;
+    static final int FILA_GRAFICO = 18;
+    static final int FILAS_EMBUDO = 5;
+    static final int FILAS_FACULTADES = 14;
+    static final int FILAS_CONVOCATORIAS = 10;
+
+    /** Las cinco etapas del embudo; la ultima (becas vigentes) va resaltada. */
+    private static java.awt.Image graficoEmbudo(BiResponse a) {
+        BiResponse.Embudo e = a.embudo();
+        return GraficosPdf.barrasHorizontales(List.of(
+                new Barra("Postulaciones", e.postulaciones(), String.valueOf(e.postulaciones())),
+                new Barra("Precalificadas", e.precalificadas(), String.valueOf(e.precalificadas())),
+                new Barra("Finalistas", e.finalistas(), String.valueOf(e.finalistas())),
+                new Barra("Adjudicadas", e.adjudicadas(), String.valueOf(e.adjudicadas())),
+                new Barra("Becas vigentes", e.becasVigentes(), String.valueOf(e.becasVigentes()))),
+                ANCHO_GRAFICO, FILA_GRAFICO, FILAS_EMBUDO, 120, 60, true);
+    }
+
+    /** Las facultades que mas postulan (hasta {@link #FILAS_FACULTADES}), con postulaciones, porcentaje y adjudicadas. */
+    private static java.awt.Image graficoFacultades(BiResponse a) {
+        List<Barra> barras = new ArrayList<>();
+        int puesto = 1;
+        for (BiResponse.Facultad f : a.facultades()) {
+            if (puesto > FILAS_FACULTADES) {
+                break;
+            }
+            barras.add(new Barra(puesto++ + ". " + f.nombre(), f.postulaciones(),
+                    f.postulaciones() + " (" + porcentaje(f.porcentajePostulaciones()) + ")  ·  "
+                            + f.adjudicadas() + " adj."));
+        }
+        return GraficosPdf.barrasHorizontales(barras, ANCHO_GRAFICO, FILA_GRAFICO, FILAS_FACULTADES, 250, 105, false);
+    }
+
+    /** Postulaciones por convocatoria con su variacion y su tasa de adjudicacion. */
+    private static java.awt.Image graficoConvocatorias(BiResponse a) {
+        List<Barra> barras = new ArrayList<>();
+        for (BiResponse.ConvocatoriaComparada c : a.convocatorias()) {
+            if (barras.size() >= FILAS_CONVOCATORIAS) {
+                break;
+            }
+            String variacion = c.variacionPostulaciones() == null ? ""
+                    : (c.variacionPostulaciones() > 0 ? "+" : "") + porcentaje(c.variacionPostulaciones()) + "  ·  ";
+            barras.add(new Barra(c.nombre(), c.postulaciones(), c.postulaciones() + "  ·  " + variacion
+                    + c.adjudicadas() + " adj. (" + porcentaje(c.tasaAdjudicacion()) + ")"));
+        }
+        return GraficosPdf.barrasHorizontales(barras, ANCHO_GRAFICO, FILA_GRAFICO, FILAS_CONVOCATORIAS, 200, 150,
+                false);
+    }
+
+    private static String porcentaje(Double valor) {
+        return valor == null ? "s/d" : String.format(Locale.forLanguageTag("es-BO"), "%.1f %%", valor);
     }
 
     private static List<Map<String, ?>> filas(List<IndicadorMensual> porMes) {
@@ -129,26 +177,14 @@ public class IndicadoresPdfService {
         return filas;
     }
 
-    // TODO CU-10: mientras no exista el registro de asistencia, el valor es null y se muestra «Sin datos».
+    // * Sin asistencia que medir (CU10) el valor es null y se muestra «Sin datos».
     private static String texto(Double asistencia) {
         return asistencia == null ? SIN_DATOS : String.format(Locale.forLanguageTag("es-BO"), "%.1f %%", asistencia);
     }
 
     // La plantilla se compila una vez y se reutiliza.
     private JasperReport plantilla() throws JRException {
-        JasperReport compilada = plantillaCompilada;
-        if (compilada == null) {
-            try (InputStream fuente = getClass().getResourceAsStream(PLANTILLA)) {
-                if (fuente == null) {
-                    throw new JRException("No se encontró la plantilla " + PLANTILLA);
-                }
-                compilada = JasperCompileManager.compileReport(fuente);
-            } catch (IOException e) {
-                throw new JRException(e);
-            }
-            plantillaCompilada = compilada;
-        }
-        return compilada;
+        return ReportePdf.compilar(PLANTILLA);
     }
 
     /** `indicadores-{etiqueta-de-gestion-sin-espacios}-{yyyyMMdd}.pdf`. */

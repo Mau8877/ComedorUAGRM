@@ -55,6 +55,22 @@ tarde o temprano el store y el servidor quedan desincronizados.
   contenido en un solo componente padre no necesita Zustand, un `useState`
   ahí alcanza.
 
+## Estado de UI compartido entre pantallas: la convocatoria elegida
+
+Cuando varias pantallas trabajan sobre «lo mismo que se está mirando», lo que
+se elige en una tiene que venir ya elegido en las otras. El caso real: la
+convocatoria de lista priorizada, adjudicación, finalistas y publicar
+resultados (`src/store/useConvocatoriaElegidaStore.ts`). Cada pantalla usa
+`const [elegida, setElegida] = useConvocatoriaElegida()` (misma firma que
+`useState`) en vez de su propio `useState`, y sigue validando que el código
+exista en su lista. Es UI (qué se mira), no datos del servidor, por eso va en
+Zustand, sin `persist`: dura lo que la pestaña. `setupTests.ts` lo reinicia
+antes de cada test.
+
+Sin elección previa cada pantalla abre una por defecto: la más reciente, salvo
+adjudicación, que abre la más reciente **cerrada** (en una abierta o en
+borrador no se puede seleccionar ni decidir).
+
 ## Estructura de un store
 
 Store plano mientras el estado sea simple:

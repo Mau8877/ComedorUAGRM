@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { UserIcon } from 'lucide-react'
 
 import { Skeleton } from '@/components/ui/skeleton'
 import { AlertaError, etiquetaRol, mapearError, useCerrarSesion, type Usuario } from '@/features/auth'
@@ -22,6 +23,7 @@ export function PerfilScreen({ usuario }: { usuario: Usuario }) {
 
   const layoutProps = {
     title: 'Mi perfil',
+    icono: UserIcon,
     user: { nombre: `${usuario.nombres} ${usuario.apellidos}`, rol: etiquetaRol(usuario.rol) },
     onCerrarSesion: () => cerrarSesion.mutate(),
     ...acciones,

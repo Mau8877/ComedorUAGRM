@@ -30,11 +30,11 @@ Es incluido por el [CU-07: Auditar expediente finalista](CU07%20-%20Auditar%20ex
 
 1. El Administrador DUBSS entra a «Finalistas» en el menú (o llega desde la auditoría de expedientes, CU-07).
 2. El sistema muestra las convocatorias y deja seleccionada la más reciente (A9).
-3. El sistema muestra los finalistas de la convocatoria con su posición, nombre, puntaje, estado de la notificación («Sin enviar», «Enviada» o «Fallida») y estado de la documentación física («Pendiente» o «Recibida»); permite buscar por nombre o CI (A10).
+3. El sistema muestra los finalistas de la convocatoria con su posición, nombre, puntaje, estado de la notificación («Sin enviar», «Enviando…», «Enviada» o «Fallida») y estado de la documentación física («Pendiente» o «Recibida»); permite buscar por nombre o CI (A10).
 4. El Administrador selecciona los finalistas a notificar (todos o un subconjunto) y define el **plazo de entrega**, el **lugar y horario** y los **documentos físicos** que deben presentar.
 5. El Administrador confirma el envío (A6).
 6. El sistema guarda el aviso en la bandeja de cada finalista seleccionado, le envía push y correo y marca al finalista como notificado (A1, A2).
-7. El sistema anota el envío en la bitácora (destinatarios, fecha y hora) y muestra el resultado: cuántos avisos se enviaron y cuántos fallaron.
+7. El sistema anota el envío en la bitácora (destinatarios, fecha y hora) y muestra el resultado: cuántos avisos quedaron registrados en la bandeja y cuántos no se pudieron registrar (el push y el correo salen después; ver Reglas de negocio).
 
 ### Flujo B: registrar la entrega de documentación física
 
@@ -79,10 +79,11 @@ Es incluido por el [CU-07: Auditar expediente finalista](CU07%20-%20Auditar%20ex
 - **Lo que se guarda del finalista** (diseño lógico): `notificado_en`, `plazo_entrega` y `documentacion_recibida_en` de la tabla `finalista`. El **plazo es una fecha** y debe ser posterior a hoy.
 - **Lugar, horario y lista de documentos** no tienen columna en el diseño lógico: viajan en el texto del aviso y en el detalle de la bitácora. *(Decisión del equipo: la documentación de grado los deja «por definir con la DUBSS» y no los modela; se ingresan como texto en cada envío.)*
 - **Observaciones de la entrega** tampoco tienen columna: se guardan en el detalle de la bitácora. *(Decisión del equipo.)*
-- **Estado de la notificación del finalista:** «Sin enviar» (nunca se notificó), «Enviada» (el último aviso se entregó por al menos una vía) o «Fallida» (el último aviso no se pudo entregar). Se deriva del último aviso ligado a esa postulación. *(Decisión del equipo.)*
+- **Estado de la notificación del finalista:** «Sin enviar» (nunca se notificó), «Enviando…» (el último aviso se guardó pero el push y el correo todavía se están despachando, con reintentos; dura unos segundos), «Enviada» (el último aviso se entregó por al menos una vía) o «Fallida» (pasada esa ventana, el último aviso no se pudo entregar). Se deriva del último aviso ligado a esa postulación. *(Decisión del equipo.)*
 - **Estado de la entrega física:** «Recibida» si `documentacion_recibida_en` tiene valor; «Pendiente» si no. Corregir la fecha no cambia el estado.
 - **Destinatarios del comunicado:** el diseño lógico define `TODOS`, `FINALISTAS` y `ADJUDICADOS`. Hoy se aceptan **`TODOS` y `FINALISTAS`**; `ADJUDICADOS` se habilita cuando existan las adjudicaciones (CU-05/CU-22). `TODOS` son las cuentas activas de Postulante; si el comunicado está ligado a una convocatoria, solo quienes tienen una postulación enviada en ella. `FINALISTAS` exige convocatoria. *(Decisión del equipo.)*
 - **Comunicados: push y bandeja, sin correo** (para no mandar correo masivo a miles de postulantes); el aviso al finalista sí va además por correo. *(Decisión del equipo; RF-16 solo exige push.)*
+- **El resultado del envío cuenta avisos registrados, no entregados.** Cuando el Administrador confirma, el sistema guarda el aviso de cada finalista en su bandeja y responde; el push y el correo salen en segundo plano (con reintentos, unos segundos) y su resultado se conoce después. Por eso el diálogo informa a cuántos finalistas se les está enviando el aviso (y a cuántos no se pudo registrar) y remite a la columna «Notificación», donde cada finalista pasa por «Enviando…» y queda «Enviada» o «Fallida» cuando termina la entrega (la ventana es `app.notificaciones.ventana-envio-segundos`, 30 s por defecto, y debe superar la suma de las esperas de los reintentos). *(Decisión del equipo: esperar la entrega bloquearía la pantalla durante los reintentos.)*
 - **El envío masivo** (comunicado a todos) guarda los avisos y los despacha por lotes sin bloquear la respuesta al Administrador; el resultado del despacho no se espera.
 - **Bitácora:** cada notificación a finalistas (cantidad y códigos de los destinatarios, sin nombres ni CI), cada registro o corrección de entrega (con el valor anterior) y cada comunicado publicado quedan anotados. Nunca contraseñas, tokens de Firebase ni correos en el detalle.
 - **Un comunicado publicado no se edita ni se borra** desde este CU (es lo que ya recibieron los destinatarios). *(Decisión del equipo.)*

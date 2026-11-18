@@ -35,6 +35,7 @@
 		<!-- JasperReports (PDF de la lista priorizada, CU06). Desde la 7.x el exportador a PDF
 		     (jasperreports-pdf) y el compilador (jasperreports-jdt) son artefactos aparte. -->
 		<jasperreports.version>7.1.0</jasperreports.version>
+		<poi.version>5.4.1</poi.version>
 		<!-- Cliente de MinIO (archivos del expediente, CU07). Se fija en la ultima 8.x que publica la
 		     documentacion oficial de MinIO: la 9.0 refactoriza todo el cliente y no se ha probado aca. -->
 		<minio.version>8.5.17</minio.version>
@@ -102,6 +103,12 @@
 			<groupId>com.bucket4j</groupId>
 			<artifactId>bucket4j_jdk11-core</artifactId>
 			<version>8.14.0</version>
+		</dependency>
+		<!-- Excel del dashboard BI (CU12): libros .xlsx con Apache POI. -->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>${poi.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.jasperreports</groupId>

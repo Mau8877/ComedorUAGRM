@@ -51,9 +51,7 @@ paquete adapter intermedio):
 ```tsx
 const form = useForm({
   defaultValues: { nombre: '', email: '' },
-  validators: {
-    onChange: crearUsuarioSchema,
-  },
+  ...validacionFormulario(crearUsuarioSchema),
   onSubmit: async ({ value }) => {
     // value ya viene tipado como CrearUsuarioRequest
   },
@@ -68,10 +66,30 @@ const form = useForm({
 > es una integración que evoluciona rápido entre versiones de ambas
 > librerías.
 
-Se prefiere `validators.onChange` (valida mientras el usuario escribe) sobre
-solo validar en `onSubmit`, para que el error aparezca inline apenas el
-campo es inválido, no recién al intentar enviar -- pero ver la regla
-siguiente antes de renderizar ese error.
+**Siempre `...validacionFormulario(schema)`** (`src/utils/validacionFormulario.ts`),
+nunca `validators: { onChange: schema, onBlur: schema }`. Esa forma guarda el
+error de cada evento por separado: el que deja el blur (o un intento de envío)
+sobre un campo vacío **no se borra al escribir**, porque al escribir solo se
+recalcula el de `onChange`, y se ve «El campo es obligatorio» con el campo ya
+lleno. `validacionFormulario` corre el schema en cada cambio, blur y envío y
+escribe siempre en un único lugar (`errorMap.onDynamic`), así el resultado más
+reciente reemplaza al anterior. Para renderizar ese error ver la regla
+siguiente.
+
+## Campos obligatorios llevan un asterisco rojo
+
+Todo campo que el schema exige (`min(1)`, enum sin valor por defecto, etc.)
+lleva un `*` rojo después de la etiqueta. Es un pseudo-elemento de CSS, no
+texto, así que no cambia el nombre accesible de la etiqueta ni los tests con
+`getByLabelText`:
+
+- `<Label htmlFor="x" required>` (`components/ui/label`) o `required` en
+  `CampoFormulario` / `CampoUsuario`.
+- Para una etiqueta que no es un `<label>` (un `<span>` de un `Select`),
+  `className={cn('text-sm font-medium', MARCA_OBLIGATORIO)}`.
+- Si la obligatoriedad depende de otro campo (observaciones de una auditoría
+  que no es «Validado»), `required` es una condición, no una constante.
+- Los campos opcionales no llevan marca; los de solo lectura tampoco.
 
 ## Un campo solo muestra su error si el usuario ya lo tocó
 

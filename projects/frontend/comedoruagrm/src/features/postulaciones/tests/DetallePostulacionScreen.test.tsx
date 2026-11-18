@@ -242,6 +242,18 @@ describe('DetallePostulacionScreen', () => {
       expect(bloque).toHaveTextContent('La DUBSS aún no los indicó')
     })
 
+    it.each(['no_adjudicada', 'archivada', 'devuelta', 'adjudicada'] as const)(
+      'un finalista con la postulación %s ya no ve «Eres finalista» (su motivo o resultado salen aparte)',
+      async (estado) => {
+        const finalista = { plazoEntrega: '2026-11-20', documentacionRecibida: false, documentosFisicos: 'CI' }
+        responder(detalle({ estado, finalista }))
+        montar()
+        await screen.findByRole('list', { name: 'Línea de tiempo' })
+
+        expect(screen.queryByRole('region', { name: 'Eres finalista' })).not.toBeInTheDocument()
+      },
+    )
+
     it('adjudicada: muestra el resultado y «Ver resultados de la convocatoria» lleva a /resultados', async () => {
       responder(detalle({ estado: 'adjudicada', resultado: 'ADJUDICADA' }))
       const { user } = montar()

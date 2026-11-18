@@ -1,8 +1,6 @@
 package com.comedoruagrm.backend.features.postulaciones.service;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.comedoruagrm.backend.common.auditoria.Auditar;
 import com.comedoruagrm.backend.common.auditoria.ResultadoAuditado;
+import com.comedoruagrm.backend.common.report.ReportePdf;
 import com.comedoruagrm.backend.common.exception.NotFoundException;
 import com.comedoruagrm.backend.common.exception.ValidationException;
 import com.comedoruagrm.backend.features.bitacora.constant.BitacoraAcciones;
@@ -38,14 +37,9 @@ import com.comedoruagrm.backend.features.usuarios.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRParameter;
-import net.sf.jasperreports.engine.JasperCompileManager;
-import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.fill.JRFileVirtualizer;
-import net.sf.jasperreports.export.SimpleExporterInput;
-import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
-import net.sf.jasperreports.pdf.JRPdfExporter;
 
 /**
  * Exporta la lista priorizada a PDF con JasperReports (CU06, paso 7).
@@ -74,7 +68,6 @@ public class ListaPriorizadaPdfService {
     private final ListaPriorizadaRepository repository;
     private final UsuarioService usuarioService;
 
-    private volatile JasperReport plantillaCompilada;
 
     /** El PDF ya generado y el nombre con el que se descarga. */
     public record PdfGenerado(String nombreArchivo, byte[] contenido) {
@@ -134,14 +127,9 @@ public class ListaPriorizadaPdfService {
             ListaPriorizadaDataSource datos = new ListaPriorizadaDataSource(
                     desplazamiento -> repository.buscar(request.convocatoriaId(), request.carreraId(), busqueda,
                             TRAMO, desplazamiento), ZONA);
-            JasperPrint impreso = JasperFillManager.fillReport(plantilla(), parametros, datos);
+            JasperPrint impreso = ReportePdf.llenar(plantilla(), parametros, datos);
 
-            ByteArrayOutputStream salida = new ByteArrayOutputStream();
-            JRPdfExporter exportador = new JRPdfExporter();
-            exportador.setExporterInput(new SimpleExporterInput(impreso));
-            exportador.setExporterOutput(new SimpleOutputStreamExporterOutput(salida));
-            exportador.exportReport();
-            return salida.toByteArray();
+            return ReportePdf.exportar(impreso);
         } catch (JRException e) {
             LOG.error("No se pudo generar el PDF de la lista priorizada: convocatoria={}",
                     request.convocatoriaId(), e);
@@ -158,19 +146,7 @@ public class ListaPriorizadaPdfService {
 
     // La plantilla se compila una vez y se reutiliza.
     private JasperReport plantilla() throws JRException {
-        JasperReport compilada = plantillaCompilada;
-        if (compilada == null) {
-            try (InputStream fuente = getClass().getResourceAsStream(PLANTILLA)) {
-                if (fuente == null) {
-                    throw new JRException("No se encontró la plantilla " + PLANTILLA);
-                }
-                compilada = JasperCompileManager.compileReport(fuente);
-            } catch (IOException e) {
-                throw new JRException(e);
-            }
-            plantillaCompilada = compilada;
-        }
-        return compilada;
+        return ReportePdf.compilar(PLANTILLA);
     }
 
     private void borrar(Path directorio) {

@@ -4,5 +4,7 @@ import type { SeleccionDashboard } from '../types'
 export const dashboardKeys = {
   all: ['dashboard'] as const,
   filtros: () => [...dashboardKeys.all, 'filtros'] as const,
-  indicadores: (params: SeleccionDashboard) => [...dashboardKeys.all, 'indicadores', params] as const,
+  indicadores: (params: SeleccionDashboard) =>
+    [...dashboardKeys.all, 'indicadores', params] as const,
+  bi: (params: SeleccionDashboard) => [...dashboardKeys.all, 'bi', params] as const,
 }

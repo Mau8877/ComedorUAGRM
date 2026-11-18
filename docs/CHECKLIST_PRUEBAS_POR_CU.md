@@ -15,25 +15,25 @@ Llena la columna «Resultado» al terminar cada CU (`OK` / `Falla` / `Parcial`).
 | CU01 | Registrarse y autenticarse | Web + móvil | Hecho | 16 / 9 / 10 | OK | |
 | CU15 | Recuperar contraseña y gestionar perfil | Web + móvil | Hecho | 14 / 7 / 6 | OK | |
 | CU14 | Gestionar usuarios y roles | Web | Hecho | 13 / 7 / – | OK | |
-| CU-EXTRA-01 | Notificaciones push (bandeja + push + correo) | Backend + móvil + bandeja web | Hecho | 12 / – / 5 | | |
-| CU06 | Visualizar lista priorizada | Web | Hecho | 10 / 5 / – | | |
-| CU21 | Notificar finalistas y publicar comunicados | Web | Hecho | 12 / 7 / – | | |
-| CU07 | Auditar expediente finalista | Web | Hecho | 12 / 5 / – | | |
-| CU19 | Devolver postulación para corrección | Web | Hecho | 9 / 4 / – | | |
-| CU20 | Archivar o rechazar postulación | Web | Hecho | 8 / 4 / – | | |
-| CU05 | Auditar y adjudicar becas | Web | Hecho | 11 / 7 / – | | |
-| CU22 | Publicar resultados de adjudicación | Web + móvil (consulta) | Hecho | 11 / 5 / – | | |
-| CU08 | Generar acta de adjudicación | Web | Hecho | 10 / 4 / – | | |
-| CU04 | Consultar estado de postulación | Web + móvil | Hecho | 7 / 4 / 4 | | |
-| CU12 | Dashboard de indicadores BI | Web | Hecho | 9 / 4 / – | | |
+| CU-EXTRA-01 | Notificaciones push (bandeja + push + correo) | Backend + móvil + bandeja web | Hecho | 12 / – / 5 | OK | Probado con Firebase real (push al Android) |
+| CU06 | Visualizar lista priorizada | Web | Hecho | 10 / 5 / – | OK | |
+| CU21 | Notificar finalistas y publicar comunicados | Web | Hecho | 12 / 7 / – | OK | Estado «Enviando…» añadido; resultado del envío cuenta avisos registrados |
+| CU07 | Auditar expediente finalista | Web | Hecho | 12 / 5 / – | OK | Los 10 fallos previos del frontend ya no ocurren (167 pruebas en verde) |
+| CU19 | Devolver postulación para corrección | Web | Hecho | 9 / 4 / – | OK | «Corregir y reenviar» oculto hasta que exista el CU02 |
+| CU20 | Archivar o rechazar postulación | Web | Hecho | 8 / 4 / – | OK | Doble clic cubierto por prueba de integración (dos peticiones a la vez) |
+| CU05 | Auditar y adjudicar becas | Web | Hecho | 11 / 7 / – | OK | Probado a mano: panel, adjudicar, cupos agotados y no adjudicar. Seleccionar finalistas, ERR_ADJ_02/03, concurrencia y doble clic: cubiertos por las pruebas de integración |
+| CU22 | Publicar resultados de adjudicación | Web + móvil (consulta) | Hecho | 11 / 5 / – | OK | «Fallo de envío» y «sin adjudicados» cubiertos por pruebas de integración; 2026-II quedó publicada |
+| CU08 | Generar acta de adjudicación | Web | Hecho | 10 / 4 / – | OK | Acta 001/2026 de «Publicada» generada. ERR_ACT_04 y numeración concurrente cubiertos por pruebas de integración. Diseño del PDF por mejorar |
+| CU04 | Consultar estado de postulación | Web + móvil | Hecho | 7 / 4 / 4 | OK | «Corregir y reenviar» oculto hasta que exista el CU02; «Eres finalista» solo con la postulación calificada |
+| CU12 | Dashboard de indicadores BI | Web | Hecho | 13 / 7 / – | | |
 
 Orden de prueba recomendado (cada uno prepara datos o confianza para el siguiente): **CU01 → CU15 → CU14 → CU-EXTRA-01 → CU06 → CU21 → CU07 → CU19 → CU20 → CU05 → CU22 → CU08 → CU04 → CU12**.
 
 ### Notas conocidas (no son fallos nuevos)
 
 - `SecurityConfigTest` falla si no hay **Redis local** levantado (es ajeno a los CU). Levanta Redis (sección 1) antes de correr `./mvnw test`.
-- **UT del frontend del CU07:** había 10 pruebas fallando de antes; si salen en rojo en `expedientes`, anótalo como «deuda conocida», no como regresión.
-- **CU22:** su **Swagger no se ha verificado** y sus **pantallas no se han probado en el navegador**. Dale especial atención (sección CU22).
+- **UT del frontend del CU07:** había 10 pruebas fallando de antes; el 2026-11-17 las 167 de `expedientes` pasan, así que si vuelven a salir en rojo ya es una regresión.
+- **CU22:** su Swagger y sus pantallas ya se verificaron (2026-11-17). Ojo: `[PRUEBA] Beca Comedor 2026-II` quedó **publicada**; CU08 usa esa convocatoria.
 - **Los CU de origen no existen:** CU02 (postular), CU03 (IA), CU13 (convocatorias) los hace otro integrante. Todos los datos (convocatorias, postulaciones, puntajes, finalistas, expedientes) vienen de **cargadores de datos de prueba** que solo corren con el perfil `dev`.
 - El menú del Administrador muestra **«Menús» y «Pedidos»**, y el del estudiante **«Mi Menú» y «Mis Pedidos»**: son placeholders del scaffold, no pertenecen a ningún CU. Ignóralos.
 - El módulo de IA (`comedor-uagrm-ia`) solo tiene `/health`; los puntajes son de prueba.
@@ -236,14 +236,14 @@ flutter pub get && flutter analyze && flutter test
 
 No es una pantalla propia: se prueba con la campana de la web, Swagger y el móvil. **Md:** `CU-EXTRA-01 - Notificaciones push.md`.
 
-- [ ] Como admin, `POST /api/v1/notificaciones/prueba` → `200`; el aviso de prueba aparece en **tu bandeja** (campana del encabezado) y en Mailpit (correo a tu cuenta).
-- [ ] La campana muestra el contador de no leídos (`GET /notificaciones/me/resumen`); abre un aviso → «marcar como leído» (`POST /{codigo}/leer`), «Leer todo» y «Eliminar notificaciones» funcionan.
-- [ ] Un usuario no ve ni puede marcar avisos de otro (`404` `ERR_NOT_01`).
-- [ ] **Sin Firebase configurado** todo sigue funcionando; el push solo queda en el log del backend (sin el token). Anota si lo probaste con Firebase real o no.
-- [ ] Móvil: al iniciar sesión se registra el teléfono (`POST /dispositivos-fcm`); al cerrar sesión se da de baja (`POST /dispositivos-fcm/baja`, idempotente). BD: tabla `dispositivo_fcm`.
-- [ ] Token compartido con otra cuenta → se reasigna al usuario actual, sin duplicarse.
-- [ ] Un fallo de envío (apaga Mailpit un momento) **no** deshace la operación que originó el aviso; el aviso queda en la bandeja.
-- [ ] Sin sesión → `401`; endpoint de prueba con un rol que no es admin → `403`.
+- [x] Como admin, `POST /api/v1/notificaciones/prueba` → `200`; el aviso de prueba aparece en **tu bandeja** (campana del encabezado) y en Mailpit (correo a tu cuenta).
+- [x] La campana muestra el contador de no leídos (`GET /notificaciones/me/resumen`); abre un aviso → «marcar como leído» (`POST /{codigo}/leer`), «Leer todo» y «Eliminar notificaciones» funcionan.
+- [x] Un usuario no ve ni puede marcar avisos de otro (`404` `ERR_NOT_01`).
+- [x] **Sin Firebase configurado** todo sigue funcionando; el push solo queda en el log del backend (sin el token). Anota si lo probaste con Firebase real o no. _Probado con Firebase real: el push llegó a un Android._
+- [x] Móvil: al iniciar sesión se registra el teléfono (`POST /dispositivos-fcm`); al cerrar sesión se da de baja (`POST /dispositivos-fcm/baja`, idempotente). BD: tabla `dispositivo_fcm`.
+- [x] Token compartido con otra cuenta → se reasigna al usuario actual, sin duplicarse.
+- [x] Un fallo de envío (apaga Mailpit un momento) **no** deshace la operación que originó el aviso; el aviso queda en la bandeja.
+- [x] Sin sesión → `401`; endpoint de prueba con un rol que no es admin → `403`.
 
 **UT:** `./mvnw test -Dtest='*Notificacion*Test,DispositivoFcm*Test,CanalPush*Test,Despacho*Test,ReintentosTest,Eventos*PlantillaTest'` · `pnpm test -- src/features/notificaciones` · `flutter test`.
 
@@ -253,20 +253,20 @@ No es una pantalla propia: se prueba con la campana de la web, Swagger y el móv
 
 **Plataforma:** web, ruta `/lista-priorizada`, menú «Lista priorizada». **Rol:** Administrador. **Md:** `CU06 - Visualizar lista priorizada de postulantes.md`.
 
-- [ ] Abre la pantalla: queda seleccionada la **convocatoria más reciente**. La tabla muestra posición, nombre, CI, carrera, puntaje y fecha de cálculo, de **mayor a menor puntaje**, y arriba el total y cuántas siguen pendientes de precalificar. (CA01)
-- [ ] Solo aparecen postulaciones «calificada»; las devueltas/archivadas/adjudicadas/no adjudicadas/borrador/pendientes **no**. (CA03)
-- [ ] Cada postulación aparece **una sola vez**, con su puntaje vigente. (CA02)
-- [ ] Paginación: 10/20/50 (20 por defecto); en la página 2 con 20 filas la primera posición es **21**. (CA05, CA06)
-- [ ] Busca por **nombre** y por **CI**; filtra por **carrera**: solo salen los que cumplen y cada uno **conserva su posición real** de la lista completa. (CA07)
-- [ ] Recorre todas las páginas con empates de puntaje: ninguna se repite ni falta. (CA08)
-- [ ] Convocatoria sin calificadas → mensaje «No hay postulaciones calificadas…» y cuántas pendientes; sin tabla. (CA04)
-- [ ] **Exportar PDF** con la lista completa: descarga un PDF con convocatoria, fecha/hora, quién lo generó, **toda** la lista (no solo la página), mismo orden y posiciones, sin datos socioeconómicos. (CA16, CA18)
-- [ ] Exporta con una búsqueda/filtro activo → el PDF trae solo los filtrados e indica los filtros usados. (CA17)
-- [ ] Exporta con la lista vacía (filtro sin resultados) → no genera PDF, avisa «no hay postulaciones» (`400` `ERR_PRI_03`). (CA19)
-- [ ] BD: la exportación dejó una fila en `bitacora` (usuario, convocatoria, filtros). La consulta normal **no** deja nada. (CA14, CA20)
-- [ ] Un código de convocatoria inexistente en `GET /lista-priorizada?convocatoriaCodigo=...` → `404` `ERR_PRI_01`. (CA13)
-- [ ] Postulante/directivo llamando al endpoint → `403`; sin sesión → `401`. (CA11, CA12)
-- [ ] Rendimiento (opcional): con `SEED_PRIORIZACION_POSTULACIONES=20000` cada página responde en ≤ 3 s. (CA09)
+- [x] Abre la pantalla: queda seleccionada la **convocatoria más reciente**. La tabla muestra posición, nombre, CI, carrera, puntaje y fecha de cálculo, de **mayor a menor puntaje**, y arriba el total y cuántas siguen pendientes de precalificar. (CA01)
+- [x] Solo aparecen postulaciones «calificada»; las devueltas/archivadas/adjudicadas/no adjudicadas/borrador/pendientes **no**. (CA03)
+- [x] Cada postulación aparece **una sola vez**, con su puntaje vigente. (CA02)
+- [x] Paginación: 10/20/50 (20 por defecto); en la página 2 con 20 filas la primera posición es **21**. (CA05, CA06)
+- [x] Busca por **nombre** y por **CI**; filtra por **carrera**: solo salen los que cumplen y cada uno **conserva su posición real** de la lista completa. (CA07)
+- [x] Recorre todas las páginas con empates de puntaje: ninguna se repite ni falta. (CA08)
+- [x] Convocatoria sin calificadas → mensaje «No hay postulaciones calificadas…» y cuántas pendientes; sin tabla. (CA04)
+- [x] **Exportar PDF** con la lista completa: descarga un PDF con convocatoria, fecha/hora, quién lo generó, **toda** la lista (no solo la página), mismo orden y posiciones, sin datos socioeconómicos. (CA16, CA18)
+- [x] Exporta con una búsqueda/filtro activo → el PDF trae solo los filtrados e indica los filtros usados. (CA17)
+- [x] Exporta con la lista vacía (filtro sin resultados) → no genera PDF, avisa «no hay postulaciones» (`400` `ERR_PRI_03`). (CA19)
+- [x] BD: la exportación dejó una fila en `bitacora` (usuario, convocatoria, filtros). La consulta normal **no** deja nada. (CA14, CA20)
+- [x] Un código de convocatoria inexistente en `GET /lista-priorizada?convocatoriaCodigo=...` → `404` `ERR_PRI_01`. (CA13)
+- [x] Postulante/directivo llamando al endpoint → `403`; sin sesión → `401`. (CA11, CA12)
+- [x] Rendimiento (opcional): con `SEED_PRIORIZACION_POSTULACIONES=20000` cada página responde en ≤ 3 s. (CA09)
 
 **UT:** `./mvnw test -Dtest='ListaPriorizada*Test'` · `pnpm test -- src/features/priorizacion`.
 
@@ -278,25 +278,25 @@ No es una pantalla propia: se prueba con la campana de la web, Swagger y el móv
 
 ### A. Notificar
 
-- [ ] Elige una convocatoria con finalistas (queda seleccionada la más reciente). La tabla muestra posición, nombre, puntaje, notificación («Sin enviar»/«Enviada»/«Fallida») y documentación («Pendiente»/«Recibida»).
-- [ ] Selecciona dos finalistas, define **plazo (posterior a hoy)**, **lugar y horario** y **documentos físicos**, y confirma el envío. **Esperado:** resultado «N enviados, M fallidos»; esos finalistas pasan a «Enviada». (BD: `finalista.notificado_en`.)
-- [ ] Plazo de hoy o anterior → `400` `ERR_FIN_04`. Faltan lugar/documentos o ningún finalista seleccionado → no envía, indica los campos.
-- [ ] Entra con `postulante.finalista@prueba.local`: el aviso aparece en su **bandeja** de la web; ábrelo y márcalo como leído. Mailpit recibe el correo.
-- [ ] Reintento: simula fallo (apaga Mailpit), notifica, verifica «Fallida», vuelve a notificar solo a esos: el resto **no** recibe el aviso dos veces.
-- [ ] Convocatoria sin finalistas → «Todavía no hay finalistas en esta convocatoria», sin tabla.
+- [x] Elige una convocatoria con finalistas (queda seleccionada la más reciente). La tabla muestra posición, nombre, puntaje, notificación («Sin enviar»/«Enviada»/«Fallida») y documentación («Pendiente»/«Recibida»).
+- [x] Selecciona dos finalistas, define **plazo (posterior a hoy)**, **lugar y horario** y **documentos físicos**, y confirma el envío. **Esperado:** resultado «Se está enviando el aviso a N finalistas» (y, si algún aviso no se pudo registrar, cuántos); esos finalistas pasan a «Enviada» en la tabla (unos segundos después). (BD: `finalista.notificado_en`.)
+- [x] Plazo de hoy o anterior → `400` `ERR_FIN_04`. Faltan lugar/documentos o ningún finalista seleccionado → no envía, indica los campos.
+- [x] Entra con `postulante.finalista@prueba.local`: el aviso aparece en su **bandeja** de la web; ábrelo y márcalo como leído. Mailpit recibe el correo.
+- [x] Reintento: simula fallo (apaga Mailpit), notifica, verifica «Fallida», vuelve a notificar solo a esos: el resto **no** recibe el aviso dos veces.
+- [x] Convocatoria sin finalistas → «Todavía no hay finalistas en esta convocatoria», sin tabla.
 
 ### B. Entrega física
 
-- [ ] Busca un finalista por CI o nombre y marca «documentación recibida» con fecha (por defecto hoy) y observaciones opcionales → pasa a «Recibida».
-- [ ] Fecha **futura** → `400` `ERR_FIN_03`.
-- [ ] Corrige la fecha ya registrada → se guarda la nueva y la anterior queda en la `bitacora`.
+- [x] Busca un finalista por CI o nombre y marca «documentación recibida» con fecha (por defecto hoy) y observaciones opcionales → pasa a «Recibida».
+- [x] Fecha **futura** → `400` `ERR_FIN_03`.
+- [x] Corrige la fecha ya registrada → se guarda la nueva y la anterior queda en la `bitacora`.
 
 ### C. Comunicados
 
-- [ ] «Nuevo aviso o comunicado»: título, contenido y destinatarios (todos los postulantes o finalistas); **vista previa**; confirma. Muestra a cuántos llegó y cada destinatario recibe el aviso.
-- [ ] Faltan título/contenido/destinatarios → no publica. Grupo sin destinatarios → `400` `ERR_COM_01`.
-- [ ] Este CU **no cambia el estado** de ninguna postulación (verifica `postulacion.estado`).
-- [ ] Rol no admin → `403`; sin sesión → `401`.
+- [x] «Nuevo aviso o comunicado»: título, contenido y destinatarios (todos los postulantes o finalistas); **vista previa**; confirma. Muestra a cuántos llegó y cada destinatario recibe el aviso.
+- [x] Faltan título/contenido/destinatarios → no publica. Grupo sin destinatarios → `400` `ERR_COM_01`.
+- [x] Este CU **no cambia el estado** de ninguna postulación (verifica `postulacion.estado`).
+- [x] Rol no admin → `403`; sin sesión → `401`.
 
 **UT:** `./mvnw test -Dtest='Finalista*Test,SeleccionFinalistas*Test,RequestsFinalistasValidacionTest,Comunicado*Test,PublicarComunicadoRequestValidacionTest,FinalistasComunicadosIntegrationTest'` · `pnpm test -- src/features/finalistas src/features/comunicados`.
 
@@ -308,16 +308,16 @@ No es una pantalla propia: se prueba con la campana de la web, Swagger y el móv
 
 Datos de prueba del expediente (cargados al arrancar): finalista 1 validado, 2 observado, 3 con entrega y sin auditar, 4 observado y luego validado, 5 no válido, 6–10 con entrega pendiente.
 
-- [ ] Desde «Finalistas», pulsa **Auditar** en el finalista 3. El expediente muestra: datos del postulante, **respuestas socioeconómicas**, documentos con estado («Recibido»/«Falta»), puntaje de la IA vigente y las auditorías previas.
-- [ ] Abre un documento: se obtiene un **acceso temporal** (no un enlace público); un documento de otro finalista → `404` `ERR_EXP_05`. Si MinIO está caído, error claro y el resto del expediente sigue visible.
-- [ ] Registra **Validado** con puntaje académico 0–30 → el expediente muestra la auditoría y el **puntaje total = IA + académico**; el postulante recibe un aviso con el resultado. (BD: `auditoria_expediente`, bitácora.)
-- [ ] **Observado** o **No válido** **sin observaciones** → `400` `ERR_EXP_03`; observaciones > 500 caracteres → `400`.
-- [ ] **Validado sin puntaje académico** o con puntaje fuera de 0–30 → `400` `ERR_EXP_04`.
-- [ ] Finalista con la **entrega pendiente** (6–10): no deja auditar, `409` `ERR_EXP_01` («primero registra la entrega»).
-- [ ] Reaudita un finalista (p. ej. el 4): se agrega una auditoría nueva y las anteriores se conservan; vale la última.
-- [ ] Doble clic en guardar → se registra **una sola** auditoría (idempotencia; clave repetida con otro contenido → `409` `ERR_EXP_06`).
-- [ ] Postulación que ya no es «calificada» (devuelta/archivada/decidida) → `409` `ERR_EXP_02`, el expediente se actualiza.
-- [ ] Finalista inexistente en la URL → `404` y vuelve a la lista. Rol no admin → `403`; sin sesión → `401`.
+- [x] Desde «Finalistas», pulsa **Auditar** en el finalista 3. El expediente muestra: datos del postulante, **respuestas socioeconómicas**, documentos con estado («Recibido»/«Falta»), puntaje de la IA vigente y las auditorías previas.
+- [x] Abre un documento: se obtiene un **acceso temporal** (no un enlace público); un documento de otro finalista → `404` `ERR_EXP_05`. Si MinIO está caído, error claro y el resto del expediente sigue visible.
+- [x] Registra **Validado** con puntaje académico 0–30 → el expediente muestra la auditoría y el **puntaje total = IA + académico**; el postulante recibe un aviso con el resultado. (BD: `auditoria_expediente`, bitácora.)
+- [x] **Observado** o **No válido** **sin observaciones** → `400` `ERR_EXP_03`; observaciones > 500 caracteres → `400`.
+- [x] **Validado sin puntaje académico** o con puntaje fuera de 0–30 → `400` `ERR_EXP_04`.
+- [x] Finalista con la **entrega pendiente** (6–10): no deja auditar, `409` `ERR_EXP_01` («primero registra la entrega»).
+- [x] Reaudita un finalista (p. ej. el 4): se agrega una auditoría nueva y las anteriores se conservan; vale la última.
+- [x] Doble clic en guardar → se registra **una sola** auditoría (idempotencia; clave repetida con otro contenido → `409` `ERR_EXP_06`).
+- [x] Postulación que ya no es «calificada» (devuelta/archivada/decidida) → `409` `ERR_EXP_02`, el expediente se actualiza.
+- [x] Finalista inexistente en la URL → `404` y vuelve a la lista. Rol no admin → `403`; sin sesión → `401`.
 
 **UT:** `./mvnw test -Dtest='Expediente*Test,AuditoriaExpedienteRepositoryTest,RegistrarAuditoriaRequestValidacionTest'` · `pnpm test -- src/features/expedientes` (**10 fallos previos conocidos**: anota cuáles son y si cambió el número).
 
@@ -329,16 +329,16 @@ Datos de prueba del expediente (cargados al arrancar): finalista 1 validado, 2 o
 
 Necesitas un finalista **«calificada» con al menos una auditoría** (usa la consulta 1.5; el 2 o el 4 del expediente de prueba si siguen calificadas).
 
-- [ ] Pulsa «Devolver para corrección»: ventana con nombre y convocatoria y campo **motivo** (obligatorio, ≤ 500).
-- [ ] **Cancela** la ventana → no cambia nada (estado sigue «calificada»).
-- [ ] Motivo vacío, solo espacios o de más de 500 caracteres → error inline; por Swagger `400` `ERR_SYS_01`.
-- [ ] Confirma con un motivo válido → el expediente pasa a «Devuelta» y **ya no permite** auditar ni devolver otra vez. (BD: `postulacion.estado='devuelta'`; fila en `postulacion_historial` con estado anterior/nuevo, usuario, fecha y motivo; fila en `bitacora`.)
-- [ ] El postulante recibe aviso con las observaciones (bandeja, correo en Mailpit, push en log).
-- [ ] La postulación **sale de la lista priorizada** (CU06).
-- [ ] Devolver un finalista **sin auditoría** → `409` `ERR_DEV_02`.
-- [ ] Devolver uno que ya no está calificada (ya devuelto/archivado/…) → `409` `ERR_DEV_01`.
-- [ ] Finalista inexistente → `404` `ERR_FIN_01`. Rol no admin → `403`; sin sesión → `401`.
-- [ ] (Cruce con CU04) Entra como el postulante: su postulación devuelta muestra las observaciones y «Corregir y reenviar».
+- [x] Pulsa «Devolver para corrección»: ventana con nombre y convocatoria y campo **motivo** (obligatorio, ≤ 500).
+- [x] **Cancela** la ventana → no cambia nada (estado sigue «calificada»).
+- [x] Motivo vacío, solo espacios o de más de 500 caracteres → error inline; por Swagger `400` `ERR_SYS_01`.
+- [x] Confirma con un motivo válido → el expediente pasa a «Devuelta» y **ya no permite** auditar ni devolver otra vez. (BD: `postulacion.estado='devuelta'`; fila en `postulacion_historial` con estado anterior/nuevo, usuario, fecha y motivo; fila en `bitacora`.)
+- [x] El postulante recibe aviso con las observaciones (bandeja, correo en Mailpit, push en log).
+- [x] La postulación **sale de la lista priorizada** (CU06).
+- [x] Devolver un finalista **sin auditoría** → `409` `ERR_DEV_02`.
+- [x] Devolver uno que ya no está calificada (ya devuelto/archivado/…) → `409` `ERR_DEV_01`.
+- [x] Finalista inexistente → `404` `ERR_FIN_01`. Rol no admin → `403`; sin sesión → `401`.
+- [x] (Cruce con CU04) Entra como el postulante: su postulación devuelta muestra el estado «Devuelta», el paso en el recorrido y las **observaciones**. «Corregir y reenviar» **no** aparece: está oculto mientras no exista el CU02 (otro integrante), por diseño del CU04.
 
 **UT:** `./mvnw test -Dtest='Devolucion*Test,DevolverPostulacionRequestValidacionTest'` · `pnpm test -- src/features/expedientes`.
 
@@ -348,16 +348,16 @@ Necesitas un finalista **«calificada» con al menos una auditoría** (usa la co
 
 **Plataforma:** web, dentro del expediente, botones «Archivar» y «Rechazar». **Md:** `CU20 - Archivar o rechazar postulación.md`. Requiere finalista **«calificada»** y convocatoria **sin resultados publicados**.
 
-- [ ] **Archivar:** botón → ventana con nombre y convocatoria y **motivo obligatorio** (≤ 500). Cancelar no cambia nada.
-- [ ] Confirma → estado **«archivada»**; el expediente queda «Archivada» sin más acciones; fila en historial (con motivo) y en bitácora; aviso al postulante con el motivo. (CA de CU20)
-- [ ] **Rechazar** (con otro finalista) → estado **«no adjudicada»** (aviso con el texto de rechazo). Verifica en BD que **no** se creó fila en `adjudicacion` (es distinto de «No adjudicar» del CU05).
-- [ ] Motivo vacío/solo espacios/> 500 → `400` `ERR_SYS_01`.
-- [ ] Sobre una postulación que ya no es «calificada» (ya archivada, devuelta, adjudicada…) → `409` `ERR_ARC_01`.
-- [ ] En una convocatoria con resultados **ya publicados** (`[PRUEBA] Publicada`) → `409` `ERR_ARC_01`.
-- [ ] Doble clic/dos peticiones iguales → solo una surte efecto, la otra `409`.
-- [ ] Postulaciones archivadas/rechazadas salen de la lista priorizada.
-- [ ] Finalista inexistente → `404`; rol no admin → `403`; sin sesión → `401`.
-- [ ] (Cruce con CU04) El postulante ve el **motivo** en su detalle.
+- [x] **Archivar:** botón → ventana con nombre y convocatoria y **motivo obligatorio** (≤ 500). Cancelar no cambia nada.
+- [x] Confirma → estado **«archivada»**; el expediente queda «Archivada» sin más acciones; fila en historial (con motivo) y en bitácora; aviso al postulante con el motivo. (CA de CU20)
+- [x] **Rechazar** (con otro finalista) → estado **«no adjudicada»** (aviso con el texto de rechazo). Verifica en BD que **no** se creó fila en `adjudicacion` (es distinto de «No adjudicar» del CU05).
+- [x] Motivo vacío/solo espacios/> 500 → `400` `ERR_SYS_01`.
+- [x] Sobre una postulación que ya no es «calificada» (ya archivada, devuelta, adjudicada…) → `409` `ERR_ARC_01`.
+- [x] En una convocatoria con resultados **ya publicados** (`[PRUEBA] Publicada`) → `409` `ERR_ARC_01`.
+- [x] Doble clic/dos peticiones iguales → solo una surte efecto, la otra `409`.
+- [x] Postulaciones archivadas/rechazadas salen de la lista priorizada.
+- [x] Finalista inexistente → `404`; rol no admin → `403`; sin sesión → `401`.
+- [x] (Cruce con CU04) El postulante ve el **motivo** en su detalle.
 
 **UT:** `./mvnw test -Dtest='CierrePostulacion*Test,EventosCierrePostulacionPlantillaTest'` · `pnpm test -- src/features/expedientes`.
 
@@ -371,29 +371,29 @@ Datos: la convocatoria `[PRUEBA]` principal tiene cupos 5, puntaje mínimo 70 y 
 
 ### Panel y selección de finalistas
 
-- [ ] Abre `/adjudicacion` y elige la convocatoria: panel con **cupos, adjudicados, no adjudicados, disponibles y puntaje mínimo** + lista priorizada. (CA01)
-- [ ] «Seleccionar finalistas» propone la **cantidad configurada**; ajústala y confirma → se registran en el orden de la lista con su **posición real** y sin repetir a los ya seleccionados. (CA02, CA22)
-- [ ] Cantidad **0, negativa o mayor** que las calificadas disponibles → `400`, no selecciona a nadie. (CA03)
-- [ ] Pedir más finalistas que cupos **se permite** (suplentes). (A3)
-- [ ] Convocatoria sin cupos/mínimo definidos (o no cerrada) → `409` `ERR_ADJ_05`: no deja seleccionar ni decidir. (CA14)
-- [ ] La cantidad configurada **no** aparece en ninguna respuesta a postulantes ni pública. (CA22)
+- [x] Abre `/adjudicacion` y elige la convocatoria: panel con **cupos, adjudicados, no adjudicados, disponibles y puntaje mínimo** + lista priorizada. (CA01)
+- [x] «Seleccionar finalistas» propone la **cantidad configurada**; ajústala y confirma → se registran en el orden de la lista con su **posición real** y sin repetir a los ya seleccionados. (CA02, CA22)
+- [x] Cantidad **0, negativa o mayor** que las calificadas disponibles → `400`, no selecciona a nadie. (CA03)
+- [x] Pedir más finalistas que cupos **se permite** (suplentes). (A3)
+- [x] Convocatoria sin cupos/mínimo definidos (o no cerrada) → `409` `ERR_ADJ_05`: no deja seleccionar ni decidir. (CA14)
+- [x] La cantidad configurada **no** aparece en ninguna respuesta a postulantes ni pública. (CA22)
 
 ### Decisión sobre un finalista (desde su expediente)
 
-- [ ] **Adjudicar** un finalista «Validado», con puntaje total ≥ mínimo y cupos libres: ventana de confirmación con nombre, puntaje total y cupos; confirma → postulación **«adjudicada»**; los cupos disponibles bajan. (BD: fila en `adjudicacion` con puntaje final, usuario, fecha; `postulacion_historial`; `bitacora`.) (CA04)
-- [ ] **No adjudicar** con motivo válido → **«no adjudicada»** y fila en `adjudicacion` con resultado `NO_ADJUDICADA`. Sin motivo / solo espacios / > 500 → `400`. (CA05, CA06)
-- [ ] Finalista **sin auditoría** → ambas decisiones dan `409` `ERR_ADJ_02`. (CA07)
-- [ ] Última auditoría **no «Validado»** → «Adjudicar» da `409` `ERR_ADJ_02`, «No adjudicar» sí funciona. (CA08)
-- [ ] Puntaje total **bajo el mínimo** (el finalista validado con puntaje bajo de la semilla) → «Adjudicar» `409` `ERR_ADJ_03`; «No adjudicar» sí. (CA09)
-- [ ] **Cupos agotados** → «Adjudicar» `409` `ERR_ADJ_04`; «No adjudicar» sí. (CA10)
-- [ ] En la convocatoria de **un solo cupo libre**, intenta adjudicar a dos finalistas (idealmente casi a la vez desde dos ventanas) → solo uno se adjudica, el otro `409`; nunca se superan los cupos. (CA11)
-- [ ] Doble clic en confirmar → una sola decisión y una sola anotación en bitácora; la segunda `409` `ERR_ADJ_01`. (CA13)
-- [ ] Postulación que ya no es «calificada» o resultados publicados → `409` `ERR_ADJ_01`. (CA12)
-- [ ] **Cancelar** la ventana → nada cambia. (CA18)
-- [ ] Una vez decidida, la postulación **no aparece** en la lista priorizada ni se puede auditar/decidir otra vez. (CA19)
-- [ ] Al decidir **no se avisa** al postulante (se hará al publicar, CU22). Verifica que no hay aviso nuevo. (CA20)
-- [ ] La bitácora anota la decisión **sin** nombres, CI ni motivo. (CA17)
-- [ ] Finalista/convocatoria inexistente → `404`; rol no admin → `403`; sin sesión → `401`. (CA21)
+- [x] **Adjudicar** un finalista «Validado», con puntaje total ≥ mínimo y cupos libres: ventana de confirmación con nombre, puntaje total y cupos; confirma → postulación **«adjudicada»**; los cupos disponibles bajan. (BD: fila en `adjudicacion` con puntaje final, usuario, fecha; `postulacion_historial`; `bitacora`.) (CA04)
+- [x] **No adjudicar** con motivo válido → **«no adjudicada»** y fila en `adjudicacion` con resultado `NO_ADJUDICADA`. Sin motivo / solo espacios / > 500 → `400`. (CA05, CA06)
+- [x] Finalista **sin auditoría** → ambas decisiones dan `409` `ERR_ADJ_02`. (CA07)
+- [x] Última auditoría **no «Validado»** → «Adjudicar» da `409` `ERR_ADJ_02`, «No adjudicar» sí funciona. (CA08)
+- [x] Puntaje total **bajo el mínimo** (el finalista validado con puntaje bajo de la semilla) → «Adjudicar» `409` `ERR_ADJ_03`; «No adjudicar» sí. (CA09)
+- [x] **Cupos agotados** → «Adjudicar» `409` `ERR_ADJ_04`; «No adjudicar» sí. (CA10)
+- [x] En la convocatoria de **un solo cupo libre**, intenta adjudicar a dos finalistas (idealmente casi a la vez desde dos ventanas) → solo uno se adjudica, el otro `409`; nunca se superan los cupos. (CA11)
+- [x] Doble clic en confirmar → una sola decisión y una sola anotación en bitácora; la segunda `409` `ERR_ADJ_01`. (CA13)
+- [x] Postulación que ya no es «calificada» o resultados publicados → `409` `ERR_ADJ_01`. (CA12)
+- [x] **Cancelar** la ventana → nada cambia. (CA18)
+- [x] Una vez decidida, la postulación **no aparece** en la lista priorizada ni se puede auditar/decidir otra vez. (CA19)
+- [x] Al decidir **no se avisa** al postulante (se hará al publicar, CU22). Verifica que no hay aviso nuevo. (CA20)
+- [x] La bitácora anota la decisión **sin** nombres, CI ni motivo. (CA17)
+- [x] Finalista/convocatoria inexistente → `404`; rol no admin → `403`; sin sesión → `401`. (CA21)
 
 **UT:** `./mvnw test -Dtest='Adjudicacion*Test,CantidadFinalistasPrivadaTest,ListaPriorizadaAdjudicacionTest,SeleccionFinalistas*Test'` · `pnpm test -- src/features/adjudicacion src/features/expedientes`. (Pendiente anotado: imagen 091 del diseño lógico por actualizar en la documentación de grado.)
 
@@ -401,7 +401,7 @@ Datos: la convocatoria `[PRUEBA]` principal tiene cupos 5, puntaje mínimo 70 y 
 
 ## CU22 — Publicar resultados de adjudicación
 
-> ⚠️ **Sin verificar hasta ahora:** el Swagger de este CU y sus pantallas en el navegador. Prueba ambos y anota todo lo raro.
+> Swagger y pantallas verificados el 2026-11-17 (administrador y postulante), con `[PRUEBA] Beca Comedor 2026-II` ya publicada.
 
 **Plataforma:** web, rutas `/publicar-resultados` (Administrador, menú «Publicar resultados») y `/resultados` (Postulante). **Md:** `CU22 - Publicar resultados de adjudicación.md`.
 
@@ -409,25 +409,25 @@ Convocatorias de prueba: **`[PRUEBA] Beca Comedor 2026-II`** (todo decidido, sin
 
 ### Administrador
 
-- [ ] Swagger: `GET /api/v1/convocatorias/{codigo}/resultados/resumen` y `/decisiones` (admin) responden con adjudicados, no adjudicados y puntaje final de cada uno; `puedePublicar` verdadero/falso según el caso.
-- [ ] `/publicar-resultados` → elige `[PRUEBA] Con pendientes`: muestra cuántos finalistas **faltan por decidir** y el botón «Publicar» no debe permitir publicar; por Swagger `POST .../publicar` da `409` `ERR_PUB_01` con cuántos faltan. (A1)
-- [ ] Elige `[PRUEBA] Beca Comedor 2026-II`: resumen con adjudicados/no adjudicados y puntaje final.
-- [ ] Pulsa «Publicar» → ventana que avisa que **no se puede deshacer** y que se avisará a los finalistas; **cancela** → nada se publica. (A4)
-- [ ] Confirma → publicada. BD: fila en `publicacion_resultado` (usuario y fecha), `convocatoria.estado='PUBLICADA'`, fila en `bitacora`. Se crea **un aviso por cada finalista con decisión** (bandeja, correo en Mailpit, push en log).
-- [ ] Publica **otra vez** la misma convocatoria (doble clic o desde Swagger) → `409` `ERR_PUB_02`, muestra quién y cuándo publicó y no registra otra. (A2)
-- [ ] Convocatoria que no está **cerrada** → `409` `ERR_PUB_03`; inexistente → `404` `ERR_PRI_01`. (A3)
-- [ ] Fallo de envío de un aviso (apaga Mailpit antes de publicar) → la publicación queda registrada igual. (A5)
-- [ ] Se publica **aunque no haya adjudicados** (si todos fueron «no adjudicada») — decisión tuya; prueba con una convocatoria así si puedes.
-- [ ] **No** se puede despublicar (no existe endpoint ni botón).
-- [ ] Rol no admin → `403`; sin sesión → `401`.
+- [x] Swagger: `GET /api/v1/convocatorias/{codigo}/resultados/resumen` y `/decisiones` (admin) responden con adjudicados, no adjudicados y puntaje final de cada uno; `puedePublicar` verdadero/falso según el caso.
+- [x] `/publicar-resultados` → elige `[PRUEBA] Con pendientes`: muestra cuántos finalistas **faltan por decidir** y el botón «Publicar» no debe permitir publicar; por Swagger `POST .../publicar` da `409` `ERR_PUB_01` con cuántos faltan. (A1)
+- [x] Elige `[PRUEBA] Beca Comedor 2026-II`: resumen con adjudicados/no adjudicados y puntaje final.
+- [x] Pulsa «Publicar» → ventana que avisa que **no se puede deshacer** y que se avisará a los finalistas; **cancela** → nada se publica. (A4)
+- [x] Confirma → publicada. BD: fila en `publicacion_resultado` (usuario y fecha), `convocatoria.estado='PUBLICADA'`, fila en `bitacora`. Se crea **un aviso por cada finalista con decisión** (bandeja, correo en Mailpit, push en log).
+- [x] Publica **otra vez** la misma convocatoria (doble clic o desde Swagger) → `409` `ERR_PUB_02`, muestra quién y cuándo publicó y no registra otra. (A2)
+- [x] Convocatoria que no está **cerrada** → `409` `ERR_PUB_03`; inexistente → `404` `ERR_PRI_01`. (A3)
+- [x] Fallo de envío de un aviso (apaga Mailpit antes de publicar) → la publicación queda registrada igual. (A5)
+- [x] Se publica **aunque no haya adjudicados** (si todos fueron «no adjudicada») — decisión tuya; prueba con una convocatoria así si puedes.
+- [x] **No** se puede despublicar (no existe endpoint ni botón).
+- [x] Rol no admin → `403`; sin sesión → `401`.
 
 ### Postulante
 
-- [ ] Como `postulante.finalista@prueba.local`, `/resultados` lista convocatorias con resultados publicados (`GET /api/v1/resultados/convocatorias`).
-- [ ] La lista pública de una convocatoria muestra **solo nombre, apellido, nota, carrera y facultad** de los adjudicados. La **nota es el puntaje final**.
-- [ ] «Mi resultado» (`.../resultados/mio`) muestra «adjudicada»/«no adjudicada» **sin el motivo** de la decisión final.
-- [ ] Una convocatoria sin publicar → `404` `ERR_PUB_04` para el postulante (no se filtran resultados antes).
-- [ ] Lo mismo en la app móvil si aplica.
+- [x] Como `postulante.finalista@prueba.local`, `/resultados` lista convocatorias con resultados publicados (`GET /api/v1/resultados/convocatorias`).
+- [x] La lista pública de una convocatoria muestra **solo nombre, apellido, nota, carrera y facultad** de los adjudicados. La **nota es el puntaje final**.
+- [x] «Mi resultado» (`.../resultados/mio`) muestra «adjudicada»/«no adjudicada» **sin el motivo** de la decisión final.
+- [x] Una convocatoria sin publicar → `404` `ERR_PUB_04` para el postulante (no se filtran resultados antes).
+- [x] Lo mismo en la app móvil si aplica.
 
 **UT:** `./mvnw test -Dtest='Resultados*Test,PublicacionResultado*Test,MarcaPublicacionRepositoryTest,EventosResultadosPlantillaTest'` · `pnpm test -- src/features/resultados`.
 
@@ -437,18 +437,18 @@ Convocatorias de prueba: **`[PRUEBA] Beca Comedor 2026-II`** (todo decidido, sin
 
 **Plataforma:** web, ruta `/actas` (menú «Actas»). **Md:** `CU08 - Generar acta de adjudicación.md`. Requiere resultados **publicados** (CU22). Para probar usa `[PRUEBA] Publicada` (si ya le generaste acta, publica antes `[PRUEBA] Beca Comedor 2026-II` en CU22 y úsala).
 
-- [ ] `/actas` muestra la tabla de actas generadas (número, convocatoria, fecha, quién) y el panel «Generar acta» con las convocatorias **publicadas sin acta**.
-- [ ] Si ninguna cumple → mensaje «No hay convocatorias con resultados publicados pendientes de acta», la tabla se sigue viendo. (A1)
-- [ ] Elige una convocatoria y pulsa **«Vista previa»**: muestra el documento con número «borrador»; **no** guarda nada ni toca la bitácora.
-- [ ] Pulsa **«Generar PDF»** → ventana que avisa que el acta es **definitiva** (no se regenera ni se elimina). **Cancela** → nada se guarda. (A6)
-- [ ] Confirma → se genera el PDF con número automático `NNN/AAAA`, adjudicados con nombre, apellido, CI, carrera y puntaje final; se guarda en **MinIO** (verifica el objeto en `:9001`); fila en `acta_adjudicacion` y en `bitacora`.
-- [ ] «Descargar» → abre/descarga el PDF por una dirección **temporal firmada (5 min)**; la descarga queda en la bitácora. Verifica que el PDF abre bien y sus datos coinciden con los adjudicados de la convocatoria.
-- [ ] Generar una **segunda acta** para la misma convocatoria (o vista previa de una que ya tiene) → `409` `ERR_ACT_02`; muestra la existente. (A4)
-- [ ] Convocatoria con resultados **sin publicar** → `409` `ERR_ACT_01`. (A3)
-- [ ] Descargar el acta de una convocatoria **sin acta** → `404` `ERR_ACT_03`. (A5)
-- [ ] Borra el objeto del acta en MinIO y descarga → `404` `ERR_ACT_04`, no se anota descarga. (A9)
-- [ ] Dos actas de convocatorias distintas generadas casi a la vez → números distintos, nunca repetidos. (A7)
-- [ ] Rol no admin → `403`; sin sesión → `401`.
+- [x] `/actas` muestra la tabla de actas generadas (número, convocatoria, fecha, quién) y el panel «Generar acta» con las convocatorias **publicadas sin acta**.
+- [x] Si ninguna cumple → mensaje «No hay convocatorias con resultados publicados pendientes de acta», la tabla se sigue viendo. (A1)
+- [x] Elige una convocatoria y pulsa **«Vista previa»**: muestra el documento con número «borrador»; **no** guarda nada ni toca la bitácora.
+- [x] Pulsa **«Generar PDF»** → ventana que avisa que el acta es **definitiva** (no se regenera ni se elimina). **Cancela** → nada se guarda. (A6)
+- [x] Confirma → se genera el PDF con número automático `NNN/AAAA`, adjudicados con nombre, apellido, CI, carrera y puntaje final; se guarda en **MinIO** (verifica el objeto en `:9001`); fila en `acta_adjudicacion` y en `bitacora`.
+- [x] «Descargar» → abre/descarga el PDF por una dirección **temporal firmada (5 min)**; la descarga queda en la bitácora. Verifica que el PDF abre bien y sus datos coinciden con los adjudicados de la convocatoria.
+- [x] Generar una **segunda acta** para la misma convocatoria (o vista previa de una que ya tiene) → `409` `ERR_ACT_02`; muestra la existente. (A4)
+- [x] Convocatoria con resultados **sin publicar** → `409` `ERR_ACT_01`. (A3)
+- [x] Descargar el acta de una convocatoria **sin acta** → `404` `ERR_ACT_03`. (A5)
+- [x] Borra el objeto del acta en MinIO y descarga → `404` `ERR_ACT_04`, no se anota descarga. (A9)
+- [x] Dos actas de convocatorias distintas generadas casi a la vez → números distintos, nunca repetidos. (A7)
+- [x] Rol no admin → `403`; sin sesión → `401`.
 
 **UT:** `./mvnw test -Dtest='Acta*Test,ConsultaActasServiceTest,NumeroActaService*Test,ActasConsultaRepositoryTest'` · `pnpm test -- src/features/actas`.
 
@@ -460,18 +460,18 @@ Convocatorias de prueba: **`[PRUEBA] Beca Comedor 2026-II`** (todo decidido, sin
 
 Entra con `postulante.finalista@prueba.local`. La semilla crea una convocatoria `[PRUEBA] Mis postulaciones - …` por estado (pendiente, devuelta, archivada, decisión final sin publicar, finalista, adjudicada publicada, rechazada) y un borrador, en **dos gestiones**.
 
-- [ ] La lista muestra las postulaciones enviadas, de la más reciente a la más antigua, con gestión, fecha de envío y estado visible. **El borrador no aparece.** (CA01, CA12)
-- [ ] Filtro por **gestión académica** funciona. (CA03)
-- [ ] Detalle de una postulación: estado visible y **línea de tiempo** con fecha y hora de cada cambio, **sin mostrar quién lo hizo**, más los pasos pendientes. (CA04)
-- [ ] **Devuelta:** muestra las observaciones del admin con fecha y el botón «Corregir y reenviar». (CA05)
-- [ ] **Archivada** y **rechazada (CU20):** muestran el **motivo**. (CA06)
-- [ ] **Decisión final sin publicar:** se ve «calificada» y se **oculta** esa fila del historial. (CA07)
-- [ ] **Resultados publicados:** se ve «adjudicada»/«no adjudicada», botón «Ver resultado» hacia `/resultados`, **sin el motivo** de la decisión final. (CA08)
-- [ ] **Finalista:** bloque «Eres finalista» con plazo, documentos a presentar y si la documentación ya fue recibida. (CA09)
-- [ ] Desde un aviso de la campana (o push en móvil) se abre el detalle de la postulación correspondiente. (CA10)
-- [ ] Una cuenta sin postulaciones (la que creaste en CU01) ve mensaje informativo. (CA02)
-- [ ] `GET /api/v1/postulaciones/{codigo}` de una postulación ajena o inexistente → `404` `ERR_POS_01`; con rol admin → `403`; sin sesión → `401`. (CA11)
-- [ ] Consultar no modifica estados, avisos ni bitácora. (CA13)
+- [x] La lista muestra las postulaciones enviadas, de la más reciente a la más antigua, con gestión, fecha de envío y estado visible. **El borrador no aparece.** (CA01, CA12)
+- [x] Filtro por **gestión académica** funciona. (CA03)
+- [x] Detalle de una postulación: estado visible y **línea de tiempo** con fecha y hora de cada cambio, **sin mostrar quién lo hizo**, más los pasos pendientes. (CA04)
+- [x] **Devuelta:** muestra las observaciones del admin con fecha. El botón «Corregir y reenviar» sigue oculto hasta que exista el CU02 (CA05, ver CU04 A3). (CA05)
+- [x] **Archivada** y **rechazada (CU20):** muestran el **motivo**. (CA06)
+- [x] **Decisión final sin publicar:** se ve «calificada» y se **oculta** esa fila del historial. (CA07)
+- [x] **Resultados publicados:** se ve «adjudicada»/«no adjudicada», botón «Ver resultado» hacia `/resultados`, **sin el motivo** de la decisión final. (CA08)
+- [x] **Finalista:** bloque «Eres finalista» con plazo, documentos a presentar y si la documentación ya fue recibida, **solo mientras la postulación sigue «calificada»**; devuelta, archivada, rechazada o adjudicada no lo muestran. (CA09)
+- [x] Desde un aviso de la campana (o push en móvil) se abre el detalle de la postulación correspondiente. (CA10)
+- [x] Una cuenta sin postulaciones (la que creaste en CU01) ve mensaje informativo. (CA02)
+- [x] `GET /api/v1/postulaciones/{codigo}` de una postulación ajena o inexistente → `404` `ERR_POS_01`; con rol admin → `403`; sin sesión → `401`. (CA11)
+- [x] Consultar no modifica estados, avisos ni bitácora. (CA13)
 
 **UT:** `./mvnw test -Dtest='MisPostulaciones*Test,EstadoVisibleTest,NotificacionPostulacionCodigo*Test'` · `pnpm test -- src/features/postulaciones` · `flutter test`.
 
@@ -492,7 +492,40 @@ Entra con `directivo@dubss.com`. La semilla crea dos convocatorias `[PRUEBA] Das
 - [ ] Si los indicadores nunca se calcularon, lo indica en lugar de inventar números.
 - [ ] Admin/postulante llamando a `/api/v1/dashboard/*` → `403`; sin sesión → `401`.
 
-**UT:** `./mvnw test -Dtest='Dashboard*Test,Indicadores*Test,FiltrosDashboard*Test,RefrescoIndicadores*Test,VistaIndicadoresMigracionTest'` · `pnpm test -- src/features/dashboard`.
+**Análisis BI** (la semilla ahora trae puntajes, becas y asistencia del 26-oct al 17-nov; si no los ves, reinicia el backend en `dev` con la base vacía o espera al refresco de las 02:00):
+
+- [ ] Debajo de los gráficos aparece «Análisis BI» con **embudo**, **facultades**, **comparación de convocatorias**, **puntajes de la IA**, **cobertura de cupos**, **asistencia por día de la semana** y **tendencia entre gestiones**.
+- [ ] **Embudo:** cada etapa muestra su % respecto de la anterior; las cifras de postulaciones y adjudicadas coinciden con las tarjetas de arriba.
+- [ ] **Facultades:** la que más postulaciones tiene aparece primero; al hacer clic en una se ven sus **carreras**, y otro clic las oculta. Compara las barras (postulaciones y adjudicadas) con la BD.
+- [ ] **Comparación:** la variación (+/− %) de cada convocatoria es contra la anterior (la primera muestra «—»). Hacer clic en el nombre de una convocatoria **filtra todo el dashboard** por ella (los selectores quedan en esa convocatoria).
+- [ ] **Puntajes:** 7 tramos de 10 puntos (0–70) y el promedio; la suma de las barras es el número de postulaciones con puntaje.
+- [ ] **Cobertura:** % de cupos cubiertos por becas vigentes; suspendidas, dadas de baja y reemplazos coinciden con el padrón (CU23).
+- [ ] **Asistencia:** la tarjeta «Asistencia promedio» ya no dice «Sin datos» (hay asistencia del CU10); el gráfico por día de la semana muestra lunes a viernes y el aviso de **becas en riesgo** (menos de 60 % con 5+ días de servicio). *(Criterio a validar con la DUBSS.)*
+- [ ] **Tendencia:** barras de postulaciones y adjudicadas por gestión y la variación de la gestión elegida.
+- [ ] «Descargar Excel» → `.xlsx` con las hojas Resumen, Por mes, Por facultad, Por carrera, Convocatorias, Puntajes, Asistencia y Tendencia, con lo que ves en pantalla. Sin datos → `400` `ERR_DAS_02`.
+- [ ] Con una gestión sin datos no aparece la sección de análisis y se ve el mensaje informativo; las tarjetas muestran ceros.
+- [ ] `GET /api/v1/dashboard/bi` y `/bi/excel` con otro rol → `403`; sin sesión → `401`; gestión/convocatoria inexistente → `404` `ERR_DAS_01`.
+- [ ] Un porcentaje sin denominador (por ejemplo, tasa de una facultad sin postulaciones) se ve como «—», no como 0 %.
+
+**UT:** `./mvnw test -Dtest='Dashboard*Test,Indicadores*Test,FiltrosDashboard*Test,RefrescoIndicadores*Test,VistaIndicadoresMigracionTest,Bi*Test,VistasBiMigracionTest,DatosPruebaDashboardTest'` · `pnpm test -- src/features/dashboard`.
+
+---
+
+## Pantallas de inicio (Administrador DUBSS, Personal del Comedor y Postulante)
+
+No es un CU: es la pantalla `/panel` de cada rol, con datos reales de `GET /api/v1/panel/administrador`, `/comedor` y `/postulante` (conteos sin datos personales; el del postulante solo trae la convocatoria abierta y si tiene borrador o ya postuló).
+
+- [ ] Como `admin@dubss.com`, `/panel` muestra 6 tarjetas de color (postulaciones pendientes y calificadas, convocatorias abiertas, becas vigentes y suspendidas, asistencias de hoy) y los números coinciden con la BD.
+- [ ] Con una convocatoria abierta se ve su nombre, la fecha de cierre, cuántos días faltan y la barra de postulaciones frente a los cupos; sin ninguna abierta dice «No hay ninguna convocatoria abierta».
+- [ ] Los 8 accesos directos (Convocatorias, Lista priorizada, Auditoría y adjudicación, Publicar resultados, Actas, Padrón de becados, Planillas, Cotejo de asistencia) llevan a su módulo.
+- [ ] Como Personal del Comedor, `/panel` ya no muestra el aviso: tiene su marco (header y menú con «Panel») y 4 tarjetas (becas vigentes, asistencias de hoy con %, registradas por ti, hora del último registro) más el gráfico de 7 días.
+- [ ] Al registrar una asistencia desde la app móvil y recargar `/panel`, «Asistencias de hoy» y «Registradas por ti» suben en 1.
+- [ ] Como Postulante, `/panel` muestra la convocatoria abierta con su cierre y un botón que cambia según el caso: «Postular ahora», «Continuar mi borrador» o, si ya envió, un aviso sin botón.
+- [ ] Las tarjetas «Mi postulación» (estado con su badge y enlace al detalle), «Mi beca» (estado y asistencias; sin beca dice que aún no tiene) y «Avisos sin leer» coinciden con «Mis postulaciones», «Mi beca» y la campana. Un resultado todavía sin publicar se ve «Calificada», no adjudicada.
+- [ ] Los 4 accesos directos del Postulante (Mis postulaciones, Resultados, Mi beca, Perfil) llevan a su pantalla.
+- [ ] `GET /api/v1/panel/administrador` con otro rol → `403` `ERR_AUTH_07`; `/comedor` y `/postulante` con otro rol → `403`; sin sesión → `401`.
+
+**UT:** `./mvnw test -Dtest='PanelServiceTest,PanelRepositoryTest'` · `pnpm test -- src/features/panel src/layouts`.
 
 ---
 
