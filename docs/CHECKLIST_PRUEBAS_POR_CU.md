@@ -511,6 +511,24 @@ Entra con `directivo@dubss.com`. La semilla crea dos convocatorias `[PRUEBA] Das
 
 ---
 
+## Pantallas de inicio (Administrador DUBSS, Personal del Comedor y Postulante)
+
+No es un CU: es la pantalla `/panel` de cada rol, con datos reales de `GET /api/v1/panel/administrador`, `/comedor` y `/postulante` (conteos sin datos personales; el del postulante solo trae la convocatoria abierta y si tiene borrador o ya postuló).
+
+- [ ] Como `admin@dubss.com`, `/panel` muestra 6 tarjetas de color (postulaciones pendientes y calificadas, convocatorias abiertas, becas vigentes y suspendidas, asistencias de hoy) y los números coinciden con la BD.
+- [ ] Con una convocatoria abierta se ve su nombre, la fecha de cierre, cuántos días faltan y la barra de postulaciones frente a los cupos; sin ninguna abierta dice «No hay ninguna convocatoria abierta».
+- [ ] Los 8 accesos directos (Convocatorias, Lista priorizada, Auditoría y adjudicación, Publicar resultados, Actas, Padrón de becados, Planillas, Cotejo de asistencia) llevan a su módulo.
+- [ ] Como Personal del Comedor, `/panel` ya no muestra el aviso: tiene su marco (header y menú con «Panel») y 4 tarjetas (becas vigentes, asistencias de hoy con %, registradas por ti, hora del último registro) más el gráfico de 7 días.
+- [ ] Al registrar una asistencia desde la app móvil y recargar `/panel`, «Asistencias de hoy» y «Registradas por ti» suben en 1.
+- [ ] Como Postulante, `/panel` muestra la convocatoria abierta con su cierre y un botón que cambia según el caso: «Postular ahora», «Continuar mi borrador» o, si ya envió, un aviso sin botón.
+- [ ] Las tarjetas «Mi postulación» (estado con su badge y enlace al detalle), «Mi beca» (estado y asistencias; sin beca dice que aún no tiene) y «Avisos sin leer» coinciden con «Mis postulaciones», «Mi beca» y la campana. Un resultado todavía sin publicar se ve «Calificada», no adjudicada.
+- [ ] Los 4 accesos directos del Postulante (Mis postulaciones, Resultados, Mi beca, Perfil) llevan a su pantalla.
+- [ ] `GET /api/v1/panel/administrador` con otro rol → `403` `ERR_AUTH_07`; `/comedor` y `/postulante` con otro rol → `403`; sin sesión → `401`.
+
+**UT:** `./mvnw test -Dtest='PanelServiceTest,PanelRepositoryTest'` · `pnpm test -- src/features/panel src/layouts`.
+
+---
+
 ## Cierre
 
 - [ ] Todas las casillas de «Resultado» de la tabla 0 llenas.
