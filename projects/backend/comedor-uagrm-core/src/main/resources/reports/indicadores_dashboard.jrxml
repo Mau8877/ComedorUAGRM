@@ -14,6 +14,9 @@
 	<parameter name="TOTAL_FINALISTAS" class="java.lang.String"/>
 	<parameter name="TOTAL_ADJUDICADAS" class="java.lang.String"/>
 	<parameter name="TOTAL_ASISTENCIA" class="java.lang.String"/>
+	<parameter name="RESUMEN_EMBUDO" class="java.lang.String"/>
+	<parameter name="RESUMEN_FACULTADES" class="java.lang.String"/>
+	<parameter name="RESUMEN_CONVOCATORIAS" class="java.lang.String"/>
 	<parameter name="GENERADO_EN" class="java.lang.String"/>
 	<parameter name="GENERADO_POR" class="java.lang.String"/>
 	<field name="mes" class="java.lang.String"/>
@@ -104,6 +107,29 @@
 			</element>
 		</band>
 	</detail>
+	<summary height="110">
+		<element kind="staticText" positionType="Float" x="0" y="14" width="555" height="14" fontSize="10.0" bold="true"
+		         pdfFontName="Helvetica-Bold">
+			<text><![CDATA[Análisis BI]]></text>
+		</element>
+		<element kind="textField" positionType="Float" textAdjust="StretchHeight" x="0" y="30" width="555" height="12">
+			<expression><![CDATA["Embudo: " + $P{RESUMEN_EMBUDO}]]></expression>
+		</element>
+		<element kind="staticText" positionType="Float" x="0" y="46" width="555" height="12" bold="true"
+		         pdfFontName="Helvetica-Bold">
+			<text><![CDATA[Postulación por facultad (de la que más postula a la que menos)]]></text>
+		</element>
+		<element kind="textField" positionType="Float" textAdjust="StretchHeight" x="0" y="59" width="555" height="12">
+			<expression><![CDATA[$P{RESUMEN_FACULTADES}]]></expression>
+		</element>
+		<element kind="staticText" positionType="Float" x="0" y="74" width="555" height="12" bold="true"
+		         pdfFontName="Helvetica-Bold">
+			<text><![CDATA[Comparación entre convocatorias de la gestión]]></text>
+		</element>
+		<element kind="textField" positionType="Float" textAdjust="StretchHeight" x="0" y="87" width="555" height="12">
+			<expression><![CDATA[$P{RESUMEN_CONVOCATORIAS}]]></expression>
+		</element>
+	</summary>
 	<pageFooter height="28">
 		<element kind="textField" x="0" y="2" width="555" height="12" fontSize="8.0">
 			<expression><![CDATA["Generado el " + $P{GENERADO_EN} + " por " + $P{GENERADO_POR}]]></expression>

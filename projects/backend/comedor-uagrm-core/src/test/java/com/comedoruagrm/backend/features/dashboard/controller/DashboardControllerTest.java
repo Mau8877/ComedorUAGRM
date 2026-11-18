@@ -32,6 +32,7 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import com.comedoruagrm.backend.common.exception.NotFoundException;
 import com.comedoruagrm.backend.common.exception.ValidationException;
+import com.comedoruagrm.backend.features.dashboard.dto.BiResponse;
 import com.comedoruagrm.backend.features.dashboard.dto.FiltrosDashboardResponse;
 import com.comedoruagrm.backend.features.dashboard.dto.FiltrosDashboardResponse.ConvocatoriaFiltro;
 import com.comedoruagrm.backend.features.dashboard.dto.FiltrosDashboardResponse.GestionFiltro;
@@ -39,6 +40,9 @@ import com.comedoruagrm.backend.features.dashboard.dto.IndicadoresResponse;
 import com.comedoruagrm.backend.features.dashboard.dto.IndicadoresResponse.GestionResumen;
 import com.comedoruagrm.backend.features.dashboard.dto.IndicadoresResponse.IndicadorMensual;
 import com.comedoruagrm.backend.features.dashboard.dto.IndicadoresResponse.Totales;
+import com.comedoruagrm.backend.features.dashboard.service.BiExcelService;
+import com.comedoruagrm.backend.features.dashboard.service.BiExcelService.ExcelGenerado;
+import com.comedoruagrm.backend.features.dashboard.service.BiService;
 import com.comedoruagrm.backend.features.dashboard.service.FiltrosDashboardService;
 import com.comedoruagrm.backend.features.dashboard.service.IndicadoresPdfService;
 import com.comedoruagrm.backend.features.dashboard.service.IndicadoresPdfService.PdfGenerado;
@@ -68,6 +72,12 @@ class DashboardControllerTest {
 
     @MockitoBean
     private IndicadoresPdfService pdf;
+
+    @MockitoBean
+    private BiService bi;
+
+    @MockitoBean
+    private BiExcelService excel;
 
     @MockitoBean
     private UsuarioAutenticableProvider provider;
@@ -126,6 +136,74 @@ class DashboardControllerTest {
                 .andExpect(jsonPath("$.data.actualizadoEn").value("2026-11-13T06:00:00Z"))
                 .andExpect(jsonPath("$.data.sinDatos").value(false))
                 .andExpect(jsonPath("$.error").doesNotExist());
+    }
+
+    private BiResponse analisis() {
+        return new BiResponse(new GestionResumen(gestion, "2026-II"), null,
+                new BiResponse.Embudo(100, 90, 20, 10, 8),
+                List.of(new BiResponse.Facultad("Facultad de Ciencias", 60, 6, 60.0, 10.0,
+                        List.of(new BiResponse.Carrera("Informática", 60, 6)))),
+                List.of(new BiResponse.ConvocatoriaComparada(convocatoria, "Beca 2026", 10, 100, 20, 10, 10.0, 41.5,
+                        null, true)),
+                List.of(new BiResponse.TramoPuntaje(0, 10, 3)), 41.5,
+                new BiResponse.Cobertura(10, 8, 1, 1, 0, 80.0),
+                new BiResponse.Asistencia(75.5, 12, 2, List.of(new BiResponse.AsistenciaDia(1, 80.0))),
+                List.of(new BiResponse.GestionTendencia(gestion, "2026-II", 100, 10, null, true)),
+                Instant.parse("2026-11-13T06:00:00Z"), false);
+    }
+
+    @Test
+    void bi_da200_conElAnalisisYPasaLosFiltrosAlService() throws Exception {
+        when(bi.consultar(gestion, convocatoria)).thenReturn(analisis());
+
+        mockMvc.perform(get(BASE + "/bi").with(sesion()).param("filter[gestion]", gestion.toString())
+                        .param("filter[convocatoria]", convocatoria.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("success"))
+                .andExpect(jsonPath("$.data.embudo.postulaciones").value(100))
+                .andExpect(jsonPath("$.data.embudo.becasVigentes").value(8))
+                .andExpect(jsonPath("$.data.facultades[0].nombre").value("Facultad de Ciencias"))
+                .andExpect(jsonPath("$.data.facultades[0].carreras[0].nombre").value("Informática"))
+                .andExpect(jsonPath("$.data.convocatorias[0].seleccionada").value(true))
+                .andExpect(jsonPath("$.data.convocatorias[0].variacionPostulaciones").doesNotExist())
+                .andExpect(jsonPath("$.data.cobertura.porcentaje").value(80.0))
+                .andExpect(jsonPath("$.data.asistencia.becasEnRiesgo").value(2))
+                .andExpect(jsonPath("$.data.tendencia[0].etiqueta").value("2026-II"))
+                .andExpect(jsonPath("$.data.sinDatos").value(false))
+                .andExpect(jsonPath("$.error").doesNotExist());
+    }
+
+    @Test
+    void bi_conUnFiltroNoSoportado_da400ErrSys05() throws Exception {
+        mockMvc.perform(get(BASE + "/bi").with(sesion()).param("filter[rol]", "x"))
+                .andExpect(status().isBadRequest());
+
+        verify(bi, never()).consultar(any(), any());
+    }
+
+    @Test
+    void biExcel_da200ConElLibroAdjunto_yElUsuarioDelToken() throws Exception {
+        byte[] contenido = {1, 2, 3};
+        when(excel.generar(directivo, gestion, null)).thenReturn(new ExcelGenerado("bi-2026-ii-20261113.xlsx", contenido));
+
+        mockMvc.perform(get(BASE + "/bi/excel").with(sesion()).param("filter[gestion]", gestion.toString()))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Type",
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .andExpect(header().string("Content-Disposition", org.hamcrest.Matchers.containsString(
+                        "bi-2026-ii-20261113.xlsx")))
+                .andExpect(content().bytes(contenido));
+    }
+
+    @Test
+    void biExcel_sinDatos_da400ErrDas02ConElSobre() throws Exception {
+        when(excel.generar(any(), any(), any())).thenThrow(new com.comedoruagrm.backend.common.exception
+                .ValidationException("ERR_DAS_02", "No hay datos que exportar para esa selección."));
+
+        mockMvc.perform(get(BASE + "/bi/excel").with(sesion()))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value("failed"))
+                .andExpect(jsonPath("$.error").value("ERR_DAS_02"));
     }
 
     @Test
@@ -206,8 +284,10 @@ class DashboardControllerTest {
         mockMvc.perform(get(BASE + "/filtros")).andExpect(status().isUnauthorized());
         mockMvc.perform(get(BASE + "/indicadores")).andExpect(status().isUnauthorized());
         mockMvc.perform(get(BASE + "/indicadores/pdf")).andExpect(status().isUnauthorized());
+        mockMvc.perform(get(BASE + "/bi")).andExpect(status().isUnauthorized());
+        mockMvc.perform(get(BASE + "/bi/excel")).andExpect(status().isUnauthorized());
 
-        verifyNoInteractions(filtros, indicadores, pdf);
+        verifyNoInteractions(filtros, indicadores, pdf, bi, excel);
     }
 
     @Test
@@ -215,8 +295,10 @@ class DashboardControllerTest {
         when(filtros.obtener()).thenThrow(new AccessDeniedException("sin rol"));
         when(indicadores.consultar(any(), any())).thenThrow(new AccessDeniedException("sin rol"));
         when(pdf.generar(any(), any(), any())).thenThrow(new AccessDeniedException("sin rol"));
+        when(bi.consultar(any(), any())).thenThrow(new AccessDeniedException("sin rol"));
+        when(excel.generar(any(), any(), any())).thenThrow(new AccessDeniedException("sin rol"));
 
-        for (String ruta : List.of("/filtros", "/indicadores", "/indicadores/pdf")) {
+        for (String ruta : List.of("/filtros", "/indicadores", "/indicadores/pdf", "/bi", "/bi/excel")) {
             mockMvc.perform(get(BASE + ruta).with(sesion()))
                     .andExpect(status().isForbidden()).andExpect(jsonPath("$.error").value("ERR_AUTH_07"));
         }

@@ -26,6 +26,8 @@ import com.comedoruagrm.backend.features.dashboard.dto.IndicadoresResponse;
 import com.comedoruagrm.backend.features.dashboard.dto.IndicadoresResponse.IndicadorMensual;
 import com.comedoruagrm.backend.features.dashboard.repository.IndicadoresRepository;
 import com.comedoruagrm.backend.features.dashboard.repository.IndicadoresRepository.ConvocatoriaDatos;
+import com.comedoruagrm.backend.features.dashboard.repository.IndicadoresRepository.FilaAsistenciaMes;
+import com.comedoruagrm.backend.features.dashboard.repository.IndicadoresRepository.FilaAsistenciaTotal;
 import com.comedoruagrm.backend.features.dashboard.repository.IndicadoresRepository.FilaMensual;
 import com.comedoruagrm.backend.features.dashboard.repository.IndicadoresRepository.GestionDatos;
 import com.comedoruagrm.backend.features.dashboard.repository.IndicadoresRepository.TotalesFila;
@@ -47,6 +49,7 @@ class IndicadoresServiceTest {
                 new FilaMensual(LocalDate.of(2026, 9, 1), 6, 0, 0),
                 new FilaMensual(LocalDate.of(2026, 12, 1), 4, 4, 2)));
         when(repositorio.ultimaActualizacion()).thenReturn(Optional.of(Instant.parse("2026-11-13T06:00:00Z")));
+        when(repositorio.asistenciaTotal(anyLong(), any())).thenReturn(new FilaAsistenciaTotal(0, 0));
     }
 
     @Test
@@ -157,6 +160,7 @@ class IndicadoresServiceTest {
         when(repositorio.totales(anyLong(), any())).thenReturn(new TotalesFila(0, 0, 0));
         when(repositorio.serieMensual(anyLong(), any())).thenReturn(List.of());
         when(repositorio.ultimaActualizacion()).thenReturn(Optional.empty());
+        when(repositorio.asistenciaTotal(anyLong(), any())).thenReturn(new FilaAsistenciaTotal(0, 0));
 
         IndicadoresResponse r = servicio.consultar(gestion.codigo(), null);
 
@@ -167,7 +171,7 @@ class IndicadoresServiceTest {
     }
 
     @Test
-    void laAsistencia_esNulaEnLosTotalesYEnCadaMes() {
+    void sinAsistenciaQueMedir_losTotalesYCadaMesQuedanEnNull() {
         when(repositorio.gestion(gestion.codigo())).thenReturn(Optional.of(gestion));
         conDatos();
 
@@ -175,6 +179,37 @@ class IndicadoresServiceTest {
 
         assertThat(r.totales().asistenciaPromedio()).isNull();
         assertThat(r.porMes()).allMatch(m -> m.asistencia() == null);
+    }
+
+    @Test
+    void conAsistenciaRegistrada_calculaLaTasaEnLosTotalesYEnSuMes() {
+        when(repositorio.gestion(gestion.codigo())).thenReturn(Optional.of(gestion));
+        conDatos();
+        when(repositorio.asistenciaTotal(anyLong(), any())).thenReturn(new FilaAsistenciaTotal(45, 60));
+        when(repositorio.asistenciaMensual(anyLong(), any())).thenReturn(List.of(
+                new FilaAsistenciaMes(LocalDate.of(2026, 10, 1), 30, 40),
+                new FilaAsistenciaMes(LocalDate.of(2026, 12, 1), 15, 20)));
+
+        IndicadoresResponse r = servicio.consultar(gestion.codigo(), null);
+
+        assertThat(r.totales().asistenciaPromedio()).isEqualTo(75.0);
+        // Septiembre a diciembre sin huecos; la asistencia solo donde hubo registro.
+        assertThat(r.porMes()).extracting(IndicadorMensual::mes)
+                .containsExactly("2026-09", "2026-10", "2026-11", "2026-12");
+        assertThat(r.porMes()).extracting(IndicadorMensual::asistencia).containsExactly(null, 75.0, null, 75.0);
+    }
+
+    @Test
+    void unMesSoloConAsistencia_ampliaLaSerie() {
+        when(repositorio.gestion(gestion.codigo())).thenReturn(Optional.of(gestion));
+        conDatos();
+        when(repositorio.asistenciaMensual(anyLong(), any())).thenReturn(List.of(
+                new FilaAsistenciaMes(LocalDate.of(2027, 1, 1), 9, 10)));
+
+        IndicadoresResponse r = servicio.consultar(gestion.codigo(), null);
+
+        assertThat(r.porMes()).extracting(IndicadorMensual::mes).last().isEqualTo("2027-01");
+        assertThat(r.porMes().get(r.porMes().size() - 1).asistencia()).isEqualTo(90.0);
     }
 
     @Test

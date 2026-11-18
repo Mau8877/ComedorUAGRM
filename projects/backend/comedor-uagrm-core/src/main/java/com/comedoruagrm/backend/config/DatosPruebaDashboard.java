@@ -129,6 +129,43 @@ public class DatosPruebaDashboard implements CommandLineRunner {
         long sinPublicar = convocatoria(gestion, admin, SIN_PUBLICAR, "CERRADA");
         List<Long> otras = enviar(sinPublicar, conEnvio.subList(0, Math.min(20, enviadas)), 3);
         finalistas(otras, admin, 3, 0);
+
+        // Datos para el analisis BI: puntajes de la IA, becas de las adjudicadas y su asistencia reciente.
+        puntajes(postulaciones);
+        puntajes(otras);
+        becasYAsistencia(admin);
+    }
+
+    /** Puntaje de la IA de 0 a 70, repartido entre postulaciones (varios tramos del histograma). */
+    private void puntajes(List<Long> postulaciones) {
+        for (int i = 0; i < postulaciones.size(); i++) {
+            jdbc.update("""
+                    INSERT INTO puntaje_postulacion (modelo_id, postulacion_id, puntaje_total, fecha_calculo)
+                    SELECT m.id, ?, CAST(? AS numeric), now() - interval '20 days'
+                    FROM modelo_preseleccion m WHERE m.activo AND m.eliminado_en IS NULL
+                    """, postulaciones.get(i), String.valueOf(8 + (i * 17) % 60));
+        }
+    }
+
+    /**
+     * Una beca vigente por adjudicada y asistencia de los dias habiles de noviembre; la tasa varia por beca
+     * (alta, media y baja) para que haya becas en riesgo.
+     */
+    private void becasYAsistencia(long admin) {
+        jdbc.update("""
+                INSERT INTO beca (convocatoria_id, postulante_id, adjudicacion_id, fecha_inicio)
+                SELECT p.convocatoria_id, p.postulante_id, a.id, DATE '2026-10-26'
+                FROM adjudicacion a JOIN postulacion p ON p.id = a.postulacion_id
+                WHERE a.resultado = 'ADJUDICADA' AND a.eliminado_en IS NULL
+                """);
+        jdbc.update("""
+                INSERT INTO asistencia (beca_id, registrado_por, fecha)
+                SELECT b.id, ?, d::date
+                FROM beca b
+                CROSS JOIN generate_series(DATE '2026-10-26', DATE '2026-11-17', interval '1 day') d
+                WHERE extract(isodow FROM d) < 6
+                  AND abs(hashtext(b.id::text || d::text)) % 100 < CASE b.id % 3 WHEN 0 THEN 92 WHEN 1 THEN 75 ELSE 35 END
+                """, admin);
     }
 
     private long convocatoria(long gestion, long admin, String nombre, String estado) {

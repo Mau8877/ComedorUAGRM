@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.comedoruagrm.backend.common.exception.ValidationException;
+import com.comedoruagrm.backend.features.dashboard.dto.BiResponse;
 import com.comedoruagrm.backend.features.dashboard.dto.IndicadoresResponse;
 import com.comedoruagrm.backend.features.dashboard.dto.IndicadoresResponse.IndicadorMensual;
 import com.comedoruagrm.backend.features.dashboard.exception.DashboardErrorCodes;
@@ -62,6 +63,7 @@ public class IndicadoresPdfService {
     private static final String SIN_DATOS = "Sin datos";
 
     private final IndicadoresService indicadores;
+    private final BiService bi;
     private final UsuarioService usuarioService;
     private final Clock reloj;
 
@@ -76,16 +78,17 @@ public class IndicadoresPdfService {
     public PdfGenerado generar(UUID actorCodigo, UUID gestion, UUID convocatoria) {
         Usuario actor = usuarioService.obtenerPorCodigo(actorCodigo);
         IndicadoresResponse datos = indicadores.obtener(gestion, convocatoria);
+        BiResponse analisis = bi.obtener(gestion, convocatoria);
         if (datos.sinDatos()) {
             throw new ValidationException(DashboardErrorCodes.ERR_DAS_02,
                     "No hay datos que exportar para esa selección.");
         }
         Instant ahora = reloj.instant();
-        byte[] pdf = renderizar(datos, actor, ahora);
+        byte[] pdf = renderizar(datos, analisis, actor, ahora);
         return new PdfGenerado(nombreArchivo(datos.gestion().etiqueta(), ahora), pdf);
     }
 
-    private byte[] renderizar(IndicadoresResponse datos, Usuario actor, Instant ahora) {
+    private byte[] renderizar(IndicadoresResponse datos, BiResponse analisis, Usuario actor, Instant ahora) {
         try {
             Map<String, Object> parametros = new HashMap<>();
             parametros.put(JRParameter.REPORT_LOCALE, Locale.forLanguageTag("es-BO"));
@@ -98,6 +101,9 @@ public class IndicadoresPdfService {
             parametros.put("TOTAL_FINALISTAS", String.valueOf(datos.totales().finalistas()));
             parametros.put("TOTAL_ADJUDICADAS", String.valueOf(datos.totales().becasAdjudicadas()));
             parametros.put("TOTAL_ASISTENCIA", texto(datos.totales().asistenciaPromedio()));
+            parametros.put("RESUMEN_EMBUDO", resumenEmbudo(analisis));
+            parametros.put("RESUMEN_FACULTADES", resumenFacultades(analisis));
+            parametros.put("RESUMEN_CONVOCATORIAS", resumenConvocatorias(analisis));
             parametros.put("GENERADO_EN", FECHA_HORA.format(ahora.atZone(ZONA)));
             parametros.put("GENERADO_POR", actor.getNombres() + " " + actor.getApellidos());
 
@@ -115,6 +121,55 @@ public class IndicadoresPdfService {
         }
     }
 
+    private static String resumenEmbudo(BiResponse a) {
+        BiResponse.Embudo e = a.embudo();
+        return "postulaciones " + e.postulaciones() + " > precalificadas " + e.precalificadas() + " > finalistas "
+                + e.finalistas() + " > adjudicadas " + e.adjudicadas() + " > becas vigentes " + e.becasVigentes();
+    }
+
+    /** Una linea por facultad: la que mas postula primero. Solo agregados, sin datos personales. */
+    private static String resumenFacultades(BiResponse a) {
+        if (a.facultades().isEmpty()) {
+            return SIN_DATOS;
+        }
+        StringBuilder texto = new StringBuilder();
+        int puesto = 1;
+        for (BiResponse.Facultad f : a.facultades()) {
+            if (puesto > 1) {
+                texto.append('\n');
+            }
+            texto.append(puesto++).append(". ").append(f.nombre()).append(": ").append(f.postulaciones())
+                    .append(" postulaciones (").append(porcentaje(f.porcentajePostulaciones())).append("), ")
+                    .append(f.adjudicadas()).append(" adjudicadas (").append(porcentaje(f.tasaAdjudicacion()))
+                    .append(")");
+        }
+        return texto.toString();
+    }
+
+    private static String resumenConvocatorias(BiResponse a) {
+        if (a.convocatorias().isEmpty()) {
+            return SIN_DATOS;
+        }
+        StringBuilder texto = new StringBuilder();
+        for (BiResponse.ConvocatoriaComparada c : a.convocatorias()) {
+            if (texto.length() > 0) {
+                texto.append('\n');
+            }
+            texto.append(c.nombre()).append(": ").append(c.postulaciones()).append(" postulaciones");
+            if (c.variacionPostulaciones() != null) {
+                texto.append(" (").append(c.variacionPostulaciones() > 0 ? "+" : "")
+                        .append(porcentaje(c.variacionPostulaciones())).append(" vs la anterior)");
+            }
+            texto.append(", ").append(c.adjudicadas()).append(" adjudicadas (")
+                    .append(porcentaje(c.tasaAdjudicacion())).append(")");
+        }
+        return texto.toString();
+    }
+
+    private static String porcentaje(Double valor) {
+        return valor == null ? "s/d" : String.format(Locale.forLanguageTag("es-BO"), "%.1f %%", valor);
+    }
+
     private static List<Map<String, ?>> filas(List<IndicadorMensual> porMes) {
         List<Map<String, ?>> filas = new ArrayList<>();
         for (IndicadorMensual m : porMes) {
@@ -129,7 +184,7 @@ public class IndicadoresPdfService {
         return filas;
     }
 
-    // TODO CU-10: mientras no exista el registro de asistencia, el valor es null y se muestra «Sin datos».
+    // * Sin asistencia que medir (CU10) el valor es null y se muestra «Sin datos».
     private static String texto(Double asistencia) {
         return asistencia == null ? SIN_DATOS : String.format(Locale.forLanguageTag("es-BO"), "%.1f %%", asistencia);
     }

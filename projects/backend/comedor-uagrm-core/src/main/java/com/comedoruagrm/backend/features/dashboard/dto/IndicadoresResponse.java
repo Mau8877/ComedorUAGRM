@@ -10,7 +10,7 @@ import java.util.UUID;
  * * `gestion` es null si todavia no hay gestiones; `convocatoria` es null cuando se piden «Todas».
  * * `actualizadoEn` es null si el lote nunca se ejecuto; `sinDatos` es verdadero si todos los totales son cero.
  * * `mes` va como `yyyy-MM`.
- * TODO: asistenciaPromedio y asistencia valen null hasta que exista el registro de asistencia (CU-10).
+ * * asistenciaPromedio y asistencia (en %) salen del registro de asistencia (CU10); valen null si no hubo asistencia que medir.
  */
 public record IndicadoresResponse(GestionResumen gestion, ConvocatoriaResumen convocatoria, Totales totales,
         List<IndicadorMensual> porMes, Instant actualizadoEn, boolean sinDatos) {

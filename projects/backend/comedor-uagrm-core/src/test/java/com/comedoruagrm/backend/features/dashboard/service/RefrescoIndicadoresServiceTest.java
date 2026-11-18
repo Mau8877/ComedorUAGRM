@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -15,6 +16,7 @@ import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InOrder;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -56,8 +58,15 @@ class RefrescoIndicadoresServiceTest {
         boolean salioBien = service.refrescar();
 
         assertThat(salioBien).isTrue();
-        verify(jdbc).execute("REFRESH MATERIALIZED VIEW CONCURRENTLY mv_indicadores_convocatoria");
-        assertThat(logs.list).hasSize(1);
+        // Cada vista, en el orden en que depende una de otra (mv_bi_convocatoria lee mv_bi_asistencia_dia).
+        InOrder orden = inOrder(jdbc);
+        for (String vista : RefrescoIndicadoresService.VISTAS) {
+            orden.verify(jdbc).execute("REFRESH MATERIALIZED VIEW CONCURRENTLY " + vista);
+        }
+        assertThat(RefrescoIndicadoresService.VISTAS).startsWith("mv_indicadores_convocatoria")
+                .containsExactly("mv_indicadores_convocatoria", "mv_bi_asistencia_dia", "mv_bi_convocatoria",
+                        "mv_bi_carrera_convocatoria", "mv_bi_puntaje_convocatoria");
+        assertThat(logs.list).hasSize(5);
         assertThat(logs.list.get(0).getLevel().toString()).isEqualTo("INFO");
         assertThat(logs.list.get(0).getArgumentArray()).hasSize(2);
     }
@@ -69,8 +78,9 @@ class RefrescoIndicadoresServiceTest {
 
         boolean salioBien = service.refrescar();
 
+        // Una vista que falla no impide refrescar las demas: cada una conserva su dato anterior.
         assertThat(salioBien).isFalse();
-        assertThat(logs.list).hasSize(1);
+        assertThat(logs.list).hasSize(5);
         ILoggingEvent evento = logs.list.get(0);
         assertThat(evento.getLevel().toString()).isEqualTo("ERROR");
         // Solo el tipo del error: nunca el mensaje, que podria traer datos.
@@ -85,8 +95,10 @@ class RefrescoIndicadoresServiceTest {
         boolean refresco = service.refrescarSiEstaVacia();
 
         assertThat(refresco).isTrue();
-        verify(jdbc).execute("REFRESH MATERIALIZED VIEW mv_indicadores_convocatoria");
-        verify(jdbc, never()).execute("REFRESH MATERIALIZED VIEW CONCURRENTLY mv_indicadores_convocatoria");
+        for (String vista : RefrescoIndicadoresService.VISTAS) {
+            verify(jdbc).execute("REFRESH MATERIALIZED VIEW " + vista);
+            verify(jdbc, never()).execute("REFRESH MATERIALIZED VIEW CONCURRENTLY " + vista);
+        }
     }
 
     @Test

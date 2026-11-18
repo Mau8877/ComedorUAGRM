@@ -2,6 +2,8 @@ package com.comedoruagrm.backend.features.dashboard.service;
 
 import static net.logstash.logback.argument.StructuredArguments.kv;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -10,7 +12,7 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Refresca por lote la vista `mv_indicadores_convocatoria` del dashboard (CU12).
+ * Refresca por lote las vistas del dashboard (CU12): `mv_indicadores_convocatoria` y las `mv_bi_*`.
  *
  * * `refrescar` usa `REFRESH ... CONCURRENTLY` (la vista tiene un indice unico para eso): quien consulta el
  * * dashboard no se bloquea mientras tanto. Un fallo se loguea como ERROR y no se propaga: la aplicacion sigue en
@@ -29,11 +31,18 @@ public class RefrescoIndicadoresService {
 
     static final String VISTA = "mv_indicadores_convocatoria";
 
+    /**
+     * Todas las vistas del dashboard, en el orden en que se refrescan: `mv_bi_convocatoria` lee de
+     * `mv_bi_asistencia_dia` (becas en riesgo), asi que esa va primero.
+     */
+    public static final List<String> VISTAS = List.of(VISTA, "mv_bi_asistencia_dia", "mv_bi_convocatoria",
+            "mv_bi_carrera_convocatoria", "mv_bi_puntaje_convocatoria");
+
     private final JdbcTemplate jdbc;
 
     /** Refresca la vista sin bloquear las lecturas. Devuelve si salio bien; un fallo no se propaga. */
     public boolean refrescar() {
-        return ejecutar("REFRESH MATERIALIZED VIEW CONCURRENTLY " + VISTA);
+        return refrescarTodas("REFRESH MATERIALIZED VIEW CONCURRENTLY ");
     }
 
     /** Refresca la vista solo si no tiene ninguna fila (primer arranque). Devuelve si hizo el refresco y salio bien. */
@@ -48,7 +57,16 @@ public class RefrescoIndicadoresService {
                     kv("error", e.getClass().getSimpleName()));
             return false;
         }
-        return ejecutar("REFRESH MATERIALIZED VIEW " + VISTA);
+        return refrescarTodas("REFRESH MATERIALIZED VIEW ");
+    }
+
+    /** Refresca cada vista aunque una falle (cada una conserva su dato anterior); es exito solo si todas salen bien. */
+    private boolean refrescarTodas(String prefijo) {
+        boolean todas = true;
+        for (String vista : VISTAS) {
+            todas &= ejecutar(prefijo + vista);
+        }
+        return todas;
     }
 
     private boolean ejecutar(String sentencia) {

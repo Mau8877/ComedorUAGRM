@@ -38,7 +38,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * CU12 de punta a punta contra un Postgres real: los indicadores del Directivo salen de la vista (gestion vigente,
- * filtros, sin datos, borradores y resultados sin publicar que no cuentan, asistencia sin datos), el PDF, que
+ * filtros, sin datos, borradores y resultados sin publicar que no cuentan, asistencia real del CU10), el analisis BI,
+ * el PDF y el Excel, que
  * consultar no escribe nada, los permisos (403/401/404), el rendimiento con 20 000 postulaciones y el refresco.
  */
 // Muchas peticiones desde una misma IP: se sube el limite para que el rate limit no interfiera con el test.
@@ -129,8 +130,9 @@ class DashboardIntegrationTest {
     @AfterEach
     void limpiar() {
         borrarTodo();
-        // La vista guarda lo que vio la ultima vez: se refresca vacia para que otros tests no la vean sucia.
-        jdbc.execute("REFRESH MATERIALIZED VIEW mv_indicadores_convocatoria");
+        // Las vistas guardan lo que vieron la ultima vez: se refrescan vacias para que otros tests no las vean sucias.
+        refresco.refrescarSiEstaVacia();
+        RefrescoIndicadoresService.VISTAS.forEach(v -> jdbc.execute("REFRESH MATERIALIZED VIEW " + v));
     }
 
     // ---- CA01, CA05: gestion vigente y lote ----
@@ -231,11 +233,116 @@ class DashboardIntegrationTest {
     }
 
     @Test
-    void laAsistencia_vieneNulaEnLosTotalesYEnCadaMes() throws Exception {
+    void sinAsistenciaRegistrada_vieneNulaEnLosTotalesYEnCadaMes() throws Exception {
         JsonNode data = datos(consultar("").andExpect(status().isOk()));
 
         assertThat(data.get("totales").get("asistenciaPromedio").isNull()).isTrue();
         data.get("porMes").forEach(m -> assertThat(m.get("asistencia").isNull()).isTrue());
+    }
+
+    // ---- Asistencia real (CU10) ----
+
+    @Test
+    void conAsistenciaRegistrada_laTasaSaleDelRegistro_enLosTotalesYEnElMes() throws Exception {
+        long becaUno = beca(convocatoriaA, "2026-10-01");
+        long becaDos = beca(convocatoriaA, "2026-10-01");
+        // Tres dias de servicio de octubre: asisten dos, dos y uno de los dos becados.
+        asistencia(becaUno, "2026-10-12");
+        asistencia(becaDos, "2026-10-12");
+        asistencia(becaUno, "2026-10-13");
+        asistencia(becaDos, "2026-10-13");
+        asistencia(becaUno, "2026-10-14");
+        assertThat(refresco.refrescar()).isTrue();
+
+        JsonNode data = datos(consultar("").andExpect(status().isOk()));
+
+        // 5 asistencias de 6 esperadas = 83,3 %; solo octubre tiene registro.
+        assertThat(data.get("totales").get("asistenciaPromedio").asDouble()).isEqualTo(83.3);
+        assertThat(data.get("porMes").get(0).get("asistencia").isNull()).isTrue();
+        assertThat(data.get("porMes").get(1).get("asistencia").asDouble()).isEqualTo(83.3);
+        // Filtrar por la otra convocatoria no trae asistencia.
+        consultar("?filter[convocatoria]=" + codigoConvocatoria(convocatoriaB))
+                .andExpect(jsonPath("$.data.totales.asistenciaPromedio").doesNotExist());
+    }
+
+    // ---- Analisis BI ----
+
+    @Test
+    void bi_sinFiltros_traeElEmbudoYLasComparacionesDeLaGestionVigente() throws Exception {
+        mockMvc.perform(get(BASE + "/bi").with(directivo)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("success"))
+                .andExpect(jsonPath("$.data.gestion.etiqueta").value("GI-VIG"))
+                .andExpect(jsonPath("$.data.embudo.postulaciones").value(5))
+                .andExpect(jsonPath("$.data.embudo.finalistas").value(3))
+                .andExpect(jsonPath("$.data.embudo.adjudicadas").value(1))
+                .andExpect(jsonPath("$.data.facultades[0].postulaciones").value(5))
+                .andExpect(jsonPath("$.data.facultades[0].porcentajePostulaciones").value(100.0))
+                .andExpect(jsonPath("$.data.facultades[0].carreras[0].postulaciones").value(5))
+                .andExpect(jsonPath("$.data.convocatorias.length()").value(2))
+                .andExpect(jsonPath("$.data.convocatorias[0].nombre").value("Conv A"))
+                .andExpect(jsonPath("$.data.convocatorias[1].variacionPostulaciones").value(-33.3))
+                .andExpect(jsonPath("$.data.puntaje.length()").value(7))
+                .andExpect(jsonPath("$.data.asistencia.porDiaSemana.length()").value(7))
+                .andExpect(jsonPath("$.data.tendencia.length()").value(2))
+                .andExpect(jsonPath("$.data.sinDatos").value(false))
+                .andExpect(jsonPath("$.data.actualizadoEn").isNotEmpty())
+                .andExpect(jsonPath("$.error").doesNotExist());
+    }
+
+    @Test
+    void bi_conConvocatoria_achicaElEmbudo_peroElComparativoSigueCompletoYMarcaLaElegida() throws Exception {
+        mockMvc.perform(get(BASE + "/bi").with(directivo).param("filter[convocatoria]",
+                codigoConvocatoria(convocatoriaB).toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.convocatoria.nombre").value("Conv B"))
+                .andExpect(jsonPath("$.data.embudo.postulaciones").value(2))
+                .andExpect(jsonPath("$.data.convocatorias.length()").value(2))
+                .andExpect(jsonPath("$.data.convocatorias[0].seleccionada").value(false))
+                .andExpect(jsonPath("$.data.convocatorias[1].seleccionada").value(true));
+    }
+
+    @Test
+    void bi_conPuntajesDeLaIa_armaElHistogramaYElPromedio() throws Exception {
+        long p = enviada(convocatoriaA, "2026-10-06T15:00:00Z");
+        fx.puntajeIa(p, "55.00", "{}");
+        long q = enviada(convocatoriaA, "2026-10-07T15:00:00Z");
+        fx.puntajeIa(q, "65.00", "{}");
+        assertThat(refresco.refrescar()).isTrue();
+
+        mockMvc.perform(get(BASE + "/bi").with(directivo).param("filter[convocatoria]",
+                codigoConvocatoria(convocatoriaA).toString()))
+                .andExpect(jsonPath("$.data.embudo.precalificadas").value(2))
+                .andExpect(jsonPath("$.data.puntaje[5].cantidad").value(1))
+                .andExpect(jsonPath("$.data.puntaje[6].cantidad").value(1))
+                .andExpect(jsonPath("$.data.puntajePromedio").value(60.0));
+    }
+
+    @Test
+    void bi_unaGestionSinDatos_responde200ConSinDatos_yUnaInexistenteDa404() throws Exception {
+        mockMvc.perform(get(BASE + "/bi").with(directivo).param("filter[gestion]",
+                codigoGestion(gestionVieja).toString()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.sinDatos").value(true))
+                .andExpect(jsonPath("$.data.embudo.postulaciones").value(0))
+                .andExpect(jsonPath("$.data.facultades").isEmpty());
+        mockMvc.perform(get(BASE + "/bi").with(directivo).param("filter[gestion]", UUID.randomUUID().toString()))
+                .andExpect(status().isNotFound()).andExpect(jsonPath("$.error").value("ERR_DAS_01"));
+        mockMvc.perform(get(BASE + "/bi/excel").with(directivo).param("filter[gestion]",
+                codigoGestion(gestionVieja).toString()))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.error").value("ERR_DAS_02"));
+    }
+
+    @Test
+    void elExcel_esUnLibroXlsxQueSeDescargaComoAdjunto() throws Exception {
+        MvcResult resultado = mockMvc.perform(get(BASE + "/bi/excel").with(directivo)).andExpect(status().isOk())
+                .andReturn();
+
+        byte[] libro = resultado.getResponse().getContentAsByteArray();
+        // Un .xlsx es un zip: empieza por «PK».
+        assertThat(new String(libro, 0, 2, StandardCharsets.ISO_8859_1)).isEqualTo("PK");
+        assertThat(resultado.getResponse().getContentType())
+                .isEqualTo("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        assertThat(resultado.getResponse().getHeader(HttpHeaders.CONTENT_DISPOSITION))
+                .startsWith("attachment; filename=\"bi-gi-vig-").endsWith(".xlsx\"");
     }
 
     // ---- CA09 ----
@@ -248,6 +355,8 @@ class DashboardIntegrationTest {
         consultar("?filter[convocatoria]=" + codigoConvocatoria(convocatoriaA)).andExpect(status().isOk());
         mockMvc.perform(get(BASE + "/filtros").with(directivo)).andExpect(status().isOk());
         mockMvc.perform(get(BASE + "/indicadores/pdf").with(directivo)).andExpect(status().isOk());
+        mockMvc.perform(get(BASE + "/bi").with(directivo)).andExpect(status().isOk());
+        mockMvc.perform(get(BASE + "/bi/excel").with(directivo)).andExpect(status().isOk());
 
         assertThat(huella()).isEqualTo(antes);
     }
@@ -257,7 +366,7 @@ class DashboardIntegrationTest {
     @Test
     void unAdministradorOUnPostulante_dan403ErrAuth07_enTodasLasRutas() throws Exception {
         for (RequestPostProcessor sesion : List.of(admin, postulante)) {
-            for (String ruta : List.of("/filtros", "/indicadores", "/indicadores/pdf")) {
+            for (String ruta : List.of("/filtros", "/indicadores", "/indicadores/pdf", "/bi", "/bi/excel")) {
                 mockMvc.perform(get(BASE + ruta).with(sesion)).andExpect(status().isForbidden())
                         .andExpect(jsonPath("$.error").value("ERR_AUTH_07"));
             }
@@ -266,7 +375,7 @@ class DashboardIntegrationTest {
 
     @Test
     void sinSesion_dan401_yUnaGestionInexistenteDa404() throws Exception {
-        for (String ruta : List.of("/filtros", "/indicadores", "/indicadores/pdf")) {
+        for (String ruta : List.of("/filtros", "/indicadores", "/indicadores/pdf", "/bi", "/bi/excel")) {
             mockMvc.perform(get(BASE + ruta)).andExpect(status().isUnauthorized());
         }
         consultar("?filter[gestion]=" + UUID.randomUUID()).andExpect(status().isNotFound())
@@ -383,6 +492,19 @@ class DashboardIntegrationTest {
         return postulacion;
     }
 
+    private long beca(long convocatoria, String inicio) {
+        long postulante = fx.postulante(String.valueOf(siguienteCi++));
+        return jdbc.queryForObject("""
+                INSERT INTO beca (convocatoria_id, postulante_id, estado, fecha_inicio)
+                VALUES (?, ?, CAST('VIGENTE' AS estado_beca), CAST(? AS date)) RETURNING id""", Long.class,
+                convocatoria, postulante, inicio);
+    }
+
+    private void asistencia(long beca, String fecha) {
+        jdbc.update("INSERT INTO asistencia (beca_id, registrado_por, fecha) VALUES (?, ?, CAST(? AS date))", beca,
+                adminId, fecha);
+    }
+
     private void adjudicar(long postulacion, String resultado, String fecha) {
         fx.adjudicacion(postulacion, resultado, "80.00", adminId);
         jdbc.update("UPDATE adjudicacion SET fecha_adjudicacion = CAST(? AS timestamptz) WHERE postulacion_id = ?",
@@ -407,6 +529,8 @@ class DashboardIntegrationTest {
                     || ',adjudicacion=' || (SELECT count(*) FROM adjudicacion)
                     || ',publicacion=' || (SELECT count(*) FROM publicacion_resultado)
                     || ',convocatoria=' || (SELECT count(*) FROM convocatoria)
+                    || ',beca=' || (SELECT count(*) FROM beca)
+                    || ',asistencia=' || (SELECT count(*) FROM asistencia)
                     || ',vista=' || (SELECT coalesce(sum(postulaciones_recibidas), 0) FROM mv_indicadores_convocatoria)
                     || ',calculado=' || (SELECT max(calculado_en) FROM mv_indicadores_convocatoria)
                 """, String.class));
@@ -435,6 +559,9 @@ class DashboardIntegrationTest {
 
     // Deja la base vacia al terminar: los demas tests de integracion no deben ver estos datos.
     private void borrarTodo() {
+        jdbc.update("DELETE FROM asistencia");
+        jdbc.update("DELETE FROM movimiento_beca");
+        jdbc.update("DELETE FROM beca");
         jdbc.update("DELETE FROM acta_adjudicacion");
         jdbc.update("DELETE FROM publicacion_resultado");
         jdbc.update("DELETE FROM adjudicacion");
