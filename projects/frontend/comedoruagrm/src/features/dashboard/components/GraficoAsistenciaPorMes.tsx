@@ -1,11 +1,15 @@
+import { CalendarCheckIcon } from 'lucide-react'
+
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import type { ChartConfig } from '@/components/ui/chart'
 
 import type { IndicadorMensual } from '../types'
 import { formatearMes } from './formato'
+import { TituloPanel } from './ChipIcono'
+import { estiloTarjeta } from './tonos'
 
 const CONFIG = { asistencia: { label: 'Asistencia (%)', color: 'var(--accent)' } } satisfies ChartConfig
 
@@ -14,9 +18,9 @@ export function GraficoAsistenciaPorMes({ datos }: { datos: IndicadorMensual[] }
   const hayDatos = datos.some((d) => d.asistencia !== null)
   const serie = datos.map((d) => ({ mes: formatearMes(d.mes), asistencia: d.asistencia }))
   return (
-    <Card>
+    <Card className={estiloTarjeta('success')}>
       <CardHeader>
-        <CardTitle>Asistencia por mes</CardTitle>
+        <TituloPanel icono={CalendarCheckIcon} tono="success">Asistencia por mes</TituloPanel>
       </CardHeader>
       <CardContent>
         {!hayDatos ? (

@@ -1,9 +1,13 @@
+import { GraduationCapIcon } from 'lucide-react'
+
 import { useState } from 'react'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 
 import type { FacultadBi } from '../types'
 import { formatearNumero, formatearPorcentajeONulo } from './formato'
+import { TituloPanel } from './ChipIcono'
+import { estiloTarjeta } from './tonos'
 
 /**
  * Qué facultad se postula más, comparada con sus adjudicadas (CU12). Al elegir una facultad se ven sus carreras.
@@ -16,9 +20,9 @@ export function RankingFacultades({ facultades }: { facultades: FacultadBi[] }) 
   const detalle = facultades.find((f) => f.nombre === elegida)
 
   return (
-    <Card>
+    <Card className={estiloTarjeta('accent')}>
       <CardHeader>
-        <CardTitle>Postulaciones por facultad</CardTitle>
+        <TituloPanel icono={GraduationCapIcon} tono="accent">Postulaciones por facultad</TituloPanel>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         {facultades.length === 0 ? (

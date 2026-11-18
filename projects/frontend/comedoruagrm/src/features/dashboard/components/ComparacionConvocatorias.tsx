@@ -1,7 +1,11 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ScaleIcon } from 'lucide-react'
+
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 
 import type { ConvocatoriaComparada } from '../types'
 import { formatearNumero, formatearPorcentajeONulo, formatearVariacion } from './formato'
+import { TituloPanel } from './ChipIcono'
+import { estiloTarjeta } from './tonos'
 
 interface Props {
   convocatorias: ConvocatoriaComparada[]
@@ -12,9 +16,9 @@ interface Props {
 /** Comparación entre convocatorias de la gestión, con su variación frente a la anterior (CU12). */
 export function ComparacionConvocatorias({ convocatorias, onElegir }: Props) {
   return (
-    <Card>
+    <Card className={estiloTarjeta('info')}>
       <CardHeader>
-        <CardTitle>Comparación entre convocatorias</CardTitle>
+        <TituloPanel icono={ScaleIcon} tono="info">Comparación entre convocatorias</TituloPanel>
       </CardHeader>
       <CardContent className="overflow-x-auto">
         {convocatorias.length === 0 ? (

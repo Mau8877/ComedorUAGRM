@@ -1,11 +1,15 @@
+import { CalendarCheckIcon } from 'lucide-react'
+
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import type { ChartConfig } from '@/components/ui/chart'
 
 import type { AsistenciaBi } from '../types'
 import { formatearNumero, formatearPorcentajeONulo, nombreDia } from './formato'
+import { TituloPanel } from './ChipIcono'
+import { estiloTarjeta } from './tonos'
 
 const CONFIG = { tasa: { label: 'Asistencia (%)', color: 'var(--success)' } } satisfies ChartConfig
 
@@ -14,9 +18,9 @@ export function AsistenciaPorDiaSemana({ asistencia }: { asistencia: AsistenciaB
   const hayDatos = asistencia.diasConRegistro > 0
   const serie = asistencia.porDiaSemana.map((d) => ({ dia: nombreDia(d.dia), tasa: d.tasa }))
   return (
-    <Card>
+    <Card className={estiloTarjeta('success')}>
       <CardHeader>
-        <CardTitle>Asistencia por día de la semana</CardTitle>
+        <TituloPanel icono={CalendarCheckIcon} tono="success">Asistencia por día de la semana</TituloPanel>
         {hayDatos && (
           <p className="text-xs text-muted-foreground">
             Promedio {formatearPorcentajeONulo(asistencia.tasaPromedio)} ·{' '}

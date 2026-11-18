@@ -1,10 +1,14 @@
+import { SparklesIcon } from 'lucide-react'
+
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import type { ChartConfig } from '@/components/ui/chart'
 
 import type { TramoPuntaje } from '../types'
+import { TituloPanel } from './ChipIcono'
+import { estiloTarjeta } from './tonos'
 
 const CONFIG = { cantidad: { label: 'Postulaciones', color: 'var(--info)' } } satisfies ChartConfig
 
@@ -19,9 +23,9 @@ export function HistogramaPuntajes({
   const hayDatos = tramos.some((t) => t.cantidad > 0)
   const serie = tramos.map((t) => ({ tramo: `${t.desde}–${t.hasta}`, cantidad: t.cantidad }))
   return (
-    <Card>
+    <Card className={estiloTarjeta('info')}>
       <CardHeader>
-        <CardTitle>Distribución de puntajes de la IA</CardTitle>
+        <TituloPanel icono={SparklesIcon} tono="info">Distribución de puntajes de la IA</TituloPanel>
         {promedio !== null && (
           <p className="text-xs text-muted-foreground">
             Promedio: {String(promedio).replace('.', ',')} de 70

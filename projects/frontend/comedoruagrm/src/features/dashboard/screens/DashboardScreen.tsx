@@ -1,3 +1,4 @@
+import { AwardIcon, CalendarCheckIcon, InboxIcon, StarIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -198,18 +199,26 @@ export function DashboardScreen({ titulo, activeHref, usuarioActual }: Dashboard
 
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <TarjetaIndicador
+                tono="primary"
+                icono={InboxIcon}
                 titulo="Postulaciones recibidas"
                 valor={formatearNumero(datos.totales.postulacionesRecibidas)}
               />
               <TarjetaIndicador
+                tono="warning"
+                icono={StarIcon}
                 titulo="Finalistas"
                 valor={formatearNumero(datos.totales.finalistas)}
               />
               <TarjetaIndicador
+                tono="accent"
+                icono={AwardIcon}
                 titulo="Becas adjudicadas"
                 valor={formatearNumero(datos.totales.becasAdjudicadas)}
               />
               <TarjetaIndicador
+                tono="success"
+                icono={CalendarCheckIcon}
                 titulo="Asistencia promedio"
                 valor={
                   datos.totales.asistenciaPromedio === null
@@ -238,7 +247,7 @@ export function DashboardScreen({ titulo, activeHref, usuarioActual }: Dashboard
 
             {analisis && !analisis.sinDatos && (
               <>
-                <h3 className="font-heading text-lg">Análisis BI</h3>
+                <h3 className="border-l-4 border-l-accent pl-3 font-heading text-lg">Análisis BI</h3>
                 <div className="grid gap-4 lg:grid-cols-2">
                   <EmbudoProceso embudo={analisis.embudo} />
                   <RankingFacultades facultades={analisis.facultades} />

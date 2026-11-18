@@ -1,11 +1,15 @@
+import { TrendingUpIcon } from 'lucide-react'
+
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import type { ChartConfig } from '@/components/ui/chart'
 
 import type { GestionTendencia } from '../types'
 import { formatearVariacion } from './formato'
+import { TituloPanel } from './ChipIcono'
+import { estiloTarjeta } from './tonos'
 
 const CONFIG = {
   postulaciones: { label: 'Postulaciones', color: 'var(--primary)' },
@@ -16,9 +20,9 @@ const CONFIG = {
 export function TendenciaGestiones({ tendencia }: { tendencia: GestionTendencia[] }) {
   const actual = tendencia.find((g) => g.seleccionada)
   return (
-    <Card>
+    <Card className={estiloTarjeta('primary')}>
       <CardHeader>
-        <CardTitle>Tendencia entre gestiones</CardTitle>
+        <TituloPanel icono={TrendingUpIcon} tono="primary">Tendencia entre gestiones</TituloPanel>
         {actual && (
           <p className="text-xs text-muted-foreground">
             Gestión {actual.etiqueta}: {formatearVariacion(actual.variacionPostulaciones)} de

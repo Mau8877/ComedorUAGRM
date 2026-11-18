@@ -1,7 +1,11 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { FunnelIcon } from 'lucide-react'
+
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 
 import type { Embudo } from '../types'
 import { formatearNumero, formatearPorcentajeONulo } from './formato'
+import { TituloPanel } from './ChipIcono'
+import { estiloTarjeta } from './tonos'
 
 /** Etapas del proceso, de la postulación a la beca vigente (CU12). */
 export function EmbudoProceso({ embudo }: { embudo: Embudo }) {
@@ -14,9 +18,9 @@ export function EmbudoProceso({ embudo }: { embudo: Embudo }) {
   ]
   const maximo = Math.max(1, ...etapas.map((e) => e.valor))
   return (
-    <Card>
+    <Card className={estiloTarjeta('primary')}>
       <CardHeader>
-        <CardTitle>Embudo del proceso</CardTitle>
+        <TituloPanel icono={FunnelIcon} tono="primary">Embudo del proceso</TituloPanel>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         {etapas.map((etapa, i) => {
