@@ -280,7 +280,9 @@ services:
 
   # Contenedor temporal para crear el bucket automáticamente
   minio-init:
-    image: minio/mc
+    # * minio/mc ya no está en Docker Hub (MinIO dejó de publicar imágenes).
+    # * El cliente de Bitnami trae el mismo `mc` en el PATH.
+    image: bitnamilegacy/minio-client
     container_name: comedor-uagrm-minio-init
     environment:
       - MINIO_ROOT_USER=${MINIO_ROOT_USER}
