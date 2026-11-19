@@ -161,7 +161,7 @@ class PlanillaIntegrationTest {
 
         String texto = textoDelPdf(archivos.get(ruta));
         assertThat(texto).contains("Conv PLAINT", "Becados vigentes: 2", "01/09/2026 al 30/09/2026",
-                "Generada el", "Admin Prueba", "2200100", "2200101");
+                "Generado el", "Admin Prueba", "2200100", "2200101");
         // Por apellido: «Dos» va antes que «Uno». Carla (baja) no entra.
         assertThat(texto.indexOf("Dos Beto")).isPositive().isLessThan(texto.indexOf("Uno Ana"));
         assertThat(texto).doesNotContain("Tres Carla").doesNotContain("2200102");
