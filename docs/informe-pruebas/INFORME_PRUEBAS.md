@@ -30,7 +30,7 @@ Ya existían antes de este trabajo: Checkstyle, ESLint, `flutter analyze`, Ruff 
 | App móvil (Flutter) | 310 | **todas pasan** | **78,7 % líneas** (2841 de 3610) |
 | API (Bruno) | 191 peticiones, 444 aserciones, los 26 CU y las notificaciones push | **todas pasan** en local; se corre en local, no en el CI | — |
 | E2E (Playwright) | 5 pruebas (4 flujos) | **todas pasan** | — |
-| Rendimiento (k6) | 1 script | **no ejecutado localmente** (ver 4.3) | — |
+| Rendimiento (k6) | 1 script | **ejecutado una vez en GitHub: latencia muy buena (p95 13,9 ms) pero el umbral de errores falló por un error del script, ya corregido; falta repetir** (ver 4.3) | — |
 
 ---
 
@@ -160,7 +160,7 @@ Limitación: el flujo de postulación llega hasta guardar el borrador; no envía
 
 Script: `tests/k6/carga-api.js` (rampa de 10 a 20 usuarios virtuales durante 55 s sobre salud, carreras, convocatorias, indicadores y bitácora; umbrales: menos de 1 % de errores y p95 por debajo de 800 ms). Workflow manual: `.github/workflows/k6.yml` (*Run workflow* en la pestaña Actions; sube `k6-resumen.json`).
 
-**k6 no está instalado en esta máquina y no lo ejecuté aquí, así que no hay resultados de rendimiento que mostrar todavía.** Los números salen de la primera corrida del workflow.
+**Primera corrida (la hizo Mau con el workflow, 20 usuarios virtuales, 55 s):** 619 iteraciones y 3096 peticiones; tiempo de respuesta promedio 7,17 ms, mediana 6,1 ms, p95 13,9 ms y máximo 287,75 ms (el umbral de p95 menor a 800 ms se cumplió con mucho margen). **El umbral de errores falló: 19,99 % de peticiones fallidas**, es decir, exactamente 1 de cada 5. La causa más probable es un error del propio script: una de las cinco peticiones (`/dashboard/indicadores`) la hacía con el token del administrador y ese endpoint es solo del rol Directivo, que responde 403. Ya corregí el script para que use una sesión de directivo para esa petición; **falta repetir la corrida para confirmar que baja a 0 % de errores** (no lo he podido ejecutar yo).
 
 ### 4.4 Pipeline de integración continua
 
