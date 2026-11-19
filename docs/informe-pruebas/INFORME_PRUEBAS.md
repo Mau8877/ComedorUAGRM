@@ -28,7 +28,7 @@ Ya existían antes de este trabajo: Checkstyle, ESLint, `flutter analyze`, Ruff 
 | Backend core (JUnit) | 2032 (1 omitida) | **todas pasan** con Redis y Docker encendidos (ver 3.1) | **97,0 % líneas**, 84,6 % ramas, 97,3 % métodos |
 | Panel web (Vitest) | 1296 en 147 archivos | **todas pasan** | **83,4 % líneas**, 82,2 % sentencias, 74,3 % ramas, 78,8 % funciones |
 | App móvil (Flutter) | 310 | **todas pasan** | **78,7 % líneas** (2841 de 3610) |
-| API (Bruno) | 191 peticiones, 444 aserciones, los 26 CU y las notificaciones push | **todas pasan** en local; el CI corre 181 (excluye las 10 que usan MinIO) | — |
+| API (Bruno) | 191 peticiones, 444 aserciones, los 26 CU y las notificaciones push | **todas pasan** en local; se corre en local, no en el CI | — |
 | E2E (Playwright) | 5 pruebas (4 flujos) | **todas pasan** | — |
 | Rendimiento (k6) | 1 script | **no ejecutado localmente** (ver 4.3) | — |
 
@@ -120,7 +120,7 @@ Assertions    444/444
 | CU extra: notificaciones push | `CU27-EXTRA-01-Notificaciones-push` | 9 |
 
 **Limitaciones (importantes):**
-- 10 peticiones (generar y descargar acta y planilla, y todo el CU11) necesitan MinIO. Pasaron en mi máquina con MinIO encendido. En el CI se excluyen (`--exclude-tags minio`) y se corren en local con `docker compose up` (que ya incluye MinIO), con `bru run --env local`.
+- 10 peticiones (generar y descargar acta y planilla, y todo el CU11) necesitan MinIO. Pasaron en mi máquina con MinIO encendido. Se corren en local con `docker compose up` (que ya incluye MinIO) y `bru run --env local`; `--exclude-tags minio` las omite si no hay MinIO.
 - Se probó con las llamadas a la API; la subida real de archivos de CU16 (multipart) y el flujo de recuperación por el enlace del correo (CU15) no se cubren, solo sus errores y los listados.
 - CU03 y CU26 prueban lo que hay con los datos de prueba (el módulo de IA real no corre en estas pruebas): la precalificación, el límite de 70 puntos y el rechazo de un modelo incompleto; no se prueba una versión válida del modelo.
 - La colección está pensada para una base recién creada: algunas peticiones cambian el estado de las convocatorias de prueba (adjudican, publican, dan de baja), así que repetirla sobre la misma base falla en esos pasos.
@@ -164,7 +164,7 @@ Script: `tests/k6/carga-api.js` (rampa de 10 a 20 usuarios virtuales durante 55 
 
 ### 4.4 Pipeline de integración continua
 
-`.github/workflows/ci.yml` corre ahora también en pushes a `Mauro`. Cada job sube sus reportes como artefactos: `cobertura-backend-jacoco`, `resultados-backend-surefire`, `cobertura-web-vitest`, `cobertura-movil-flutter` y `evidencia-bruno-playwright` (reporte de Bruno, informe HTML de Playwright, capturas y registro del backend). El job nuevo `pruebas-sistema` levanta Postgres y Redis efímeros, arranca el backend y el panel, y corre Bruno (sin las 10 peticiones que usan MinIO) y Playwright. **El pipeline modificado todavía no se ejecutó en GitHub**: lo validé solo localmente, así que la primera corrida puede pedir ajustes.
+`.github/workflows/ci.yml` corre ahora también en pushes a `Mauro`. Cada job sube sus reportes como artefactos: `cobertura-backend-jacoco`, `resultados-backend-surefire`, `cobertura-web-vitest` y `cobertura-movil-flutter`. Bruno y Playwright **no corren en el CI**: se ejecutan en local (ver sección 5), con el backend en perfil `dev`, y su evidencia es la de las secciones 4.1 y 4.2. **El pipeline modificado todavía no se ejecutó en GitHub**: lo validé solo localmente, así que la primera corrida puede pedir ajustes.
 
 ---
 
