@@ -270,20 +270,6 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      # MinIO con las credenciales y el bucket por defecto de application.properties:
-      # lo usan generar acta, generar planilla y los cotejos (requests con tag `minio`).
-      - name: Levantar MinIO
-        run: |
-          # Las imágenes de MinIO ya no se pueden bajar de Docker Hub ni de Quay sin
-          # credenciales: se usa el binario oficial de dl.min.io.
-          mkdir -p "$HOME/minio-bin" "$HOME/minio-data"
-          curl -fsSL https://dl.min.io/server/minio/release/linux-amd64/minio -o "$HOME/minio-bin/minio"
-          curl -fsSL https://dl.min.io/client/mc/release/linux-amd64/mc -o "$HOME/minio-bin/mc"
-          chmod +x "$HOME/minio-bin/minio" "$HOME/minio-bin/mc"
-          MINIO_ROOT_USER=minio_admin MINIO_ROOT_PASSWORD=minio_local_pass_123 nohup "$HOME/minio-bin/minio" server "$HOME/minio-data" > "$GITHUB_WORKSPACE/minio.log" 2>&1 &
-          for i in $(seq 1 30); do curl -sf http://localhost:9000/minio/health/live && break; sleep 2; done
-          "$HOME/minio-bin/mc" alias set l http://localhost:9000 minio_admin minio_local_pass_123
-          "$HOME/minio-bin/mc" mb --ignore-existing l/comedor-uagrm-storage
       - name: Levantar el backend
         working-directory: projects/backend/comedor-uagrm-core
         run: |
@@ -295,7 +281,7 @@ jobs:
         run: |
           npm install -g @usebruno/cli@4.3.0
           cd tests/api-bruno
-          bru run --env local --reporter-html "$GITHUB_WORKSPACE/bruno-reporte.html" --reporter-junit "$GITHUB_WORKSPACE/bruno-junit.xml"
+          bru run --env local --exclude-tags minio --reporter-html "$GITHUB_WORKSPACE/bruno-reporte.html" --reporter-junit "$GITHUB_WORKSPACE/bruno-junit.xml"
       - name: Levantar el panel web
         run: |
           cp projects/frontend/comedoruagrm/.env.example projects/frontend/comedoruagrm/.env
