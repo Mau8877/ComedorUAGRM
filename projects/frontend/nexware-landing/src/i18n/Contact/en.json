@@ -8,5 +8,7 @@
   "send": "Send message",
   "errorRequired": "This field is required.",
   "errorEmail": "Enter a valid email, for example name@domain.com.",
-  "success": "Thanks, we got your message. (Demo version: nothing was sent to a server.)"
+  "sending": "Sending…",
+  "success": "Thanks, we got your message. We will get back to you soon.",
+  "errorSend": "We could not send your message. Please try again in a few minutes."
 }

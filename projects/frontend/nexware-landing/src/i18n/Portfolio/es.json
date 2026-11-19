@@ -3,7 +3,7 @@
   "title": "Lo que construimos.",
   "label": "PROYECTO DEMO",
   "name": "ComedorUAGRM",
-  "image": "[ Captura del proyecto ComedorUAGRM ]",
+  "image": "Panel del postulante de ComedorUAGRM: convocatoria abierta, estado de la postulación, beca y avisos",
   "description": "Sistema web y móvil para postular y preseleccionar a la Beca Comedor de la UAGRM. Un modelo de inteligencia artificial preselecciona las solicitudes, calcula un puntaje de vulnerabilidad socioeconómica y prioriza las carpetas que debe auditar la DUBSS, con tableros de Business Intelligence. Reemplaza la revisión manual de cerca de 20.000 carpetas por gestión.",
   "cta": "Ver demo"
 }

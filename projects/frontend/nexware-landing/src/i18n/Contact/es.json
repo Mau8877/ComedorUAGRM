@@ -8,5 +8,7 @@
   "send": "Enviar mensaje",
   "errorRequired": "Este campo es obligatorio.",
   "errorEmail": "Escribe un correo válido, por ejemplo nombre@dominio.com.",
-  "success": "Gracias, recibimos tu mensaje. (Versión de demostración: no se envió a ningún servidor.)"
+  "sending": "Enviando…",
+  "success": "Gracias, recibimos tu mensaje. Te responderemos pronto.",
+  "errorSend": "No pudimos enviar tu mensaje. Inténtalo de nuevo en unos minutos."
 }

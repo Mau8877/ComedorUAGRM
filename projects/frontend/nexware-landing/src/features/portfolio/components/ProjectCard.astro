@@ -5,6 +5,7 @@ import TechLogo from '@/components/ui/TechLogo.astro'
 import type { TechId } from '@/config/tech'
 
 interface Props {
+  imageSrc: string
   imageAlt: string
   label: string
   title: string
@@ -14,12 +15,12 @@ interface Props {
   ctaHref: string
 }
 
-const { imageAlt, label, title, description, techs, ctaLabel, ctaHref } = Astro.props
+const { imageSrc, imageAlt, label, title, description, techs, ctaLabel, ctaHref } = Astro.props
 ---
 
 <article class="project reveal">
-  <div class="media" role="img" aria-label={imageAlt}>
-    <span>{imageAlt}</span>
+  <div class="media">
+    <img src={imageSrc} alt={imageAlt} width="1920" height="954" loading="lazy" decoding="async" />
   </div>
   <div class="body">
     <Eyebrow>{label}</Eyebrow>
@@ -59,14 +60,13 @@ const { imageAlt, label, title, description, techs, ctaLabel, ctaHref } = Astro.
     align-items: center;
     justify-content: center;
   }
-  .media span {
-    padding: 8px 14px;
-    border-radius: 999px;
-    background: var(--surface);
-    font-family: 'JetBrains Mono', ui-monospace, monospace;
-    font-size: 13px;
-    color: var(--accent);
-    text-align: center;
+  .media img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    box-shadow: 0 8px 30px rgb(0 0 0 / 0.12);
   }
   .body {
     flex: 1 1 380px;
