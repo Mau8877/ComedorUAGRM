@@ -274,9 +274,9 @@ jobs:
       # lo usan generar acta, generar planilla y los cotejos (requests con tag `minio`).
       - name: Levantar MinIO
         run: |
-          docker run -d --name minio --network host -e MINIO_ROOT_USER=minio_admin -e MINIO_ROOT_PASSWORD=minio_local_pass_123 minio/minio server /data
+          docker run -d --name minio --network host -e MINIO_ROOT_USER=minio_admin -e MINIO_ROOT_PASSWORD=minio_local_pass_123 quay.io/minio/minio server /data
           for i in $(seq 1 30); do curl -sf http://localhost:9000/minio/health/live && break; sleep 2; done
-          docker run --rm --network host --entrypoint sh minio/mc -c "mc alias set l http://localhost:9000 minio_admin minio_local_pass_123 && mc mb --ignore-existing l/comedor-uagrm-storage"
+          docker run --rm --network host --entrypoint sh quay.io/minio/mc -c "mc alias set l http://localhost:9000 minio_admin minio_local_pass_123 && mc mb --ignore-existing l/comedor-uagrm-storage"
       - name: Levantar el backend
         working-directory: projects/backend/comedor-uagrm-core
         run: |
@@ -286,7 +286,7 @@ jobs:
           for i in $(seq 1 60); do curl -sf http://localhost:8080/health && break; sleep 3; done
       - name: Pruebas de API (Bruno)
         run: |
-          npm install -g @usebruno/cli
+          npm install -g @usebruno/cli@4.3.0
           cd tests/api-bruno
           bru run --env local --reporter-html "$GITHUB_WORKSPACE/bruno-reporte.html" --reporter-junit "$GITHUB_WORKSPACE/bruno-junit.xml"
       - name: Levantar el panel web
@@ -300,9 +300,9 @@ jobs:
         env:
           WEB_URL: http://localhost:5173
         run: |
-          npm install
-          npx playwright install --with-deps chromium
-          npx playwright test
+          npm ci --ignore-scripts
+          npx --no-install playwright install --with-deps chromium
+          npx --no-install playwright test
       - name: Subir evidencia de sistema
         if: always()
         uses: actions/upload-artifact@v4
