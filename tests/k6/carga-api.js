@@ -26,7 +26,14 @@ export function setup() {
     { headers: { 'Content-Type': 'application/json' } },
   )
   check(r, { 'login 200': (x) => x.status === 200 })
-  return { token: r.json('data.accessToken') }
+  // El dashboard BI es solo del rol Directivo (el administrador recibe 403).
+  const d = http.post(
+    `${BASE}/api/v1/auth/login`,
+    JSON.stringify({ correo: __ENV.DIRECTIVO_CORREO || 'directivo@dubss.com', contrasena: __ENV.ADMIN_PASSWORD || '123123123' }),
+    { headers: { 'Content-Type': 'application/json' } },
+  )
+  check(d, { 'login directivo 200': (x) => x.status === 200 })
+  return { token: r.json('data.accessToken'), tokenDirectivo: d.json('data.accessToken') }
 }
 
 export default function (data) {
@@ -35,7 +42,7 @@ export default function (data) {
     ['GET', `${BASE}/health`],
     ['GET', `${BASE}/api/v1/carreras`],
     ['GET', `${BASE}/api/v1/convocatorias?page=1&pageSize=10`, null, h],
-    ['GET', `${BASE}/api/v1/dashboard/indicadores`, null, h],
+    ['GET', `${BASE}/api/v1/dashboard/indicadores`, null, { headers: { Authorization: `Bearer ${data.tokenDirectivo}` } }],
     ['GET', `${BASE}/api/v1/bitacora?page=1&pageSize=10`, null, h],
   ])
   res.forEach((r) => check(r, { 'status 200': (x) => x.status === 200 }))

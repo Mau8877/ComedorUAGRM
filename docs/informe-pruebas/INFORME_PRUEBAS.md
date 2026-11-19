@@ -12,10 +12,10 @@ Sistema de postulación y preselección de la Beca Comedor (DUBSS, UAGRM): backe
 | **JaCoCo** | Cobertura del backend (líneas, ramas, métodos) | Se integra al `mvn test` sin cambiar los tests y genera HTML y XML. |
 | **Vitest + Testing Library + `@vitest/coverage-v8`** | Panel web: schemas, componentes, pantallas, hooks | Corre sobre Vite sin configuración extra; el proveedor V8 da cobertura real sin instrumentar el código. |
 | **`flutter test --coverage`** | App móvil: lógica, providers, pantallas (widget tests) | Es la herramienta oficial de Flutter; produce `lcov.info`, formato que entienden otros servicios. |
-| **Bruno** | API REST: contrato (códigos HTTP, sobre `ApiResponse`, códigos de error, permisos por rol) | Las colecciones son archivos de texto versionados en el repo (a diferencia de Postman, que guarda en la nube) y el CLI (`bru run`) corre en CI sin cuenta. |
+| **Bruno** | API REST: contrato (códigos HTTP, sobre `ApiResponse`, códigos de error, permisos por rol) | Las colecciones son archivos de texto versionados en el repo (a diferencia de Postman, que guarda en la nube) y el CLI (`bru run`) corre desde la terminal sin cuenta. |
 | **Playwright** | Panel web de punta a punta en un navegador real, con capturas | Ejercita el flujo completo (pantalla → API → base de datos) y deja capturas como evidencia. |
-| **k6** | Rendimiento del backend bajo carga (usuarios virtuales, p95 de latencia) | Script en JavaScript, umbrales que hacen fallar la corrida y fácil de ejecutar en CI. Es manual, no corre en cada push. |
-| **GitHub Actions** | Ejecución automática y archivo de reportes | Corre todo en cada push a `main` y a `Mauro` y guarda los reportes como artefactos descargables. |
+| **k6** | Rendimiento del backend bajo carga (usuarios virtuales, p95 de latencia) | Script en JavaScript, umbrales que hacen fallar la corrida y se ejecuta como workflow manual de GitHub Actions (no corre en cada push). |
+| **GitHub Actions** | Ejecución automática de lint, pruebas y coberturas, y el workflow manual de k6 | Corre en cada push a `main` y a `Mauro` y guarda los reportes como artefactos descargables. |
 
 Ya existían antes de este trabajo: Checkstyle, ESLint, `flutter analyze`, Ruff y pytest (módulo de IA).
 
@@ -28,9 +28,9 @@ Ya existían antes de este trabajo: Checkstyle, ESLint, `flutter analyze`, Ruff 
 | Backend core (JUnit) | 2032 (1 omitida) | **todas pasan** con Redis y Docker encendidos (ver 3.1) | **97,0 % líneas**, 84,6 % ramas, 97,3 % métodos |
 | Panel web (Vitest) | 1296 en 147 archivos | **todas pasan** | **83,4 % líneas**, 82,2 % sentencias, 74,3 % ramas, 78,8 % funciones |
 | App móvil (Flutter) | 310 | **todas pasan** | **78,7 % líneas** (2841 de 3610) |
-| API (Bruno) | 191 peticiones, 444 aserciones, los 26 CU y las notificaciones push | **todas pasan** en local; se corre en local, no en el CI | — |
+| API (Bruno) | 191 peticiones, 444 aserciones, los 26 CU y las notificaciones push | **todas pasan** (se corre en local, no en el CI) | — |
 | E2E (Playwright) | 5 pruebas (4 flujos) | **todas pasan** | — |
-| Rendimiento (k6) | 1 script | **no ejecutado localmente** (ver 4.3) | — |
+| Rendimiento (k6) | 1 script, 20 usuarios virtuales, 55 s | **cumple los dos umbrales** (0 % de errores, p95 15,33 ms) en GitHub Actions | — |
 
 ---
 
@@ -160,11 +160,27 @@ Limitación: el flujo de postulación llega hasta guardar el borrador; no envía
 
 Script: `tests/k6/carga-api.js` (rampa de 10 a 20 usuarios virtuales durante 55 s sobre salud, carreras, convocatorias, indicadores y bitácora; umbrales: menos de 1 % de errores y p95 por debajo de 800 ms). Workflow manual: `.github/workflows/k6.yml` (*Run workflow* en la pestaña Actions; sube `k6-resumen.json`).
 
-**k6 no está instalado en esta máquina y no lo ejecuté aquí, así que no hay resultados de rendimiento que mostrar todavía.** Los números salen de la primera corrida del workflow.
+**Resultado (corrida #3 en GitHub Actions, backend en perfil `dev` con Postgres y Redis efímeros):** ambos umbrales se cumplen.
+
+| Medida | Resultado | Umbral |
+| --- | --- | --- |
+| Peticiones fallidas (`http_req_failed`) | **0,00 %** (0 de 3092) | menos de 1 % ✓ |
+| Latencia p95 (`http_req_duration`) | **15,33 ms** | menos de 800 ms ✓ |
+| Latencia promedio / mediana / p90 / máxima | 8,09 / 6,86 / 12,72 / 249,91 ms | — |
+| Verificaciones (`checks`) | 100 % (3092 de 3092) | — |
+| Iteraciones completas | 618 (11,0 por segundo) | — |
+| Peticiones HTTP | 3092 (55,1 por segundo) | — |
+| Usuarios virtuales | hasta 20 | — |
+
+Cada iteración pide, con un segundo de pausa, la salud del sistema, las carreras, el listado de convocatorias, los indicadores del dashboard (con sesión de directivo) y la bitácora.
+
+*Historial:* en una primera corrida el umbral de errores falló con 19,99 % (exactamente 1 de cada 5 peticiones) porque mi script pedía `/dashboard/indicadores` con el token del administrador y ese endpoint es solo del rol Directivo (responde 403). Era un error del script, no del sistema; se corrigió para usar una sesión de directivo y la corrida #3 dio 0 %. La latencia fue buena en ambas (p95 de 13,9 y 15,33 ms).
+
+Alcance de la prueba: es una carga ligera (20 usuarios, un minuto, datos de prueba, una sola instancia en el runner de GitHub); sirve como línea base, no como prueba de capacidad para producción.
 
 ### 4.4 Pipeline de integración continua
 
-`.github/workflows/ci.yml` corre ahora también en pushes a `Mauro`. Cada job sube sus reportes como artefactos: `cobertura-backend-jacoco`, `resultados-backend-surefire`, `cobertura-web-vitest` y `cobertura-movil-flutter`. Bruno y Playwright **no corren en el CI**: se ejecutan en local (ver sección 5), con el backend en perfil `dev`, y su evidencia es la de las secciones 4.1 y 4.2. **El pipeline modificado todavía no se ejecutó en GitHub**: lo validé solo localmente, así que la primera corrida puede pedir ajustes.
+`.github/workflows/ci.yml` corre ahora también en pushes a `Mauro`. Cada job sube sus reportes como artefactos: `cobertura-backend-jacoco`, `resultados-backend-surefire`, `cobertura-web-vitest` y `cobertura-movil-flutter`. Bruno y Playwright **no corren en el CI**: se ejecutan en local (ver sección 5), con el backend en perfil `dev`, y su evidencia es la de las secciones 4.1 y 4.2. El workflow de k6 sí se ejecutó en GitHub (corrida #3, en verde). Los pasos de cobertura y de subida de artefactos de `ci.yml` los validé localmente y **no tengo la confirmación de su corrida en GitHub**.
 
 ---
 
@@ -189,3 +205,16 @@ k6 run -e BASE_URL=http://localhost:8080 tests/k6/carga-api.js
 ## 6. Calidad estática
 
 El análisis de calidad (bugs, vulnerabilidades, duplicación) se hace por fuera del repositorio con SonarCloud (sonarcloud.io), conectado directamente al repo de GitHub; el repositorio no contiene configuración de Sonar.
+
+---
+
+## 7. Alcance y limitaciones
+
+Para no dar una idea equivocada de «todo al 100 %»:
+
+- **Todas las pruebas que existen pasan**, pero la **cobertura no es del 100 %**: backend 97,0 % de líneas, web 83,4 % y móvil 78,7 %. Cobertura mide cuánto código se ejecuta al probar, no la ausencia de errores.
+- Las coberturas de los tres proyectos y la colección Bruno se midieron en el equipo de desarrollo; el backend se midió antes de corregir la prueba de planillas y no repetí la corrida completa.
+- Bruno (191 peticiones) cubre los 26 CU más las notificaciones push, pero no la subida real de archivos (CU16) ni el enlace de recuperación por correo (CU15); CU03 y CU26 se prueban con los datos de prueba, sin el módulo de IA real.
+- Playwright cubre 4 flujos del panel web, no todas las pantallas. No hay pruebas E2E de la app móvil (solo sus pruebas de widgets y unitarias).
+- k6 es una carga ligera de línea base.
+- El análisis estático de SonarCloud se ve en su propio sitio y puede marcar avisos que no se atendieron en el repositorio.
