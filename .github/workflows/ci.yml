@@ -274,9 +274,16 @@ jobs:
       # lo usan generar acta, generar planilla y los cotejos (requests con tag `minio`).
       - name: Levantar MinIO
         run: |
-          docker run -d --name minio --network host -e MINIO_ROOT_USER=minio_admin -e MINIO_ROOT_PASSWORD=minio_local_pass_123 quay.io/minio/minio server /data
+          # Las imágenes de MinIO ya no se pueden bajar de Docker Hub ni de Quay sin
+          # credenciales: se usa el binario oficial de dl.min.io.
+          mkdir -p "$HOME/minio-bin" "$HOME/minio-data"
+          curl -fsSL https://dl.min.io/server/minio/release/linux-amd64/minio -o "$HOME/minio-bin/minio"
+          curl -fsSL https://dl.min.io/client/mc/release/linux-amd64/mc -o "$HOME/minio-bin/mc"
+          chmod +x "$HOME/minio-bin/minio" "$HOME/minio-bin/mc"
+          MINIO_ROOT_USER=minio_admin MINIO_ROOT_PASSWORD=minio_local_pass_123 nohup "$HOME/minio-bin/minio" server "$HOME/minio-data" > "$GITHUB_WORKSPACE/minio.log" 2>&1 &
           for i in $(seq 1 30); do curl -sf http://localhost:9000/minio/health/live && break; sleep 2; done
-          docker run --rm --network host --entrypoint sh quay.io/minio/mc -c "mc alias set l http://localhost:9000 minio_admin minio_local_pass_123 && mc mb --ignore-existing l/comedor-uagrm-storage"
+          "$HOME/minio-bin/mc" alias set l http://localhost:9000 minio_admin minio_local_pass_123
+          "$HOME/minio-bin/mc" mb --ignore-existing l/comedor-uagrm-storage
       - name: Levantar el backend
         working-directory: projects/backend/comedor-uagrm-core
         run: |
