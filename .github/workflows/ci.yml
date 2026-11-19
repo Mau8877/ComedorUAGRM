@@ -7,7 +7,7 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: [main]
+    branches: [main, Mauro]
 
 jobs:
   # Detecta qué carpetas cambiaron para no correr, por ejemplo, todo el
@@ -94,8 +94,23 @@ jobs:
         run: chmod +x ./mvnw
       - name: Checkstyle
         run: ./mvnw -B checkstyle:check
+      # `mvn test` también genera el reporte de cobertura de JaCoCo (pom.xml).
       - name: Tests
         run: ./mvnw -B test
+      - name: Subir cobertura JaCoCo
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobertura-backend-jacoco
+          path: projects/backend/comedor-uagrm-core/target/site/jacoco
+          if-no-files-found: warn
+      - name: Subir resultados de pruebas (surefire)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: resultados-backend-surefire
+          path: projects/backend/comedor-uagrm-core/target/surefire-reports
+          if-no-files-found: warn
       - name: Build
         run: ./mvnw -B clean package -DskipTests
 
@@ -137,7 +152,14 @@ jobs:
       # usa npm por separado y tiene su propio job (`landing`, abajo).
       - run: pnpm install --frozen-lockfile
       - run: pnpm --dir projects/frontend/comedoruagrm run lint
-      - run: pnpm --dir projects/frontend/comedoruagrm run test
+      - run: pnpm --dir projects/frontend/comedoruagrm exec vitest run --coverage
+      - name: Subir cobertura Vitest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobertura-web-vitest
+          path: projects/frontend/comedoruagrm/coverage
+          if-no-files-found: warn
       - run: pnpm --dir projects/frontend/comedoruagrm run build
 
   # Landing de Nexware (Astro): fuera del workspace pnpm, con npm propio.
@@ -190,4 +212,106 @@ jobs:
       # el análisis/los tests corran (no pegan contra un backend real).
       - run: cp .env.example .env
       - run: flutter analyze
-      - run: flutter test
+      - run: flutter test --coverage
+      - name: Subir cobertura Flutter
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobertura-movil-flutter
+          path: projects/mobile/coverage
+          if-no-files-found: warn
+
+  # Pruebas de API (Bruno) y E2E (Playwright): levantan el backend en perfil dev
+  # (con datos de prueba) sobre un Postgres efímero. Corren si cambia backend o web.
+  pruebas-sistema:
+    needs: changes
+    if: needs.changes.outputs.core == 'true' || needs.changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: comedor_uagrm_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      SPRING_PROFILES_ACTIVE: dev
+      JWT_SECRET: ci-secreto-de-prueba-con-mas-de-32-caracteres
+      RATE_LIMIT_CAPACITY: '100000'
+      RATE_LIMIT_REFILL_PER_MINUTE: '100000'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # MinIO con las credenciales y el bucket por defecto de application.properties:
+      # lo usan generar acta, generar planilla y los cotejos (requests con tag `minio`).
+      - name: Levantar MinIO
+        run: |
+          docker run -d --name minio --network host -e MINIO_ROOT_USER=minio_admin -e MINIO_ROOT_PASSWORD=minio_local_pass_123 minio/minio server /data
+          for i in $(seq 1 30); do curl -sf http://localhost:9000/minio/health/live && break; sleep 2; done
+          docker run --rm --network host --entrypoint sh minio/mc -c "mc alias set l http://localhost:9000 minio_admin minio_local_pass_123 && mc mb --ignore-existing l/comedor-uagrm-storage"
+      - name: Levantar el backend
+        working-directory: projects/backend/comedor-uagrm-core
+        run: |
+          chmod +x ./mvnw
+          ./mvnw -B -q package -DskipTests
+          nohup java -jar target/*.jar > "$GITHUB_WORKSPACE/backend.log" 2>&1 &
+          for i in $(seq 1 60); do curl -sf http://localhost:8080/health && break; sleep 3; done
+      - name: Pruebas de API (Bruno)
+        run: |
+          npm install -g @usebruno/cli
+          cd tests/api-bruno
+          bru run --env local --reporter-html "$GITHUB_WORKSPACE/bruno-reporte.html" --reporter-junit "$GITHUB_WORKSPACE/bruno-junit.xml"
+      - name: Levantar el panel web
+        run: |
+          cp projects/frontend/comedoruagrm/.env.example projects/frontend/comedoruagrm/.env
+          pnpm --dir projects/frontend/comedoruagrm run build
+          nohup pnpm --dir projects/frontend/comedoruagrm exec vite preview --host localhost --port 5173 > web.log 2>&1 &
+          for i in $(seq 1 20); do curl -sf http://localhost:5173 && break; sleep 1; done
+      - name: E2E (Playwright)
+        working-directory: tests/e2e
+        env:
+          WEB_URL: http://localhost:5173
+        run: |
+          npm install
+          npx playwright install --with-deps chromium
+          npx playwright test
+      - name: Subir evidencia de sistema
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidencia-bruno-playwright
+          path: |
+            bruno-reporte.html
+            bruno-junit.xml
+            tests/e2e/playwright-report
+            tests/e2e/capturas
+            backend.log
+          if-no-files-found: ignore
