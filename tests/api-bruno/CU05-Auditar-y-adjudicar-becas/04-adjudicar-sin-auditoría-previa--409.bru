@@ -1,0 +1,21 @@
+meta {
+  name: Adjudicar sin auditoría previa (409)
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/finalistas/{{e03f2}}/adjudicar
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 409
+  res.body.status: eq failed
+  res.body.error: eq ERR_ADJ_02
+}

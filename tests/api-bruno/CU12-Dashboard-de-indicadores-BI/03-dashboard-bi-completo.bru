@@ -1,0 +1,21 @@
+meta {
+  name: Dashboard BI completo
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/v1/dashboard/bi
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{directivoToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+  res.body.data.embudo: isDefined
+}

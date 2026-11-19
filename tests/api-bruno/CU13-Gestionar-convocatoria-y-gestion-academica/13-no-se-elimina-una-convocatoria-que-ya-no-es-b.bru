@@ -1,0 +1,21 @@
+meta {
+  name: No se elimina una convocatoria que ya no es borrador (409)
+  type: http
+  seq: 13
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/convocatorias/{{convocatoriaCodigo}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 409
+  res.body.status: eq failed
+  res.body.error: eq ERR_CV_08
+}

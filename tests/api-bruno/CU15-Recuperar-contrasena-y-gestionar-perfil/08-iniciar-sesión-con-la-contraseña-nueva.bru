@@ -1,0 +1,27 @@
+meta {
+  name: Iniciar sesión con la contraseña nueva
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "correo": "{{correoPost}}",
+    "contrasena": "Clave1234"
+  }
+}
+
+script:post-response {
+  bru.setVar("postToken", res.body.data.accessToken);
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+}

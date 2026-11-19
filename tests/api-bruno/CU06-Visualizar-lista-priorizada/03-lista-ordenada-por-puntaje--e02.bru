@@ -1,0 +1,22 @@
+meta {
+  name: Lista ordenada por puntaje (E02)
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/v1/lista-priorizada?filter%5BconvocatoriaId%5D={{cE02}}&page=1&pageSize=5
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+  res.body.data[0].posicion: eq 1
+  res.body.meta.pageSize: eq 5
+}

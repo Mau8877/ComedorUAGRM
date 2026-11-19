@@ -1,0 +1,26 @@
+meta {
+  name: Cambiar el correo con la contraseña incorrecta (400)
+  type: http
+  seq: 3
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/perfil
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{postToken}}
+}
+
+body:json {
+  {
+    "correo": "otro.correo@prueba.test",
+    "contrasenaActual": "mala"
+  }
+}
+
+assert {
+  res.status: eq 400
+}

@@ -1,0 +1,22 @@
+meta {
+  name: Pedir enlace de recuperación (respuesta neutra)
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/recuperar-contrasena
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "correo": "noexiste@prueba.test"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+}

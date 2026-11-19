@@ -1,0 +1,36 @@
+meta {
+  name: Crear gestión académica
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/gestiones-academicas
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "etiqueta": "{{etiquetaGestion}}",
+    "fechaInicio": "2090-01-01",
+    "fechaFin": "2090-06-30"
+  }
+}
+
+script:pre-request {
+  bru.setVar("etiquetaGestion", "T" + String(Date.now()).slice(-8));
+}
+
+script:post-response {
+  bru.setVar("gestionCodigo", res.body.data.codigo);
+}
+
+assert {
+  res.status: eq 201
+  res.body.status: eq success
+}

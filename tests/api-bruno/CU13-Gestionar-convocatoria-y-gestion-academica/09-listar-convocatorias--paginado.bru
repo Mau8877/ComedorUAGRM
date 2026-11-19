@@ -1,0 +1,22 @@
+meta {
+  name: Listar convocatorias (paginado)
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{baseUrl}}/api/v1/convocatorias?page=1&pageSize=10
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+  res.body.meta.page: eq 1
+  res.body.meta.pageSize: eq 10
+}

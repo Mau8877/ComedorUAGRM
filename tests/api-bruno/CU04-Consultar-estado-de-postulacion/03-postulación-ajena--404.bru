@@ -1,0 +1,21 @@
+meta {
+  name: Postulación ajena (404)
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/v1/postulaciones/{{calificadaCodigo}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{postToken}}
+}
+
+assert {
+  res.status: eq 404
+  res.body.status: eq failed
+  res.body.error: eq ERR_POS_01
+}

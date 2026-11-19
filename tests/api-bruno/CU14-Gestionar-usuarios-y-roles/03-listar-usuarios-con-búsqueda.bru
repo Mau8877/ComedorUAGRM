@@ -1,0 +1,21 @@
+meta {
+  name: Listar usuarios con búsqueda
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/v1/usuarios?search=Nuevo&page=1&pageSize=5
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+  res.body.data.length: gte 1
+}

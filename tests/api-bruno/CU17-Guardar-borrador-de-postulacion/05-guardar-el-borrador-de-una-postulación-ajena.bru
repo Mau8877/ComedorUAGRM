@@ -1,0 +1,27 @@
+meta {
+  name: Guardar el borrador de una postulación ajena (4xx)
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{baseUrl}}/api/v1/postulaciones/{{postulacionCodigo}}/borrador
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "ingresosFamiliares": 1
+  }
+}
+
+script:pre-request {
+  req.setHeader("Authorization", "Bearer " + bru.getVar("borradorToken"));
+}
+
+tests {
+    test("no se guarda en lo ajeno (4xx)", function () {
+      expect(res.status).to.be.within(400, 409);
+    });
+}

@@ -1,0 +1,20 @@
+meta {
+  name: Indicadores del dashboard
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/v1/dashboard/indicadores
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{directivoToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+}

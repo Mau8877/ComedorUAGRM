@@ -1,0 +1,21 @@
+meta {
+  name: Cerrar la convocatoria
+  type: http
+  seq: 12
+}
+
+post {
+  url: {{baseUrl}}/api/v1/convocatorias/{{convocatoriaCodigo}}/cerrar
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+  res.body.data.estado: eq CERRADA
+}

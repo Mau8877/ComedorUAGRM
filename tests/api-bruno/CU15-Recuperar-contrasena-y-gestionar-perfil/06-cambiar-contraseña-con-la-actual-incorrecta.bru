@@ -1,0 +1,29 @@
+meta {
+  name: Cambiar contraseña con la actual incorrecta (400)
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/cambiar-contrasena
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{postToken}}
+}
+
+body:json {
+  {
+    "contrasenaActual": "mala",
+    "contrasenaNueva": "Clave1234",
+    "confirmacionContrasena": "Clave1234"
+  }
+}
+
+assert {
+  res.status: eq 400
+  res.body.status: eq failed
+  res.body.error: eq ERR_AUTH_09
+}

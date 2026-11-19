@@ -1,0 +1,23 @@
+meta {
+  name: Generar el acta (requiere almacenamiento MinIO)
+  type: http
+  seq: 4
+  tags: [
+    minio
+  ]
+}
+
+post {
+  url: {{baseUrl}}/api/v1/convocatorias/{{cE06}}/acta
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 201
+  res.body.status: eq success
+}

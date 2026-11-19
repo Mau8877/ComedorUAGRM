@@ -1,0 +1,23 @@
+meta {
+  name: Registros digitales de la planilla
+  type: http
+  seq: 3
+  tags: [
+    minio
+  ]
+}
+
+get {
+  url: {{baseUrl}}/api/v1/planillas/{{planillaCodigo}}/cotejos/registros?page=1&pageSize=10
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+}

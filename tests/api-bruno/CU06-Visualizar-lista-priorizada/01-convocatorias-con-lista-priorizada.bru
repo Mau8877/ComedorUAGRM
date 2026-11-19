@@ -1,0 +1,20 @@
+meta {
+  name: Convocatorias con lista priorizada
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/lista-priorizada/convocatorias
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+}

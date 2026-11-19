@@ -1,0 +1,26 @@
+meta {
+  name: Filtros del dashboard
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/dashboard/filtros
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{directivoToken}}
+}
+
+script:post-response {
+  const g = res.body.data.gestiones.find(x => x.etiqueta === "[PRUEBA] 2026-II");
+  if (g) bru.setVar("gestionBI", g.codigo);
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+  res.body.data.gestiones: isDefined
+}

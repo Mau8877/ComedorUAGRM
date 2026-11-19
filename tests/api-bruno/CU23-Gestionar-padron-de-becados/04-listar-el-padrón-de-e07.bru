@@ -1,0 +1,29 @@
+meta {
+  name: Listar el padrón de E07
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/v1/convocatorias/{{cE07}}/padron?page=1&pageSize=10
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+script:post-response {
+  const d = res.body.data;
+  const libres = d.filter(b => b.estado === "VIGENTE" && b.becado.ci !== "E-BECADO-01");
+  bru.setVar("becaSuspender", libres[0].codigo);
+  bru.setVar("becaBaja", libres[1].codigo);
+  const baja = d.find(b => b.estado === "BAJA");
+  if (baja) bru.setVar("becaBajaSembrada", baja.codigo);
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+}

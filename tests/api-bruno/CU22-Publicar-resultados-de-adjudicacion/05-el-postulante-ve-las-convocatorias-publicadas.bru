@@ -1,0 +1,21 @@
+meta {
+  name: El postulante ve las convocatorias publicadas
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/v1/resultados/convocatorias
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{postToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+  res.body.data.length: gte 1
+}

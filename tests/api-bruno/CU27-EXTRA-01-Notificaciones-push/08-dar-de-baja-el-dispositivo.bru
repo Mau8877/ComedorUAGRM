@@ -1,0 +1,26 @@
+meta {
+  name: Dar de baja el dispositivo
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/api/v1/dispositivos-fcm/baja
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{becadoToken}}
+}
+
+body:json {
+  {
+    "token": "token-de-prueba-automatizada-0123456789"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+}

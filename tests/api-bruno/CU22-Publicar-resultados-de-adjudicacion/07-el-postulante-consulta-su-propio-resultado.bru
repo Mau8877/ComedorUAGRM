@@ -1,0 +1,20 @@
+meta {
+  name: El postulante consulta su propio resultado
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/api/v1/convocatorias/{{cE05}}/resultados/mio
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{postToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+}

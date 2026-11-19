@@ -1,0 +1,29 @@
+meta {
+  name: Un postulante no publica comunicados (403)
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/v1/comunicados
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{postToken}}
+}
+
+body:json {
+  {
+    "titulo": "x",
+    "contenido": "y",
+    "destinatarios": "TODOS"
+  }
+}
+
+assert {
+  res.status: eq 403
+  res.body.status: eq failed
+  res.body.error: eq ERR_AUTH_07
+}

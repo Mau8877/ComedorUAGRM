@@ -1,0 +1,25 @@
+meta {
+  name: Vista previa de la planilla (PDF)
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/v1/convocatorias/{{cE08}}/planillas/vista-previa?desde=2026-10-01&hasta=2026-10-31
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+    test("responde un PDF", function () {
+      expect(String(res.getHeader("content-type"))).to.include("application/pdf");
+    });
+}

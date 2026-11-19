@@ -1,0 +1,23 @@
+meta {
+  name: Datos para cotejar
+  type: http
+  seq: 2
+  tags: [
+    minio
+  ]
+}
+
+get {
+  url: {{baseUrl}}/api/v1/planillas/{{planillaCodigo}}/cotejos/datos
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+}

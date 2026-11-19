@@ -1,0 +1,27 @@
+meta {
+  name: Cambiar el rol
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/v1/usuarios/{{usuarioNuevo}}/cambiar-rol
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "rol": "DIRECTIVO"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+  res.body.data.rol: eq DIRECTIVO
+}

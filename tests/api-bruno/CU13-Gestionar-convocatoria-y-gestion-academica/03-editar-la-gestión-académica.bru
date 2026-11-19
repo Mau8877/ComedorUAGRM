@@ -1,0 +1,28 @@
+meta {
+  name: Editar la gestión académica
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{baseUrl}}/api/v1/gestiones-academicas/{{gestionCodigo}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "etiqueta": "{{etiquetaGestion}}",
+    "fechaInicio": "2090-01-01",
+    "fechaFin": "2090-07-30"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+}

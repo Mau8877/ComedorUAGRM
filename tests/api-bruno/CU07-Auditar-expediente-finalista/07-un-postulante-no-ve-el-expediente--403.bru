@@ -1,0 +1,21 @@
+meta {
+  name: Un postulante no ve el expediente (403)
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/api/v1/finalistas/{{e04Validado}}/expediente
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{postToken}}
+}
+
+assert {
+  res.status: eq 403
+  res.body.status: eq failed
+  res.body.error: eq ERR_AUTH_07
+}

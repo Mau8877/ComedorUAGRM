@@ -1,0 +1,28 @@
+meta {
+  name: Notificar sin finalistas (400)
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/finalistas/notificaciones
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "finalistas": [],
+    "plazoEntrega": "2030-01-01",
+    "lugarHorario": "DUBSS",
+    "documentos": "CI"
+  }
+}
+
+assert {
+  res.status: eq 400
+}

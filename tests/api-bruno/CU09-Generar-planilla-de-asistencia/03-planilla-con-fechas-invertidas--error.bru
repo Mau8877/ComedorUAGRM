@@ -1,0 +1,28 @@
+meta {
+  name: Planilla con fechas invertidas (error)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/convocatorias/{{cE08}}/planillas
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "fechaDesde": "2026-10-31",
+    "fechaHasta": "2026-10-01"
+  }
+}
+
+tests {
+    test("rechaza fechas invertidas (4xx)", function () {
+      expect(res.status).to.be.within(400, 409);
+    });
+}

@@ -1,0 +1,42 @@
+meta {
+  name: Enviar la postulación completa
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/postulaciones/{{postulacionCodigo}}/enviar
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{postToken}}
+}
+
+body:json {
+  {
+    "ingresosFamiliares": 1500,
+    "dependientes": 3,
+    "procedencia": "Capital",
+    "patrimonio": "Vivienda alquilada",
+    "estadoVulnerabilidad": "Hogar monoparental",
+    "promedioAcademico": 70,
+    "complementarios": {
+      "dependenciaEconomica": "Ambos padres",
+      "ocupacionSosten": "Asalariado formal",
+      "rangoIngresos": "Menor de Bs. 2500",
+      "tieneHijos": false,
+      "tenenciaVivienda": "Alquiler",
+      "otroBeneficio": false,
+      "discapacidad": false
+    }
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+  res.body.data.estado: eq pendiente
+  res.body.data.numeroEnvios: eq 1
+}

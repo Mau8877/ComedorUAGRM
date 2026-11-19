@@ -1,0 +1,27 @@
+meta {
+  name: Archivar otra vez (409)
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/finalistas/{{e03f4}}/archivar
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "motivo": "Prueba automatizada"
+  }
+}
+
+tests {
+    test("ya cerrada (409)", function () {
+      expect(res.status).to.equal(409);
+    });
+}

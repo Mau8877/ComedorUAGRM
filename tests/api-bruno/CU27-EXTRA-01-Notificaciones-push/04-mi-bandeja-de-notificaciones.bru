@@ -1,0 +1,20 @@
+meta {
+  name: Mi bandeja de notificaciones
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/v1/notificaciones/me?page=1&pageSize=10
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{becadoToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+}

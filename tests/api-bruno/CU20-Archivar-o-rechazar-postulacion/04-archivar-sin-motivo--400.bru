@@ -1,0 +1,23 @@
+meta {
+  name: Archivar sin motivo (400)
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/finalistas/{{e03f2}}/archivar
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {}
+}
+
+assert {
+  res.status: eq 400
+}

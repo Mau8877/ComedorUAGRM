@@ -1,0 +1,20 @@
+meta {
+  name: Panel del postulante con beca
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/v1/panel/postulante
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{becadoToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+}

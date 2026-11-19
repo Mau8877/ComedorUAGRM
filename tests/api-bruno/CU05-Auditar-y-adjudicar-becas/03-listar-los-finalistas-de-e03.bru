@@ -1,0 +1,29 @@
+meta {
+  name: Listar los finalistas de E03
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/v1/finalistas?filter%5BconvocatoriaId%5D={{cE03}}&pageSize=10
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+script:post-response {
+  const d = res.body.data;
+  bru.setVar("e03f1", d[0].codigo);
+  bru.setVar("e03f2", d[1].codigo);
+  bru.setVar("e03f3", d[2].codigo);
+  bru.setVar("e03f4", d[3].codigo);
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+  res.body.data.length: gte 4
+}

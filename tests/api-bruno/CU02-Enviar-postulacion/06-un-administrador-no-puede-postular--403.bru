@@ -1,0 +1,21 @@
+meta {
+  name: Un administrador no puede postular (403)
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/v1/postulaciones
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 403
+  res.body.status: eq failed
+  res.body.error: eq ERR_AUTH_07
+}

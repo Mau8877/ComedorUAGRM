@@ -1,0 +1,22 @@
+meta {
+  name: Cerrar sesión (idempotente)
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/logout
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "refreshToken": "{{postRefresh}}"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+}

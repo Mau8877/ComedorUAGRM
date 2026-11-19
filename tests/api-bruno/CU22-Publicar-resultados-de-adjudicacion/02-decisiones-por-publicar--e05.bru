@@ -1,0 +1,21 @@
+meta {
+  name: Decisiones por publicar (E05)
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/v1/convocatorias/{{cE05}}/resultados/decisiones?page=1&pageSize=10
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+  res.body.data.length: gte 1
+}

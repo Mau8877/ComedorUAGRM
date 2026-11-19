@@ -1,0 +1,21 @@
+meta {
+  name: Reemplazo de una beca vigente (409)
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/api/v1/becas/{{becaSuspender}}/reemplazo
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 409
+  res.body.status: eq failed
+  res.body.error: eq ERR_BEC_06
+}

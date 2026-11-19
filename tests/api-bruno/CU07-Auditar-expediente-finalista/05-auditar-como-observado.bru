@@ -1,0 +1,29 @@
+meta {
+  name: Auditar como observado
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/v1/finalistas/{{e04SinAuditar}}/auditorias
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "resultado": "OBSERVADO",
+    "observaciones": "Falta una fotocopia",
+    "puntajeAcademico": 20
+  }
+}
+
+assert {
+  res.status: eq 201
+  res.body.status: eq success
+  res.body.data.auditoria.resultado: eq OBSERVADO
+}

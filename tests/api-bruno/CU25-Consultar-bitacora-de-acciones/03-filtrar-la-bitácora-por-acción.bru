@@ -1,0 +1,20 @@
+meta {
+  name: Filtrar la bitácora por acción
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/v1/bitacora?filter%5Baccion%5D=INICIO_SESION&pageSize=5
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+}

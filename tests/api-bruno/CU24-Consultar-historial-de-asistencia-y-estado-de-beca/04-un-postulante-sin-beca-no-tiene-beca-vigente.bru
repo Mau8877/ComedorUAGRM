@@ -1,0 +1,21 @@
+meta {
+  name: Un postulante sin beca no tiene beca vigente
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/v1/mi-beca
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{postToken}}
+}
+
+tests {
+    test("sin beca: 200 vacío o 404", function () {
+      expect([200, 404]).to.include(res.status);
+    });
+}

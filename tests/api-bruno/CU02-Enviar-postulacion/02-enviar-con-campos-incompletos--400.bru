@@ -1,0 +1,32 @@
+meta {
+  name: Enviar con campos incompletos (400)
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/postulaciones/{{postulacionCodigo}}/enviar
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{postToken}}
+}
+
+body:json {
+  {
+    "ingresosFamiliares": 1500,
+    "dependientes": 3,
+    "procedencia": "Capital",
+    "patrimonio": "Vivienda alquilada",
+    "estadoVulnerabilidad": "Hogar monoparental",
+    "promedioAcademico": 70
+  }
+}
+
+assert {
+  res.status: eq 400
+  res.body.status: eq failed
+  res.body.error: eq ERR_ENV_04
+}

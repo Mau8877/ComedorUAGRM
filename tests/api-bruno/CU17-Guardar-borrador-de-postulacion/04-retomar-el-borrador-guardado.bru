@@ -1,0 +1,21 @@
+meta {
+  name: Retomar el borrador guardado
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/v1/postulaciones/mi-borrador
+  body: none
+  auth: none
+}
+
+script:pre-request {
+  req.setHeader("Authorization", "Bearer " + bru.getVar("borradorToken"));
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+  res.body.data.postulacion: eq {{borradorCodigo}}
+}

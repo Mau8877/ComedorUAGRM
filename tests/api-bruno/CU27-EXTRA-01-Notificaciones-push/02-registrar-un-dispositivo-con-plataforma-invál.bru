@@ -1,0 +1,26 @@
+meta {
+  name: Registrar un dispositivo con plataforma inválida (400)
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/dispositivos-fcm
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{becadoToken}}
+}
+
+body:json {
+  {
+    "token": "otro-token-0123456789",
+    "plataforma": "MARCIANO"
+  }
+}
+
+assert {
+  res.status: eq 400
+}

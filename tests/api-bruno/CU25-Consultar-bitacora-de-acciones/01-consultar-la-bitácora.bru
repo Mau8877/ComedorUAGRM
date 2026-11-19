@@ -1,0 +1,22 @@
+meta {
+  name: Consultar la bitácora
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/bitacora?page=1&pageSize=10
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+  res.body.meta.page: eq 1
+  res.body.data.length: gte 1
+}

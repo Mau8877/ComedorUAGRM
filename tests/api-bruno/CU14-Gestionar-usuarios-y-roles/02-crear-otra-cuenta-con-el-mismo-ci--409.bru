@@ -1,0 +1,29 @@
+meta {
+  name: Crear otra cuenta con el mismo CI (409)
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/usuarios
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "nombres": "Otro",
+    "apellidos": "Personal",
+    "ci": "{{ciNuevo}}",
+    "correo": "otro@prueba.test",
+    "rol": "PERSONAL_COMEDOR"
+  }
+}
+
+assert {
+  res.status: eq 409
+}

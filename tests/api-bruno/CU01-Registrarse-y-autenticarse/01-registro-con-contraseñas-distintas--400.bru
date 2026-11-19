@@ -1,0 +1,30 @@
+meta {
+  name: Registro con contraseñas distintas (400)
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/registro
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "nombres": "X",
+    "apellidos": "Y",
+    "ci": "123",
+    "registroUniversitario": "212345678",
+    "carreraCodigo": "{{carreraCodigo}}",
+    "telefono": "7",
+    "correo": "x@y.test",
+    "contrasena": "Clave123",
+    "confirmacionContrasena": "Otra456"
+  }
+}
+
+assert {
+  res.status: eq 400
+  res.body.status: eq failed
+}

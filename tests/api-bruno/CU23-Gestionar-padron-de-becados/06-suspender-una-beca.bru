@@ -1,0 +1,27 @@
+meta {
+  name: Suspender una beca
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/v1/becas/{{becaSuspender}}/suspender
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "motivo": "Prueba automatizada"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+  res.body.data.estado: eq SUSPENDIDA
+}

@@ -1,0 +1,21 @@
+meta {
+  name: Publicar los resultados de E05
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/convocatorias/{{cE05}}/resultados/publicar
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 201
+  res.body.status: eq success
+  res.body.data.convocatoria.estado: eq PUBLICADA
+}

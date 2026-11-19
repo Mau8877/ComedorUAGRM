@@ -1,0 +1,27 @@
+meta {
+  name: Un postulante no gestiona becas (403)
+  type: http
+  seq: 12
+}
+
+post {
+  url: {{baseUrl}}/api/v1/becas/{{becaSuspender}}/suspender
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{postToken}}
+}
+
+body:json {
+  {
+    "motivo": "x"
+  }
+}
+
+assert {
+  res.status: eq 403
+  res.body.status: eq failed
+  res.body.error: eq ERR_AUTH_07
+}

@@ -1,0 +1,25 @@
+meta {
+  name: Vista previa del acta (PDF)
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/v1/convocatorias/{{cE06}}/acta/vista-previa
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+    test("responde un PDF", function () {
+      expect(String(res.getHeader("content-type"))).to.include("application/pdf");
+    });
+}

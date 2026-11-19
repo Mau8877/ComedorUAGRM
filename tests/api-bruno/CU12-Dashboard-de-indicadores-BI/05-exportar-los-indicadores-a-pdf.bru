@@ -1,0 +1,25 @@
+meta {
+  name: Exportar los indicadores a PDF
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/v1/dashboard/indicadores/pdf?filter%5Bgestion%5D={{gestionBI}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{directivoToken}}
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+    test("responde un PDF", function () {
+      expect(String(res.getHeader("content-type"))).to.include("application/pdf");
+    });
+}

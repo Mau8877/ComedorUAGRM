@@ -1,0 +1,20 @@
+meta {
+  name: Eliminar la convocatoria en borrador
+  type: http
+  seq: 15
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/convocatorias/{{convBorrador}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+}

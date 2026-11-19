@@ -1,0 +1,27 @@
+meta {
+  name: Crear convocatoria sin fecha de cierre (400)
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/v1/convocatorias
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "nombre": "Sin fechas"
+  }
+}
+
+assert {
+  res.status: eq 400
+  res.body.status: eq failed
+  res.body.error: eq ERR_SYS_01
+}

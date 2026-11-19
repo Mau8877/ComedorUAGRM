@@ -1,0 +1,26 @@
+meta {
+  name: Guardar una versión sin los parámetros del modelo (400)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/modelos-preseleccion
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "parametros": []
+  }
+}
+
+assert {
+  res.status: eq 400
+  res.body.status: eq failed
+}

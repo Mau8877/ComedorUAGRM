@@ -1,0 +1,41 @@
+meta {
+  name: Reenviar la misma petición es idempotente
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/postulaciones/{{postulacionCodigo}}/enviar
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{postToken}}
+}
+
+body:json {
+  {
+    "ingresosFamiliares": 1500,
+    "dependientes": 3,
+    "procedencia": "Capital",
+    "patrimonio": "Vivienda alquilada",
+    "estadoVulnerabilidad": "Hogar monoparental",
+    "promedioAcademico": 70,
+    "complementarios": {
+      "dependenciaEconomica": "Ambos padres",
+      "ocupacionSosten": "Asalariado formal",
+      "rangoIngresos": "Menor de Bs. 2500",
+      "tieneHijos": false,
+      "tenenciaVivienda": "Alquiler",
+      "otroBeneficio": false,
+      "discapacidad": false
+    }
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+  res.body.data.numeroEnvios: eq 1
+}

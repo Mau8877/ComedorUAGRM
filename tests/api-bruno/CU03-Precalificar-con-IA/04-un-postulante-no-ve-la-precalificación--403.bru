@@ -1,0 +1,21 @@
+meta {
+  name: Un postulante no ve la precalificación (403)
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/v1/postulaciones/{{calificadaCodigo}}/precalificacion
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{postToken}}
+}
+
+assert {
+  res.status: eq 403
+  res.body.status: eq failed
+  res.body.error: eq ERR_AUTH_07
+}

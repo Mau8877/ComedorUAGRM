@@ -1,0 +1,27 @@
+meta {
+  name: Archivar la postulación del finalista 4 (E03)
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/finalistas/{{e03f4}}/archivar
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "motivo": "Prueba automatizada"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+  res.body.data.estado: eq archivada
+}

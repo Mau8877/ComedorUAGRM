@@ -1,0 +1,29 @@
+meta {
+  name: Auditar el expediente del finalista 1 como válido
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/api/v1/finalistas/{{e03f1}}/auditorias
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "resultado": "VALIDADO",
+    "observaciones": "Expediente completo",
+    "puntajeAcademico": 25
+  }
+}
+
+assert {
+  res.status: eq 201
+  res.body.status: eq success
+  res.body.data.auditoria.resultado: eq VALIDADO
+}
