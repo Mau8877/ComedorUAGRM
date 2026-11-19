@@ -42,12 +42,18 @@ String? redirectDeSesion({required AsyncValue<Usuario?> sesion, required String 
     return _rutasPublicas.contains(ubicacion) ? null : '/login';
   }
 
-  // * La app es solo para postulantes: cualquier otro rol queda en
-  // * /solo-postulantes (al iniciar sesión, al restaurar la sesión guardada y
-  // * ante cualquier intento de navegar a una pantalla de postulante).
+  // * El personal del comedor solo usa /asistencia (y su /perfil); el resto de
+  // * pantallas lo devuelve ahí.
+  if (usuario.rol == rolPersonalComedor) {
+    return (ubicacion == '/asistencia' || ubicacion == '/perfil') ? null : '/asistencia';
+  }
+  // * Fuera de postulante y personal del comedor, la app no tiene módulo:
+  // * cualquier otro rol queda en /solo-postulantes (al iniciar sesión, al
+  // * restaurar la sesión guardada y ante cualquier intento de navegar).
   if (usuario.rol != rolPostulante) {
     return ubicacion == '/solo-postulantes' ? null : '/solo-postulantes';
   }
+  if (ubicacion == '/asistencia') return rutaInicioPorRol(usuario.rol);
   if (_rutasPublicas.contains(ubicacion) ||
       ubicacion == '/' ||
       ubicacion == '/cargando' ||

@@ -1,0 +1,25 @@
+meta {
+  name: Exportar la lista a archivo
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/v1/lista-priorizada/exportaciones
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "convocatoriaId": "{{cE02}}"
+  }
+}
+
+assert {
+  res.status: eq 200
+}

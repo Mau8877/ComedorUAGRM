@@ -1,0 +1,57 @@
+name: Rendimiento (k6)
+
+# Manual: no corre en cada push. Levanta el backend (perfil dev) y le aplica la
+# carga de tests/k6/carga-api.js; sube el resumen como artefacto.
+on:
+  workflow_dispatch:
+
+jobs:
+  k6:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: comedor_uagrm_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+    env:
+      SPRING_PROFILES_ACTIVE: dev
+      JWT_SECRET: ci-secreto-de-prueba-con-mas-de-32-caracteres
+      RATE_LIMIT_CAPACITY: '1000000'
+      RATE_LIMIT_REFILL_PER_MINUTE: '1000000'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Levantar el backend
+        working-directory: projects/backend/comedor-uagrm-core
+        run: |
+          chmod +x ./mvnw
+          ./mvnw -B -q package -DskipTests
+          nohup java -jar target/*.jar > "$GITHUB_WORKSPACE/backend.log" 2>&1 &
+          for i in $(seq 1 60); do curl -sf http://localhost:8080/health && break; sleep 3; done
+      - uses: grafana/setup-k6-action@v1
+      - name: Correr k6
+        run: k6 run --summary-export=k6-resumen.json tests/k6/carga-api.js
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: k6-resumen
+          path: |
+            k6-resumen.json
+            backend.log

@@ -1,0 +1,20 @@
+meta {
+  name: Buscar en la bitácora por texto
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/v1/bitacora?search=admin&pageSize=5
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+}

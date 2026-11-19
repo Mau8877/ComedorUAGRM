@@ -7,7 +7,7 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: [main]
+    branches: [main, Mauro]
 
 jobs:
   # Detecta qué carpetas cambiaron para no correr, por ejemplo, todo el
@@ -94,8 +94,23 @@ jobs:
         run: chmod +x ./mvnw
       - name: Checkstyle
         run: ./mvnw -B checkstyle:check
+      # `mvn test` también genera el reporte de cobertura de JaCoCo (pom.xml).
       - name: Tests
         run: ./mvnw -B test
+      - name: Subir cobertura JaCoCo
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobertura-backend-jacoco
+          path: projects/backend/comedor-uagrm-core/target/site/jacoco
+          if-no-files-found: warn
+      - name: Subir resultados de pruebas (surefire)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: resultados-backend-surefire
+          path: projects/backend/comedor-uagrm-core/target/surefire-reports
+          if-no-files-found: warn
       - name: Build
         run: ./mvnw -B clean package -DskipTests
 
@@ -137,7 +152,14 @@ jobs:
       # usa npm por separado y tiene su propio job (`landing`, abajo).
       - run: pnpm install --frozen-lockfile
       - run: pnpm --dir projects/frontend/comedoruagrm run lint
-      - run: pnpm --dir projects/frontend/comedoruagrm run test
+      - run: pnpm --dir projects/frontend/comedoruagrm exec vitest run --coverage
+      - name: Subir cobertura Vitest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobertura-web-vitest
+          path: projects/frontend/comedoruagrm/coverage
+          if-no-files-found: warn
       - run: pnpm --dir projects/frontend/comedoruagrm run build
 
   # Landing de Nexware (Astro): fuera del workspace pnpm, con npm propio.
@@ -190,4 +212,11 @@ jobs:
       # el análisis/los tests corran (no pegan contra un backend real).
       - run: cp .env.example .env
       - run: flutter analyze
-      - run: flutter test
+      - run: flutter test --coverage
+      - name: Subir cobertura Flutter
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobertura-movil-flutter
+          path: projects/mobile/coverage
+          if-no-files-found: warn

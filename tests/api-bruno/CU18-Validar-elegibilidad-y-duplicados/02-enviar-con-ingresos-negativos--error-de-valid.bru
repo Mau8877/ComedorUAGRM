@@ -1,0 +1,32 @@
+meta {
+  name: Enviar con ingresos negativos (error de validación)
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/postulaciones/{{borradorCodigo}}/enviar
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "ingresosFamiliares": -5,
+    "dependientes": 3,
+    "procedencia": "Capital",
+    "patrimonio": "Vivienda alquilada",
+    "estadoVulnerabilidad": "Hogar monoparental",
+    "promedioAcademico": 70
+  }
+}
+
+script:pre-request {
+  req.setHeader("Authorization", "Bearer " + bru.getVar("borradorToken"));
+}
+
+tests {
+    test("rechaza datos inválidos (400)", function () {
+      expect(res.status).to.equal(400);
+    });
+}

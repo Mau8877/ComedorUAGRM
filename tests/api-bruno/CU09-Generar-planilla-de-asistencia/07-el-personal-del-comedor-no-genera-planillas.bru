@@ -1,0 +1,28 @@
+meta {
+  name: El personal del comedor no genera planillas (403)
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/api/v1/convocatorias/{{cE08}}/planillas
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{personalToken}}
+}
+
+body:json {
+  {
+    "fechaDesde": "2026-10-01",
+    "fechaHasta": "2026-10-31"
+  }
+}
+
+assert {
+  res.status: eq 403
+  res.body.status: eq failed
+  res.body.error: eq ERR_AUTH_07
+}

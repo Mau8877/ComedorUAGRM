@@ -1,0 +1,23 @@
+meta {
+  name: Devolver sin motivo (400)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/finalistas/{{e03f4}}/devolver
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {}
+}
+
+assert {
+  res.status: eq 400
+}

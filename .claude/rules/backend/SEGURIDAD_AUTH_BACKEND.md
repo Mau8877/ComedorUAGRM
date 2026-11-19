@@ -291,6 +291,7 @@ Quedan sin autenticación los de infraestructura ya definidos en
 | `POST /api/v1/auth/logout` | Se autentica con el refresh token del body; cerrar una sesión ya vencida no debe dar error (CU01, A10) |
 | `POST /api/v1/auth/recuperar-contrasena` | La persona olvidó la contraseña y no tiene sesión; la respuesta es siempre neutra (CU15) |
 | `POST /api/v1/auth/restablecer-contrasena` | Se autentica con el token de un solo uso del enlace del correo (CU15) |
+| `POST /api/v1/contacto` | Formulario de contacto de la landing de Nexware: visitantes sin cuenta; reenvía el mensaje por correo (campo trampa `sitioWeb` contra bots) |
 | `GET /api/v1/carreras` | El formulario de registro necesita la lista **antes** de que exista cuenta; es solo lectura de un catálogo, sin datos personales |
 
 **Ningún otro endpoint de negocio es público.** Cualquier endpoint nuevo es

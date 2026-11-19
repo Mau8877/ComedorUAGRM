@@ -1,0 +1,21 @@
+meta {
+  name: Resumen de la lista (E02)
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/v1/lista-priorizada/resumen?filter%5BconvocatoriaId%5D={{cE02}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+  res.body.data.totalCalificadas: gte 1
+}

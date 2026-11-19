@@ -1,0 +1,25 @@
+meta {
+  name: Exportar la lista (sin convocatoria, 400)
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/v1/lista-priorizada/exportaciones
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {}
+}
+
+assert {
+  res.status: eq 400
+  res.body.status: eq failed
+  res.body.error: eq ERR_SYS_01
+}

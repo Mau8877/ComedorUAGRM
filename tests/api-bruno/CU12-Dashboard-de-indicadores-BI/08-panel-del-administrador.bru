@@ -1,0 +1,20 @@
+meta {
+  name: Panel del administrador
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/api/v1/panel/administrador
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+}

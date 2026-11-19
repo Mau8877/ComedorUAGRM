@@ -1,0 +1,27 @@
+meta {
+  name: Devolver sin auditoría previa (409)
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/finalistas/{{e03f4}}/devolver
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "motivo": "Falta un documento"
+  }
+}
+
+assert {
+  res.status: eq 409
+  res.body.status: eq failed
+  res.body.error: eq ERR_DEV_02
+}

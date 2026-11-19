@@ -1,0 +1,25 @@
+meta {
+  name: Auditoría sin resultado (400)
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/v1/finalistas/{{e04SinAuditar}}/auditorias
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "observaciones": "x"
+  }
+}
+
+assert {
+  res.status: eq 400
+}

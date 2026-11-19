@@ -1,0 +1,24 @@
+meta {
+  name: Iniciar la postulación
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/postulaciones
+  body: none
+  auth: none
+}
+
+script:pre-request {
+  req.setHeader("Authorization", "Bearer " + bru.getVar("borradorToken"));
+}
+
+script:post-response {
+  bru.setVar("borradorCodigo", res.body.data.postulacion);
+}
+
+assert {
+  res.status: eq 201
+  res.body.status: eq success
+}

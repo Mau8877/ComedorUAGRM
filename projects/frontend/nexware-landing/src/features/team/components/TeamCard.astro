@@ -2,18 +2,28 @@
 interface Props {
   name: string
   role: string
+  cvHref: string
+  cvLabel: string
+  photo?: string
 }
 
-const { name, role } = Astro.props
+const { name, role, cvHref, cvLabel, photo } = Astro.props
 const initial = name.charAt(0).toUpperCase()
 ---
 
 <article class="card reveal">
-  <div class="avatar" aria-hidden="true">
-    {initial}
-  </div>
+  {photo ? (
+    <img class="avatar photo" src={photo} alt={name} width="96" height="96" loading="lazy" />
+  ) : (
+    <div class="avatar" aria-hidden="true">
+      {initial}
+    </div>
+  )}
   <h3>{name}</h3>
   <span class="role">{role}</span>
+  <a class="cv" href={cvHref} target="_blank" rel="noopener" aria-label={`${cvLabel} — ${name}`}>
+    {cvLabel}
+  </a>
 </article>
 
 <style>
@@ -44,6 +54,12 @@ const initial = name.charAt(0).toUpperCase()
     font-size: 28px;
     font-weight: 700;
   }
+  .avatar.photo {
+    width: 96px;
+    height: 96px;
+    border-radius: 20px;
+    object-fit: cover;
+  }
   h3 {
     font-size: 20px;
     line-height: 1.2;
@@ -53,5 +69,24 @@ const initial = name.charAt(0).toUpperCase()
   .role {
     font-size: 15px;
     color: var(--soft);
+  }
+  .cv {
+    align-self: flex-start;
+    margin-top: 4px;
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--accent);
+    text-decoration: none;
+    transition:
+      border-color 0.2s ease,
+      background-color 0.2s ease;
+  }
+  .cv:hover,
+  .cv:focus-visible {
+    border-color: var(--accent);
+    background: var(--tint);
   }
 </style>

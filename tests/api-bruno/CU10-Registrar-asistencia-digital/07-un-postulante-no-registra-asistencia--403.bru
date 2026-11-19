@@ -1,0 +1,27 @@
+meta {
+  name: Un postulante no registra asistencia (403)
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/api/v1/asistencias
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{postToken}}
+}
+
+body:json {
+  {
+    "becaCodigo": "{{becaE08}}"
+  }
+}
+
+assert {
+  res.status: eq 403
+  res.body.status: eq failed
+  res.body.error: eq ERR_AUTH_07
+}

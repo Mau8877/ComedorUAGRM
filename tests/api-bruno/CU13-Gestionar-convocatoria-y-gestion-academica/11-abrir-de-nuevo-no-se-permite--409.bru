@@ -1,0 +1,21 @@
+meta {
+  name: Abrir de nuevo no se permite (409)
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{baseUrl}}/api/v1/convocatorias/{{convocatoriaCodigo}}/abrir
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 409
+  res.body.status: eq failed
+  res.body.error: eq ERR_CV_08
+}

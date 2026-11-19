@@ -1,0 +1,29 @@
+meta {
+  name: Guardar el borrador incompleto
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{baseUrl}}/api/v1/postulaciones/{{borradorCodigo}}/borrador
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "ingresosFamiliares": 1500,
+    "dependientes": 3,
+    "procedencia": "Capital"
+  }
+}
+
+script:pre-request {
+  req.setHeader("Authorization", "Bearer " + bru.getVar("borradorToken"));
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+  res.body.data.camposPendientes: gte 1
+}

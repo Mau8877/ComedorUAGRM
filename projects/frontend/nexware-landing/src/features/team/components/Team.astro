@@ -1,6 +1,7 @@
 ---
 import Section from '@/components/ui/Section.astro'
 import SectionHeader from '@/components/ui/SectionHeader.astro'
+import { withBase } from '@/i18n/routes'
 import { useTranslations, type Lang } from '@/i18n/utils'
 import TeamCard from './TeamCard.astro'
 
@@ -26,8 +27,20 @@ const t = useTranslations(Astro.props.lang)
       </p>
     </div>
     <div class="people">
-      <TeamCard name={t('team.mauro')} role={t('team.role')} />
-      <TeamCard name={t('team.leonel')} role={t('team.role')} />
+      <TeamCard
+        name={t('team.mauro')}
+        role={t('team.role')}
+        photo={withBase('/team/mauro.jpg')}
+        cvHref={withBase('/cv/cv-mauro-gutierrez.pdf')}
+        cvLabel={t('team.viewCv')}
+      />
+      <TeamCard
+        name={t('team.leonel')}
+        role={t('team.role')}
+        photo={withBase('/team/leonel.png')}
+        cvHref={withBase('/cv/cv-leonel-barrios.pdf')}
+        cvLabel={t('team.viewCv')}
+      />
     </div>
   </div>
 </Section>

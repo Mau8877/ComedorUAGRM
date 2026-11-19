@@ -1,0 +1,27 @@
+meta {
+  name: Buscar un CI sin beca (404)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/asistencias/buscar-becado
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{personalToken}}
+}
+
+body:json {
+  {
+    "ci": "999999999"
+  }
+}
+
+tests {
+    test("CI sin beca vigente (4xx)", function () {
+      expect(res.status).to.be.within(400, 409);
+    });
+}

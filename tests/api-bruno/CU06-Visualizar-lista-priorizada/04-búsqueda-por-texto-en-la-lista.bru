@@ -1,0 +1,20 @@
+meta {
+  name: Búsqueda por texto en la lista
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/v1/lista-priorizada?filter%5BconvocatoriaId%5D={{cE02}}&search=Elena
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+}

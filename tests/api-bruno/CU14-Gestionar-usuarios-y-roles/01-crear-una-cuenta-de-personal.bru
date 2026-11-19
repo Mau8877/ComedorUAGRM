@@ -1,0 +1,46 @@
+meta {
+  name: Crear una cuenta de personal
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/usuarios
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "nombres": "Nuevo",
+    "apellidos": "Personal",
+    "ci": "{{ciNuevo}}",
+    "correo": "{{correoNuevo}}",
+    "rol": "PERSONAL_COMEDOR"
+  }
+}
+
+script:pre-request {
+  const n = Date.now();
+  bru.setVar("ciNuevo", String(n).slice(-7));
+  bru.setVar("correoNuevo", `nuevo${n}@prueba.test`);
+}
+
+script:post-response {
+  bru.setVar("usuarioNuevo", res.body.data.codigo);
+}
+
+assert {
+  res.status: eq 201
+  res.body.status: eq success
+}
+
+tests {
+    test("devuelve la contraseña temporal una sola vez", function () {
+      expect(res.body.data.contrasenaTemporal).to.be.a("string");
+    });
+}

@@ -1,0 +1,30 @@
+meta {
+  name: Registro con correo ya usado (409)
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/registro
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "nombres": "X",
+    "apellidos": "Y",
+    "ci": "987654321",
+    "registroUniversitario": "298765432",
+    "carreraCodigo": "{{carreraCodigo}}",
+    "telefono": "7",
+    "correo": "{{correoPost}}",
+    "contrasena": "Clave123",
+    "confirmacionContrasena": "Clave123"
+  }
+}
+
+assert {
+  res.status: eq 409
+  res.body.status: eq failed
+}

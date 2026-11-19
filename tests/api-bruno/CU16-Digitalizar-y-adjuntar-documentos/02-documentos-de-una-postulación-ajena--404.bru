@@ -1,0 +1,21 @@
+meta {
+  name: Documentos de una postulación ajena (404)
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/v1/postulaciones/{{calificadaCodigo}}/documentos
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{postToken}}
+}
+
+tests {
+    test("no se ve lo ajeno (4xx)", function () {
+      expect(res.status).to.be.within(400, 404);
+    });
+}

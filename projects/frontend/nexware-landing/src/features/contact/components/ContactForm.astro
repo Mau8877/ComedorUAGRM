@@ -10,8 +10,8 @@ const t = useTranslations(Astro.props.lang)
 ---
 
 <!--
-  Esta versión no envía datos a ningún servidor: valida en el navegador y
-  muestra un mensaje de éxito.
+  Valida en el navegador y envía el mensaje a POST /api/v1/contacto del core
+  (mismo origen detrás del proxy), que lo reenvía por correo.
 -->
 <form
   class="form"
@@ -19,7 +19,14 @@ const t = useTranslations(Astro.props.lang)
   data-required={t('contact.errorRequired')}
   data-email={t('contact.errorEmail')}
   data-success={t('contact.success')}
+  data-sending={t('contact.sending')}
+  data-error-send={t('contact.errorSend')}
 >
+  <!-- Campo trampa contra bots: una persona no lo ve; si llega lleno, el servidor descarta el mensaje. -->
+  <div class="trampa" aria-hidden="true">
+    <label for="sitioWeb">No lo llenes</label>
+    <input id="sitioWeb" name="sitioWeb" type="text" tabindex="-1" autocomplete="off" />
+  </div>
   <div class="field">
     <label for="nombre">{t('contact.name')}</label>
     <input
@@ -59,6 +66,7 @@ const t = useTranslations(Astro.props.lang)
     {t('contact.send')}
   </Button>
   <p class="success" role="status" hidden></p>
+  <p class="failure" role="alert" hidden></p>
 </form>
 
 <script>
@@ -66,6 +74,8 @@ const t = useTranslations(Astro.props.lang)
 
   const form = document.querySelector<HTMLFormElement>('.form')
   const success = form?.querySelector<HTMLElement>('.success')
+  const failure = form?.querySelector<HTMLElement>('.failure')
+  const send = form?.querySelector<HTMLButtonElement>('button[type="submit"]')
 
   function setError(field: HTMLInputElement | HTMLTextAreaElement, message: string) {
     const output = document.getElementById(`${field.id}-error`)
@@ -73,13 +83,15 @@ const t = useTranslations(Astro.props.lang)
     field.setAttribute('aria-invalid', message ? 'true' : 'false')
   }
 
-  form?.addEventListener('submit', (event) => {
+  form?.addEventListener('submit', async (event) => {
     event.preventDefault()
-    if (!form || !success) return
+    if (!form || !success || !failure) return
     let firstInvalid: HTMLElement | null = null
 
     form
-      .querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input, textarea')
+      .querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
+        'input:not([name="sitioWeb"]), textarea'
+      )
       .forEach((field) => {
         const error = validateField(field.type, field.value)
         const message =
@@ -93,9 +105,38 @@ const t = useTranslations(Astro.props.lang)
       ;(firstInvalid as HTMLElement).focus()
       return
     }
-    success.textContent = form.dataset.success ?? ''
-    success.hidden = false
-    form.reset()
+    success.hidden = true
+    failure.hidden = true
+    const label = send?.textContent
+    if (send) {
+      send.disabled = true
+      send.textContent = form.dataset.sending ?? ''
+    }
+    try {
+      const data = new FormData(form)
+      const response = await fetch('/api/v1/contacto', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre: data.get('nombre'),
+          correo: data.get('correo'),
+          mensaje: data.get('mensaje'),
+          sitioWeb: data.get('sitioWeb'),
+        }),
+      })
+      if (!response.ok) throw new Error(String(response.status))
+      success.textContent = form.dataset.success ?? ''
+      success.hidden = false
+      form.reset()
+    } catch {
+      failure.textContent = form.dataset.errorSend ?? ''
+      failure.hidden = false
+    } finally {
+      if (send) {
+        send.disabled = false
+        send.textContent = label ?? ''
+      }
+    }
   })
 </script>
 
@@ -152,6 +193,20 @@ const t = useTranslations(Astro.props.lang)
   }
   .form :global(.send) {
     align-self: flex-start;
+  }
+  .trampa {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+  .failure {
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    font-size: 15px;
   }
   .success {
     padding: 12px 16px;

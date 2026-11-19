@@ -1,0 +1,33 @@
+meta {
+  name: Ubicar las convocatorias de prueba E01 a E08
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/api/v1/convocatorias?page=1&pageSize=50
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+script:post-response {
+  for (const c of res.body.data) {
+    const m = /\[PRUEBA\] (E0[1-8])/.exec(c.nombre);
+    if (m) bru.setVar("c" + m[1], c.codigo);
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+}
+
+tests {
+    test("encontró las 8 convocatorias de prueba", function () {
+      for (const k of ["cE01","cE02","cE03","cE04","cE05","cE06","cE07","cE08"]) expect(bru.getVar(k)).to.be.a("string");
+    });
+}

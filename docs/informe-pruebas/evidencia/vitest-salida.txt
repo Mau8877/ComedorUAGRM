@@ -1,0 +1,18 @@
+
+ RUN  v4.1.11 D:/DesarrolloSoftware/ComedorUAGRM/projects/frontend/comedoruagrm
+      Coverage enabled with v8
+
+
+ Test Files  147 passed (147)
+      Tests  1296 passed (1296)
+   Start at  21:38:44
+   Duration  76.49s (transform 17.79s, setup 108.28s, import 239.48s, tests 331.08s, environment 338.31s)
+
+ % Coverage report from v8
+
+=============================== Coverage summary ===============================
+Statements   : 82.22% ( 4182/5086 )
+Branches     : 74.3% ( 3037/4087 )
+Functions    : 78.77% ( 1592/2021 )
+Lines        : 83.39% ( 3942/4727 )
+================================================================================

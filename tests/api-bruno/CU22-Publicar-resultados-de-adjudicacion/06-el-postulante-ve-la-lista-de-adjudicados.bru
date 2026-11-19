@@ -1,0 +1,21 @@
+meta {
+  name: El postulante ve la lista de adjudicados
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/api/v1/convocatorias/{{cE05}}/resultados?page=1&pageSize=10
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{postToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+  res.body.data.length: gte 1
+}

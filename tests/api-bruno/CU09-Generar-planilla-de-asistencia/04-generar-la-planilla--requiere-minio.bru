@@ -1,0 +1,34 @@
+meta {
+  name: Generar la planilla (requiere MinIO)
+  type: http
+  seq: 4
+  tags: [
+    minio
+  ]
+}
+
+post {
+  url: {{baseUrl}}/api/v1/convocatorias/{{cE08}}/planillas
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "fechaDesde": "2026-10-01",
+    "fechaHasta": "2026-10-31"
+  }
+}
+
+script:post-response {
+  try { const v = res.body.data.codigo; if (v !== undefined) bru.setVar("planillaCodigo", v); } catch (e) {}
+}
+
+assert {
+  res.status: eq 201
+  res.body.status: eq success
+}

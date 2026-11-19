@@ -1,0 +1,21 @@
+meta {
+  name: Resumen para la planilla (E08)
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/convocatorias/{{cE08}}/planillas/resumen
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+  res.body.data.becadosVigentes: gte 1
+}

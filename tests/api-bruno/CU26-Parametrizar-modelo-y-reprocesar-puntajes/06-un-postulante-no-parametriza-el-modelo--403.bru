@@ -1,0 +1,27 @@
+meta {
+  name: Un postulante no parametriza el modelo (403)
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/v1/modelos-preseleccion
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{postToken}}
+}
+
+body:json {
+  {
+    "parametros": []
+  }
+}
+
+assert {
+  res.status: eq 403
+  res.body.status: eq failed
+  res.body.error: eq ERR_AUTH_07
+}

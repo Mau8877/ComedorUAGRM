@@ -1,0 +1,20 @@
+meta {
+  name: Marcar todo como leído
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/v1/notificaciones/leer-todo
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{becadoToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+}

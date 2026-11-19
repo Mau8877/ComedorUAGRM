@@ -23,8 +23,11 @@ public final class RutasPublicas {
     public static final String RECUPERAR_CONTRASENA = "/api/v1/auth/recuperar-contrasena";
     public static final String RESTABLECER_CONTRASENA = "/api/v1/auth/restablecer-contrasena";
 
+    // Formulario de contacto de la landing de Nexware: lo usan visitantes sin cuenta.
+    public static final String CONTACTO = "/api/v1/contacto";
+
     private static final Set<String> POST_PUBLICOS = Set.of(REGISTRO, LOGIN, REFRESH, LOGOUT,
-            RECUPERAR_CONTRASENA, RESTABLECER_CONTRASENA);
+            RECUPERAR_CONTRASENA, RESTABLECER_CONTRASENA, CONTACTO);
 
     private RutasPublicas() {
     }

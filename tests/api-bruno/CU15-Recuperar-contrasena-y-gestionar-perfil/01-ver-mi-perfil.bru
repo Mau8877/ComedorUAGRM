@@ -1,0 +1,21 @@
+meta {
+  name: Ver mi perfil
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/perfil
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{postToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+  res.body.data.rol: eq POSTULANTE
+}

@@ -1,0 +1,21 @@
+meta {
+  name: Reprocesar sin postulaciones con respuestas (409)
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/v1/convocatorias/{{cE02}}/reprocesar
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 409
+  res.body.status: eq failed
+  res.body.error: eq ERR_MOD_06
+}

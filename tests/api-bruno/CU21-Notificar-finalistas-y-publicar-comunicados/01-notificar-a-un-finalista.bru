@@ -1,0 +1,32 @@
+meta {
+  name: Notificar a un finalista
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/finalistas/notificaciones
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "finalistas": [
+      "{{e03f2}}"
+    ],
+    "plazoEntrega": "2030-01-01",
+    "lugarHorario": "DUBSS, 8:00 a 12:00",
+    "documentos": "Carnet y certificado de notas"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+  res.body.data.solicitados: eq 1
+}

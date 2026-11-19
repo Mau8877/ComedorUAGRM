@@ -1,0 +1,21 @@
+meta {
+  name: Publicar de nuevo (409)
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/convocatorias/{{cE05}}/resultados/publicar
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+tests {
+    test("ya publicados (409)", function () {
+      expect(res.status).to.equal(409);
+    });
+}

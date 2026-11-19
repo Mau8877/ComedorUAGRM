@@ -95,7 +95,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, RutasPublicas.CARRERAS).permitAll()
                 .requestMatchers(HttpMethod.POST, RutasPublicas.REGISTRO, RutasPublicas.LOGIN,
                         RutasPublicas.REFRESH, RutasPublicas.LOGOUT,
-                        RutasPublicas.RECUPERAR_CONTRASENA, RutasPublicas.RESTABLECER_CONTRASENA).permitAll()
+                        RutasPublicas.RECUPERAR_CONTRASENA, RutasPublicas.RESTABLECER_CONTRASENA,
+                        RutasPublicas.CONTACTO).permitAll()
                 // 2. Cualquier otra ruta exige un token de acceso válido
                 .anyRequest().authenticated()
             );

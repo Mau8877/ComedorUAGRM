@@ -1,0 +1,21 @@
+meta {
+  name: Un postulante no gestiona usuarios (403)
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/api/v1/usuarios
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{postToken}}
+}
+
+assert {
+  res.status: eq 403
+  res.body.status: eq failed
+  res.body.error: eq ERR_AUTH_07
+}

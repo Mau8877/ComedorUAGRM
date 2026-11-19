@@ -1,0 +1,45 @@
+meta {
+  name: Un postulante no crea convocatorias (403)
+  type: http
+  seq: 16
+}
+
+post {
+  url: {{baseUrl}}/api/v1/convocatorias
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{postToken}}
+}
+
+body:json {
+  {
+    "nombre": "Convocatoria automatizada {{etiquetaGestion}}",
+    "gestionCodigo": "{{gestionCodigo}}",
+    "fechaApertura": "{{apertura}}",
+    "fechaCierre": "{{cierre}}",
+    "cupos": 50,
+    "puntajeMinimo": 40,
+    "cantidadFinalistas": 60,
+    "documentos": [
+      {
+        "tipoDocumentoCodigo": "{{tipoDocCodigo}}",
+        "obligatorio": true
+      }
+    ]
+  }
+}
+
+script:pre-request {
+  const h = new Date();
+  bru.setVar("apertura", h.toISOString().slice(0, 10));
+  bru.setVar("cierre", new Date(h.getTime() + 30 * 864e5).toISOString().slice(0, 10));
+}
+
+assert {
+  res.status: eq 403
+  res.body.status: eq failed
+  res.body.error: eq ERR_AUTH_07
+}

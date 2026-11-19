@@ -1,0 +1,23 @@
+meta {
+  name: Consultar el acta generada
+  type: http
+  seq: 5
+  tags: [
+    minio
+  ]
+}
+
+get {
+  url: {{baseUrl}}/api/v1/convocatorias/{{cE06}}/acta
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+}

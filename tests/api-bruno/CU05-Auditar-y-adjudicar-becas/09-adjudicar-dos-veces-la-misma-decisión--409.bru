@@ -1,0 +1,21 @@
+meta {
+  name: Adjudicar dos veces la misma decisión (409)
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{baseUrl}}/api/v1/finalistas/{{e03f1}}/adjudicar
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+tests {
+    test("la decisión es definitiva (409)", function () {
+      expect(res.status).to.equal(409);
+    });
+}

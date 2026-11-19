@@ -1,0 +1,20 @@
+meta {
+  name: Convocatorias pendientes de acta
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/actas/pendientes
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+}

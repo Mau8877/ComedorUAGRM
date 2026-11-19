@@ -4,6 +4,11 @@ export interface NavItem {
   label: string
   href: string
   icon: LucideIcon
+  /**
+   * Título del grupo del menú al que pertenece. Los ítems de un mismo grupo van seguidos en el array: el sidebar
+   * dibuja el título cuando cambia el grupo. Sin `grupo`, el ítem queda suelto (ej. el Dashboard, arriba de todo).
+   */
+  grupo?: string
 }
 
 export interface LayoutUser {

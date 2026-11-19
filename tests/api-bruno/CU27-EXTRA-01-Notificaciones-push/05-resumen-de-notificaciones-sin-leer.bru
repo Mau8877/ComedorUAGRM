@@ -1,0 +1,20 @@
+meta {
+  name: Resumen de notificaciones sin leer
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/v1/notificaciones/me/resumen
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{becadoToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+}

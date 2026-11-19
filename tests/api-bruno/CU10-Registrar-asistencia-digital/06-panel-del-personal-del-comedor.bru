@@ -1,0 +1,21 @@
+meta {
+  name: Panel del personal del comedor
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/api/v1/panel/comedor
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{personalToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+  res.body.data.asistenciasHoy: gte 1
+}

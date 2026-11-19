@@ -1,0 +1,25 @@
+meta {
+  name: Ubicar un becado vigente de E08
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/convocatorias/{{cE08}}/padron?pageSize=10&filter%5Bestado%5D=VIGENTE
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+script:post-response {
+  bru.setVar("becaE08", res.body.data[0].codigo);
+  bru.setVar("ciE08", res.body.data[0].becado.ci);
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+}

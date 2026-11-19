@@ -1,0 +1,31 @@
+meta {
+  name: Registrar la entrega física del finalista 1
+  type: http
+  seq: 6
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/finalistas/{{e03f1}}/entrega
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "fechaRecepcion": "{{hoy}}",
+    "observaciones": "Recibida en la prueba automatizada"
+  }
+}
+
+script:pre-request {
+  bru.setVar("hoy", new Date(Date.now() - 864e5).toISOString().slice(0, 10));
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+}

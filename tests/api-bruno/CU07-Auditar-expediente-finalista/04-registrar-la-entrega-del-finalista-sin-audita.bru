@@ -1,0 +1,31 @@
+meta {
+  name: Registrar la entrega del finalista sin auditar
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/finalistas/{{e04SinAuditar}}/entrega
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "fechaRecepcion": "{{hoy}}",
+    "observaciones": ""
+  }
+}
+
+script:pre-request {
+  bru.setVar("hoy", new Date(Date.now() - 864e5).toISOString().slice(0, 10));
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+}

@@ -1,0 +1,29 @@
+meta {
+  name: Auditar sin haber recibido la documentación (error de negocio)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/finalistas/{{e04SinAuditar}}/auditorias
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "resultado": "VALIDADO",
+    "observaciones": "x",
+    "puntajeAcademico": 20
+  }
+}
+
+tests {
+    test("no se audita sin entrega física (4xx)", function () {
+      expect(res.status).to.be.within(400, 409);
+    });
+}

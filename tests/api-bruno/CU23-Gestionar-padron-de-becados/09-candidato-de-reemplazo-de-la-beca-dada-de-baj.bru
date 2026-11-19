@@ -1,0 +1,25 @@
+meta {
+  name: Candidato de reemplazo de la beca dada de baja
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{baseUrl}}/api/v1/becas/{{becaBaja}}/reemplazo
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+script:post-response {
+  bru.setVar("candidato", res.body.data.postulanteCodigo);
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+  res.body.data.postulanteCodigo: isString
+}

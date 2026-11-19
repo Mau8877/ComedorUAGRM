@@ -35,8 +35,12 @@ void main() {
       expect(rutaInicioPorRol('POSTULANTE'), '/estudiante');
     });
 
+    test('el personal del comedor va a registrar asistencia', () {
+      expect(rutaInicioPorRol('PERSONAL_COMEDOR'), '/asistencia');
+    });
+
     test('cualquier otro rol (o uno desconocido) va a /solo-postulantes', () {
-      for (final rol in ['ADMINISTRADOR_DUBSS', 'DIRECTIVO', 'PERSONAL_COMEDOR', 'HACKER']) {
+      for (final rol in ['ADMINISTRADOR_DUBSS', 'DIRECTIVO', 'HACKER']) {
         expect(rutaInicioPorRol(rol), '/solo-postulantes', reason: rol);
       }
     });
@@ -165,12 +169,25 @@ void main() {
     });
 
     test('un rol que no es postulante aterriza en /solo-postulantes al iniciar o restaurar la sesión', () {
-      for (final rol in ['ADMINISTRADOR_DUBSS', 'DIRECTIVO', 'PERSONAL_COMEDOR']) {
+      for (final rol in ['ADMINISTRADOR_DUBSS', 'DIRECTIVO']) {
         final sesion = AsyncData<Usuario?>(_usuario(rol));
         for (final ruta in ['/login', '/registro', '/', '/cargando']) {
           expect(redirectDeSesion(sesion: sesion, ubicacion: ruta), '/solo-postulantes', reason: '$rol $ruta');
         }
       }
+    });
+
+    test('el personal del comedor aterriza en /asistencia y solo puede usar esa pantalla y su perfil', () {
+      final personal = AsyncData<Usuario?>(_usuario('PERSONAL_COMEDOR'));
+      for (final ruta in ['/login', '/registro', '/', '/cargando', '/estudiante', '/solo-postulantes', '/mis-postulaciones/abc']) {
+        expect(redirectDeSesion(sesion: personal, ubicacion: ruta), '/asistencia', reason: ruta);
+      }
+      expect(redirectDeSesion(sesion: personal, ubicacion: '/asistencia'), isNull);
+      expect(redirectDeSesion(sesion: personal, ubicacion: '/perfil'), isNull);
+    });
+
+    test('un postulante no puede entrar a /asistencia', () {
+      expect(redirectDeSesion(sesion: AsyncData<Usuario?>(_usuario('POSTULANTE')), ubicacion: '/asistencia'), '/estudiante');
     });
 
     test('un rol que no es postulante no puede navegar a pantallas de postulante', () {

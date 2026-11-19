@@ -1,0 +1,26 @@
+meta {
+  name: Reemplazar al becado
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{baseUrl}}/api/v1/becas/{{becaBaja}}/reemplazar
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "postulanteCodigo": "{{candidato}}"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+}

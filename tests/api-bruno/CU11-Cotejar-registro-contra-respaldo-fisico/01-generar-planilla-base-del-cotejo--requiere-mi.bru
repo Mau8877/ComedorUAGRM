@@ -1,0 +1,36 @@
+meta {
+  name: Generar planilla base del cotejo (requiere MinIO)
+  type: http
+  seq: 1
+  tags: [
+    minio
+  ]
+}
+
+post {
+  url: {{baseUrl}}/api/v1/convocatorias/{{cE08}}/planillas
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "fechaDesde": "2026-10-01",
+    "fechaHasta": "2026-10-31"
+  }
+}
+
+script:post-response {
+  const c = res.body.data && res.body.data.codigo;
+  if (c) bru.setVar("planillaCotejo", c);
+}
+
+tests {
+    test("planilla creada o ya existente", function () {
+      expect([200, 201, 409]).to.include(res.status);
+    });
+}

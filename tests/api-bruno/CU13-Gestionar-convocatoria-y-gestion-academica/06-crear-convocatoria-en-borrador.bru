@@ -1,0 +1,48 @@
+meta {
+  name: Crear convocatoria en borrador
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/v1/convocatorias
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "nombre": "Convocatoria automatizada {{etiquetaGestion}}",
+    "gestionCodigo": "{{gestionCodigo}}",
+    "fechaApertura": "{{apertura}}",
+    "fechaCierre": "{{cierre}}",
+    "cupos": 50,
+    "puntajeMinimo": 40,
+    "cantidadFinalistas": 60,
+    "documentos": [
+      {
+        "tipoDocumentoCodigo": "{{tipoDocCodigo}}",
+        "obligatorio": true
+      }
+    ]
+  }
+}
+
+script:pre-request {
+  const h = new Date();
+  bru.setVar("apertura", h.toISOString().slice(0, 10));
+  bru.setVar("cierre", new Date(h.getTime() + 30 * 864e5).toISOString().slice(0, 10));
+}
+
+script:post-response {
+  bru.setVar("convocatoriaCodigo", res.body.data.codigo);
+}
+
+assert {
+  res.status: eq 201
+  res.body.status: eq success
+}

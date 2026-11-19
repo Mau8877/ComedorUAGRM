@@ -1,0 +1,27 @@
+meta {
+  name: Un postulante no devuelve (403)
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/finalistas/{{e03f4}}/devolver
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{postToken}}
+}
+
+body:json {
+  {
+    "motivo": "x"
+  }
+}
+
+assert {
+  res.status: eq 403
+  res.body.status: eq failed
+  res.body.error: eq ERR_AUTH_07
+}

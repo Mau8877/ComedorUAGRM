@@ -1,0 +1,21 @@
+meta {
+  name: Panel del postulante: ya postuló
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/v1/panel/postulante
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{postToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+  res.body.data.yaPostulo: eq true
+}

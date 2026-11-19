@@ -1,0 +1,26 @@
+meta {
+  name: Publicar un comunicado sin título (400)
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/comunicados
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "contenido": "Sin titulo",
+    "destinatarios": "TODOS"
+  }
+}
+
+assert {
+  res.status: eq 400
+}

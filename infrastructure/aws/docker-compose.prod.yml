@@ -1,0 +1,144 @@
+# Stack de PRODUCCIÓN (demo en una instancia EC2). A diferencia del docker-compose.yml de la raíz (desarrollo,
+# con el código montado y recarga en caliente), acá todo corre desde imágenes ya construidas (ECR).
+#
+# * Solo `proxy` publica un puerto (80): CloudFront le habla por HTTP y es quien pone el HTTPS.
+# * Postgres y Redis NO publican puertos: solo se ven dentro de la red del compose.
+# * Sin MinIO (los archivos van a S3), sin Mailpit (el correo sale por SES), sin Prometheus/Grafana.
+# Variables: archivo `.env` de esta misma carpeta (ver env.prod.example).
+name: comedor-uagrm
+
+services:
+  proxy:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - '80:80'
+    volumes:
+      - ./nginx.prod.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - panel
+      - landing
+      - core
+    networks: [red]
+
+  panel:
+    image: ${ECR_REGISTRY}/comedor-panel:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    networks: [red]
+
+  landing:
+    image: ${ECR_REGISTRY}/comedor-landing:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    networks: [red]
+
+  core:
+    image: ${ECR_REGISTRY}/comedor-core:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      # * Perfil `dev` a propósito: es el que activa los datos de demostración (administrador, convocatorias,
+      # * postulantes, becados) para la presentación. Las contraseñas de esas cuentas salen del .env, no son
+      # * las de desarrollo.
+      SPRING_PROFILES_ACTIVE: dev
+      JAVA_TOOL_OPTIONS: -Xmx1g -XX:+ExitOnOutOfMemoryError
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_DATA_REDIS_HOST: redis
+      IA_BASE_URL: http://ia:8000
+      JWT_SECRET: ${JWT_SECRET}
+      COOKIE_SECURE: 'true'
+      FRONTEND_URL: ${FRONTEND_URL}
+      CORS_ALLOWED_ORIGINS: ${FRONTEND_URL}
+      # * Todo el tráfico llega con la IP del proxy (ver RateLimitFilter): se sube el cupo para que una sala
+      # * entera de gente no se bloquee entre sí durante la presentación.
+      RATE_LIMIT_CAPACITY: ${RATE_LIMIT_CAPACITY:-3000}
+      RATE_LIMIT_REFILL_PER_MINUTE: ${RATE_LIMIT_REFILL_PER_MINUTE:-3000}
+      # Archivos: S3 con el rol de la instancia (sin claves en la configuración)
+      STORAGE_CREDENTIALS: ${STORAGE_CREDENTIALS:-aws-iam}
+      MINIO_URL: https://s3.${AWS_REGION}.amazonaws.com
+      MINIO_PUBLIC_URL: https://s3.${AWS_REGION}.amazonaws.com
+      MINIO_REGION: ${AWS_REGION}
+      STORAGE_BUCKET: ${STORAGE_BUCKET}
+      MINIO_ROOT_USER: ${STORAGE_ACCESS_KEY:-}
+      MINIO_ROOT_PASSWORD: ${STORAGE_SECRET_KEY:-}
+      # Correo: SES por SMTP
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_SMTP_AUTH: 'true'
+      MAIL_SMTP_STARTTLS: 'true'
+      MAIL_FROM: ${MAIL_FROM}
+      # Cuentas de demostración
+      SEED_ADMIN_CORREO: ${SEED_ADMIN_CORREO:-admin@dubss.com}
+      SEED_ADMIN_CONTRASENA: ${DEMO_PASSWORD}
+      SEED_FINALISTAS_CONTRASENA: ${DEMO_PASSWORD}
+      SEED_DASHBOARD_CONTRASENA: ${DEMO_PASSWORD}
+      APP_SEED_ESCENARIOS_CONTRASENA: ${DEMO_PASSWORD}
+      # Push (FCM): si `secrets/firebase-sa.json` no existe, el backend arranca igual y el push queda en modo log
+      FIREBASE_CREDENTIALS_PATH: /run/secrets/firebase-sa.json
+    volumes:
+      # Se monta la carpeta (no el archivo): si faltara, Docker crearía una carpeta con ese nombre
+      - ./secrets:/run/secrets:ro
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:8080/health']
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 120s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      ia:
+        condition: service_healthy
+    networks: [red]
+
+  ia:
+    image: ${ECR_REGISTRY}/comedor-ia:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'python', '-c', "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks: [red]
+
+  postgres:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [red]
+
+  redis:
+    image: redis:8-alpine
+    restart: unless-stopped
+    command: redis-server --maxmemory 128mb --maxmemory-policy allkeys-lru --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [red]
+
+networks:
+  red:
+    name: comedor-uagrm-prod
+
+volumes:
+  postgres_data:
+  redis_data:

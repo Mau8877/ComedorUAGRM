@@ -1,0 +1,27 @@
+meta {
+  name: No adjudicar sin auditoría previa (409)
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/v1/finalistas/{{e03f3}}/no-adjudicar
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "motivo": "prueba automatizada"
+  }
+}
+
+assert {
+  res.status: eq 409
+  res.body.status: eq failed
+  res.body.error: eq ERR_ADJ_02
+}

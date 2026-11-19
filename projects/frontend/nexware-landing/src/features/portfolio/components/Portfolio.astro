@@ -2,6 +2,7 @@
 import Section from '@/components/ui/Section.astro'
 import SectionHeader from '@/components/ui/SectionHeader.astro'
 import { SITE } from '@/config/site'
+import { withBase } from '@/i18n/routes'
 import { useTranslations, type Lang } from '@/i18n/utils'
 import ProjectCard from './ProjectCard.astro'
 
@@ -20,8 +21,8 @@ const t = useTranslations(Astro.props.lang)
       title={t('portfolio.title')}
       titleId="portafolio-title"
     />
-    <!-- El texto entre [corchetes] de la imagen es contenido pendiente (captura real). -->
     <ProjectCard
+      imageSrc={withBase('/portfolio/comedor-panel.png')}
       imageAlt={t('portfolio.image')}
       label={t('portfolio.label')}
       title={t('portfolio.name')}

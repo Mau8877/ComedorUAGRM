@@ -1,0 +1,33 @@
+meta {
+  name: Registrar el cotejo como conforme
+  type: http
+  seq: 4
+  tags: [
+    minio
+  ]
+}
+
+post {
+  url: {{baseUrl}}/api/v1/planillas/{{planillaCodigo}}/cotejos
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "totalRegistros": 1,
+    "coincidencias": 1,
+    "discrepancias": 0,
+    "resultado": "CONFORME",
+    "observaciones": ""
+  }
+}
+
+assert {
+  res.status: eq 201
+  res.body.status: eq success
+}

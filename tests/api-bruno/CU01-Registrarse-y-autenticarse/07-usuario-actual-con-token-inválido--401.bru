@@ -1,0 +1,22 @@
+meta {
+  name: Usuario actual con token inválido (401)
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/api/v1/auth/usuario-actual
+  body: none
+  auth: none
+}
+
+script:pre-request {
+  req.setHeader("Authorization", "Bearer token.invalido.000");
+}
+
+tests {
+    test("401 ERR_AUTH_01", function () {
+      expect(res.status).to.equal(401);
+      expect(res.body.error).to.equal("ERR_AUTH_01");
+    });
+}

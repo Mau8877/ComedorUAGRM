@@ -1,0 +1,29 @@
+meta {
+  name: Login del administrador
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "correo": "{{adminCorreo}}",
+    "contrasena": "{{adminPassword}}"
+  }
+}
+
+script:post-response {
+  bru.setVar("adminRefresh", res.body.data.refreshToken);
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+  res.body.data.usuario.rol: eq ADMINISTRADOR_DUBSS
+  res.body.data.tokenType: eq Bearer
+}

@@ -1,0 +1,21 @@
+meta {
+  name: Un postulante no publica resultados (403)
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/api/v1/convocatorias/{{cE04}}/resultados/publicar
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{postToken}}
+}
+
+assert {
+  res.status: eq 403
+  res.body.status: eq failed
+  res.body.error: eq ERR_AUTH_07
+}

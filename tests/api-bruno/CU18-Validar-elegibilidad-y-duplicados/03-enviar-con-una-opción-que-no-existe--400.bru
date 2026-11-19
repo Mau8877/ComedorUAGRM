@@ -1,0 +1,32 @@
+meta {
+  name: Enviar con una opción que no existe (400)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/postulaciones/{{borradorCodigo}}/enviar
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "ingresosFamiliares": 1500,
+    "dependientes": 3,
+    "procedencia": "Marte",
+    "patrimonio": "Vivienda alquilada",
+    "estadoVulnerabilidad": "Hogar monoparental",
+    "promedioAcademico": 70
+  }
+}
+
+script:pre-request {
+  req.setHeader("Authorization", "Bearer " + bru.getVar("borradorToken"));
+}
+
+tests {
+    test("rechaza opciones inválidas (400)", function () {
+      expect(res.status).to.equal(400);
+    });
+}

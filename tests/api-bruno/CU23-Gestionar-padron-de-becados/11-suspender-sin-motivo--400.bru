@@ -1,0 +1,23 @@
+meta {
+  name: Suspender sin motivo (400)
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{baseUrl}}/api/v1/becas/{{becaSuspender}}/suspender
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {}
+}
+
+assert {
+  res.status: eq 400
+}

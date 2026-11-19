@@ -1,0 +1,22 @@
+meta {
+  name: Segunda postulación en la misma gestión (409)
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/postulaciones
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{postToken}}
+}
+
+tests {
+    test("solo una postulación por gestión (409)", function () {
+      expect(res.status).to.equal(409);
+      expect(res.body.status).to.equal("failed");
+    });
+}

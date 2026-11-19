@@ -1,0 +1,21 @@
+meta {
+  name: Padrón sin resultados publicados (409)
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/convocatorias/{{cE01}}/padron
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 409
+  res.body.status: eq failed
+  res.body.error: eq ERR_BEC_03
+}

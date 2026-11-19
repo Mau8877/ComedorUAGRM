@@ -1,0 +1,22 @@
+meta {
+  name: Mis postulaciones (paginado)
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/postulaciones/mias?page=1&pageSize=10
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{postToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+  res.body.meta.totalItems: gte 1
+  res.body.data[0].estado: eq pendiente
+}

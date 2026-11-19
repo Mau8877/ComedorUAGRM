@@ -1,0 +1,23 @@
+meta {
+  name: Descargar el acta (URL temporal)
+  type: http
+  seq: 6
+  tags: [
+    minio
+  ]
+}
+
+get {
+  url: {{baseUrl}}/api/v1/convocatorias/{{cE06}}/acta/descarga
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+}

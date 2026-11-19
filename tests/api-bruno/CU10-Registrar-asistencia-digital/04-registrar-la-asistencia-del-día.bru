@@ -1,0 +1,27 @@
+meta {
+  name: Registrar la asistencia del día
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/asistencias
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{personalToken}}
+}
+
+body:json {
+  {
+    "becaCodigo": "{{becaE08}}"
+  }
+}
+
+assert {
+  res.status: eq 201
+  res.body.status: eq success
+  res.body.data.yaRegistrada: eq false
+}

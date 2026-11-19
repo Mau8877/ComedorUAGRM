@@ -1,0 +1,21 @@
+meta {
+  name: Desactivar la cuenta
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/v1/usuarios/{{usuarioNuevo}}/desactivar
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq success
+  res.body.data.activo: eq false
+}
