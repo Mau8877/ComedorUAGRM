@@ -14,6 +14,7 @@ import { useDevolverPostulacion } from '../api/useExpediente'
 import { aDevolucionRequest, devolucionSchema, MAX_MOTIVO } from '../schemas'
 import type { DevolucionFormValues } from '../schemas'
 import type { DevolucionResultado } from '../types'
+import { errorVisible } from '@/utils/errorCampo'
 
 const ID_FORMULARIO = 'devolver-postulacion'
 const VALORES_INICIALES: DevolucionFormValues = { motivo: '' }
@@ -118,7 +119,7 @@ export function DevolverPostulacionDialog({
               />
               <div className="flex justify-between gap-2">
                 <span className="text-xs text-destructive">
-                  {field.state.meta.isTouched && field.state.meta.errors[0]
+                  {errorVisible(field) && field.state.meta.errors[0]
                     ? field.state.meta.errors[0].message
                     : ''}
                 </span>

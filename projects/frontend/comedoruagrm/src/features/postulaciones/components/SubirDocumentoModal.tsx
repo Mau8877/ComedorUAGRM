@@ -15,6 +15,7 @@ import {
 import type { ErrorDocumentos } from '../api'
 import { crearArchivoDocumentoSchema, formatearTamano, nombresDeFormatos } from '../schemas'
 import type { ArchivoAdjunto, DocumentoRequerido, ReglasArchivo } from '../types'
+import { validacionFormulario } from '@/utils/validacionFormulario'
 
 const FORM_ID = 'subir-documento-form'
 
@@ -47,7 +48,7 @@ export function SubirDocumentoModal({ open, onOpenChange, codigo, requerido, reg
 
   const form = useForm({
     defaultValues: { archivo: null as File | null },
-    validators: { onChange: schema, onBlur: schema, onSubmit: schema },
+    ...validacionFormulario(schema),
     onSubmit: ({ value }) => {
       if (enviando.current || !value.archivo) return
       enviando.current = true

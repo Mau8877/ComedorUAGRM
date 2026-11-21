@@ -1,4 +1,4 @@
-import type { ValidationLogicFn } from '@tanstack/react-form'
+import type { AnyFormApi, ValidationLogicFn } from '@tanstack/react-form'
 
 /**
  * Lógica de validación de los formularios: el esquema se corre en cada cambio, en cada blur y al enviar, y
@@ -23,5 +23,15 @@ const validarEnCadaEvento: ValidationLogicFn = (props) => {
 
 /** Opciones de `useForm` para validar con un esquema de Zod: `useForm({ defaultValues, ...validacionFormulario(esquema) })`. */
 export function validacionFormulario<TSchema>(esquema: TSchema) {
-  return { validators: { onDynamic: esquema }, validationLogic: validarEnCadaEvento }
+  return {
+    validators: { onDynamic: esquema },
+    validationLogic: validarEnCadaEvento,
+    // * Un envío inválido marca todos los campos como «ya salió del campo»: así su error se muestra (y el campo se
+    // * vuelve a renderizar) aunque la persona nunca lo haya abandonado; ver `errorCampo.ts`.
+    onSubmitInvalid: ({ formApi }: { formApi: AnyFormApi }) => {
+      for (const nombre of Object.keys(formApi.fieldInfo)) {
+        formApi.setFieldMeta(nombre, (m) => ({ ...m, isBlurred: true }))
+      }
+    },
+  }
 }

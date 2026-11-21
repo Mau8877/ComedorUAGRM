@@ -17,6 +17,7 @@ import { aNoAdjudicarRequest, MAX_MOTIVO, noAdjudicarSchema } from '../schemas'
 import type { NoAdjudicarFormValues } from '../schemas'
 import type { AccionDecision, DecisionAdjudicacionResultado, Expediente } from '../types'
 import { formatearPuntos } from './formatos'
+import { mensajeError } from '@/utils/errorCampo'
 
 const ID_FORMULARIO = 'decidir-adjudicacion'
 const VALORES_INICIALES: NoAdjudicarFormValues = { motivo: '' }
@@ -204,7 +205,7 @@ export function DecidirAdjudicacionDialog({
                 />
                 <div className="flex justify-between gap-2">
                   <ErrorCampo
-                    error={field.state.meta.isTouched ? field.state.meta.errors[0]?.message : undefined}
+                    error={mensajeError(field)}
                   />
                   <span className="text-xs text-muted-foreground">
                     {field.state.value.length}/{MAX_MOTIVO}

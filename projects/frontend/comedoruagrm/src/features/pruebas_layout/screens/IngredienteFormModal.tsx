@@ -11,6 +11,7 @@ import {
   type IngredienteFormValues,
 } from '../schemas'
 import type { Ingrediente } from '../types'
+import { errorVisible } from '@/utils/errorCampo'
 
 const FORM_ID = 'ingrediente-form'
 
@@ -98,7 +99,7 @@ export function IngredienteFormModal({
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}
               />
-              {field.state.meta.isTouched && field.state.meta.errors[0] && (
+              {errorVisible(field) && field.state.meta.errors[0] && (
                 <span className="text-xs text-destructive">{field.state.meta.errors[0].message}</span>
               )}
             </div>
@@ -118,7 +119,7 @@ export function IngredienteFormModal({
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}
               />
-              {field.state.meta.isTouched && field.state.meta.errors[0] && (
+              {errorVisible(field) && field.state.meta.errors[0] && (
                 <span className="text-xs text-destructive">{field.state.meta.errors[0].message}</span>
               )}
             </div>
@@ -188,7 +189,7 @@ export function IngredienteFormModal({
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
                 />
-                {field.state.meta.isTouched && field.state.meta.errors[0] && (
+                {errorVisible(field) && field.state.meta.errors[0] && (
                   <span className="text-xs text-destructive">{field.state.meta.errors[0].message}</span>
                 )}
               </div>
@@ -209,7 +210,7 @@ export function IngredienteFormModal({
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
                 />
-                {field.state.meta.isTouched && field.state.meta.errors[0] && (
+                {errorVisible(field) && field.state.meta.errors[0] && (
                   <span className="text-xs text-destructive">{field.state.meta.errors[0].message}</span>
                 )}
               </div>
@@ -232,7 +233,7 @@ export function IngredienteFormModal({
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}
               />
-              {field.state.meta.isTouched && field.state.meta.errors[0] && (
+              {errorVisible(field) && field.state.meta.errors[0] && (
                 <span className="text-xs text-destructive">{field.state.meta.errors[0].message}</span>
               )}
             </div>

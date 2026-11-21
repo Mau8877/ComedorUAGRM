@@ -10,6 +10,8 @@ import { AlertaError } from '@/features/auth'
 import { mapearErrorBecas, useDarDeBaja, useSuspender } from '../api'
 import { motivoSchema } from '../schemas'
 import type { Beca } from '../types'
+import { errorVisible } from '@/utils/errorCampo'
+import { validacionFormulario } from '@/utils/validacionFormulario'
 
 const ID_FORMULARIO = 'motivo-beca'
 
@@ -50,7 +52,7 @@ export function MotivoBecaDialog({ open, onOpenChange, beca, accion }: MotivoBec
 
   const form = useForm({
     defaultValues: { motivo: '' },
-    validators: { onChange: motivoSchema, onBlur: motivoSchema },
+    ...validacionFormulario(motivoSchema),
     onSubmit: ({ value }) => {
       if (enviando.current) return
       enviando.current = true
@@ -117,14 +119,14 @@ export function MotivoBecaDialog({ open, onOpenChange, beca, accion }: MotivoBec
                 name={field.name}
                 rows={3}
                 value={field.state.value}
-                aria-invalid={field.state.meta.isTouched && field.state.meta.errors.length > 0 ? true : undefined}
+                aria-invalid={errorVisible(field) && field.state.meta.errors.length > 0 ? true : undefined}
                 onBlur={field.handleBlur}
                 onChange={(e) => {
                   if (error) setError(null)
                   field.handleChange(e.target.value)
                 }}
               />
-              {field.state.meta.isTouched && field.state.meta.errors[0] && (
+              {errorVisible(field) && field.state.meta.errors[0] && (
                 <span className="text-xs text-destructive">{field.state.meta.errors[0].message}</span>
               )}
             </div>

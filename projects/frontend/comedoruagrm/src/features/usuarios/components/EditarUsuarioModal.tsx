@@ -13,6 +13,7 @@ import type { EditarUsuarioPersonalRequest } from '../schemas'
 import type { UsuarioPersonal } from '../types'
 import { AlertaUsuarios } from './AlertaUsuarios'
 import { CampoUsuario } from './CampoUsuario'
+import { mensajeError } from '@/utils/errorCampo'
 
 const FORM_ID = 'editar-usuario-form'
 
@@ -110,7 +111,7 @@ export function EditarUsuarioModal({ open, onOpenChange, usuario }: EditarUsuari
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={field.handleChange}
-                error={field.state.meta.isTouched ? field.state.meta.errors[0]?.message : undefined}
+                error={mensajeError(field)}
               />
             )}
           </form.Field>
@@ -122,7 +123,7 @@ export function EditarUsuarioModal({ open, onOpenChange, usuario }: EditarUsuari
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={field.handleChange}
-                error={field.state.meta.isTouched ? field.state.meta.errors[0]?.message : undefined}
+                error={mensajeError(field)}
               />
             )}
           </form.Field>
@@ -144,7 +145,7 @@ export function EditarUsuarioModal({ open, onOpenChange, usuario }: EditarUsuari
                 field.handleChange(valor)
               }}
               error={
-                error?.campo === 'correo' ? error.mensaje : field.state.meta.isTouched ? field.state.meta.errors[0]?.message : undefined
+                error?.campo === 'correo' ? error.mensaje : mensajeError(field)
               }
             />
           )}

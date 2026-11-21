@@ -20,6 +20,8 @@ import {
   VARIABLES_MODELO,
 } from '../schemas'
 import type { ModeloPreseleccion } from '../types'
+import { errorVisible } from '@/utils/errorCampo'
+import { validacionFormulario } from '@/utils/validacionFormulario'
 
 interface FormularioParametrosProps {
   /** La versión vigente; `null` si todavía no se guardó ninguna (la columna «Actual» queda vacía). */
@@ -49,7 +51,7 @@ export function FormularioParametros({ vigente, onCambios, onDesactualizado }: F
 
   const form = useForm({
     defaultValues: iniciales,
-    validators: { onChange: parametrosSchema, onBlur: parametrosSchema },
+    ...validacionFormulario(parametrosSchema),
     onSubmit: ({ value }) => {
       if (enviando.current) return
       if (!sumaEsValida(value)) return
@@ -128,14 +130,14 @@ export function FormularioParametros({ vigente, onCambios, onDesactualizado }: F
                             aria-label={`Nuevo peso de ${nombre}`}
                             className="text-center"
                             value={field.state.value}
-                            aria-invalid={field.state.meta.isTouched && field.state.meta.errors.length > 0 ? true : undefined}
+                            aria-invalid={errorVisible(field) && field.state.meta.errors.length > 0 ? true : undefined}
                             onBlur={field.handleBlur}
                             onChange={(e) => {
                               if (error) setError(null)
                               field.handleChange(e.target.value)
                             }}
                           />
-                          {field.state.meta.isTouched && field.state.meta.errors[0] && (
+                          {errorVisible(field) && field.state.meta.errors[0] && (
                             <span className="text-xs text-destructive">{field.state.meta.errors[0].message}</span>
                           )}
                         </div>
@@ -178,11 +180,11 @@ export function FormularioParametros({ vigente, onCambios, onDesactualizado }: F
                 id={field.name}
                 name={field.name}
                 value={field.state.value}
-                aria-invalid={field.state.meta.isTouched && field.state.meta.errors.length > 0 ? true : undefined}
+                aria-invalid={errorVisible(field) && field.state.meta.errors.length > 0 ? true : undefined}
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}
               />
-              {field.state.meta.isTouched && field.state.meta.errors[0] && (
+              {errorVisible(field) && field.state.meta.errors[0] && (
                 <span className="text-xs text-destructive">{field.state.meta.errors[0].message}</span>
               )}
             </div>

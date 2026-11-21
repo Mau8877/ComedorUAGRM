@@ -34,6 +34,7 @@ import {
 } from '../schemas'
 import type { AuditoriaFormValues, AuditoriaValues } from '../schemas'
 import type { ResultadoAuditoria, ResultadoRegistroAuditoria } from '../types'
+import { errorVisible } from '@/utils/errorCampo'
 
 interface AuditoriaFormProps {
   /** Código del finalista que se audita. */
@@ -162,7 +163,7 @@ export function AuditoriaForm({ finalista, bloqueo, onRegistrada, onFinalistaIne
                   </Label>
                 ))}
               </RadioGroup>
-              {field.state.meta.isTouched && field.state.meta.errors[0] && (
+              {errorVisible(field) && field.state.meta.errors[0] && (
                 <span className="text-xs text-destructive">{field.state.meta.errors[0].message}</span>
               )}
             </div>
@@ -186,7 +187,7 @@ export function AuditoriaForm({ finalista, bloqueo, onRegistrada, onFinalistaIne
                       onBlur={field.handleBlur}
                       onChange={(e) => field.handleChange(e.target.value)}
                     />
-                    {field.state.meta.isTouched && field.state.meta.errors[0] && (
+                    {errorVisible(field) && field.state.meta.errors[0] && (
                       <span className="text-xs text-destructive">{field.state.meta.errors[0].message}</span>
                     )}
                   </div>
@@ -219,7 +220,7 @@ export function AuditoriaForm({ finalista, bloqueo, onRegistrada, onFinalistaIne
               />
               <div className="flex justify-between gap-2">
                 <span className="text-xs text-destructive">
-                  {field.state.meta.isTouched && field.state.meta.errors[0]
+                  {errorVisible(field) && field.state.meta.errors[0]
                     ? field.state.meta.errors[0].message
                     : ''}
                 </span>

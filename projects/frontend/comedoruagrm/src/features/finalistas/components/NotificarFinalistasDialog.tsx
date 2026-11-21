@@ -24,6 +24,7 @@ import { useNotificarFinalistas } from '../api/useFinalistas'
 import { aNotificarRequest, mananaIso, notificarFinalistasSchema } from '../schemas'
 import type { NotificarFinalistasValues } from '../schemas'
 import type { ResultadoNotificacion } from '../types'
+import { mensajeError } from '@/utils/errorCampo'
 
 const ID_FORMULARIO = 'notificar-finalistas'
 
@@ -172,7 +173,7 @@ export function NotificarFinalistasDialog({
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
                 />
-                <ErrorCampo error={field.state.meta.isTouched ? field.state.meta.errors[0]?.message : undefined} />
+                <ErrorCampo error={mensajeError(field)} />
               </div>
             )}
           </form.Field>
@@ -191,7 +192,7 @@ export function NotificarFinalistasDialog({
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
                 />
-                <ErrorCampo error={field.state.meta.isTouched ? field.state.meta.errors[0]?.message : undefined} />
+                <ErrorCampo error={mensajeError(field)} />
               </div>
             )}
           </form.Field>

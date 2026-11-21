@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useForm } from '@tanstack/react-form'
+import { useForm, type AnyFieldApi } from '@tanstack/react-form'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -12,6 +12,8 @@ import type { GuardarBorradorRequest, OpcionesFormulario } from '../types'
 
 import { formatearHora } from './formatos'
 import { miembroVacio } from './valoresIniciales'
+import { mensajeError, errorVisible } from '@/utils/errorCampo'
+import { validacionFormulario } from '@/utils/validacionFormulario'
 
 const ETIQUETAS: Record<keyof RespuestasSocioeconomicasValues, string> = {
   ingresosFamiliares: 'ingresos familiares',
@@ -72,8 +74,8 @@ export interface FormularioSocioeconomicoProps {
   guardadoEn?: string | null
 }
 
-function Error({ campo }: { campo: { state: { meta: { isTouched: boolean; errors: Array<{ message: string } | undefined> } } } }) {
-  const mensaje = campo.state.meta.isTouched ? campo.state.meta.errors[0]?.message : undefined
+function Error({ campo }: { campo: AnyFieldApi }) {
+  const mensaje = mensajeError(campo)
   return mensaje ? <span className="text-xs text-destructive">{mensaje}</span> : null
 }
 
@@ -104,7 +106,7 @@ export function FormularioSocioeconomico({
   const [erroresBorrador, setErroresBorrador] = useState<string[]>([])
   const form = useForm({
     defaultValues: valores,
-    validators: { onChange: respuestasSocioeconomicasSchema, onBlur: respuestasSocioeconomicasSchema },
+    ...validacionFormulario(respuestasSocioeconomicasSchema),
     onSubmit: ({ value }) => onContinuar(value),
   })
 
@@ -143,7 +145,7 @@ export function FormularioSocioeconomico({
             inputMode={inputMode}
             placeholder={placeholder}
             value={field.state.value}
-            aria-invalid={field.state.meta.isTouched && field.state.meta.errors.length > 0 ? true : undefined}
+            aria-invalid={errorVisible(field) && field.state.meta.errors.length > 0 ? true : undefined}
             onBlur={field.handleBlur}
             onChange={(e) => field.handleChange(e.target.value)}
           />
@@ -391,7 +393,7 @@ export function FormularioSocioeconomico({
                 name={field.name}
                 rows={3}
                 value={field.state.value}
-                aria-invalid={field.state.meta.isTouched && field.state.meta.errors.length > 0 ? true : undefined}
+                aria-invalid={errorVisible(field) && field.state.meta.errors.length > 0 ? true : undefined}
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}
               />
