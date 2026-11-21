@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../shared/widgets/campo_formulario.dart';
 import '../models/formulario_postulacion.dart';
 import '../validacion_formulario.dart';
 
@@ -308,6 +309,7 @@ class FormularioOficial extends StatelessWidget {
         for (final o in opciones) DropdownMenuItem(value: o, child: Text(o)),
       ],
       validator: validarOpcion,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       onChanged: alCambiar,
     );
   }
@@ -326,6 +328,7 @@ class FormularioOficial extends StatelessWidget {
         DropdownMenuItem(value: false, child: Text('No')),
       ],
       validator: validarSiNo,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       onChanged: alCambiar,
     );
   }
@@ -336,7 +339,7 @@ class FormularioOficial extends StatelessWidget {
     String? Function(String?) validar, {
     int lineas = 1,
   }) {
-    return TextFormField(
+    return CampoFormulario(
       controller: c,
       maxLines: lineas,
       decoration: InputDecoration(labelText: etiqueta),
@@ -345,7 +348,7 @@ class FormularioOficial extends StatelessWidget {
   }
 
   static Widget _numero(String etiqueta, TextEditingController c, int maximo) {
-    return TextFormField(
+    return CampoFormulario(
       controller: c,
       keyboardType: TextInputType.number,
       decoration: InputDecoration(labelText: etiqueta),
@@ -403,28 +406,28 @@ class _FilaFamiliar extends StatelessWidget {
                 'Familiar $n',
                 style: Theme.of(context).textTheme.titleSmall,
               ),
-              TextFormField(
+              CampoFormulario(
                 controller: fila.nombre,
                 decoration: const InputDecoration(labelText: 'Nombre completo'),
                 validator: (v) => validarTextoOpcional(v, 150),
               ),
-              TextFormField(
+              CampoFormulario(
                 controller: fila.parentesco,
                 decoration: const InputDecoration(labelText: 'Parentesco'),
                 validator: (v) => validarTextoOpcional(v, 100),
               ),
-              TextFormField(
+              CampoFormulario(
                 controller: fila.edad,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(labelText: 'Edad'),
                 validator: (v) => validarEnteroOpcional(v, 120),
               ),
-              TextFormField(
+              CampoFormulario(
                 controller: fila.ocupacion,
                 decoration: const InputDecoration(labelText: 'Ocupación'),
                 validator: (v) => validarTextoOpcional(v, 100),
               ),
-              TextFormField(
+              CampoFormulario(
                 controller: fila.observacion,
                 decoration: const InputDecoration(labelText: 'Observación'),
                 validator: (v) => validarTextoOpcional(v, 150),
