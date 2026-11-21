@@ -30,6 +30,16 @@ if (_formKey.currentState!.validate()) {
 }
 ```
 
+## Cuándo se muestra el error: al salir del campo o al enviar
+
+Los campos de texto usan `CampoFormulario` (`lib/shared/widgets/campo_formulario.dart`),
+no un `TextFormField` suelto: valida con `AutovalidateMode.onUnfocus` y se revalida al
+editar una vez visible el error. **Nunca `autovalidateMode: onUserInteraction` en un
+`Form` ni en un campo de texto**: muestra el error mientras la persona todavía escribe.
+`onUserInteraction` solo en selectores (`DropdownButtonFormField`), donde elegir es un
+solo gesto. Mismo criterio que la web
+([FORMULARIOS_ZOD_TANSTACK_FRONTEND.md](../frontend/FORMULARIOS_ZOD_TANSTACK_FRONTEND.md)).
+
 ## Mensajes en español
 
 Igual que en el frontend web (ver
