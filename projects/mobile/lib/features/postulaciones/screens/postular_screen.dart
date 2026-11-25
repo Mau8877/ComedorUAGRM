@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../shared/widgets/campo_formulario.dart';
 import '../envio_error_mapper.dart';
 import '../formatos.dart';
 import '../models/formulario_postulacion.dart';
@@ -305,11 +306,10 @@ class _PostularScreenState extends ConsumerState<PostularScreen> {
   Widget _pasoFormulario(FormularioPostulacion f) {
     return Form(
       key: _formKey,
-      autovalidateMode: AutovalidateMode.onUserInteraction,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          TextFormField(
+          CampoFormulario(
             controller: _ingresos,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             decoration: const InputDecoration(
@@ -318,7 +318,7 @@ class _PostularScreenState extends ConsumerState<PostularScreen> {
             validator: validarIngresos,
           ),
           const SizedBox(height: 12),
-          TextFormField(
+          CampoFormulario(
             controller: _dependientes,
             keyboardType: TextInputType.number,
             decoration: const InputDecoration(
@@ -348,7 +348,7 @@ class _PostularScreenState extends ConsumerState<PostularScreen> {
             (v) => _vulnerabilidad = v,
           ),
           const SizedBox(height: 12),
-          TextFormField(
+          CampoFormulario(
             controller: _promedio,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             decoration: const InputDecoration(
@@ -404,6 +404,7 @@ class _PostularScreenState extends ConsumerState<PostularScreen> {
         for (final o in opciones) DropdownMenuItem(value: o, child: Text(o)),
       ],
       validator: validarOpcion,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       onChanged: (v) => setState(() => alCambiar(v)),
     );
   }

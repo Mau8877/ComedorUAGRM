@@ -11,6 +11,8 @@ import { gestionSchema } from '../schemas'
 import type { GestionAcademica } from '../types'
 import { AlertaConvocatorias } from './AlertaConvocatorias'
 import { CampoConvocatoria } from './CampoConvocatoria'
+import { mensajeError, errorVisible } from '@/utils/errorCampo'
+import { validacionFormulario } from '@/utils/validacionFormulario'
 
 const FORM_ID = 'gestion-form'
 
@@ -37,7 +39,7 @@ export function GestionFormModal({ open, onOpenChange, gestion }: GestionFormMod
       fechaInicio: gestion?.fechaInicio ?? '',
       fechaFin: gestion?.fechaFin ?? '',
     },
-    validators: { onChange: gestionSchema, onBlur: gestionSchema },
+    ...validacionFormulario(gestionSchema),
     onSubmit: ({ value }) => {
       if (enviando.current) return
       enviando.current = true
@@ -122,7 +124,7 @@ export function GestionFormModal({ open, onOpenChange, gestion }: GestionFormMod
               error={
                 error?.campo === 'etiqueta'
                   ? error.mensaje
-                  : field.state.meta.isTouched
+                  : errorVisible(field)
                     ? field.state.meta.errors[0]?.message
                     : undefined
               }
@@ -140,7 +142,7 @@ export function GestionFormModal({ open, onOpenChange, gestion }: GestionFormMod
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={field.handleChange}
-                error={field.state.meta.isTouched ? field.state.meta.errors[0]?.message : undefined}
+                error={mensajeError(field)}
               />
             )}
           </form.Field>
@@ -159,7 +161,7 @@ export function GestionFormModal({ open, onOpenChange, gestion }: GestionFormMod
                 error={
                   error?.campo === 'fechaFin'
                     ? error.mensaje
-                    : field.state.meta.isTouched
+                    : errorVisible(field)
                       ? field.state.meta.errors[0]?.message
                       : undefined
                 }

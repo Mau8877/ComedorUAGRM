@@ -1,0 +1,7 @@
+B: mensaje: Observaciones (opcional) Corregir la fecha Registrar auditoría Resultado Validado Observado No válido Observaciones Las observaciones son obligatorias si el expediente es ob
+B: historial: Historial de auditorías Sin auditorías todavía.
+C: Documentación física Pendiente | Primero registra la entrega de la documentación física. | botón registrar auditoría habilitado: false
+A: aviso inicial: undefined
+A: campos tras elegir Validado: entrega-observaciones, auditoria-puntaje, auditoria-observaciones
+A: puntajes: Puntaje IA (de 70) 58.00 Académico (de 30) 25.00 Total (de 100) 83.00
+A: historial: Historial de auditorías Validado 24/11/2026, 11:02 p. m. Administrador DUBSS · Académico 25.00

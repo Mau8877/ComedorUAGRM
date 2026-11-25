@@ -14,6 +14,7 @@ import { useSeleccionarFinalistas } from '../api/useSeleccionarFinalistas'
 import { aSeleccionRequest, seleccionSchema, seleccionSchemaRequerido } from '../schemas'
 import type { SeleccionValues } from '../schemas'
 import type { PanelAdjudicacion, SeleccionFinalistasResultado } from '../types'
+import { errorVisible } from '@/utils/errorCampo'
 
 const ID_FORMULARIO = 'seleccionar-finalistas'
 
@@ -145,7 +146,7 @@ export function SeleccionarFinalistasDialog({
                 onChange={(e) => field.handleChange(e.target.value)}
               />
               <span className="text-xs text-destructive">
-                {field.state.meta.isTouched && field.state.meta.errors[0]
+                {errorVisible(field) && field.state.meta.errors[0]
                   ? field.state.meta.errors[0].message
                   : ''}
               </span>

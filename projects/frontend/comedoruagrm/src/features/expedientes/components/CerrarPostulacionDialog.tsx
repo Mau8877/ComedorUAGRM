@@ -15,6 +15,7 @@ import { useRechazarPostulacion } from '../api/useRechazarPostulacion'
 import { aCierreRequest, cierreSchema, MAX_MOTIVO } from '../schemas'
 import type { CierreFormValues } from '../schemas'
 import type { AccionCierre, CierrePostulacionResultado } from '../types'
+import { errorVisible } from '@/utils/errorCampo'
 
 const ID_FORMULARIO = 'cerrar-postulacion'
 const VALORES_INICIALES: CierreFormValues = { motivo: '' }
@@ -164,7 +165,7 @@ export function CerrarPostulacionDialog({
               />
               <div className="flex justify-between gap-2">
                 <span className="text-xs text-destructive">
-                  {field.state.meta.isTouched && field.state.meta.errors[0]
+                  {errorVisible(field) && field.state.meta.errors[0]
                     ? field.state.meta.errors[0].message
                     : ''}
                 </span>

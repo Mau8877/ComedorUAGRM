@@ -25,6 +25,7 @@ import { usePublicarComunicado } from '../api/useComunicados'
 import { aPublicarRequest, comunicadoSchema, ETIQUETAS_DESTINATARIOS, requiereConvocatoria } from '../schemas'
 import type { ComunicadoValues } from '../schemas'
 import type { DestinatariosComunicado } from '../types'
+import { errorVisible } from '@/utils/errorCampo'
 
 interface ComunicadoFormProps {
   /** Convocatoria elegida en la pantalla: obligatoria para dirigirlo a los finalistas o a los adjudicados y acota a «Todos». */
@@ -104,7 +105,7 @@ export function ComunicadoForm({ convocatoriaId }: ComunicadoFormProps) {
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}
               />
-              {field.state.meta.isTouched && field.state.meta.errors[0] && (
+              {errorVisible(field) && field.state.meta.errors[0] && (
                 <span className="text-xs text-destructive">{field.state.meta.errors[0].message}</span>
               )}
             </div>
@@ -124,7 +125,7 @@ export function ComunicadoForm({ convocatoriaId }: ComunicadoFormProps) {
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}
               />
-              {field.state.meta.isTouched && field.state.meta.errors[0] && (
+              {errorVisible(field) && field.state.meta.errors[0] && (
                 <span className="text-xs text-destructive">{field.state.meta.errors[0].message}</span>
               )}
             </div>

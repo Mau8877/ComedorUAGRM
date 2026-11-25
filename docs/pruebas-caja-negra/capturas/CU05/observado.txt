@@ -1,0 +1,8 @@
+A: panel antes: Cupos 3 Adjudicados 0 No adjudicados 0 Cupos disponibles 3 Puntaje mínimo 40 Cantidad de finalistas 4 Finalistas 4 Sin seleccionar 0
+A: expediente: Estado de la postulación calificada
+A: ventana: Adjudicar beca Cerrar Decisión final sobre el finalista auditado Postulación de Elena Suárez Molina en [PRUEBA] E04 CERRADA - 4 finalistas: 1 validado, 1 observado, 1 no valido, 1 sin entrega ni auditoria. Puntaje total 95.00 Cupos disponibles 3 Puntaje mínimo 40.00 La decisión es definitiva: no se puede reabrir ni cambiar. El postulante la conocerá cuando se publiquen los resultados; no se le avi
+A: estado tras adjudicar: Estado de la postulación adjudicada
+A: panel después: Cupos 3 Adjudicados 1 No adjudicados 0 Cupos disponibles 2 Puntaje mínimo 40 Cantidad de finalistas 4 Finalistas 4 Sin seleccionar 0
+B: botón Adjudicar habilitado=false; No adjudicar habilitado=false; aviso: Primero registra la auditoría del expediente. Primero hay que auditar el expediente. Primero registra la entrega de la documentación física.
+C: ventana: No adjudicar Cerrar Decisión final sobre el finalista auditado Postulación de Ana Zambrana Heredia en [PRUEBA] E03 CERRADA - 6 calificadas y 4 finalistas sin notificar ni auditar. Puntaje total 83.00 Cupos disponibles 3 Puntaje mínimo 40.00 La decisión es definitiva: no se puede reabrir ni cambiar. 
+C: tras confirmar sin motivo: No adjudicar Cerrar Decisión final sobre el finalista auditado Postulación de Ana Zambrana Heredia en [PRUEBA] E03 CERRADA - 6 calificadas y 4 finalistas sin notificar ni auditar. Puntaje total 83.00 Cupos disponibles 3 Puntaje mínimo 40.00 La decisión es definitiva: no se puede reabrir ni cambiar. 

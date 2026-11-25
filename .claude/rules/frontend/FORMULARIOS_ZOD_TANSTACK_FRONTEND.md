@@ -91,33 +91,35 @@ texto, así que no cambia el nombre accesible de la etiqueta ni los tests con
   que no es «Validado»), `required` es una condición, no una constante.
 - Los campos opcionales no llevan marca; los de solo lectura tampoco.
 
-## Un campo solo muestra su error si el usuario ya lo tocó
+## Un campo muestra su error solo después de salir de él (o al enviar)
 
-`validators.onChange` valida el **objeto completo** del form en cada
-tecleo, no campo por campo -- por eso, al escribir en un solo campo,
-TanStack Form recalcula el `errorMap` de **todos** los campos del schema a
-la vez y se lo reparte a cada `field.state.meta.errors`, incluidos los que
-el usuario todavía no tocó. Si un `form.Field` renderiza ese error apenas
-existe, cualquier campo vacío obligatorio (`foto`, `stock`, etc.) aparece
-"inválido" desde la primera letra que se escribe en **otro** campo,
-aunque el usuario ni llegó a esa parte del formulario todavía.
+`validacionFormulario` valida el **objeto completo** en cada tecleo, así que
+TanStack Form recalcula el error de **todos** los campos y se lo reparte a
+cada `field.state.meta.errors`, también al que la persona todavía está
+escribiendo por primera vez. Si un campo muestra ese error apenas existe,
+«El campo es obligatorio» salta desde la primera letra, con el foco aún ahí.
 
-**Regla obligatoria**: todo `form.Field` que muestra un error inline lo
-condiciona también a `field.state.meta.isTouched` -- que TanStack Form
-solo pone en `true` para el campo puntual que el usuario escribió o le
-hizo blur (nunca para los demás, aunque su `errorMap` ya se haya
-recalculado):
+**`field.state.meta.isTouched` no sirve para decidir si se muestra**: TanStack
+lo pone en `true` al **teclear**, no solo al salir. La regla es: el error se
+ve cuando el campo ya perdió el foco (`isBlurred`) o ya se intentó enviar el
+formulario; una vez visible, se revalida al escribir y desaparece apenas el
+dato es válido.
+
+Eso lo resuelve `src/utils/errorCampo.ts`, y es lo que se usa **siempre**:
 
 ```tsx
+import { errorVisible, mensajeError } from '@/utils/errorCampo'
+
 <form.Field name="nombre">
   {(field) => (
     <>
       <Input
         value={field.state.value}
+        aria-invalid={errorVisible(field) && field.state.meta.errors.length > 0 ? true : undefined}
         onBlur={field.handleBlur}
         onChange={(e) => field.handleChange(e.target.value)}
       />
-      {field.state.meta.isTouched && field.state.meta.errors[0] && (
+      {errorVisible(field) && field.state.meta.errors[0] && (
         <span className="text-xs text-destructive">{field.state.meta.errors[0].message}</span>
       )}
     </>
@@ -125,10 +127,12 @@ recalculado):
 </form.Field>
 ```
 
-Por esto mismo, `onBlur={field.handleBlur}` en cada `Input`/`Select` no es
-decorativo -- sin él, un campo que el usuario salta sin escribirle nunca
-queda "tocado" antes del submit. Al intentar enviar el formulario
-(`form.handleSubmit()`), TanStack Form sí marca todos los campos como
-tocados de una sola vez, así que en ese momento aparecen correctamente
-todos los errores pendientes, aunque el usuario nunca haya pasado por esos
-campos.
+- `mensajeError(field)` devuelve el texto o `undefined` (para componentes que
+  reciben `error={...}`); `CampoFormulario` ya lo aplica.
+- `onBlur={field.handleBlur}` en cada `Input`/`Textarea` es obligatorio: sin
+  él el campo nunca queda «blurred».
+- `validacionFormulario()` marca todos los campos como blurred cuando un envío
+  es inválido (`onSubmitInvalid`), así aparecen todos los errores pendientes.
+- Un selector (`Select`) o un `DatePicker` sin `onBlur` son un solo gesto, no
+  hay «escribiendo»: pueden seguir usando `isTouched`.
+- Nunca `validators: { onChange: schema, onBlur: schema }`: ver arriba.

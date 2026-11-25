@@ -23,6 +23,8 @@ import { AlertaConvocatorias } from './AlertaConvocatorias'
 import { CampoConvocatoria } from './CampoConvocatoria'
 import { DocumentosRequeridosField } from './DocumentosRequeridosField'
 import { EstadoConvocatoriaBadge } from './EstadoConvocatoriaBadge'
+import { mensajeError, errorVisible } from '@/utils/errorCampo'
+import { validacionFormulario } from '@/utils/validacionFormulario'
 
 const FORM_ID = 'convocatoria-form'
 const PAGE_SIZE_GESTIONES = 100
@@ -127,7 +129,7 @@ function FormularioConvocatoria({ open, onOpenChange, modo, detalle }: Formulari
 
   const form = useForm({
     defaultValues: valoresIniciales(detalle),
-    validators: { onChange: convocatoriaSchema, onBlur: convocatoriaSchema },
+    ...validacionFormulario(convocatoriaSchema),
     onSubmit: ({ value }) => {
       if (soloLectura || enviando.current) return
       enviando.current = true
@@ -214,7 +216,7 @@ function FormularioConvocatoria({ open, onOpenChange, modo, detalle }: Formulari
             disabled={soloLectura}
             onBlur={field.handleBlur}
             onChange={field.handleChange}
-            error={field.state.meta.isTouched ? field.state.meta.errors[0]?.message : undefined}
+            error={mensajeError(field)}
           />
         )}
       </form.Field>
@@ -248,7 +250,7 @@ function FormularioConvocatoria({ open, onOpenChange, modo, detalle }: Formulari
             {detalle && detalle.estado !== 'BORRADOR' && !soloLectura && (
               <span className="text-xs text-muted-foreground">La gestión solo se cambia en una convocatoria en borrador.</span>
             )}
-            {field.state.meta.isTouched && field.state.meta.errors[0] && (
+            {errorVisible(field) && field.state.meta.errors[0] && (
               <span className="text-xs text-destructive">{field.state.meta.errors[0].message}</span>
             )}
           </div>
@@ -266,7 +268,7 @@ function FormularioConvocatoria({ open, onOpenChange, modo, detalle }: Formulari
               disabled={aperturaBloqueada}
               onBlur={field.handleBlur}
               onChange={field.handleChange}
-              error={field.state.meta.isTouched ? field.state.meta.errors[0]?.message : undefined}
+              error={mensajeError(field)}
               ayuda="Rige desde las 00:00 de ese día (hora de Bolivia)."
             />
           )}
@@ -287,7 +289,7 @@ function FormularioConvocatoria({ open, onOpenChange, modo, detalle }: Formulari
               error={
                 error?.campo === 'fechaCierre'
                   ? error.mensaje
-                  : field.state.meta.isTouched
+                  : errorVisible(field)
                     ? field.state.meta.errors[0]?.message
                     : undefined
               }
@@ -308,7 +310,7 @@ function FormularioConvocatoria({ open, onOpenChange, modo, detalle }: Formulari
               disabled={soloLectura}
               onBlur={field.handleBlur}
               onChange={field.handleChange}
-              error={field.state.meta.isTouched ? field.state.meta.errors[0]?.message : undefined}
+              error={mensajeError(field)}
               ayuda="Opcional: se define con la DUBSS."
             />
           )}
@@ -323,7 +325,7 @@ function FormularioConvocatoria({ open, onOpenChange, modo, detalle }: Formulari
               disabled={soloLectura}
               onBlur={field.handleBlur}
               onChange={field.handleChange}
-              error={field.state.meta.isTouched ? field.state.meta.errors[0]?.message : undefined}
+              error={mensajeError(field)}
               ayuda="Opcional: de 0 a 100."
             />
           )}
@@ -338,7 +340,7 @@ function FormularioConvocatoria({ open, onOpenChange, modo, detalle }: Formulari
               disabled={soloLectura}
               onBlur={field.handleBlur}
               onChange={field.handleChange}
-              error={field.state.meta.isTouched ? field.state.meta.errors[0]?.message : undefined}
+              error={mensajeError(field)}
               ayuda="Opcional: solo la ve el Administrador."
             />
           )}
@@ -353,7 +355,7 @@ function FormularioConvocatoria({ open, onOpenChange, modo, detalle }: Formulari
             onBlur={field.handleBlur}
             disabled={documentosBloqueados}
             actuales={detalle?.documentos}
-            error={field.state.meta.isTouched ? field.state.meta.errors[0]?.message : undefined}
+            error={mensajeError(field)}
           />
         )}
       </form.Field>

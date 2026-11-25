@@ -16,6 +16,7 @@ import { aEntregaRequest, hoyIso, registrarEntregaSchema } from '../schemas'
 import type { Finalista } from '../types'
 import { EntregaBadge } from './EstadoBadges'
 import { formatearFechaDia } from './formatos'
+import { errorVisible } from '@/utils/errorCampo'
 
 interface RegistrarEntregaPanelProps {
   /** El finalista elegido en la tabla; sin él, el panel pide elegir uno. */
@@ -117,7 +118,7 @@ function FormularioEntrega({
               onBlur={field.handleBlur}
               onChange={(e) => field.handleChange(e.target.value)}
             />
-            {field.state.meta.isTouched && field.state.meta.errors[0] && (
+            {errorVisible(field) && field.state.meta.errors[0] && (
               <span className="text-xs text-destructive">{field.state.meta.errors[0].message}</span>
             )}
           </div>

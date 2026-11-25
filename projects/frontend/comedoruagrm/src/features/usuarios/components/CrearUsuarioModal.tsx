@@ -14,6 +14,7 @@ import { crearUsuarioPersonalSchema, datosCuentaPersonalSchema } from '../schema
 import type { UsuarioCreado } from '../types'
 import { AlertaUsuarios } from './AlertaUsuarios'
 import { CampoUsuario } from './CampoUsuario'
+import { mensajeError } from '@/utils/errorCampo'
 
 const FORM_ID = 'crear-usuario-form'
 
@@ -137,7 +138,7 @@ export function CrearUsuarioModal({ open, onOpenChange, rol, onCreada }: CrearUs
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={field.handleChange}
-                error={field.state.meta.isTouched ? field.state.meta.errors[0]?.message : undefined}
+                error={mensajeError(field)}
               />
             )}
           </form.Field>
@@ -149,7 +150,7 @@ export function CrearUsuarioModal({ open, onOpenChange, rol, onCreada }: CrearUs
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={field.handleChange}
-                error={field.state.meta.isTouched ? field.state.meta.errors[0]?.message : undefined}
+                error={mensajeError(field)}
               />
             )}
           </form.Field>
@@ -166,7 +167,7 @@ export function CrearUsuarioModal({ open, onOpenChange, rol, onCreada }: CrearUs
                 if (error?.campo === 'ci') setError(null)
                 field.handleChange(valor)
               }}
-              error={error?.campo === 'ci' ? error.mensaje : field.state.meta.isTouched ? field.state.meta.errors[0]?.message : undefined}
+              error={error?.campo === 'ci' ? error.mensaje : mensajeError(field)}
             />
           )}
         </form.Field>
@@ -185,7 +186,7 @@ export function CrearUsuarioModal({ open, onOpenChange, rol, onCreada }: CrearUs
                 field.handleChange(valor)
               }}
               error={
-                error?.campo === 'correo' ? error.mensaje : field.state.meta.isTouched ? field.state.meta.errors[0]?.message : undefined
+                error?.campo === 'correo' ? error.mensaje : mensajeError(field)
               }
             />
           )}

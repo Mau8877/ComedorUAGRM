@@ -26,6 +26,8 @@ import type { ErrorPlanillas } from '../api'
 import { columnasPlanillas, formatearPeriodo, useDescargarPlanilla } from '../components'
 import { crearPeriodoSchema } from '../schemas'
 import type { Planilla } from '../types'
+import { errorVisible } from '@/utils/errorCampo'
+import { validacionFormulario } from '@/utils/validacionFormulario'
 
 const PAGE_SIZE_INICIAL = 20
 const SIN_PLANILLAS = 'Todavía no hay planillas generadas para esta convocatoria'
@@ -99,7 +101,7 @@ export function PlanillasScreen({ titulo, activeHref, usuarioActual }: Planillas
 
   const form = useForm({
     defaultValues: { desde: '', hasta: '' },
-    validators: { onChange: crearPeriodoSchema(resumen.data), onBlur: crearPeriodoSchema(resumen.data) },
+    ...validacionFormulario(crearPeriodoSchema(resumen.data)),
     onSubmit: ({ value }) => {
       if (!codigo || enviando.current) return
       enviando.current = true
@@ -294,14 +296,14 @@ export function PlanillasScreen({ titulo, activeHref, usuarioActual }: Planillas
                       value={field.state.value}
                       min={resumen.data?.gestionDesde}
                       max={resumen.data?.gestionHasta}
-                      aria-invalid={field.state.meta.isTouched && field.state.meta.errors.length > 0 ? true : undefined}
+                      aria-invalid={errorVisible(field) && field.state.meta.errors.length > 0 ? true : undefined}
                       onBlur={field.handleBlur}
                       onChange={(e) => {
                         setError(null)
                         field.handleChange(e.target.value)
                       }}
                     />
-                    {field.state.meta.isTouched && field.state.meta.errors[0] && (
+                    {errorVisible(field) && field.state.meta.errors[0] && (
                       <span className="text-xs text-destructive">{field.state.meta.errors[0].message}</span>
                     )}
                   </div>
@@ -320,14 +322,14 @@ export function PlanillasScreen({ titulo, activeHref, usuarioActual }: Planillas
                       value={field.state.value}
                       min={resumen.data?.gestionDesde}
                       max={resumen.data?.gestionHasta}
-                      aria-invalid={field.state.meta.isTouched && field.state.meta.errors.length > 0 ? true : undefined}
+                      aria-invalid={errorVisible(field) && field.state.meta.errors.length > 0 ? true : undefined}
                       onBlur={field.handleBlur}
                       onChange={(e) => {
                         setError(null)
                         field.handleChange(e.target.value)
                       }}
                     />
-                    {field.state.meta.isTouched && field.state.meta.errors[0] && (
+                    {errorVisible(field) && field.state.meta.errors[0] && (
                       <span className="text-xs text-destructive">{field.state.meta.errors[0].message}</span>
                     )}
                   </div>

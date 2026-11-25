@@ -26,6 +26,8 @@ import { mapearErrorCotejos, useCotejos, useDatosCotejo, useRegistrarCotejo, use
 import type { ErrorCotejos } from '../api'
 import { columnasCotejos, columnasRegistros, etiquetaResultado, formatearPeriodo } from '../components'
 import { calcularCotejo, cotejoSchema, crearSolicitudCotejo, MAX_OBSERVACIONES } from '../schemas'
+import { errorVisible } from '@/utils/errorCampo'
+import { validacionFormulario } from '@/utils/validacionFormulario'
 
 const PAGE_SIZE_INICIAL = 20
 const SIN_REGISTROS = 'No hay registros digitales de asistencia en el periodo de esta planilla'
@@ -119,7 +121,7 @@ export function CotejoScreen({ titulo, activeHref, usuarioActual }: CotejoScreen
 
   const form = useForm({
     defaultValues: { total: '', coincidencias: '', observaciones: '' },
-    validators: { onChange: cotejoSchema, onBlur: cotejoSchema },
+    ...validacionFormulario(cotejoSchema),
     onSubmit: ({ value }) => {
       if (!codigo || enviando.current) return
       enviando.current = true
@@ -388,14 +390,14 @@ export function CotejoScreen({ titulo, activeHref, usuarioActual }: CotejoScreen
                       inputMode="numeric"
                       min={0}
                       value={field.state.value}
-                      aria-invalid={field.state.meta.isTouched && field.state.meta.errors.length > 0 ? true : undefined}
+                      aria-invalid={errorVisible(field) && field.state.meta.errors.length > 0 ? true : undefined}
                       onBlur={field.handleBlur}
                       onChange={(e) => {
                         setError(null)
                         field.handleChange(e.target.value)
                       }}
                     />
-                    {field.state.meta.isTouched && field.state.meta.errors[0] && (
+                    {errorVisible(field) && field.state.meta.errors[0] && (
                       <span className="text-xs text-destructive">{field.state.meta.errors[0].message}</span>
                     )}
                   </div>
@@ -414,14 +416,14 @@ export function CotejoScreen({ titulo, activeHref, usuarioActual }: CotejoScreen
                       inputMode="numeric"
                       min={0}
                       value={field.state.value}
-                      aria-invalid={field.state.meta.isTouched && field.state.meta.errors.length > 0 ? true : undefined}
+                      aria-invalid={errorVisible(field) && field.state.meta.errors.length > 0 ? true : undefined}
                       onBlur={field.handleBlur}
                       onChange={(e) => {
                         setError(null)
                         field.handleChange(e.target.value)
                       }}
                     />
-                    {field.state.meta.isTouched && field.state.meta.errors[0] && (
+                    {errorVisible(field) && field.state.meta.errors[0] && (
                       <span className="text-xs text-destructive">{field.state.meta.errors[0].message}</span>
                     )}
                   </div>
@@ -455,14 +457,14 @@ export function CotejoScreen({ titulo, activeHref, usuarioActual }: CotejoScreen
                     maxLength={MAX_OBSERVACIONES}
                     placeholder="Observaciones…"
                     value={field.state.value}
-                    aria-invalid={field.state.meta.isTouched && field.state.meta.errors.length > 0 ? true : undefined}
+                    aria-invalid={errorVisible(field) && field.state.meta.errors.length > 0 ? true : undefined}
                     onBlur={field.handleBlur}
                     onChange={(e) => {
                       setError(null)
                       field.handleChange(e.target.value)
                     }}
                   />
-                  {field.state.meta.isTouched && field.state.meta.errors[0] && (
+                  {errorVisible(field) && field.state.meta.errors[0] && (
                     <span className="text-xs text-destructive">{field.state.meta.errors[0].message}</span>
                   )}
                 </div>

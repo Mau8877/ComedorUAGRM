@@ -1,0 +1,6 @@
+A: diálogo tras crear: Cuenta creada Cerrar Rodrigo Suárez Melgar Entrega esta contraseña temporal a la persona para que pueda iniciar sesión con director.1795573890867@dubss.test. MdHPHPoD6FJU Copiar Esta contraseña no se volverá a mostrar. Si la pierdes, no se puede recuperar desde aquí. Entendido, ya la anoté
+A: contraseña temporal mostrada: sí (12 caracteres)
+A: login con la contraseña temporal -> /dashboard
+B: mensaje bajo el campo CI: Ya existe una cuenta con ese CI
+C: fila tras desactivar: 1 Suárez Melgar Rodrigo 3890867 director.1795573890867@dubss.test Directivo Desactivada 
+C: login de la cuenta desactivada -> /login |  Tu cuenta está desactivada.

@@ -16,6 +16,7 @@ class CampoFormulario extends StatefulWidget {
   final List<TextInputFormatter>? inputFormatters;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onFieldSubmitted;
+  final int maxLines;
 
   const CampoFormulario({
     super.key,
@@ -30,6 +31,7 @@ class CampoFormulario extends StatefulWidget {
     this.inputFormatters,
     this.onChanged,
     this.onFieldSubmitted,
+    this.maxLines = 1,
   });
 
   @override
@@ -56,6 +58,7 @@ class _CampoFormularioState extends State<CampoFormulario> {
       textInputAction: widget.textInputAction,
       textCapitalization: widget.textCapitalization,
       obscureText: widget.obscureText,
+      maxLines: widget.obscureText ? 1 : widget.maxLines,
       autofillHints: widget.autofillHints,
       inputFormatters: widget.inputFormatters,
       autovalidateMode: AutovalidateMode.onUnfocus,

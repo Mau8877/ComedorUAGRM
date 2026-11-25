@@ -117,7 +117,8 @@ describe('PlanillasScreen', () => {
 
     periodo('2026-09-01', '2026-10-15')
     fireEvent.click(screen.getByRole('button', { name: 'Generar planilla' }))
-    expect(await screen.findByText('El periodo no puede superar los 31 días')).toBeInTheDocument()
+    // * El error ya estaba visible (el campo se marcó en el primer envío) y se redibuja al revalidar el envío.
+    await waitFor(() => expect(screen.getByText('El periodo no puede superar los 31 días')).toBeInTheDocument())
     expect(cliente.post).not.toHaveBeenCalled()
   })
 

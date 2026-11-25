@@ -108,7 +108,7 @@ describe('ParametrosModeloScreen', () => {
     expect(screen.getByRole('button', { name: 'Guardar versión v1.4' })).toBeDisabled()
   })
 
-  it('un valor inválido muestra el error inline solo después de tocarlo', async () => {
+  it('un valor inválido muestra el error inline recién al salir del campo', async () => {
     responder()
     const { user } = montar()
     await esperarFormulario()
@@ -116,6 +116,10 @@ describe('ParametrosModeloScreen', () => {
 
     await user.clear(nuevo('Patrimonio'))
     await user.type(nuevo('Patrimonio'), 'abc')
+    // * Con el foco todavía en el campo, el error no aparece.
+    expect(screen.queryByText('Un número de 0 a 100 con hasta 2 decimales')).not.toBeInTheDocument()
+
+    await user.tab()
 
     expect(await screen.findByText('Un número de 0 a 100 con hasta 2 decimales')).toBeInTheDocument()
   })
