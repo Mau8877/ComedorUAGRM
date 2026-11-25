@@ -1,0 +1,8 @@
+B: el calendario no permite elegir una fecha pasada (día deshabilitado)
+B: Notificar seleccionados Cerrar Se enviará a 1 finalista Plazo de entrega dd/mm/aaaa El plazo de entrega es obligatorio Lugar y horario de entrega Documentos físicos a presentar Cancelar Enviar aviso
+C: vista previa: ¿Publicar el comunicado? Se enviará a finalistas y no podrás editarlo ni borrarlo después. Volver Confirmar publicación
+C: resultado:  Nuevo aviso o comunicado Se envió a 4 destinatarios.
+D: vista previa: ¿Publicar el comunicado? Se enviará a finalistas y no podrás editarlo ni borrarlo después. Volver Confirmar publicación
+D: resultado:  Nuevo aviso o comunicado No hay destinatarios para ese comunicado.
+A2: tabla de E03: Pos. Finalista Puntaje Notificación Doc. física Auditoría Acciones 1 Elena Suárez Molina CI P0000001 65.00 Enviada Pendiente Sin auditar 2 Ana Zambrana Heredia CI P0000002 58.00 Sin enviar Pendiente Sin auditar 3 Ana Salvatierra Gil CI P0000003 52.00 Sin enviar Pendiente Sin auditar 4 Mario Cuéllar Soliz CI P0000004 47.00 Sin enviar Pendiente Sin auditar Filas por p
+A2: correos de Elena en Mailpit: Entrega de documentación física - Beca Comedor

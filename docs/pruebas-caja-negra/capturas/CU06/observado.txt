@@ -1,0 +1,4 @@
+A: filas de la lista: 1 Elena Suárez Molina P0000001 Ingeniería Electrónica 65.00 04/11/2026  // 2 Ana Zambrana Heredia P0000002 Economía 58.00 04/11/2026  // 3 Ana Salvatierra Gil P0000003 Ingeniería de Control de Procesos 52.00 04/11/2026  // 4 Mario Cuéllar Soliz P0000004 Ingeniería Electromecánica 47.00 04/11/2026  // 5 Jorge Cuéllar Soliz P0000005 Ingeniería Mecánica 41.00 04/11/2026  // 6 Carla Peña Suárez P0000006 Economía 35.00 04/11/2026 
+A: PDF descargado: lista-priorizada-prueba-e02-cerrada-6-calificadas-con-puntaje-de-65-a-35-sin-finalistas-20261124.pdf (80028 bytes)
+B: mensaje: LISTA PRIORIZADA LISTA PRIORIZADA Convocatoria [PRUEBA] Convocatoria sin postulaciones ([PRUEBA] 2026-II) 0 postulaciones calificadas · 0 pendientes de precalificación No hay postulaciones calificadas en esta convocatoria.
+C: postulante abre /lista-priorizada -> URL /panel

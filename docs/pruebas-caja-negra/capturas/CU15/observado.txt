@@ -1,0 +1,8 @@
+A: aviso: ComedorU Cambiar tema Iniciar sesión Recuperar contraseña Te enviaremos un enlace para definir una contraseña nueva. Si la cuenta existe, enviamos un enlace al correo indicado. Vence en 60 minutos. Revisa también la carpeta de spam. Enviar de nuevo Volver a iniciar sesión
+A: asunto del correo en Mailpit: Restablece tu contraseña de ComedorU
+A: enlace recibido: sí
+A: tras restablecer URL /login
+A: login con la contraseña nueva -> /panel
+B: reuso del enlace: ComedorU Cambiar tema Iniciar sesión El enlace ya no sirve Venció, ya se usó o pediste uno más reciente. Solicita un enlace nuevo para continuar. Solicitar un enlace nuevo Volver a iniciar sesión
+C: contraseña actual incorrecta ->  correo y teléfono. Correo electrónico Teléfono Guardar cambios Cambiar contraseña La contraseña nueva debe tener de 6 a 72 caracteres. Cerraremos tu sesión en los demás dispositivos. Contraseña actual La contraseña actual es incorrecta. Contraseña nueva Confirmar contraseña nueva Cambiar contraseña
+C: con la actual correcta -> ónico Teléfono Guardar cambios Cambiar contraseña La contraseña nueva debe tener de 6 a 72 caracteres. Cerraremos tu sesión en los demás dispositivos. Contraseña actual Contraseña nueva Confirmar contraseña nueva Cambiar contraseña Contraseña actualizada Cerramos tu sesión en los demás dispositivos.

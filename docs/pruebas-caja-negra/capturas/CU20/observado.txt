@@ -1,0 +1,3 @@
+A: ventana: Archivar postulación Cerrar Se avisará al postulante por la bandeja, el push y el correo Postulación de Ana Salvatierra Gil en [PRUEBA] E04 CERRADA - 4 finalistas: 1 validado, 1 observado, 1 no valido, 1 sin entrega ni auditoria. La decisión es definitiva para esta gestión: la postulación no vuelve 
+A: estado final: Estado de la postulación archivada
+B: Archivar postulación Cerrar Se avisará al postulante por la bandeja, el push y el correo Postulación de Mario Cuéllar Soliz en [PRUEBA] E04 CERRADA - 4 finalistas: 1 validado, 1 observado, 1 no valido, 1 sin entrega ni auditoria. La decisión es definitiva para esta gestión: la postulación no vuelve 

@@ -1,0 +1,4 @@
+A: estado inicial: Ana Zambrana Heredia CI P0000002 Carrera Economía Convocatoria [PRUEBA] E04 CERRADA - 4 finalistas: 1 validado, 1 observado, 1 no valido, 1 sin entrega ni auditoria Posición 2 Estado de la postulación
+A: ventana: Devolver para corrección Cerrar Se avisará al postulante por la bandeja, el push y el correo Motivo 0/500 Cancelar Devolver
+A: estado final: Estado de la postulación devuelta
+B: Devolver para corrección Cerrar Se avisará al postulante por la bandeja, el push y el correo Motivo El motivo es obligatorio 0/500 Cancelar Devolver

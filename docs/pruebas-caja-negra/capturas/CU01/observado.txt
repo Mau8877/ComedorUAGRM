@@ -1,0 +1,5 @@
+A: URL final /panel; correo lucia.1795573148717@prueba.test
+A: texto visible: PANEL PANEL Hola, Lucía Este es el resumen de tu Beca Comedor. Convocatoria abierta [PRUEBA] E01 ABIERTA - 5 postulaciones: 1 borrador, 1 pendiente, 1 devuelta, 2 calificadas Cierra el 31/12/2026 19:59 · faltan 37 días Postular ahora Mi postulación Aún no enviaste ninguna postulación. Mi beca Todaví
+B: URL /login; texto: ComedorU Cambiar tema Iniciar sesión Beca Comedor UAGRM Postula, da seguimiento a tu solicitud y consulta tu beca desde un solo lugar. Postulación 100 % en línea Consulta tu beca y tu asistencia Tu cuenta protegida con sesión segura Iniciar sesión Ingresa con tu correo y tu contraseña. Correo o contraseña incorrectos. Correo electrónico Contraseña ¿Olvidó su contraseña? Iniciar sesión ¿No tienes c
+C: URL tras login /panel
+D: directivo -> /dashboard
